@@ -1,0 +1,758 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tournament.name }} - Турнирная система{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Турниры</a></li>
+                <li class="breadcrumb-item active">{{ tournament.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-1">{{ tournament.name }}</h1>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-table-tennis me-1"></i>{{ tournament.sport_type }} • 
+                    <i class="fas fa-calendar me-1"></i>{{ tournament.start_date.strftime('%d.%m.%Y') }} - {{ tournament.end_date.strftime('%d.%m.%Y') }}
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-{{ 'success' if tournament.status == 'активен' else 'warning' if tournament.status == 'регистрация' else 'secondary' }} fs-6">
+                    {{ tournament.status }}
+                </span>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role in ['администратор', 'доверенный_участник'] %}
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                        <i class="fas fa-user-plus me-2"></i>Добавить участника
+                    </button>
+                    {% endif %}
+                {% else %}
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerUserModal">
+                        <i class="fas fa-user-plus me-2"></i>Регистрация
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика участников -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Статистика участников</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Место</th>
+                                <th>Участник</th>
+                                <th>Игр</th>
+                                <th>Побед</th>
+                                <th>Поражений</th>
+                                <th>Очки</th>
+                                <th>Разница мячей</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for participant in participants %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <strong>{{ participant.name }}</strong>
+                                    {% if participant.is_team %}
+                                        <span class="badge bg-info ms-2">Команда</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ statistics[participant.id]['games'] }}</td>
+                                <td>{{ statistics[participant.id]['wins'] }}</td>
+                                <td>{{ statistics[participant.id]['losses'] }}</td>
+                                <td>{{ statistics[participant.id]['points'] }}</td>
+                                <td>{{ statistics[participant.id]['goal_difference'] }}</td>
+                                <td>
+                                    {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')" title="Удалить участника">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Шахматка результатов -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Шахматка результатов</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th class="bg-light">Участник</th>
+                                {% for participant in participants %}
+                                <th class="text-center bg-light">{{ participant.name[:15] }}{% if participant.name|length > 15 %}...{% endif %}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p1 in participants %}
+                            <tr>
+                                <td class="bg-light fw-bold">{{ p1.name[:15] }}{% if p1.name|length > 15 %}...{% endif %}</td>
+                                {% for p2 in participants %}
+                                <td class="text-center position-relative">
+                                    {% if p1.id == p2.id %}
+                                        <span class="text-muted">—</span>
+                                    {% else %}
+                                        {% set cell_data = chessboard[p1.id][p2.id] %}
+                                        {% if cell_data.type == 'result' %}
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge bg-success mb-1">{{ cell_data.value }}</span>
+                                                {% if cell_data.editable %}
+                                                <button class="btn btn-sm btn-outline-warning" 
+                                                        onclick="editMatchResult({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
+                                                        title="Редактировать результат">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                                                                 {% elif cell_data.type == 'upcoming' %}
+                                             <div class="text-center {% if cell_data.is_next %}border border-warning border-3 rounded p-2 bg-warning bg-opacity-10{% endif %}">
+                                                 <div class="badge {% if cell_data.is_next %}bg-warning text-dark{% else %}bg-info{% endif %} mb-1">
+                                                     {% if cell_data.is_next %}🔥 СЛЕДУЮЩАЯ ИГРА{% else %}{{ cell_data.value }}{% endif %}
+                                                 </div>
+                                                 <small class="d-block text-muted">Площадка {{ cell_data.court }}</small>
+                                                 {% if cell_data.is_next %}
+                                                 <small class="d-block text-warning fw-bold">{{ cell_data.value }}</small>
+                                                 {% endif %}
+                                             </div>
+                                        {% elif cell_data.type == 'empty' %}
+                                            <button class="btn btn-outline-primary btn-sm" 
+                                                    onclick="openMatchModal({{ p1.id }}, {{ p2.id }}, '{{ p1.name }}', '{{ p2.name }}')"
+                                                    style="min-width: 60px;">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Расписание матчей -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Расписание матчей</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Время</th>
+                                <th>Площадка</th>
+                                <th>Участник 1</th>
+                                <th>Участник 2</th>
+                                <th>Счет</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if matches %}
+                                {% for match in matches %}
+                                <tr>
+                                    <td>{{ match.match_date.strftime('%d.%m.%Y') if match.match_date else '—' }}</td>
+                                    <td>{{ match.match_time.strftime('%H:%M') if match.match_time else '—' }}</td>
+                                    <td>
+                                        {% if match.court_number %}
+                                            <span class="badge bg-info">Площадка {{ match.court_number }}</span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ match.participant1.name if match.participant1 else '—' }}</td>
+                                    <td>{{ match.participant2.name if match.participant2 else '—' }}</td>
+                                    <td>
+                                        {% if match.score1 is not none and match.score2 is not none %}
+                                            <span class="badge bg-success">{{ match.score1 }}:{{ match.score2 }}</span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if match.status == 'завершен' else 'warning' if match.status == 'в_процессе' else 'secondary' }}">
+                                            {{ match.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                            <button class="btn btn-sm btn-outline-primary" onclick="editMatch({{ match.id }})" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% elif current_user.is_authenticated and (current_user.id == match.participant1.user_id or current_user.id == match.participant2.user_id) %}
+                                            <button class="btn btn-sm btn-outline-warning" onclick="editMatch({{ match.id }})" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% endif %}
+                                            {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMatch({{ match.id }})" title="Удалить">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                        <p class="mb-0">Расписание матчей пока не составлено</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для ввода результата матча -->
+<div class="modal fade" id="matchResultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Результат матча</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="matchResultForm">
+                    <input type="hidden" id="participant1Id" name="participant1_id">
+                    <input type="hidden" id="participant2Id" name="participant2_id">
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Участник 1</label>
+                            <input type="text" class="form-control" id="participant1Name" readonly>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Участник 2</label>
+                            <input type="text" class="form-control" id="participant2Name" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label for="score1" class="form-label">Счет участника 1</label>
+                            <input type="number" class="form-control" id="score1" name="score1" min="0" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="score2" class="form-label">Счет участника 2</label>
+                            <input type="number" class="form-control" id="score2" name="score2" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label for="matchDate" class="form-label">Дата матча</label>
+                            <input type="date" class="form-control" id="matchDate" name="match_date">
+                        </div>
+                        <div class="col-6">
+                            <label for="matchTime" class="form-label">Время матча</label>
+                            <input type="time" class="form-control" id="matchTime" name="match_time">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="courtNumber" class="form-label">Площадка</label>
+                        <select class="form-select" id="courtNumber" name="court_number">
+                            <option value="">Выберите площадку</option>
+                            {% for i in range(1, tournament.court_count + 1) %}
+                            <option value="{{ i }}">Площадка {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="matchResultForm" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для редактирования результата матча -->
+<div class="modal fade" id="editMatchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать результат матча</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editMatchForm">
+                    <input type="hidden" id="editMatchId" name="match_id">
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Участник 1</label>
+                            <input type="text" class="form-control" id="editParticipant1Name" readonly>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Участник 2</label>
+                            <input type="text" class="form-control" id="editParticipant2Name" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label for="editScore1" class="form-label">Счет участника 1</label>
+                            <input type="number" class="form-control" id="editScore1" name="score1" min="0" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="editScore2" class="form-label">Счет участника 2</label>
+                            <input type="number" class="form-control" id="editScore2" name="score2" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label for="editMatchDate" class="form-label">Дата матча</label>
+                            <input type="date" class="form-control" id="editMatchDate" name="match_date">
+                        </div>
+                        <div class="col-6">
+                            <label for="editMatchTime" class="form-label">Время матча</label>
+                            <input type="time" class="form-control" id="editMatchTime" name="match_time">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editCourtNumber" class="form-label">Площадка</label>
+                        <select class="form-select" id="editCourtNumber" name="court_number">
+                            <option value="">Выберите площадку</option>
+                            {% for i in range(1, tournament.court_count + 1) %}
+                            <option value="{{ i }}">Площадка {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="editMatchForm" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления участника -->
+{% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+<div class="modal fade" id="addParticipantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить участника</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addParticipantForm">
+                    <div class="mb-3">
+                        <label for="participantName" class="form-label">Имя участника или название команды</label>
+                        <input type="text" class="form-control" id="participantName" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isTeam">
+                            <label class="form-check-label" for="isTeam">
+                                Это команда
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="addParticipantForm" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Модальное окно регистрации пользователя -->
+<div class="modal fade" id="registerUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Регистрация нового пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registerUserForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Подтвердите пароль</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="registerUserForm" class="btn btn-primary">Зарегистрироваться</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Добавляем обработчики кликов на все ячейки шахматки
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.table-bordered');
+    if (table) {
+        table.addEventListener('click', function(e) {
+            const cell = e.target.closest('td');
+            if (cell && !cell.querySelector('button')) {
+                const row = cell.parentElement;
+                const rowIndex = row.rowIndex;
+                const cellIndex = cell.cellIndex;
+                
+                if (rowIndex > 0 && cellIndex > 0) { // Пропускаем заголовки
+                    const participants = {{ participants_data|tojson }};
+                    const p1 = participants[rowIndex - 1];
+                    const p2 = participants[cellIndex - 1];
+                    
+                    if (p1 && p2 && p1.id !== p2.id) {
+                        openMatchModal(p1.id, p2.id, p1.name, p2.name);
+                    }
+                }
+            }
+        });
+    }
+});
+
+function openMatchModal(p1Id, p2Id, p1Name, p2Name) {
+    document.getElementById('participant1Id').value = p1Id;
+    document.getElementById('participant2Id').value = p2Id;
+    document.getElementById('participant1Name').value = p1Name;
+    document.getElementById('participant2Name').value = p2Name;
+    
+    // Установка сегодняшней даты и текущего времени
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM формат
+    
+    document.getElementById('matchDate').value = today;
+    document.getElementById('matchTime').value = currentTime;
+    
+    new bootstrap.Modal(document.getElementById('matchResultModal')).show();
+}
+
+function editMatchResult(matchId, p1Name, p2Name) {
+    // Заполняем форму редактирования
+    document.getElementById('editMatchId').value = matchId;
+    document.getElementById('editParticipant1Name').value = p1Name;
+    document.getElementById('editParticipant2Name').value = p2Name;
+    
+    // Получаем текущие данные матча
+    fetch(`/api/matches/${matchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('editScore1').value = data.match.score1 || '';
+                document.getElementById('editScore2').value = data.match.score2 || '';
+                document.getElementById('editMatchDate').value = data.match.match_date || '';
+                document.getElementById('editMatchTime').value = data.match.match_time || '';
+                document.getElementById('editCourtNumber').value = data.match.court_number || '';
+                
+                // Если дата не указана, устанавливаем текущую
+                if (!data.match.match_date) {
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('editMatchDate').value = today;
+                }
+                
+                // Если время не указано, устанавливаем текущее
+                if (!data.match.match_time) {
+                    const now = new Date();
+                    const currentTime = now.toTimeString().slice(0, 5);
+                    document.getElementById('editMatchTime').value = currentTime;
+                }
+            }
+        });
+    
+    new bootstrap.Modal(document.getElementById('editMatchModal')).show();
+}
+
+function editMatch(matchId) {
+    // Редактирование матча из расписания
+    // Получаем данные матча для отображения имен участников
+    fetch(`/api/matches/${matchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Находим участников по ID
+                const participants = {{ participants_data|tojson }};
+                const p1 = participants.find(p => p.id === data.match.participant1_id);
+                const p2 = participants.find(p => p.id === data.match.participant2_id);
+                
+                if (p1 && p2) {
+                    editMatchResult(matchId, p1.name, p2.name);
+                } else {
+                    editMatchResult(matchId, 'Участник 1', 'Участник 2');
+                }
+            }
+        })
+        .catch(error => {
+            editMatchResult(matchId, 'Участник 1', 'Участник 2');
+        });
+}
+
+// Обработка формы результата матча
+document.addEventListener('DOMContentLoaded', function() {
+    const matchResultForm = document.getElementById('matchResultForm');
+    if (matchResultForm) {
+        matchResultForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                tournament_id: {{ tournament.id }},
+                participant1_id: parseInt(document.getElementById('participant1Id').value),
+                participant2_id: parseInt(document.getElementById('participant2Id').value),
+                score1: parseInt(document.getElementById('score1').value),
+                score2: parseInt(document.getElementById('score2').value),
+                match_date: document.getElementById('matchDate').value,
+                match_time: document.getElementById('matchTime').value,
+                court_number: document.getElementById('courtNumber').value ? parseInt(document.getElementById('courtNumber').value) : null
+            };
+            
+            fetch('/api/matches', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Результат матча сохранен!');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка при сохранении результата: ' + error);
+            });
+        });
+    }
+});
+
+// Обработка формы добавления участника
+document.addEventListener('DOMContentLoaded', function() {
+    const addParticipantForm = document.getElementById('addParticipantForm');
+    if (addParticipantForm) {
+        addParticipantForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('participantName').value,
+                is_team: document.getElementById('isTeam').checked
+            };
+            
+            fetch('/api/tournaments/{{ tournament.id }}/participants', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Участник добавлен!');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка при добавлении участника: ' + error);
+            });
+        });
+    }
+});
+
+// Обработка формы редактирования матча
+document.addEventListener('DOMContentLoaded', function() {
+    const editMatchForm = document.getElementById('editMatchForm');
+    if (editMatchForm) {
+        editMatchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const matchId = document.getElementById('editMatchId').value;
+            const formData = {
+                score1: parseInt(document.getElementById('editScore1').value),
+                score2: parseInt(document.getElementById('editScore2').value),
+                match_date: document.getElementById('editMatchDate').value,
+                match_time: document.getElementById('editMatchTime').value,
+                court_number: document.getElementById('editCourtNumber').value ? parseInt(document.getElementById('editCourtNumber').value) : null
+            };
+            
+            fetch(`/api/matches/${matchId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Результат обновлен!');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка при обновлении результата: ' + error);
+            });
+        });
+    }
+});
+
+// Функция удаления матча
+function deleteMatch(matchId) {
+    if (confirm('Вы уверены, что хотите удалить этот матч? Это действие нельзя отменить.')) {
+        fetch(`/api/matches/${matchId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Матч успешно удален!');
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении матча: ' + error);
+        });
+    }
+}
+
+// Функция удаления участника
+function deleteParticipant(participantId, participantName) {
+    if (confirm(`Вы уверены, что хотите удалить участника "${participantName}"? Это действие нельзя отменить.`)) {
+        fetch(`/api/tournaments/{{ tournament.id }}/participants/${participantId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Участник успешно удален!');
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении участника: ' + error);
+        });
+    }
+}
+
+// Обработка формы регистрации пользователя
+document.addEventListener('DOMContentLoaded', function() {
+    const registerUserForm = document.getElementById('registerUserForm');
+    if (registerUserForm) {
+        registerUserForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Пароли не совпадают!');
+                return;
+            }
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                password: password
+            };
+            
+            fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Пользователь успешно создан! Теперь вы можете войти в систему.');
+                    bootstrap.Modal.getInstance(document.getElementById('registerUserModal')).hide();
+                    // Перенаправляем на страницу входа
+                    window.location.href = '/login';
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка при регистрации: ' + error);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

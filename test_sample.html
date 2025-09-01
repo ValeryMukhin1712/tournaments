@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест форматирования диалога</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .user-prompt {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #1565c0;
+        }
+        .assistant-response {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            color: #4a148c;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ТЕСТ ФОРМАТИРОВАНИЯ ДИАЛОГА</h1>
+        
+        <div class="user-prompt">
+            <div class="timestamp">Пользователь (17:01)</div>
+            <strong>ПРОМПТ:</strong> "Нужна программа для турнира. С простой регистрацией, вводом участников, таблицей результатов, с интерфейсом ввода результатов, веб интерфейсом"
+        </div>
+        
+        <div class="assistant-response">
+            <div class="timestamp">Ассистент (17:02)</div>
+            <strong>ОТВЕТ:</strong> Понял требования. Создам веб-приложение для турниров с Flask и SQLite, включающее круговую систему, шахматку результатов, расписание матчей и разные уровни доступа пользователей.
+        </div>
+        
+        <div class="user-prompt">
+            <div class="timestamp">Пользователь (17:05)</div>
+            <strong>ПРОМПТ:</strong> "Сохрани данные в SQLlite Уведомления нужны Если есть вопросы спрашивай Разбей задачу на этапы и спрашивай"
+        </div>
+        
+        <div class="assistant-response">
+            <div class="timestamp">Ассистент (17:06)</div>
+            <strong>ОТВЕТ:</strong> Хорошо, использую SQLite для хранения данных. Разбиваю задачу на этапы: 1) Базовая структура и модели данных, 2) Система авторизации, 3) Управление турнирами, 4) Шахматка и результаты, 5) Расписание матчей.
+        </div>
+    </div>
+</body>
+</html>

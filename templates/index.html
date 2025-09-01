@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Турнирная система{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-trophy me-2"></i>Турниры</h1>
+            {% if current_user.is_authenticated and current_user.role == 'администратор' %}
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTournamentModal">
+                <i class="fas fa-plus me-2"></i>Создать турнир
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if tournaments %}
+<div class="row">
+    {% for tournament in tournaments %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ tournament.name }}</h5>
+                    <span class="badge bg-{{ 'success' if tournament.status == 'активен' else 'warning' if tournament.status == 'регистрация' else 'secondary' }}">
+                        {{ tournament.status }}
+                    </span>
+                </div>
+                <p class="card-text text-muted">
+                    <i class="fas fa-table-tennis me-1"></i>{{ tournament.sport_type }}
+                </p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ tournament.start_date.strftime('%d.%m.%Y') }} - {{ tournament.end_date.strftime('%d.%m.%Y') }}
+                    </small>
+                </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('tournament_view', tournament_id=tournament.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>Просмотр
+                        </a>
+                        {% if current_user.is_authenticated and tournament.status == 'регистрация' %}
+                        <button class="btn btn-success btn-sm" onclick="registerForTournament({{ tournament.id }})">
+                            <i class="fas fa-user-plus me-1"></i>Участвовать
+                        </button>
+                        {% elif current_user.is_authenticated and tournament.status == 'активен' %}
+                        <span class="badge bg-info">Турнир активен</span>
+                        {% elif not current_user.is_authenticated %}
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#registerUserModal">
+                            <i class="fas fa-user-plus me-1"></i>Регистрация
+                        </button>
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#participateModal" data-tournament-id="{{ tournament.id }}">
+                            <i class="fas fa-trophy me-1"></i>Хочу участвовать
+                        </button>
+                        {% endif %}
+                        {% if current_user.is_authenticated and current_user.role == 'администратор' %}
+                        <button class="btn btn-danger btn-sm" onclick="deleteTournament({{ tournament.id }}, '{{ tournament.name }}')">
+                            <i class="fas fa-trash me-1"></i>Удалить
+                        </button>
+                        {% endif %}
+                    </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+    <h3 class="text-muted">Турниры не найдены</h3>
+    <p class="text-muted">Пока нет активных турниров. Создайте первый турнир!</p>
+</div>
+{% endif %}
+
+<!-- Модальное окно создания турнира -->
+{% if current_user.is_authenticated and current_user.role == 'администратор' %}
+<div class="modal fade" id="createTournamentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создать турнир</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createTournamentForm">
+                    <div class="mb-3">
+                        <label for="tournamentName" class="form-label">Название турнира</label>
+                        <input type="text" class="form-control" id="tournamentName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sportType" class="form-label">Вид спорта</label>
+                        <select class="form-select" id="sportType" required>
+                            <option value="">Выберите вид спорта</option>
+                            <option value="теннис">Настольный теннис</option>
+                            <option value="бадминтон">Бадминтон</option>
+                            <option value="волейбол">Волейбол</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Дата начала</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">Дата окончания</label>
+                                <input type="date" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxParticipants" class="form-label">Максимум участников</label>
+                        <input type="number" class="form-control" id="maxParticipants" value="32" min="4" max="100">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="courtCount" class="form-label">Количество площадок</label>
+                                <input type="number" class="form-control" id="courtCount" value="3" min="1" max="10">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="matchDuration" class="form-label">Время матча (мин)</label>
+                                <input type="number" class="form-control" id="matchDuration" value="60" min="15" max="180">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="breakDuration" class="form-label">Перерыв (мин)</label>
+                                <input type="number" class="form-control" id="breakDuration" value="15" min="5" max="60">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="createTournamentForm" class="btn btn-primary">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Модальное окно "Хочу участвовать" -->
+<div class="modal fade" id="participateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Участие в турнире</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="participateForm">
+                    <input type="hidden" id="tournamentId" name="tournament_id">
+                    <div class="mb-3">
+                        <label for="participateUsername" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="participateUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="participatePassword" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="participatePassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="participateConfirmPassword" class="form-label">Подтвердите пароль</label>
+                        <input type="password" class="form-control" id="participateConfirmPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="participateForm" class="btn btn-warning">Участвовать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Установка минимальной даты начала на сегодня
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').min = today;
+    
+    // Устанавливаем текущую дату по умолчанию
+    document.getElementById('startDate').value = today;
+    
+    // Устанавливаем дату окончания на завтра по умолчанию
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('endDate').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('endDate').min = today;
+    
+    // Автоматическое обновление минимальной даты окончания
+    document.getElementById('startDate').addEventListener('change', function() {
+        document.getElementById('endDate').min = this.value;
+    });
+    
+    // Обработка создания турнира
+    const form = document.getElementById('createTournamentForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('tournamentName').value,
+                sport_type: document.getElementById('sportType').value,
+                start_date: document.getElementById('startDate').value,
+                end_date: document.getElementById('endDate').value,
+                max_participants: parseInt(document.getElementById('maxParticipants').value),
+                court_count: parseInt(document.getElementById('courtCount').value),
+                match_duration: parseInt(document.getElementById('matchDuration').value),
+                break_duration: parseInt(document.getElementById('breakDuration').value)
+            };
+            
+            fetch('/api/tournaments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Турнир успешно создан!');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка при создании турнира: ' + error);
+            });
+        });
+    }
+    
+    // Обработка формы "Хочу участвовать"
+    const participateForm = document.getElementById('participateForm');
+    if (participateForm) {
+        participateForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('participatePassword').value;
+            const confirmPassword = document.getElementById('participateConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Пароли не совпадают!');
+                return;
+            }
+            
+            const formData = {
+                username: document.getElementById('participateUsername').value,
+                password: password
+            };
+            
+            // Сначала создаем пользователя
+            fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Теперь добавляем пользователя в турнир
+                    const tournamentId = document.getElementById('tournamentId').value;
+                    const participantData = {
+                        name: formData.username,
+                        is_team: false
+                    };
+                    
+                    return fetch(`/api/tournaments/${tournamentId}/participants`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(participantData)
+                    });
+                } else {
+                    throw new Error(data.error);
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Вы успешно зарегистрированы и добавлены в турнир! Теперь вы можете войти в систему.');
+                    bootstrap.Modal.getInstance(document.getElementById('participateModal')).hide();
+                    // Перенаправляем на страницу входа
+                    window.location.href = '/login';
+                } else {
+                    alert('Ошибка при добавлении в турнир: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка: ' + error.message);
+            });
+        });
+    }
+    
+    // Устанавливаем tournament_id при открытии модального окна
+    const participateModal = document.getElementById('participateModal');
+    if (participateModal) {
+        participateModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const tournamentId = button.getAttribute('data-tournament-id');
+            document.getElementById('tournamentId').value = tournamentId;
+        });
+    }
+});
+
+// Функция регистрации на турнир
+function registerForTournament(tournamentId) {
+    if (confirm('Вы уверены, что хотите участвовать в этом турнире?')) {
+        const formData = {
+            name: '{{ current_user.username }}',
+            is_team: false
+        };
+        
+        fetch(`/api/tournaments/${tournamentId}/participants`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Вы успешно зарегистрированы на турнир!');
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при регистрации: ' + error);
+        });
+    }
+}
+
+// Функция удаления турнира
+function deleteTournament(tournamentId, tournamentName) {
+    if (confirm(`Вы уверены, что хотите удалить турнир "${tournamentName}"? Это действие нельзя отменить.`)) {
+        fetch(`/api/tournaments/${tournamentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Турнир успешно удален!');
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при удалении турнира: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %}
