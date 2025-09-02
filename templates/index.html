@@ -47,12 +47,9 @@
                         </button>
                         {% else %}
                         <!-- Для зарегистрированных пользователей -->
-                        {% set is_participant = false %}
-                        {% for participant in tournament.participants %}
-                            {% if participant.user_id == current_user.id %}
-                                {% set is_participant = true %}
-                            {% endif %}
-                        {% endfor %}
+                        {% set is_participant = tournament.participants | selectattr('user_id', 'equalto', current_user.id) | list | length > 0 or tournament.participants | selectattr('name', 'equalto', current_user.username) | list | length > 0 %}
+                        
+
                         
                         {% if not is_participant %}
                         <button class="btn btn-warning btn-sm" onclick="registerForTournament({{ tournament.id }})">
