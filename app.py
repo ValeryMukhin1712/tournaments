@@ -684,55 +684,87 @@ def create_schedule_for_participant(tournament_id, participant_id):
     db.session.commit()
 
 def calculate_match_time(tournament, p1_id, p2_id):
-    """Расчет времени матча с учетом нагрузки участников и площадок"""
+    """Расчет времени матча с учетом равномерной загрузки площадок и проверки конфликтов участников"""
     # Получаем все матчи турнира
     matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Создаем карту загрузки площадок для равномерного распределения
+    court_usage = {}
+    for court in range(1, tournament.court_count + 1):
+        court_usage[court] = 0
+    
+    # Подсчитываем текущую загрузку площадок
+    for match in matches:
+        if match.court_number and match.court_number in court_usage:
+            court_usage[match.court_number] += 1
     
     # Начинаем с первой даты турнира
     current_date = tournament.start_date
     current_time = datetime.strptime('09:00', '%H:%M').time()  # Начало в 9:00
     
-    # Ищем свободное время
-    while current_date <= tournament.end_date:
-        # Проверяем все временные слоты в течение дня
-        while current_time < datetime.strptime('22:00', '%H:%M').time():
-            # Проверяем все площадки для этого времени
-            for court in range(1, tournament.court_count + 1):
-                # Проверяем, свободна ли площадка в это время
-                if is_court_available(tournament, current_date, current_time, court):
-                    # Проверяем, не играет ли участник в это время
-                    if not is_participant_busy(tournament, p1_id, current_date, current_time) and \
-                       not is_participant_busy(tournament, p2_id, current_date, current_time):
-                        
-                        # Дополнительная проверка: не играл ли участник в предыдущем временном слоте
-                        if not is_participant_recently_played(tournament, p1_id, current_date, current_time) and \
-                           not is_participant_recently_played(tournament, p2_id, current_date, current_time):
-                            
-                            # Дополнительная проверка: не играет ли участник в следующем временном слоте
-                            next_time = add_minutes_to_time(current_time, tournament.match_duration + tournament.break_duration)
-                            if next_time < datetime.strptime('22:00', '%H:%M').time():
-                                if not is_participant_busy(tournament, p1_id, current_date, next_time) and \
-                                   not is_participant_busy(tournament, p2_id, current_date, next_time):
-                                    return {
-                                        'date': current_date,
-                                        'time': current_time,
-                                        'court': court
-                                    }
-                            else:
-                                return {
-                                    'date': current_date,
-                                    'time': current_time,
-                                    'court': court
-                                }
-            
-            # Переходим к следующему времени
-            current_time = add_minutes_to_time(current_time, tournament.match_duration + tournament.break_duration)
-        
-        # Переходим к следующему дню
-        current_date += timedelta(days=1)
-        current_time = datetime.strptime('09:00', '%H:%M').time()
+    # Список всех возможных временных слотов для сортировки по приоритету
+    time_slots = []
     
-    # Если не нашли время, возвращаем последний день
+    # Генерируем все возможные временные слоты
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем временные слоты по приоритету (сначала менее загруженные площадки)
+    def get_slot_priority(date, time):
+        # Подсчитываем загрузку всех площадок в это время
+        total_load = 0
+        for court in range(1, tournament.court_count + 1):
+            if not is_court_available(tournament, date, time, court):
+                total_load += 1
+        return total_load
+    
+    # Сортируем слоты по приоритету (меньше загрузка = выше приоритет)
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий временной слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, conflict_message = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играли ли участники недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Проверяем, не играют ли участники в следующем временном слоте
+        next_time = add_minutes_to_time(time, tournament.match_duration + tournament.break_duration)
+        if next_time < datetime.strptime('22:00', '%H:%M').time():
+            has_next_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, next_time)
+            if has_next_conflict:
+                continue
+        
+        # Находим наименее загруженную площадку в это время
+        best_court = None
+        min_usage = float('inf')
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                # Учитываем как текущую загрузку площадки, так и загрузку в это время
+                current_usage = court_usage[court]
+                if current_usage < min_usage:
+                    min_usage = current_usage
+                    best_court = court
+        
+        if best_court:
+            return {
+                'date': date,
+                'time': time,
+                'court': best_court
+            }
+    
+    # Если не нашли подходящее время, возвращаем последний день на первую площадку
     return {
         'date': tournament.end_date,
         'time': datetime.strptime('09:00', '%H:%M').time(),
@@ -761,7 +793,7 @@ def is_court_available(tournament, date, time, court):
     return True
 
 def is_participant_busy(tournament, participant_id, date, time):
-    """Проверка занятости участника"""
+    """Проверка занятости участника с учетом времени матча и перерыва"""
     matches = Match.query.filter(
         (Match.participant1_id == participant_id) | (Match.participant2_id == participant_id),
         Match.tournament_id == tournament.id,
@@ -773,10 +805,11 @@ def is_participant_busy(tournament, participant_id, date, time):
     for match in matches:
         if match.match_time:
             match_start = datetime.combine(date, match.match_time)
-            match_end = match_start + timedelta(minutes=tournament.match_duration)
+            # Учитываем время матча + перерыв для более точной проверки конфликтов
+            match_end = match_start + timedelta(minutes=tournament.match_duration + tournament.break_duration)
             
             # Проверяем, не пересекается ли время матча с проверяемым временем
-            # Участник занят, если проверяемое время попадает в интервал матча
+            # Участник занят, если проверяемое время попадает в интервал матча + перерыва
             if match_start <= check_datetime < match_end:
                 return True
     
@@ -787,6 +820,44 @@ def add_minutes_to_time(time, minutes):
     dt = datetime.combine(datetime.today(), time)
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
+
+def check_participant_conflicts(tournament, p1_id, p2_id, date, time):
+    """Проверка конфликтов участников - не играют ли они одновременно на разных площадках"""
+    # Проверяем, не играет ли участник 1 в это время
+    p1_matches = Match.query.filter(
+        (Match.participant1_id == p1_id) | (Match.participant2_id == p1_id),
+        Match.tournament_id == tournament.id,
+        Match.match_date == date
+    ).all()
+    
+    # Проверяем, не играет ли участник 2 в это время
+    p2_matches = Match.query.filter(
+        (Match.participant1_id == p2_id) | (Match.participant2_id == p2_id),
+        Match.tournament_id == tournament.id,
+        Match.match_date == date
+    ).all()
+    
+    check_datetime = datetime.combine(date, time)
+    
+    # Проверяем конфликты для участника 1
+    for match in p1_matches:
+        if match.match_time:
+            match_start = datetime.combine(date, match.match_time)
+            match_end = match_start + timedelta(minutes=tournament.match_duration + tournament.break_duration)
+            
+            if match_start <= check_datetime < match_end:
+                return True, f"Участник {p1_id} уже играет в это время на площадке {match.court_number}"
+    
+    # Проверяем конфликты для участника 2
+    for match in p2_matches:
+        if match.match_time:
+            match_start = datetime.combine(date, match.match_time)
+            match_end = match_start + timedelta(minutes=tournament.match_duration + tournament.break_duration)
+            
+            if match_start <= check_datetime < match_end:
+                return True, f"Участник {p2_id} уже играет в это время на площадке {match.court_number}"
+    
+    return False, None
 
 def is_participant_recently_played(tournament, participant_id, date, time):
     """Проверка, не играл ли участник недавно (в предыдущем временном слоте)"""
@@ -956,6 +1027,27 @@ def tournament_view(tournament_id):
     chessboard = create_chessboard(participants, matches)
     statistics = calculate_statistics(participants, matches, tournament)
     
+    # Определяем ближайшие матчи для каждой площадки отдельно
+    now = datetime.now()
+    upcoming_matches = [m for m in matches if m.status != 'завершен' and m.match_date and m.match_time and m.court_number]
+    
+    # Группируем матчи по площадкам
+    matches_by_court = {}
+    for match in upcoming_matches:
+        court = match.court_number
+        if court not in matches_by_court:
+            matches_by_court[court] = []
+        matches_by_court[court].append(match)
+    
+    # Для каждой площадки берем 2 ближайших матча
+    next_match_ids = []
+    for court in sorted(matches_by_court.keys()):
+        court_matches = matches_by_court[court]
+        court_matches.sort(key=lambda m: (m.match_date, m.match_time))
+        # Берем первые 2 матча для каждой площадки
+        for match in court_matches[:2]:
+            next_match_ids.append(match.id)
+    
     # Преобразуем участников в словари для JSON сериализации
     participants_data = []
     for participant in participants:
@@ -988,22 +1080,32 @@ def tournament_view(tournament_id):
                          matches=matches,
                          matches_data=matches_data,
                          chessboard=chessboard,
-                         statistics=statistics)
+                         statistics=statistics,
+                         next_match_ids=next_match_ids)
 
 def create_chessboard(participants, matches):
     """Создание шахматки для отображения результатов"""
     chessboard = {}
     
-    # Находим две ближайшие игры для выделения
+    # Находим ближайшие игры для каждой площадки отдельно
     now = datetime.now()
-    upcoming_matches = [m for m in matches if m.status != 'завершен' and m.match_date and m.match_time]
+    upcoming_matches = [m for m in matches if m.status != 'завершен' and m.match_date and m.match_time and m.court_number]
     
+    # Группируем матчи по площадкам
+    matches_by_court = {}
+    for match in upcoming_matches:
+        court = match.court_number
+        if court not in matches_by_court:
+            matches_by_court[court] = []
+        matches_by_court[court].append(match)
+    
+    # Для каждой площадки берем 2 ближайших матча
     next_matches = []
-    if upcoming_matches:
-        # Сортируем по дате и времени
-        upcoming_matches.sort(key=lambda m: (m.match_date, m.match_time))
-        # Берем две ближайшие игры
-        next_matches = upcoming_matches[:2]
+    for court in sorted(matches_by_court.keys()):
+        court_matches = matches_by_court[court]
+        court_matches.sort(key=lambda m: (m.match_date, m.match_time))
+        # Берем первые 2 матча для каждой площадки
+        next_matches.extend(court_matches[:2])
     
     for p1 in participants:
         chessboard[p1.id] = {}
@@ -1032,17 +1134,20 @@ def create_chessboard(participants, matches):
                         # Следующая игра
                         match_datetime = datetime.combine(match.match_date, match.match_time)
                         
-                        # Определяем позицию в очереди ближайших игр
+                        # Определяем позицию в очереди ближайших игр для данной площадки
                         match_position = None
-                        for i, next_match in enumerate(next_matches):
-                            next_match_datetime = datetime.combine(next_match.match_date, next_match.match_time)
-                            if match_datetime == next_match_datetime:
-                                match_position = i + 1  # 1 - первая игра, 2 - вторая игра
-                                break
+                        if match.court_number in matches_by_court:
+                            court_matches = matches_by_court[match.court_number]
+                            court_matches.sort(key=lambda m: (m.match_date, m.match_time))
+                            for i in range(min(2, len(court_matches))):  # Берем только первые 2
+                                court_match = court_matches[i]
+                                if court_match.id == match.id:
+                                    match_position = i + 1  # 1 - первая игра на площадке, 2 - вторая игра на площадке
+                                    break
                         
                         chessboard[p1.id][p2.id] = {
                             'type': 'upcoming',
-                            'value': f"📅 {match.match_date.strftime('%d.%m')} {match.match_time.strftime('%H:%M')}",
+                            'value': f"{match.match_date.strftime('%d.%m')} {match.match_time.strftime('%H:%M')}",
                             'match_id': match.id,
                             'editable': False,
                             'date': match.match_date,
@@ -1051,6 +1156,10 @@ def create_chessboard(participants, matches):
                             'is_next': match_position == 1,  # Флаг для выделения первой ближайшей игры
                             'is_second': match_position == 2  # Флаг для выделения второй ближайшей игры
                         }
+                        
+                        # Отладочная информация
+                        if match_position in [1, 2]:
+                            logger.info(f"Ближайший матч: {p1.name} vs {p2.name}, позиция: {match_position}, время: {match.match_date.strftime('%d.%m')} {match.match_time.strftime('%H:%M')}")
                 else:
                     chessboard[p1.id][p2.id] = {'type': 'empty', 'value': ''}
     

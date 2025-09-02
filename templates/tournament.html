@@ -118,7 +118,7 @@
                             <tr>
                                 <td class="bg-light fw-bold">{{ p1.name[:15] }}{% if p1.name|length > 15 %}...{% endif %}</td>
                                 {% for p2 in participants %}
-                                <td class="text-center position-relative">
+                                <td class="text-center position-relative" style="height: 80px; width: 120px; vertical-align: middle;">
                                     {% if p1.id == p2.id %}
                                         <span class="text-muted">—</span>
                                     {% else %}
@@ -134,16 +134,45 @@
                                                 </button>
                                                 {% endif %}
                                             </div>
-                                                                                                                          {% elif cell_data.type == 'upcoming' %}
-                                              <div class="text-center {% if cell_data.is_next %}border border-warning border-3 rounded p-2 bg-warning bg-opacity-10{% elif cell_data.is_second %}border border-success border-3 rounded p-2 bg-success bg-opacity-10{% endif %}">
-                                                  <div class="badge {% if cell_data.is_next %}bg-warning text-dark{% elif cell_data.is_second %}bg-success text-white{% else %}bg-info{% endif %} mb-1">
-                                                      {% if cell_data.is_next %}🔥 СЛЕДУЮЩАЯ ИГРА{% elif cell_data.is_second %}🟢 ВТОРАЯ ИГРА{% else %}{{ cell_data.value }}{% endif %}
+                                        {% elif cell_data.type == 'upcoming' %}
+                                              {% set court_colors = {
+                                                  1: 'primary',
+                                                  2: 'info', 
+                                                  3: 'success',
+                                                  4: 'warning',
+                                                  5: 'danger',
+                                                  6: 'secondary',
+                                                  7: 'dark',
+                                                  8: 'light'
+                                              } %}
+                                              {% set court_color = court_colors.get(cell_data.court, 'secondary') %}
+                                              
+                                              <div class="text-center position-relative">
+                                                  <!-- Основной контейнер с цветом площадки -->
+                                                  <div class="{% if cell_data.is_next %}border border-warning border-1 rounded p-1 bg-warning bg-opacity-15 shadow-sm{% elif cell_data.is_second %}border border-success border-1 rounded p-1 bg-success bg-opacity-15 shadow-sm{% else %}border border-{{ court_color }} border-1 rounded p-1 bg-{{ court_color }} bg-opacity-10{% endif %}" style="height: 70px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                                                      <!-- Верхняя часть -->
+                                                      <div>
+                                                          <!-- Номер корта крупным полупрозрачным шрифтом -->
+                                                          <div class="text-center mb-1">
+                                                              <span style="font-size: 1.5rem; font-weight: bold; opacity: 0.3; color: {{ court_color }};">{{ cell_data.court }}</span>
+                                                          </div>
+                                                      </div>
+                                                      
+                                                      <!-- Время матча - внизу -->
+                                                      <div class="mt-auto">
+                                                          <small class="d-block text-dark fw-bold text-center" style="font-size: 0.6rem; background-color: rgba(255, 255, 255, 0.95); padding: 1px 3px; border-radius: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ cell_data.date.strftime('%d.%m') }} {{ cell_data.time.strftime('%H:%M') }}</small>
+                                                      </div>
                                                   </div>
-                                                  <small class="d-block text-muted">Площадка {{ cell_data.court }}</small>
+                                                  
+                                                  <!-- Дополнительные индикаторы для ближайших матчей -->
                                                   {% if cell_data.is_next %}
-                                                  <small class="d-block text-warning fw-bold">{{ cell_data.value }}</small>
+                                                      <div class="position-absolute top-0 start-0 translate-middle">
+                                                          <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.6rem; padding: 2px 6px;">1</span>
+                                                      </div>
                                                   {% elif cell_data.is_second %}
-                                                  <small class="d-block text-success fw-bold">{{ cell_data.value }}</small>
+                                                      <div class="position-absolute top-0 start-0 translate-middle">
+                                                          <span class="badge bg-success text-white rounded-pill" style="font-size: 0.6rem; padding: 2px 6px;">2</span>
+                                                      </div>
                                                   {% endif %}
                                               </div>
                                         {% elif cell_data.type == 'empty' %}
@@ -191,12 +220,58 @@
                         <tbody>
                             {% if matches %}
                                 {% for match in matches %}
-                                <tr>
+                                {% set is_next_match = match.id in next_match_ids %}
+                                {% set is_first_next = false %}
+                                {% set is_second_next = false %}
+                                
+                                {# Определяем, является ли матч первым или вторым ближайшим для своей площадки #}
+                                {% if match.id in next_match_ids and match.court_number %}
+                                    {# Находим все матчи для этой площадки в next_match_ids #}
+                                    {% set court_matches = [] %}
+                                    {% for match_id in next_match_ids %}
+                                        {% for m in matches %}
+                                            {% if m.id == match_id and m.court_number == match.court_number %}
+                                                {% set _ = court_matches.append(m) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                    
+                                    {# Сортируем матчи этой площадки по времени #}
+                                    {% set court_matches = court_matches|sort(attribute='match_date') %}
+                                    {% set court_matches = court_matches|sort(attribute='match_time') %}
+                                    
+                                    {# Определяем позицию текущего матча #}
+                                    {% set match_position = 0 %}
+                                    {% for court_match in court_matches %}
+                                        {% if court_match.id == match.id %}
+                                            {% if match_position == 0 %}
+                                                {% set is_first_next = true %}
+                                            {% elif match_position == 1 %}
+                                                {% set is_second_next = true %}
+                                            {% endif %}
+                                        {% endif %}
+                                        {% set match_position = match_position + 1 %}
+                                    {% endfor %}
+                                {% endif %}
+                                <tr class="{% if is_first_next %}table-warning{% elif is_second_next %}table-success{% endif %}">
                                     <td>{{ match.match_date.strftime('%d.%m.%Y') if match.match_date else '—' }}</td>
                                     <td>{{ match.match_time.strftime('%H:%M') if match.match_time else '—' }}</td>
                                     <td>
                                         {% if match.court_number %}
-                                            <span class="badge bg-info">Площадка {{ match.court_number }}</span>
+                                            {% set court_colors = {
+                                                1: 'primary',
+                                                2: 'info', 
+                                                3: 'success',
+                                                4: 'warning',
+                                                5: 'danger',
+                                                6: 'secondary',
+                                                7: 'dark',
+                                                8: 'light'
+                                            } %}
+                                            {% set court_color = court_colors.get(match.court_number, 'secondary') %}
+                                            <span class="badge bg-{{ court_color }}">
+                                                <i class="fas fa-map-marker-alt me-1"></i>Площадка {{ match.court_number }}
+                                            </span>
                                         {% else %}
                                             —
                                         {% endif %}
@@ -210,9 +285,19 @@
                                             —
                                         {% endif %}
                                     </td>
-                                                                         <td>
-
-                                     </td>
+                                    <td>
+                                        {% if is_first_next %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-fire me-1"></i>СЛЕДУЮЩАЯ НА ПЛОЩАДКЕ {{ match.court_number }}
+                                            </span>
+                                        {% elif is_second_next %}
+                                            <span class="badge bg-success text-white">
+                                                <i class="fas fa-clock me-1"></i>ВТОРАЯ НА ПЛОЩАДКЕ {{ match.court_number }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ match.status or 'запланирован' }}</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
@@ -276,11 +361,11 @@
                                          <div class="row mb-3">
                          <div class="col-6">
                              <label for="score1" class="form-label">Счет участника 1</label>
-                             <input type="number" class="form-control" id="score1" name="score1" min="0" max="{{ tournament.points_to_win }}" required>
+                             <input type="number" class="form-control" id="score1" name="score1" min="0" required>
                          </div>
                          <div class="col-6">
                              <label for="score2" class="form-label">Счет участника 2</label>
-                             <input type="number" class="form-control" id="score2" name="score2" min="0" max="{{ tournament.points_to_win }}" required>
+                             <input type="number" class="form-control" id="score2" name="score2" min="0" required>
                          </div>
                      </div>
                      <div class="mb-3">
@@ -346,11 +431,11 @@
                                          <div class="row mb-3">
                          <div class="col-6">
                              <label for="editScore1" class="form-label">Счет участника 1</label>
-                             <input type="number" class="form-control" id="editScore1" name="score1" min="0" max="{{ tournament.points_to_win }}" required>
+                             <input type="number" class="form-control" id="editScore1" name="score1" min="0" required>
                          </div>
                          <div class="col-6">
                              <label for="editScore2" class="form-label">Счет участника 2</label>
-                             <input type="number" class="form-control" id="editScore2" name="score2" min="0" max="{{ tournament.points_to_win }}" required>
+                             <input type="number" class="form-control" id="editScore2" name="score2" min="0" required>
                          </div>
                      </div>
                      <div class="mb-3">
@@ -561,13 +646,16 @@ function openMatchModal(p1Id, p2Id, p1Name, p2Name) {
         document.getElementById('participant1Name').value = p1Name;
         document.getElementById('participant2Name').value = p2Name;
         
-        // Установка сегодняшней даты и текущего времени
+        // Установка значений по умолчанию
         const now = new Date();
         const today = now.toISOString().split('T')[0];
         const currentTime = now.toTimeString().slice(0, 5); // HH:MM формат
+        const defaultScore = {{ tournament.points_to_win }};
         
         document.getElementById('matchDate').value = today;
         document.getElementById('matchTime').value = currentTime;
+        document.getElementById('score1').value = defaultScore;
+        document.getElementById('score2').value = defaultScore;
         
         new bootstrap.Modal(document.getElementById('matchResultModal')).show();
     }
@@ -584,8 +672,10 @@ function editMatchResult(matchId, p1Name, p2Name) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('editScore1').value = data.match.score1 || '';
-                document.getElementById('editScore2').value = data.match.score2 || '';
+                // Устанавливаем значения по умолчанию для счета, если они пустые
+                const defaultScore = {{ tournament.points_to_win }};
+                document.getElementById('editScore1').value = data.match.score1 || defaultScore;
+                document.getElementById('editScore2').value = data.match.score2 || defaultScore;
                 document.getElementById('editMatchDate').value = data.match.match_date || '';
                 document.getElementById('editMatchTime').value = data.match.match_time || '';
                 document.getElementById('editCourtNumber').value = data.match.court_number || '';

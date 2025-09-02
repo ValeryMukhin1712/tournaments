@@ -100,10 +100,15 @@
                         <label for="sportType" class="form-label">Вид спорта</label>
                         <select class="form-select" id="sportType" required>
                             <option value="">Выберите вид спорта</option>
-                            <option value="теннис">Настольный теннис</option>
+                            <option value="настольный теннис">Настольный теннис</option>
                             <option value="бадминтон">Бадминтон</option>
                             <option value="волейбол">Волейбол</option>
+                            <option value="другой">Другой (указать)</option>
                         </select>
+                    </div>
+                    <div class="mb-3" id="customSportDiv" style="display: none;">
+                        <label for="customSport" class="form-label">Укажите вид спорта</label>
+                        <input type="text" class="form-control" id="customSport" placeholder="Введите название вида спорта">
                     </div>
                     <div class="row">
                         <div class="col-md-6">
@@ -127,7 +132,7 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="courtCount" class="form-label">Количество площадок</label>
-                                <input type="number" class="form-control" id="courtCount" value="3" min="1" max="10">
+                                <input type="number" class="form-control" id="courtCount" value="2" min="1" max="10">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -258,6 +263,46 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Обработка выбора вида спорта
+    const sportTypeSelect = document.getElementById('sportType');
+    const customSportDiv = document.getElementById('customSportDiv');
+    const customSportInput = document.getElementById('customSport');
+    const pointsToWinInput = document.getElementById('pointsToWin');
+    
+    if (sportTypeSelect) {
+        sportTypeSelect.addEventListener('change', function() {
+            const selectedSport = this.value;
+            
+            // Показываем/скрываем поле для ввода нового вида спорта
+            if (selectedSport === 'другой') {
+                customSportDiv.style.display = 'block';
+                customSportInput.required = true;
+            } else {
+                customSportDiv.style.display = 'none';
+                customSportInput.required = false;
+                customSportInput.value = '';
+            }
+            
+            // Автоматически заполняем поле "Очков для победы в матче"
+            switch(selectedSport) {
+                case 'настольный теннис':
+                    pointsToWinInput.value = 11;
+                    break;
+                case 'бадминтон':
+                    pointsToWinInput.value = 21;
+                    break;
+                case 'волейбол':
+                    pointsToWinInput.value = 25;
+                    break;
+                case 'другой':
+                    pointsToWinInput.value = 21; // значение по умолчанию
+                    break;
+                default:
+                    pointsToWinInput.value = 21; // значение по умолчанию
+            }
+        });
+    }
+    
     // Обработка создания турнира
     const form = document.getElementById('createTournamentForm');
     if (form) {
@@ -265,9 +310,19 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Определяем вид спорта
+            let sportType = document.getElementById('sportType').value;
+            if (sportType === 'другой') {
+                sportType = document.getElementById('customSport').value;
+                if (!sportType.trim()) {
+                    alert('Пожалуйста, укажите вид спорта');
+                    return;
+                }
+            }
+            
             const formData = {
                 name: document.getElementById('tournamentName').value,
-                sport_type: document.getElementById('sportType').value,
+                sport_type: sportType,
                 start_date: document.getElementById('startDate').value,
                 end_date: document.getElementById('endDate').value,
                 max_participants: parseInt(document.getElementById('maxParticipants').value),
