@@ -24,9 +24,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="card-title mb-0">{{ tournament.name }}</h5>
-                    <span class="badge bg-{{ 'success' if tournament.status == 'активен' else 'warning' if tournament.status == 'регистрация' else 'secondary' }}">
-                        {{ tournament.status }}
-                    </span>
+
                 </div>
                 <p class="card-text text-muted">
                     <i class="fas fa-table-tennis me-1"></i>{{ tournament.sport_type }}
@@ -41,24 +39,36 @@
                         <a href="{{ url_for('tournament_view', tournament_id=tournament.id) }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-eye me-1"></i>Просмотр
                         </a>
-                        {% if current_user.is_authenticated and tournament.status == 'регистрация' %}
-                        <button class="btn btn-success btn-sm" onclick="registerForTournament({{ tournament.id }})">
-                            <i class="fas fa-user-plus me-1"></i>Участвовать
-                        </button>
-                        {% elif current_user.is_authenticated and tournament.status == 'активен' %}
-                        <span class="badge bg-info">Турнир активен</span>
-                        {% elif not current_user.is_authenticated %}
-                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#registerUserModal">
-                            <i class="fas fa-user-plus me-1"></i>Регистрация
-                        </button>
+                        
+                        {% if not current_user.is_authenticated %}
+                        <!-- Для незарегистрированных пользователей -->
                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#participateModal" data-tournament-id="{{ tournament.id }}">
                             <i class="fas fa-trophy me-1"></i>Хочу участвовать
                         </button>
+                        {% else %}
+                        <!-- Для зарегистрированных пользователей -->
+                        {% set is_participant = false %}
+                        {% for participant in tournament.participants %}
+                            {% if participant.user_id == current_user.id %}
+                                {% set is_participant = true %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if not is_participant %}
+                        <button class="btn btn-warning btn-sm" onclick="registerForTournament({{ tournament.id }})">
+                            <i class="fas fa-trophy me-1"></i>Хочу участвовать
+                        </button>
+                        {% else %}
+                        <span class="btn btn-success btn-sm disabled">
+                            <i class="fas fa-check me-1"></i>Вы уже участвуете в этом турнире
+                        </span>
                         {% endif %}
-                        {% if current_user.is_authenticated and current_user.role == 'администратор' %}
+                        
+                        {% if current_user.role == 'администратор' %}
                         <button class="btn btn-danger btn-sm" onclick="deleteTournament({{ tournament.id }}, '{{ tournament.name }}')">
                             <i class="fas fa-trash me-1"></i>Удалить
                         </button>
+                        {% endif %}
                         {% endif %}
                     </div>
             </div>
@@ -136,6 +146,37 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Система подсчета очков -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-primary">Система подсчета очков</h6>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="pointsWin" class="form-label">Очки за победу</label>
+                                <input type="number" class="form-control" id="pointsWin" value="3" min="0" max="10">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="pointsDraw" class="form-label">Очки за ничью</label>
+                                <input type="number" class="form-control" id="pointsDraw" value="1" min="0" max="10">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="pointsLoss" class="form-label">Очки за поражение</label>
+                                <input type="number" class="form-control" id="pointsLoss" value="0" min="0" max="10">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="pointsToWin" class="form-label">Очков для победы в матче</label>
+                                <input type="number" class="form-control" id="pointsToWin" value="21" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -152,10 +193,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Участие в турнире</h5>
+                <h5 class="modal-title">Регистрация и участие в турнире</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Для участия в турнире необходимо зарегистрироваться. После регистрации вы автоматически будете добавлены в турнир.
+                </div>
                 <form id="participateForm">
                     <input type="hidden" id="tournamentId" name="tournament_id">
                     <div class="mb-3">
@@ -174,7 +219,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="submit" form="participateForm" class="btn btn-warning">Участвовать</button>
+                <button type="submit" form="participateForm" class="btn btn-warning">Зарегистрироваться и участвовать</button>
             </div>
         </div>
     </div>
@@ -184,28 +229,42 @@
 
 {% block scripts %}
 <script>
+// Обработка ошибок JavaScript
+window.addEventListener('error', function(e) {
+    console.error('JavaScript ошибка:', e.error);
+    console.error('Строка:', e.lineno);
+    console.error('Файл:', e.filename);
+});
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Установка минимальной даты начала на сегодня
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('startDate').min = today;
+    console.log('DOM загружен, инициализируем JavaScript');
     
-    // Устанавливаем текущую дату по умолчанию
-    document.getElementById('startDate').value = today;
-    
-    // Устанавливаем дату окончания на завтра по умолчанию
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('endDate').value = tomorrow.toISOString().split('T')[0];
-    document.getElementById('endDate').min = today;
-    
-    // Автоматическое обновление минимальной даты окончания
-    document.getElementById('startDate').addEventListener('change', function() {
-        document.getElementById('endDate').min = this.value;
-    });
+    // Установка минимальной даты начала на сегодня (только если элемент существует)
+    const startDateElement = document.getElementById('startDate');
+    if (startDateElement) {
+        const today = new Date().toISOString().split('T')[0];
+        startDateElement.min = today;
+        startDateElement.value = today;
+        
+        // Устанавливаем дату окончания на завтра по умолчанию
+        const endDateElement = document.getElementById('endDate');
+        if (endDateElement) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            endDateElement.value = tomorrow.toISOString().split('T')[0];
+            endDateElement.min = today;
+            
+            // Автоматическое обновление минимальной даты окончания
+            startDateElement.addEventListener('change', function() {
+                endDateElement.min = this.value;
+            });
+        }
+    }
     
     // Обработка создания турнира
     const form = document.getElementById('createTournamentForm');
     if (form) {
+        console.log('Форма создания турнира найдена');
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -217,7 +276,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 max_participants: parseInt(document.getElementById('maxParticipants').value),
                 court_count: parseInt(document.getElementById('courtCount').value),
                 match_duration: parseInt(document.getElementById('matchDuration').value),
-                break_duration: parseInt(document.getElementById('breakDuration').value)
+                break_duration: parseInt(document.getElementById('breakDuration').value),
+                points_win: parseInt(document.getElementById('pointsWin').value),
+                points_draw: parseInt(document.getElementById('pointsDraw').value),
+                points_loss: parseInt(document.getElementById('pointsLoss').value),
+                points_to_win: parseInt(document.getElementById('pointsToWin').value)
             };
             
             fetch('/api/tournaments', {
@@ -245,7 +308,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработка формы "Хочу участвовать"
     const participateForm = document.getElementById('participateForm');
     if (participateForm) {
+        console.log('Форма participateForm найдена, добавляем обработчик');
         participateForm.addEventListener('submit', function(e) {
+            console.log('Форма отправлена');
             e.preventDefault();
             
             const password = document.getElementById('participatePassword').value;
@@ -261,77 +326,66 @@ document.addEventListener('DOMContentLoaded', function() {
                 password: password
             };
             
-            // Сначала создаем пользователя
-            fetch('/api/users', {
+            // Используем новый endpoint для полного процесса
+            const tournamentId = document.getElementById('tournamentId').value;
+            console.log('Отправляем запрос на турнир ID:', tournamentId, 'с данными:', formData);
+            
+            fetch(`/api/tournaments/${tournamentId}/register-and-participate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Теперь добавляем пользователя в турнир
-                    const tournamentId = document.getElementById('tournamentId').value;
-                    const participantData = {
-                        name: formData.username,
-                        is_team: false
-                    };
-                    
-                    return fetch(`/api/tournaments/${tournamentId}/participants`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(participantData)
-                    });
-                } else {
-                    throw new Error(data.error);
-                }
+            .then(response => {
+                console.log('Получен ответ:', response.status);
+                return response.json();
             })
-            .then(response => response.json())
             .then(data => {
+                console.log('Данные ответа:', data);
                 if (data.success) {
-                    alert('Вы успешно зарегистрированы и добавлены в турнир! Теперь вы можете войти в систему.');
+                    alert('Вы успешно зарегистрированы, авторизованы и добавлены в турнир!');
                     bootstrap.Modal.getInstance(document.getElementById('participateModal')).hide();
-                    // Перенаправляем на страницу входа
-                    window.location.href = '/login';
+                    // Обновляем страницу для отображения авторизованного состояния
+                    window.location.reload();
                 } else {
-                    alert('Ошибка при добавлении в турнир: ' + data.error);
+                    alert('Ошибка: ' + data.error);
                 }
             })
             .catch(error => {
+                console.error('Ошибка запроса:', error);
                 alert('Ошибка: ' + error.message);
             });
         });
+    } else {
+        console.log('Форма participateForm НЕ найдена!');
     }
     
     // Устанавливаем tournament_id при открытии модального окна
     const participateModal = document.getElementById('participateModal');
     if (participateModal) {
+        console.log('Модальное окно participateModal найдено, добавляем обработчик');
         participateModal.addEventListener('show.bs.modal', function(event) {
+            console.log('Модальное окно открывается');
             const button = event.relatedTarget;
             const tournamentId = button.getAttribute('data-tournament-id');
+            console.log('Tournament ID из кнопки:', tournamentId);
             document.getElementById('tournamentId').value = tournamentId;
+            console.log('Tournament ID установлен в скрытое поле:', document.getElementById('tournamentId').value);
         });
+    } else {
+        console.log('Модальное окно participateModal НЕ найдено!');
     }
 });
 
 // Функция регистрации на турнир
 function registerForTournament(tournamentId) {
     if (confirm('Вы уверены, что хотите участвовать в этом турнире?')) {
-        const formData = {
-            name: '{{ current_user.username }}',
-            is_team: false
-        };
-        
-        fetch(`/api/tournaments/${tournamentId}/participants`, {
+        fetch(`/api/tournaments/${tournamentId}/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -373,3 +427,4 @@ function deleteTournament(tournamentId, tournamentName) {
 }
 </script>
 {% endblock %}
+

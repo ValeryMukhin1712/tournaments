@@ -3,11 +3,23 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
 import os
+import logging
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('tournament.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -32,13 +44,17 @@ class Tournament(db.Model):
     court_count = db.Column(db.Integer, default=3)  # количество площадок
     match_duration = db.Column(db.Integer, default=60)  # продолжительность матча в минутах
     break_duration = db.Column(db.Integer, default=15)  # перерыв между матчами в минутах
+    points_win = db.Column(db.Integer, default=3)  # очки за победу
+    points_draw = db.Column(db.Integer, default=1)  # очки за ничью
+    points_loss = db.Column(db.Integer, default=0)  # очки за поражение
+    points_to_win = db.Column(db.Integer, default=21)  # количество очков для победы в матче
     status = db.Column(db.String(20), default='регистрация')  # регистрация, активен, завершен
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Participant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     name = db.Column(db.String(100), nullable=False)
     is_team = db.Column(db.Boolean, default=False)
     registered_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -99,6 +115,9 @@ with app.app_context():
 @app.route('/')
 def index():
     tournaments = Tournament.query.all()
+    # Загружаем участников для каждого турнира
+    for tournament in tournaments:
+        tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
     return render_template('index.html', tournaments=tournaments)
 
 @app.route('/users')
@@ -118,12 +137,16 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
+        logger.info(f"Попытка входа пользователя: {username}")
+        
         user = User.query.filter_by(username=username).first()
         if user and user.password_hash == password:  # Простая проверка пароля
             login_user(user)
+            logger.info(f"Успешный вход пользователя: {username} (ID: {user.id}, Роль: {user.role})")
             flash('Вы успешно вошли в систему!', 'success')
             return redirect(url_for('index'))
         else:
+            logger.warning(f"Неудачная попытка входа пользователя: {username}")
             flash('Неверное имя пользователя или пароль', 'error')
     
     return render_template('login.html')
@@ -131,18 +154,32 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    username = current_user.username
+    user_id = current_user.id
     logout_user()
+    logger.info(f"Выход пользователя: {username} (ID: {user_id})")
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('index'))
 
 @app.route('/api/users', methods=['POST'])
 def create_user():
     """Создание нового пользователя (регистрация)"""
+    logger.info(f"ПОЛУЧЕН ЗАПРОС на /api/users")
+    logger.info(f"Request method: {request.method}")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    logger.info(f"Request data: {request.get_data()}")
+    
     data = request.get_json()
+    logger.info(f"Parsed JSON data: {data}")
+    
+    username = data.get('username', 'неизвестно') if data else 'неизвестно'
+    
+    logger.info(f"Попытка регистрации пользователя: {username}")
     
     # Проверяем, не существует ли уже пользователь с таким именем
     existing_user = User.query.filter_by(username=data['username']).first()
     if existing_user:
+        logger.warning(f"Попытка регистрации существующего пользователя: {username}")
         return jsonify({'success': False, 'error': 'Пользователь с таким именем уже существует'}), 400
     
     try:
@@ -151,6 +188,7 @@ def create_user():
         
         # Проверяем права на создание администраторов
         if role == 'администратор' and (not current_user.is_authenticated or current_user.role != 'администратор'):
+            logger.warning(f"Попытка создания администратора без прав: {username}")
             return jsonify({'success': False, 'error': 'Недостаточно прав для создания администратора'}), 403
         
         user = User(
@@ -161,9 +199,23 @@ def create_user():
         db.session.add(user)
         db.session.commit()
         
-        return jsonify({'success': True, 'message': 'Пользователь успешно создан'})
+        # Автоматически входим в систему после успешной регистрации
+        login_user(user)
+        
+        logger.info(f"Успешная регистрация пользователя: {username} (ID: {user.id}, Роль: {role})")
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Пользователь успешно создан и выполнен вход в систему',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role
+            }
+        })
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Ошибка при регистрации пользователя {username}: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/users/<int:user_id>/role', methods=['PUT'])
@@ -183,6 +235,37 @@ def change_user_role(user_id):
         return jsonify({'success': True, 'message': 'Роль пользователя изменена'})
     except Exception as e:
         db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/users', methods=['GET'])
+@login_required
+def get_users():
+    """Получение списка пользователей для добавления в турнир"""
+    if current_user.role not in ['администратор', 'доверенный_участник']:
+        return jsonify({'success': False, 'error': 'Недостаточно прав для просмотра списка пользователей'}), 403
+    
+    try:
+        tournament_id = request.args.get('tournament_id', type=int)
+        
+        # Получаем всех пользователей
+        users = User.query.order_by(User.username).all()
+        
+        # Если указан tournament_id, исключаем уже участвующих в турнире
+        if tournament_id:
+            existing_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            existing_user_ids = {p.user_id for p in existing_participants}
+            users = [user for user in users if user.id not in existing_user_ids]
+        
+        users_data = []
+        for user in users:
+            users_data.append({
+                'id': user.id,
+                'username': user.username,
+                'role': user.role
+            })
+        
+        return jsonify({'success': True, 'users': users_data})
+    except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/users/<int:user_id>', methods=['DELETE'])
@@ -213,9 +296,13 @@ def delete_user(user_id):
 @login_required
 def create_tournament():
     if current_user.role != 'администратор':
+        logger.warning(f"Попытка создания турнира без прав администратора пользователем: {current_user.username}")
         return jsonify({'error': 'Недостаточно прав'}), 403
     
     data = request.get_json()
+    tournament_name = data.get('name', 'неизвестно')
+    
+    logger.info(f"Попытка создания турнира '{tournament_name}' пользователем: {current_user.username}")
     
     try:
         tournament = Tournament(
@@ -226,13 +313,20 @@ def create_tournament():
             max_participants=int(data['max_participants']),
             court_count=int(data.get('court_count', 3)),
             match_duration=int(data.get('match_duration', 60)),
-            break_duration=int(data.get('break_duration', 15))
+            break_duration=int(data.get('break_duration', 15)),
+            points_win=int(data.get('points_win', 3)),
+            points_draw=int(data.get('points_draw', 1)),
+            points_loss=int(data.get('points_loss', 0)),
+            points_to_win=int(data.get('points_to_win', 21))
         )
         db.session.add(tournament)
         db.session.commit()
         
+        logger.info(f"Успешное создание турнира '{tournament_name}' (ID: {tournament.id}) пользователем: {current_user.username}")
+        
         return jsonify({'success': True, 'tournament_id': tournament.id})
     except Exception as e:
+        logger.error(f"Ошибка при создании турнира '{tournament_name}': {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 @app.route('/api/tournaments/<int:tournament_id>/participants', methods=['POST'])
@@ -240,47 +334,74 @@ def add_participant(tournament_id):
     tournament = Tournament.query.get_or_404(tournament_id)
     data = request.get_json()
     
-    # Проверяем дублирование по имени
-    existing_name = Participant.query.filter_by(
-        tournament_id=tournament_id, 
-        name=data['name']
-    ).first()
+    participant_name = data.get('name', 'неизвестно')
+    user_info = f" (пользователь: {current_user.username})" if current_user.is_authenticated else " (неавторизованный)"
+    logger.info(f"Попытка добавления участника '{participant_name}' в турнир '{tournament.name}' (ID: {tournament_id}){user_info}")
     
-    if existing_name:
-        return jsonify({'success': False, 'error': 'Участник с таким именем уже существует в этом турнире'}), 400
-    
-    # Если пользователь авторизован, проверяем дополнительные условия
-    if current_user.is_authenticated:
-        # Проверяем дублирование участника по user_id только для обычных участников
-        if current_user.role not in ['администратор', 'доверенный_участник']:
-            existing_participant = Participant.query.filter_by(
-                tournament_id=tournament_id,
-                user_id=current_user.id
-            ).first()
-            
-            if existing_participant:
-                return jsonify({'success': False, 'error': 'Вы уже зарегистрированы на этот турнир'}), 400
-        
-        # Проверяем права для добавления других участников
-        if current_user.role not in ['администратор', 'доверенный_участник']:
-            # Обычный участник может добавить только себя
-            if data.get('name') != current_user.username:
-                return jsonify({'success': False, 'error': 'Недостаточно прав для добавления других участников'}), 403
-        
-        user_id = current_user.id
-    else:
-        # Для неавторизованных пользователей (кнопка "Хочу участвовать")
-        # Ищем пользователя по имени
-        user = User.query.filter_by(username=data['name']).first()
+    # Если передан user_id, используем его для поиска пользователя
+    if 'user_id' in data and data['user_id']:
+        user = User.query.get(data['user_id'])
         if not user:
-            return jsonify({'success': False, 'error': 'Пользователь не найден. Сначала зарегистрируйтесь.'}), 400
+            return jsonify({'success': False, 'error': 'Пользователь не найден'}), 400
         user_id = user.id
+        participant_name = user.username
+    else:
+        # Используем переданное имя
+        participant_name = data['name']
+        
+        # Проверяем дублирование по имени
+        existing_name = Participant.query.filter_by(
+            tournament_id=tournament_id, 
+            name=participant_name
+        ).first()
+        
+        if existing_name:
+            return jsonify({'success': False, 'error': 'Участник с таким именем уже существует в этом турнире'}), 400
+        
+        # Если пользователь авторизован, проверяем дополнительные условия
+        if current_user.is_authenticated:
+            # Проверяем дублирование участника по user_id только для обычных участников
+            if current_user.role not in ['администратор', 'доверенный_участник']:
+                existing_participant = Participant.query.filter_by(
+                    tournament_id=tournament_id,
+                    user_id=current_user.id
+                ).first()
+                
+                if existing_participant:
+                    return jsonify({'success': False, 'error': 'Вы уже зарегистрированы на этот турнир'}), 400
+            
+            # Проверяем права для добавления других участников
+            if current_user.role not in ['администратор', 'доверенный_участник']:
+                # Обычный участник может добавить только себя
+                if participant_name != current_user.username:
+                    return jsonify({'success': False, 'error': 'Недостаточно прав для добавления других участников'}), 403
+            
+            # Для ручного ввода имен участников (не привязанных к пользователям)
+            # Создаем участника без привязки к конкретному пользователю
+            user_id = None
+        else:
+            # Для неавторизованных пользователей (кнопка "Хочу участвовать")
+            # Ищем пользователя по имени
+            user = User.query.filter_by(username=participant_name).first()
+            if not user:
+                return jsonify({'success': False, 'error': 'Пользователь не найден. Сначала зарегистрируйтесь.'}), 400
+            user_id = user.id
+    
+    # Проверяем, не добавлен ли уже этот пользователь в турнир (только если user_id не None)
+    if user_id is not None:
+        existing_participant = Participant.query.filter_by(
+            tournament_id=tournament_id,
+            user_id=user_id
+        ).first()
+        
+        if existing_participant:
+            return jsonify({'success': False, 'error': f'Пользователь {participant_name} уже участвует в этом турнире'}), 400
     
     try:
         participant = Participant(
             tournament_id=tournament_id,
             user_id=user_id,
-            name=data['name'],
+            name=participant_name,
             is_team=data.get('is_team', False)
         )
         db.session.add(participant)
@@ -289,8 +410,130 @@ def add_participant(tournament_id):
         # Создаем расписание матчей для нового участника
         create_schedule_for_participant(tournament_id, participant.id)
         
+        logger.info(f"Успешное добавление участника '{participant_name}' в турнир '{tournament.name}' (Participant ID: {participant.id})")
+        
         return jsonify({'success': True, 'participant_id': participant.id})
     except Exception as e:
+        logger.error(f"Ошибка при добавлении участника '{participant_name}' в турнир '{tournament.name}': {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/tournaments/<int:tournament_id>/register', methods=['POST'])
+@login_required
+def register_for_tournament(tournament_id):
+    """Запись авторизованного пользователя на турнир"""
+    tournament = Tournament.query.get_or_404(tournament_id)
+    
+    logger.info(f"Попытка записи пользователя '{current_user.username}' на турнир '{tournament.name}' (ID: {tournament_id})")
+    
+    # Проверяем, не участвует ли уже пользователь в турнире
+    existing_participant = Participant.query.filter_by(
+        tournament_id=tournament_id,
+        user_id=current_user.id
+    ).first()
+    
+    if existing_participant:
+        logger.warning(f"Пользователь '{current_user.username}' уже участвует в турнире '{tournament.name}'")
+        return jsonify({'success': False, 'error': 'Вы уже участвуете в этом турнире'}), 400
+    
+    try:
+        participant = Participant(
+            tournament_id=tournament_id,
+            user_id=current_user.id,
+            name=current_user.username,
+            is_team=False
+        )
+        db.session.add(participant)
+        db.session.commit()
+        
+        # Создаем расписание матчей для нового участника
+        create_schedule_for_participant(tournament_id, participant.id)
+        
+        logger.info(f"Успешная запись пользователя '{current_user.username}' на турнир '{tournament.name}' (Participant ID: {participant.id})")
+        
+        return jsonify({'success': True, 'participant_id': participant.id})
+    except Exception as e:
+        logger.error(f"Ошибка при записи пользователя '{current_user.username}' на турнир '{tournament.name}': {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/tournaments/<int:tournament_id>/register-and-participate', methods=['POST'])
+def register_and_participate(tournament_id):
+    """Полный процесс: регистрация пользователя + авторизация + запись на турнир"""
+    logger.info(f"ПОЛУЧЕН ЗАПРОС на /api/tournaments/{tournament_id}/register-and-participate")
+    logger.info(f"Request method: {request.method}")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    logger.info(f"Request data: {request.get_data()}")
+    
+    tournament = Tournament.query.get_or_404(tournament_id)
+    data = request.get_json()
+    
+    logger.info(f"Parsed JSON data: {data}")
+    
+    username = data.get('username', 'неизвестно') if data else 'неизвестно'
+    password = data.get('password', '') if data else ''
+    
+    logger.info(f"Начало процесса регистрации и записи на турнир: пользователь '{username}', турнир '{tournament.name}' (ID: {tournament_id})")
+    
+    # Проверяем, не существует ли уже пользователь с таким именем
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        logger.warning(f"Попытка регистрации существующего пользователя '{username}' для участия в турнире")
+        return jsonify({'success': False, 'error': 'Пользователь с таким именем уже существует'}), 400
+    
+    try:
+        # Создаем нового пользователя
+        user = User(
+            username=username,
+            password_hash=password,  # В реальном приложении пароль нужно хешировать
+            role='участник'
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        logger.info(f"Успешная регистрация пользователя '{username}' (ID: {user.id}) для участия в турнире")
+        
+        # Автоматически входим в систему
+        login_user(user)
+        logger.info(f"Автоматический вход пользователя '{username}' после регистрации")
+        
+        # Проверяем, не участвует ли уже пользователь в турнире
+        existing_participant = Participant.query.filter_by(
+            tournament_id=tournament_id,
+            user_id=user.id
+        ).first()
+        
+        if existing_participant:
+            logger.warning(f"Пользователь '{username}' уже участвует в турнире '{tournament.name}'")
+            return jsonify({'success': False, 'error': 'Вы уже участвуете в этом турнире'}), 400
+        
+        # Добавляем пользователя в турнир
+        participant = Participant(
+            tournament_id=tournament_id,
+            user_id=user.id,
+            name=username,
+            is_team=False
+        )
+        db.session.add(participant)
+        db.session.commit()
+        
+        # Создаем расписание матчей для нового участника
+        create_schedule_for_participant(tournament_id, participant.id)
+        
+        logger.info(f"Успешная запись пользователя '{username}' на турнир '{tournament.name}' (Participant ID: {participant.id})")
+        logger.info(f"Полный процесс завершен: регистрация + авторизация + запись на турнир для пользователя '{username}'")
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Вы успешно зарегистрированы, авторизованы и добавлены в турнир!',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role
+            },
+            'participant_id': participant.id
+        })
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Ошибка в процессе регистрации и записи на турнир для пользователя '{username}': {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/tournaments/<int:tournament_id>', methods=['DELETE'])
@@ -316,12 +559,15 @@ def delete_tournament(tournament_id):
 @login_required
 def delete_participant(tournament_id, participant_id):
     if current_user.role not in ['администратор', 'доверенный_участник']:
+        logger.warning(f"Попытка удаления участника без прав пользователем: {current_user.username}")
         return jsonify({'success': False, 'error': 'Недостаточно прав для удаления участника'}), 403
     
     participant = Participant.query.filter_by(
         tournament_id=tournament_id, 
         id=participant_id
     ).first_or_404()
+    
+    logger.info(f"Попытка удаления участника '{participant.name}' из турнира ID: {tournament_id} пользователем: {current_user.username}")
     
     try:
         # Удаляем все матчи с этим участником
@@ -334,8 +580,52 @@ def delete_participant(tournament_id, participant_id):
         db.session.delete(participant)
         db.session.commit()
         
+        logger.info(f"Успешное удаление участника '{participant.name}' из турнира ID: {tournament_id}")
+        
         return jsonify({'success': True, 'message': 'Участник удален'})
     except Exception as e:
+        logger.error(f"Ошибка при удалении участника '{participant.name}': {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/tournaments/<int:tournament_id>/reschedule', methods=['POST'])
+@login_required
+def reschedule_tournament(tournament_id):
+    """Пересчет расписания турнира для устранения конфликтов"""
+    if current_user.role != 'администратор':
+        return jsonify({'success': False, 'error': 'Недостаточно прав для пересчета расписания'}), 403
+    
+    tournament = Tournament.query.get_or_404(tournament_id)
+    
+    try:
+        # Получаем всех участников турнира
+        participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+        
+        # Удаляем все существующие матчи
+        Match.query.filter_by(tournament_id=tournament_id).delete()
+        db.session.commit()
+        
+        # Создаем новое расписание
+        for i, p1 in enumerate(participants):
+            for j, p2 in enumerate(participants):
+                if i < j:  # Избегаем дублирования матчей
+                    match_time = calculate_match_time(tournament, p1.id, p2.id)
+                    
+                    match = Match(
+                        tournament_id=tournament_id,
+                        participant1_id=p1.id,
+                        participant2_id=p2.id,
+                        match_date=match_time['date'],
+                        match_time=match_time['time'],
+                        court_number=match_time['court'],
+                        status='запланирован'
+                    )
+                    db.session.add(match)
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Расписание пересчитано'})
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/matches/<int:match_id>', methods=['DELETE'])
@@ -404,30 +694,43 @@ def calculate_match_time(tournament, p1_id, p2_id):
     
     # Ищем свободное время
     while current_date <= tournament.end_date:
-        for court in range(1, tournament.court_count + 1):
-            # Проверяем, свободна ли площадка в это время
-            if is_court_available(tournament, current_date, current_time, court):
-                # Проверяем, не играет ли участник в это время
-                if not is_participant_busy(tournament, p1_id, current_date, current_time) and \
-                   not is_participant_busy(tournament, p2_id, current_date, current_time):
-                    
-                    # Дополнительная проверка: не играл ли участник в предыдущем временном слоте
-                    if not is_participant_recently_played(tournament, p1_id, current_date, current_time) and \
-                       not is_participant_recently_played(tournament, p2_id, current_date, current_time):
-                        return {
-                            'date': current_date,
-                            'time': current_time,
-                            'court': court
-                        }
+        # Проверяем все временные слоты в течение дня
+        while current_time < datetime.strptime('22:00', '%H:%M').time():
+            # Проверяем все площадки для этого времени
+            for court in range(1, tournament.court_count + 1):
+                # Проверяем, свободна ли площадка в это время
+                if is_court_available(tournament, current_date, current_time, court):
+                    # Проверяем, не играет ли участник в это время
+                    if not is_participant_busy(tournament, p1_id, current_date, current_time) and \
+                       not is_participant_busy(tournament, p2_id, current_date, current_time):
+                        
+                        # Дополнительная проверка: не играл ли участник в предыдущем временном слоте
+                        if not is_participant_recently_played(tournament, p1_id, current_date, current_time) and \
+                           not is_participant_recently_played(tournament, p2_id, current_date, current_time):
+                            
+                            # Дополнительная проверка: не играет ли участник в следующем временном слоте
+                            next_time = add_minutes_to_time(current_time, tournament.match_duration + tournament.break_duration)
+                            if next_time < datetime.strptime('22:00', '%H:%M').time():
+                                if not is_participant_busy(tournament, p1_id, current_date, next_time) and \
+                                   not is_participant_busy(tournament, p2_id, current_date, next_time):
+                                    return {
+                                        'date': current_date,
+                                        'time': current_time,
+                                        'court': court
+                                    }
+                            else:
+                                return {
+                                    'date': current_date,
+                                    'time': current_time,
+                                    'court': court
+                                }
             
             # Переходим к следующему времени
             current_time = add_minutes_to_time(current_time, tournament.match_duration + tournament.break_duration)
-            
-            # Если день закончился, переходим к следующему
-            if current_time >= datetime.strptime('22:00', '%H:%M').time():
-                current_date += timedelta(days=1)
-                current_time = datetime.strptime('09:00', '%H:%M').time()
-                break
+        
+        # Переходим к следующему дню
+        current_date += timedelta(days=1)
+        current_time = datetime.strptime('09:00', '%H:%M').time()
     
     # Если не нашли время, возвращаем последний день
     return {
@@ -444,13 +747,15 @@ def is_court_available(tournament, date, time, court):
         match_date=date
     ).all()
     
+    check_datetime = datetime.combine(date, time)
+    
     for match in matches:
         if match.match_time:
             match_start = datetime.combine(date, match.match_time)
             match_end = match_start + timedelta(minutes=tournament.match_duration)
-            check_time = datetime.combine(date, time)
             
-            if match_start <= check_time <= match_end:
+            # Площадка занята, если проверяемое время попадает в интервал матча
+            if match_start <= check_datetime < match_end:
                 return False
     
     return True
@@ -463,13 +768,16 @@ def is_participant_busy(tournament, participant_id, date, time):
         Match.match_date == date
     ).all()
     
+    check_datetime = datetime.combine(date, time)
+    
     for match in matches:
         if match.match_time:
             match_start = datetime.combine(date, match.match_time)
             match_end = match_start + timedelta(minutes=tournament.match_duration)
-            check_time = datetime.combine(date, time)
             
-            if match_start <= check_time <= match_end:
+            # Проверяем, не пересекается ли время матча с проверяемым временем
+            # Участник занят, если проверяемое время попадает в интервал матча
+            if match_start <= check_datetime < match_end:
                 return True
     
     return False
@@ -504,9 +812,14 @@ def is_participant_recently_played(tournament, participant_id, date, time):
     ).all()
     
     for match in matches:
-        if match.match_time and abs((datetime.combine(prev_date, match.match_time) - 
-                                   datetime.combine(prev_date, prev_time)).total_seconds()) < 300:  # 5 минут погрешности
-            return True
+        if match.match_time:
+            # Проверяем, играл ли участник в предыдущем временном слоте
+            match_datetime = datetime.combine(prev_date, match.match_time)
+            prev_datetime = datetime.combine(prev_date, prev_time)
+            
+            # Проверяем, что матч был в предыдущем временном слоте
+            if abs((match_datetime - prev_datetime).total_seconds()) < 300:  # 5 минут погрешности
+                return True
     
     return False
 
@@ -641,7 +954,7 @@ def tournament_view(tournament_id):
     
     # Создание шахматки и статистики
     chessboard = create_chessboard(participants, matches)
-    statistics = calculate_statistics(participants, matches)
+    statistics = calculate_statistics(participants, matches, tournament)
     
     # Преобразуем участников в словари для JSON сериализации
     participants_data = []
@@ -653,11 +966,27 @@ def tournament_view(tournament_id):
             'user_id': participant.user_id
         })
     
+    # Преобразуем матчи в словари для JSON сериализации
+    matches_data = []
+    for match in matches:
+        matches_data.append({
+            'id': match.id,
+            'participant1_id': match.participant1_id,
+            'participant2_id': match.participant2_id,
+            'score1': match.score1,
+            'score2': match.score2,
+            'match_date': match.match_date.strftime('%Y-%m-%d') if match.match_date else None,
+            'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
+            'court_number': match.court_number,
+            'status': match.status
+        })
+    
     return render_template('tournament.html', 
                          tournament=tournament, 
                          participants=participants, 
                          participants_data=participants_data,
                          matches=matches,
+                         matches_data=matches_data,
                          chessboard=chessboard,
                          statistics=statistics)
 
@@ -665,18 +994,16 @@ def create_chessboard(participants, matches):
     """Создание шахматки для отображения результатов"""
     chessboard = {}
     
-    # Находим ближайшую игру для выделения
+    # Находим две ближайшие игры для выделения
     now = datetime.now()
     upcoming_matches = [m for m in matches if m.status != 'завершен' and m.match_date and m.match_time]
     
+    next_matches = []
     if upcoming_matches:
         # Сортируем по дате и времени
         upcoming_matches.sort(key=lambda m: (m.match_date, m.match_time))
-        next_match = upcoming_matches[0]
-        next_match_datetime = datetime.combine(next_match.match_date, next_match.match_time)
-    else:
-        next_match = None
-        next_match_datetime = None
+        # Берем две ближайшие игры
+        next_matches = upcoming_matches[:2]
     
     for p1 in participants:
         chessboard[p1.id] = {}
@@ -704,7 +1031,14 @@ def create_chessboard(participants, matches):
                     else:
                         # Следующая игра
                         match_datetime = datetime.combine(match.match_date, match.match_time)
-                        is_next = (next_match_datetime and match_datetime == next_match_datetime)
+                        
+                        # Определяем позицию в очереди ближайших игр
+                        match_position = None
+                        for i, next_match in enumerate(next_matches):
+                            next_match_datetime = datetime.combine(next_match.match_date, next_match.match_time)
+                            if match_datetime == next_match_datetime:
+                                match_position = i + 1  # 1 - первая игра, 2 - вторая игра
+                                break
                         
                         chessboard[p1.id][p2.id] = {
                             'type': 'upcoming',
@@ -714,14 +1048,15 @@ def create_chessboard(participants, matches):
                             'date': match.match_date,
                             'time': match.match_time,
                             'court': match.court_number,
-                            'is_next': is_next  # Флаг для выделения ближайшей игры
+                            'is_next': match_position == 1,  # Флаг для выделения первой ближайшей игры
+                            'is_second': match_position == 2  # Флаг для выделения второй ближайшей игры
                         }
                 else:
                     chessboard[p1.id][p2.id] = {'type': 'empty', 'value': ''}
     
     return chessboard
 
-def calculate_statistics(participants, matches):
+def calculate_statistics(participants, matches, tournament):
     """Расчет статистики участников"""
     stats = {}
     for participant in participants:
@@ -729,6 +1064,7 @@ def calculate_statistics(participants, matches):
             'games': 0,
             'wins': 0,
             'losses': 0,
+            'draws': 0,
             'points': 0,
             'goal_difference': 0
         }
@@ -745,13 +1081,19 @@ def calculate_statistics(participants, matches):
             if match.score1 > match.score2:
                 stats[p1_id]['wins'] += 1
                 stats[p2_id]['losses'] += 1
-                stats[p1_id]['points'] += 3
-                stats[p2_id]['points'] += 0
-            else:
+                stats[p1_id]['points'] += tournament.points_win
+                stats[p2_id]['points'] += tournament.points_loss
+            elif match.score1 < match.score2:
                 stats[p2_id]['wins'] += 1
                 stats[p1_id]['losses'] += 1
-                stats[p2_id]['points'] += 3
-                stats[p1_id]['points'] += 0
+                stats[p2_id]['points'] += tournament.points_win
+                stats[p1_id]['points'] += tournament.points_loss
+            else:
+                # Ничья
+                stats[p1_id]['draws'] += 1
+                stats[p2_id]['draws'] += 1
+                stats[p1_id]['points'] += tournament.points_draw
+                stats[p2_id]['points'] += tournament.points_draw
             
             stats[p1_id]['goal_difference'] += match.score1 - match.score2
             stats[p2_id]['goal_difference'] += match.score2 - match.score1

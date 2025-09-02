@@ -179,10 +179,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Пользователь успешно создан! Теперь вы можете войти в систему.');
+                        alert(data.message);
                         bootstrap.Modal.getInstance(document.getElementById('registerUserModal')).hide();
-                        // Перенаправляем на страницу входа
-                        window.location.href = '/login';
+                        // Обновляем страницу для отображения авторизованного состояния
+                        window.location.reload();
                     } else {
                         alert('Ошибка: ' + data.error);
                     }
