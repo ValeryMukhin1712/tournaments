@@ -70,6 +70,7 @@ class Match(db.Model):
     match_date = db.Column(db.Date)
     match_time = db.Column(db.Time)
     court_number = db.Column(db.Integer)  # номер площадки
+    match_number = db.Column(db.Integer)  # последовательный номер игры
     status = db.Column(db.String(20), default='запланирован')  # запланирован, в_процессе, завершен
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -590,42 +591,58 @@ def delete_participant(tournament_id, participant_id):
 @app.route('/api/tournaments/<int:tournament_id>/reschedule', methods=['POST'])
 @login_required
 def reschedule_tournament(tournament_id):
-    """Пересчет расписания турнира для устранения конфликтов"""
+    """Пересчет расписания турнира по методу Round-robin"""
     if current_user.role != 'администратор':
         return jsonify({'success': False, 'error': 'Недостаточно прав для пересчета расписания'}), 403
-    
-    tournament = Tournament.query.get_or_404(tournament_id)
-    
+
     try:
-        # Получаем всех участников турнира
-        participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-        
-        # Удаляем все существующие матчи
-        Match.query.filter_by(tournament_id=tournament_id).delete()
-        db.session.commit()
-        
-        # Создаем новое расписание с улучшенным алгоритмом
-        for i, p1 in enumerate(participants):
-            for j, p2 in enumerate(participants):
-                if i < j:  # Избегаем дублирования матчей
-                    match_time = calculate_match_time_balanced(tournament, p1.id, p2.id)
-                    
-                    match = Match(
-                        tournament_id=tournament_id,
-                        participant1_id=p1.id,
-                        participant2_id=p2.id,
-                        match_date=match_time['date'],
-                        match_time=match_time['time'],
-                        court_number=match_time['court'],
-                        status='запланирован'
-                    )
-                    db.session.add(match)
-        
-        db.session.commit()
-        
-        return jsonify({'success': True, 'message': 'Расписание пересчитано'})
+        success = create_round_robin_schedule(tournament_id)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Расписание пересчитано по методу Round-robin'})
+        else:
+            return jsonify({'success': False, 'error': 'Ошибка при создании расписания'})
     except Exception as e:
         db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/tournaments/<int:tournament_id>/create-missing-matches', methods=['POST'])
+@login_required
+def create_missing_matches(tournament_id):
+    """Создание всех недостающих матчей для турнира"""
+    if current_user.role != 'администратор':
+        return jsonify({'success': False, 'error': 'Недостаточно прав для создания матчей'}), 403
+
+    try:
+        success = create_all_missing_matches(tournament_id)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Недостающие матчи созданы'})
+        else:
+            return jsonify({'success': False, 'error': 'Ошибка при создании матчей'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/tournaments/<int:tournament_id>/debug-chessboard', methods=['POST'])
+@login_required
+def debug_chessboard(tournament_id):
+    """Создание отладочного файла для турнирной таблицы"""
+    if current_user.role != 'администратор':
+        return jsonify({'success': False, 'error': 'Недостаточно прав для отладки'}), 403
+
+    try:
+        tournament = Tournament.query.get_or_404(tournament_id)
+        participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
+        matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        
+        success = debug_chessboard_to_file(participants, matches, tournament_id)
+        
+        if success:
+            return jsonify({'success': True, 'message': f'Отладочный файл создан: debug_chessboard_{tournament_id}.txt'})
+        else:
+            return jsonify({'success': False, 'error': 'Ошибка при создании отладочного файла'})
+    except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/matches/<int:match_id>', methods=['DELETE'])
@@ -644,6 +661,24 @@ def delete_match(match_id):
         return jsonify({'success': True, 'message': 'Матч удален'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
+
+def get_next_match_number(tournament_id):
+    """Получение следующего номера матча для турнира"""
+    last_match = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_number.desc()).first()
+    if last_match and last_match.match_number:
+        return last_match.match_number + 1
+    return 1
+
+def renumber_matches_chronologically(tournament_id):
+    """Пересчет номеров матчей в хронологическом порядке"""
+    all_matches = Match.query.filter_by(tournament_id=tournament_id).order_by(
+        Match.match_date, Match.match_time, Match.court_number
+    ).all()
+    
+    for match_number, match in enumerate(all_matches, 1):
+        match.match_number = match_number
+    
+    db.session.commit()
 
 def create_schedule_for_participant(tournament_id, participant_id):
     """Создание расписания матчей для нового участника"""
@@ -668,7 +703,7 @@ def create_schedule_for_participant(tournament_id, participant_id):
             
             if not match_exists:
                 # Определяем время матча с учетом нагрузки
-                match_time = calculate_match_time_balanced(tournament, participant_id, other_participant.id)
+                match_time = calculate_match_time_new(tournament, participant_id, other_participant.id)
                 
                 match = Match(
                     tournament_id=tournament_id,
@@ -682,6 +717,797 @@ def create_schedule_for_participant(tournament_id, participant_id):
                 db.session.add(match)
     
     db.session.commit()
+    
+    # Пересчитываем номера матчей в хронологическом порядке
+    renumber_matches_chronologically(tournament_id)
+
+def calculate_match_time_new(tournament, p1_id, p2_id):
+    """Алгоритм Round-robin для равномерного распределения матчей"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Ищем первый подходящий слот
+    for date, time in time_slots:
+        # Проверяем, не играют ли участники в это время
+        p1_busy = any(
+            m.match_date == date and m.match_time == time and 
+            (m.participant1_id == p1_id or m.participant2_id == p1_id)
+            for m in matches
+        )
+        p2_busy = any(
+            m.match_date == date and m.match_time == time and 
+            (m.participant1_id == p2_id or m.participant2_id == p2_id)
+            for m in matches
+        )
+        
+        if p1_busy or p2_busy:
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            court_busy = any(
+                m.match_date == date and m.match_time == time and m.court_number == court
+                for m in matches
+            )
+            if not court_busy:
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback - если не нашли свободный слот, берем последний
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def create_all_missing_matches(tournament_id):
+    """Создание всех недостающих матчей для турнира"""
+    tournament = Tournament.query.get(tournament_id)
+    if not tournament:
+        return False
+    
+    # Получаем всех участников
+    participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+    if len(participants) < 2:
+        return False
+    
+    # Получаем существующие матчи
+    existing_matches = Match.query.filter_by(tournament_id=tournament_id).all()
+    
+    # Создаем все возможные пары участников
+    matches_created = 0
+    for i, p1 in enumerate(participants):
+        for j, p2 in enumerate(participants):
+            if i < j:  # Избегаем дублирования (1vs2 и 2vs1)
+                # Проверяем, не существует ли уже матч
+                match_exists = any(
+                    (m.participant1_id == p1.id and m.participant2_id == p2.id) or
+                    (m.participant1_id == p2.id and m.participant2_id == p1.id)
+                    for m in existing_matches
+                )
+                
+                if not match_exists:
+                    # Определяем время матча
+                    match_time = calculate_match_time_new(tournament, p1.id, p2.id)
+                    
+                    match = Match(
+                        tournament_id=tournament_id,
+                        participant1_id=p1.id,
+                        participant2_id=p2.id,
+                        match_date=match_time['date'],
+                        match_time=match_time['time'],
+                        court_number=match_time['court'],
+                        status='запланирован'
+                    )
+                    db.session.add(match)
+                    matches_created += 1
+                    logger.info(f"Создан матч: {p1.name} vs {p2.name}")
+    
+    db.session.commit()
+    
+    # Пересчитываем номера матчей в хронологическом порядке
+    renumber_matches_chronologically(tournament_id)
+    
+    logger.info(f"Создано {matches_created} новых матчей для турнира {tournament_id}")
+    return matches_created > 0
+
+def create_round_robin_schedule(tournament_id):
+    """Создание расписания по методу круговой таблицы (Round-robin)"""
+    tournament = Tournament.query.get(tournament_id)
+    if not tournament:
+        return False
+    
+    # Получаем всех участников
+    participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+    if len(participants) < 2:
+        return False
+    
+    # Удаляем существующие матчи
+    Match.query.filter_by(tournament_id=tournament_id).delete()
+    db.session.commit()
+    
+    # Создаем список ID участников
+    participant_ids = [p.id for p in participants]
+    n = len(participant_ids)
+    
+    # Если нечетное количество участников, добавляем "bye" (пропуск)
+    if n % 2 == 1:
+        participant_ids.append(None)  # None означает "bye"
+        n += 1
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    slot_index = 0
+    
+    # Round-robin алгоритм
+    for round_num in range(n - 1):
+        # Создаем пары для текущего раунда
+        for i in range(n // 2):
+            p1_id = participant_ids[i]
+            p2_id = participant_ids[n - 1 - i]
+            
+            # Пропускаем "bye"
+            if p1_id is None or p2_id is None:
+                continue
+            
+            # Находим свободный временной слот
+            while slot_index < len(time_slots):
+                date, time = time_slots[slot_index]
+                
+                # Проверяем, не заняты ли участники в это время
+                p1_busy = Match.query.filter_by(
+                    tournament_id=tournament_id
+                ).filter(
+                    (Match.participant1_id == p1_id) | (Match.participant2_id == p1_id),
+                    Match.match_date == date,
+                    Match.match_time == time
+                ).first()
+                
+                p2_busy = Match.query.filter_by(
+                    tournament_id=tournament_id
+                ).filter(
+                    (Match.participant1_id == p2_id) | (Match.participant2_id == p2_id),
+                    Match.match_date == date,
+                    Match.match_time == time
+                ).first()
+                
+                if not p1_busy and not p2_busy:
+                    # Находим свободную площадку
+                    for court in range(1, tournament.court_count + 1):
+                        court_busy = Match.query.filter_by(
+                            tournament_id=tournament_id,
+                            match_date=date,
+                            match_time=time,
+                            court_number=court
+                        ).first()
+                        
+                        if not court_busy:
+                            # Создаем матч
+                            match = Match(
+                                tournament_id=tournament_id,
+                                participant1_id=p1_id,
+                                participant2_id=p2_id,
+                                match_date=date,
+                                match_time=time,
+                                court_number=court,
+                                status='запланирован'
+                            )
+                            db.session.add(match)
+                            break
+                    break
+                slot_index += 1
+        
+        # Поворачиваем участников (кроме первого)
+        if n > 2:
+            participant_ids = [participant_ids[0]] + [participant_ids[-1]] + participant_ids[1:-1]
+    
+    db.session.commit()
+    
+    # Пересчитываем номера матчей в хронологическом порядке
+    renumber_matches_chronologically(tournament_id)
+    
+    return True
+
+def calculate_match_time_simple(tournament, p1_id, p2_id):
+    """Простой алгоритм расчета времени матча с равномерной загрузкой"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_round_robin(tournament, p1_id, p2_id):
+    """Алгоритм Round Robin для равномерного распределения матчей"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_balanced(tournament, p1_id, p2_id):
+    """Расчет времени матча с учетом равномерной загрузки участников"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_sequential(tournament, p1_id, p2_id):
+    """Последовательный алгоритм расчета времени матча"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_fixed(tournament, p1_id, p2_id):
+    """Фиксированный алгоритм расчета времени матча с учетом уже запланированных матчей"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_round_robin(tournament, p1_id, p2_id):
+    """Алгоритм Round Robin для равномерного распределения матчей"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_round_robin(tournament, p1_id, p2_id):
+    """Алгоритм Round Robin для равномерного распределения матчей"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def calculate_match_time_round_robin(tournament, p1_id, p2_id):
+    """Алгоритм Round Robin для равномерного распределения матчей"""
+    # Получаем все матчи турнира
+    matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    
+    # Подсчитываем загрузку каждого участника
+    participant_load = {}
+    for match in matches:
+        if match.participant1_id not in participant_load:
+            participant_load[match.participant1_id] = 0
+        if match.participant2_id not in participant_load:
+            participant_load[match.participant2_id] = 0
+        participant_load[match.participant1_id] += 1
+        participant_load[match.participant2_id] += 1
+    
+    # Инициализируем загрузку для новых участников
+    if p1_id not in participant_load:
+        participant_load[p1_id] = 0
+    if p2_id not in participant_load:
+        participant_load[p2_id] = 0
+    
+    # Генерируем все возможные временные слоты
+    time_slots = []
+    temp_date = tournament.start_date
+    while temp_date <= tournament.end_date:
+        temp_time = datetime.strptime('09:00', '%H:%M').time()
+        while temp_time < datetime.strptime('22:00', '%H:%M').time():
+            time_slots.append((temp_date, temp_time))
+            temp_time = add_minutes_to_time(temp_time, tournament.match_duration + tournament.break_duration)
+        temp_date += timedelta(days=1)
+    
+    # Сортируем слоты по приоритету (участники с меньшей нагрузкой получают приоритет)
+    def get_slot_priority(date, time):
+        p1_load = participant_load.get(p1_id, 0)
+        p2_load = participant_load.get(p2_id, 0)
+        return p1_load + p2_load
+    
+    time_slots.sort(key=lambda slot: get_slot_priority(slot[0], slot[1]))
+    
+    # Ищем подходящий слот
+    for date, time in time_slots:
+        # Проверяем конфликты участников
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        # Проверяем, не играл ли участник недавно
+        if is_participant_recently_played(tournament, p1_id, date, time) or \
+           is_participant_recently_played(tournament, p2_id, date, time):
+            continue
+        
+        # Ищем свободную площадку
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Если не нашли идеальный слот, ищем любой доступный
+    for date, time in time_slots:
+        has_conflict, _ = check_participant_conflicts(tournament, p1_id, p2_id, date, time)
+        if has_conflict:
+            continue
+        
+        for court in range(1, tournament.court_count + 1):
+            if is_court_available(tournament, date, time, court):
+                return {'date': date, 'time': time, 'court': court}
+    
+    # Fallback
+    if time_slots:
+        last_slot = time_slots[-1]
+        return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
+    
+    return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
 
 def calculate_match_time_balanced(tournament, p1_id, p2_id):
     """Расчет времени матча с учетом равномерной загрузки участников"""
@@ -1119,6 +1945,9 @@ def create_match():
             db.session.add(log)
             db.session.commit()
         
+        # Пересчитываем номера матчей в хронологическом порядке
+        renumber_matches_chronologically(data['tournament_id'])
+        
         return jsonify({'success': True, 'match_id': match.id})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -1205,16 +2034,19 @@ def get_match(match_id):
 @app.route('/tournament/<int:tournament_id>')
 def tournament_view(tournament_id):
     tournament = Tournament.query.get_or_404(tournament_id)
-    participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+    participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
     matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
     
     # Создание шахматки и статистики
     chessboard = create_chessboard(participants, matches)
     statistics = calculate_statistics(participants, matches, tournament)
     
-    # Добавляем места участников на основе очков (но сохраняем порядок добавления)
+    # Записываем отладочную информацию в файл
+    debug_chessboard_to_file(participants, matches, tournament_id)
+    
+    # Добавляем места участников на основе очков (сохраняем сортировку по имени)
     participants_with_stats = []
-    for participant in participants:
+    for participant in participants:  # participants уже отсортированы по имени
         participant_stats = statistics.get(participant.id, {
             'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
         })
@@ -1293,9 +2125,87 @@ def tournament_view(tournament_id):
                          statistics=statistics,
                          next_match_ids=next_match_ids)
 
+def debug_chessboard_to_file(participants, matches, tournament_id):
+    """Запись данных турнирной таблицы в файл для отладки"""
+    try:
+        with open(f'debug_chessboard_{tournament_id}.txt', 'w', encoding='utf-8') as f:
+            f.write(f"=== ОТЛАДКА ТУРНИРНОЙ ТАБЛИЦЫ (Турнир ID: {tournament_id}) ===\n\n")
+            
+            # Информация об участниках
+            f.write("УЧАСТНИКИ:\n")
+            for i, p in enumerate(participants, 1):
+                f.write(f"{i}. ID: {p.id}, Имя: '{p.name}', User ID: {p.user_id}\n")
+            f.write(f"Всего участников: {len(participants)}\n\n")
+            
+            # Информация о матчах
+            f.write("МАТЧИ:\n")
+            for i, m in enumerate(matches, 1):
+                f.write(f"{i}. ID: {m.id}, Участники: {m.participant1_id} vs {m.participant2_id}, "
+                       f"Статус: {m.status}, Дата: {m.match_date}, Время: {m.match_time}, "
+                       f"Площадка: {m.court_number}, Счет: {m.score1}:{m.score2}\n")
+            f.write(f"Всего матчей: {len(matches)}\n\n")
+            
+            # Создаем шахматку для анализа
+            chessboard = {}
+            sorted_participants = sorted(participants, key=lambda p: p.name)
+            
+            f.write("СОЗДАНИЕ ШАХМАТКИ:\n")
+            for p1 in sorted_participants:
+                chessboard[p1.id] = {}
+                f.write(f"\nСтрока для участника {p1.id} ('{p1.name}'):\n")
+                
+                for p2 in sorted_participants:
+                    if p1.id == p2.id:
+                        chessboard[p1.id][p2.id] = {'type': 'diagonal', 'value': '—'}
+                        f.write(f"  [{p1.id}][{p2.id}] = диагональ (—)\n")
+                    else:
+                        # Поиск матча между участниками
+                        match = next((m for m in matches 
+                                    if (m.participant1_id == p1.id and m.participant2_id == p2.id) or
+                                       (m.participant1_id == p2.id and m.participant2_id == p1.id)), None)
+                        
+                        if match:
+                            if match.status == 'завершен':
+                                if match.participant1_id == p1.id:
+                                    score = f"{match.score1}:{match.score2}"
+                                else:
+                                    score = f"{match.score2}:{match.score1}"
+                                chessboard[p1.id][p2.id] = {
+                                    'type': 'result',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'editable': True
+                                }
+                                f.write(f"  [{p1.id}][{p2.id}] = результат ({score}) - матч {match.id}\n")
+                            else:
+                                chessboard[p1.id][p2.id] = {
+                                    'type': 'upcoming',
+                                    'value': f"{match.match_date.strftime('%d.%m')} {match.match_time.strftime('%H:%M')}",
+                                    'match_id': match.id,
+                                    'editable': False,
+                                    'date': match.match_date,
+                                    'time': match.match_time,
+                                    'court': match.court_number
+                                }
+                                f.write(f"  [{p1.id}][{p2.id}] = запланирован ({match.match_date.strftime('%d.%m')} {match.match_time.strftime('%H:%M')}) - матч {match.id}\n")
+                        else:
+                            chessboard[p1.id][p2.id] = {'type': 'empty', 'value': ''}
+                            f.write(f"  [{p1.id}][{p2.id}] = ПУСТОЙ (матч не найден!)\n")
+            
+            f.write(f"\n=== КОНЕЦ ОТЛАДКИ ===\n")
+            
+        logger.info(f"Данные турнирной таблицы записаны в файл debug_chessboard_{tournament_id}.txt")
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка при записи отладочного файла: {str(e)}")
+        return False
+
 def create_chessboard(participants, matches):
     """Создание шахматки для отображения результатов"""
     chessboard = {}
+    
+    # Сортируем участников по имени для консистентности
+    sorted_participants = sorted(participants, key=lambda p: p.name)
     
     # Находим ближайшие игры для каждой площадки отдельно
     now = datetime.now()
@@ -1317,9 +2227,9 @@ def create_chessboard(participants, matches):
         # Берем первые 2 матча для каждой площадки
         next_matches.extend(court_matches[:2])
     
-    for p1 in participants:
+    for p1 in sorted_participants:
         chessboard[p1.id] = {}
-        for p2 in participants:
+        for p2 in sorted_participants:
             if p1.id == p2.id:
                 chessboard[p1.id][p2.id] = {'type': 'diagonal', 'value': '—'}
             else:

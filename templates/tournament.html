@@ -29,6 +29,12 @@
                      </button>
                      {% endif %}
                      {% if current_user.role == 'администратор' %}
+                     <button class="btn btn-info me-2" onclick="createMissingMatches()">
+                         <i class="fas fa-plus-circle me-2"></i>Создать недостающие матчи
+                     </button>
+                     <button class="btn btn-secondary me-2" onclick="debugChessboard()">
+                         <i class="fas fa-bug me-2"></i>Отладка таблицы
+                     </button>
                      <button class="btn btn-warning" onclick="rescheduleTournament()">
                          <i class="fas fa-sync-alt me-2"></i>Пересчитать расписание
                      </button>
@@ -214,6 +220,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th>№</th>
                                 <th>Дата</th>
                                 <th>Время</th>
                                 <th>Площадка</th>
@@ -261,6 +268,7 @@
                                     {% endfor %}
                                 {% endif %}
                                 <tr class="{% if is_first_next %}table-warning{% elif is_second_next %}table-success{% endif %}">
+                                    <td class="text-center fw-bold">{{ match.match_number if match.match_number else '—' }}</td>
                                     <td>{{ match.match_date.strftime('%d.%m.%Y') if match.match_date else '—' }}</td>
                                     <td>{{ match.match_time.strftime('%H:%M') if match.match_time else '—' }}</td>
                                     <td>
@@ -327,7 +335,7 @@
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">
+                                    <td colspan="9" class="text-center text-muted py-4">
                                         <i class="fas fa-calendar-times fa-2x mb-2"></i>
                                         <p class="mb-0">Расписание матчей пока не составлено</p>
                                     </td>
@@ -1051,6 +1059,53 @@ function deleteMatch(matchId) {
             alert('Ошибка при удалении матча: ' + error);
         });
     }
+}
+
+// Функция создания недостающих матчей
+function createMissingMatches() {
+    if (confirm('Создать все недостающие матчи для турнира? Это добавит матчи между участниками, которые еще не играли друг с другом.')) {
+        fetch(`/api/tournaments/{{ tournament.id }}/create-missing-matches`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при создании матчей');
+        });
+    }
+}
+
+// Функция отладки турнирной таблицы
+function debugChessboard() {
+    fetch(`/api/tournaments/{{ tournament.id }}/debug-chessboard`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при создании отладочного файла');
+    });
 }
 
 // Функция пересчета расписания
