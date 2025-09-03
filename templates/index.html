@@ -94,7 +94,7 @@
                 <form id="createTournamentForm">
                     <div class="mb-3">
                         <label for="tournamentName" class="form-label">Название турнира</label>
-                        <input type="text" class="form-control" id="tournamentName" required>
+                        <input type="text" class="form-control" id="tournamentName" value="Новый турнир" required>
                     </div>
                     <div class="mb-3">
                         <label for="sportType" class="form-label">Вид спорта</label>
@@ -138,13 +138,13 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="matchDuration" class="form-label">Время матча (мин)</label>
-                                <input type="number" class="form-control" id="matchDuration" value="60" min="15" max="180">
+                                <input type="number" class="form-control" id="matchDuration" value="15" min="5" max="180">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="breakDuration" class="form-label">Перерыв (мин)</label>
-                                <input type="number" class="form-control" id="breakDuration" value="15" min="5" max="60">
+                                <input type="number" class="form-control" id="breakDuration" value="5" min="5" max="60">
                             </div>
                         </div>
                     </div>
@@ -157,7 +157,7 @@
                         <div class="col-md-3">
                             <div class="mb-3">
                                 <label for="pointsWin" class="form-label">Очки за победу</label>
-                                <input type="number" class="form-control" id="pointsWin" value="3" min="0" max="10">
+                                <input type="number" class="form-control" id="pointsWin" value="1" min="0" max="10">
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -299,6 +299,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 default:
                     pointsToWinInput.value = 21; // значение по умолчанию
+            }
+            
+            // Автоматически устанавливаем время игры в зависимости от вида спорта
+            const matchDurationInput = document.getElementById('matchDuration');
+            const breakDurationInput = document.getElementById('breakDuration');
+            
+            if (matchDurationInput && breakDurationInput) {
+                switch(selectedSport) {
+                    case 'настольный теннис':
+                        matchDurationInput.value = 10;
+                        break;
+                    case 'бадминтон':
+                        matchDurationInput.value = 20;
+                        break;
+                    case 'волейбол':
+                        matchDurationInput.value = 30;
+                        break;
+                    case 'другой':
+                        matchDurationInput.value = 15;
+                        break;
+                    default:
+                        matchDurationInput.value = 15;
+                        break;
+                }
+                // Перерыв по умолчанию 5 минут для всех видов спорта
+                breakDurationInput.value = 5;
             }
         });
     }
