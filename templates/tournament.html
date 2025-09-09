@@ -29,9 +29,11 @@
                      </button>
                      {% endif %}
                      {% if current_user.role == 'администратор' %}
+                     {% if has_missing_matches %}
                      <button class="btn btn-info me-2" onclick="createMissingMatches()">
                          <i class="fas fa-plus-circle me-2"></i>Создать недостающие матчи
                      </button>
+                     {% endif %}
                      <button class="btn btn-secondary me-2" onclick="debugChessboard()">
                          <i class="fas fa-bug me-2"></i>Отладка таблицы
                      </button>
@@ -683,7 +685,11 @@ function editMatchResult(matchId, p1Name, p2Name) {
     document.getElementById('editParticipant2Name').value = p2Name;
     
     // Получаем текущие данные матча
-    fetch(`/api/matches/${matchId}`)
+    fetch(`/api/matches/${matchId}`, {
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -716,7 +722,11 @@ function editMatchResult(matchId, p1Name, p2Name) {
 function editMatch(matchId) {
     // Редактирование матча из расписания
     // Получаем данные матча для отображения имен участников
-    fetch(`/api/matches/${matchId}`)
+    fetch(`/api/matches/${matchId}`, {
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -759,6 +769,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
                 },
                 body: JSON.stringify(formData)
             })
@@ -793,6 +804,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
                 },
                 body: JSON.stringify(formData)
             })
@@ -845,7 +857,11 @@ function initializeUserSelection() {
 
 // Загрузка списка пользователей
 function loadUsers() {
-    fetch('/api/users?tournament_id={{ tournament.id }}')
+        fetch('/api/users?tournament_id={{ tournament.id }}', {
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -958,6 +974,7 @@ function addSelectedUsers() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify(formData)
         })
@@ -1019,6 +1036,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
                 },
                 body: JSON.stringify(formData)
             })
@@ -1044,6 +1062,7 @@ function deleteMatch(matchId) {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             }
         })
         .then(response => response.json())
@@ -1068,6 +1087,7 @@ function createMissingMatches() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             }
         })
         .then(response => response.json())
@@ -1092,6 +1112,7 @@ function debugChessboard() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
         }
     })
     .then(response => response.json())
@@ -1115,6 +1136,7 @@ function rescheduleTournament() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             }
         })
         .then(response => response.json())
@@ -1139,6 +1161,7 @@ function deleteParticipant(participantId, participantName) {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             }
         })
         .then(response => response.json())
@@ -1180,6 +1203,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
                 },
                 body: JSON.stringify(formData)
             })

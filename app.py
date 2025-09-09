@@ -1,14 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_wtf.csrf import CSRFProtect
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
 import logging
+import secrets
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Инициализация CSRF-защиты
+csrf = CSRFProtect(app)
+
+# Форма для входа
+class LoginForm(FlaskForm):
+    username = StringField('Имя пользователя', validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    submit = SubmitField('Войти')
 
 # Настройка логирования
 logging.basicConfig(
@@ -109,7 +124,7 @@ with app.app_context():
     # Создание администратора по умолчанию
     admin = User.query.filter_by(username='admin').first()
     if not admin:
-        admin = User(username='admin', password_hash='admin123', role='администратор')
+        admin = User(username='admin', password_hash=generate_password_hash('admin123'), role='администратор')
         db.session.add(admin)
         db.session.commit()
 
@@ -134,14 +149,15 @@ def users_list():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+    form = LoginForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         
         logger.info(f"Попытка входа пользователя: {username}")
         
         user = User.query.filter_by(username=username).first()
-        if user and user.password_hash == password:  # Простая проверка пароля
+        if user and check_password_hash(user.password_hash, password):  # Безопасная проверка пароля
             login_user(user)
             logger.info(f"Успешный вход пользователя: {username} (ID: {user.id}, Роль: {user.role})")
             flash('Вы успешно вошли в систему!', 'success')
@@ -150,7 +166,7 @@ def login():
             logger.warning(f"Неудачная попытка входа пользователя: {username}")
             flash('Неверное имя пользователя или пароль', 'error')
     
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 @app.route('/logout')
 @login_required
@@ -194,7 +210,7 @@ def create_user():
         
         user = User(
             username=data['username'],
-            password_hash=data['password'],  # В реальном приложении пароль нужно хешировать
+            password_hash=generate_password_hash(data['password']),  # Безопасное хеширование пароля
             role=role
         )
         db.session.add(user)
@@ -484,7 +500,7 @@ def register_and_participate(tournament_id):
         # Создаем нового пользователя
         user = User(
             username=username,
-            password_hash=password,  # В реальном приложении пароль нужно хешировать
+            password_hash=generate_password_hash(password),  # Безопасное хеширование пароля
             role='участник'
         )
         db.session.add(user)
@@ -614,7 +630,7 @@ def create_missing_matches(tournament_id):
         return jsonify({'success': False, 'error': 'Недостаточно прав для создания матчей'}), 403
 
     try:
-        success = create_all_missing_matches(tournament_id)
+        success = check_and_create_missing_matches(tournament_id)
 
         if success:
             return jsonify({'success': True, 'message': 'Недостающие матчи созданы'})
@@ -682,44 +698,8 @@ def renumber_matches_chronologically(tournament_id):
 
 def create_schedule_for_participant(tournament_id, participant_id):
     """Создание расписания матчей для нового участника"""
-    tournament = Tournament.query.get(tournament_id)
-    participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-    
-    if len(participants) < 2:
-        return
-    
-    # Получаем существующие матчи
-    existing_matches = Match.query.filter_by(tournament_id=tournament_id).all()
-    
-    # Создаем матчи с новым участником
-    for other_participant in participants:
-        if other_participant.id != participant_id:
-            # Проверяем, не существует ли уже матч
-            match_exists = any(
-                (m.participant1_id == participant_id and m.participant2_id == other_participant.id) or
-                (m.participant1_id == other_participant.id and m.participant2_id == participant_id)
-                for m in existing_matches
-            )
-            
-            if not match_exists:
-                # Определяем время матча с учетом нагрузки
-                match_time = calculate_match_time_new(tournament, participant_id, other_participant.id)
-                
-                match = Match(
-                    tournament_id=tournament_id,
-                    participant1_id=participant_id,
-                    participant2_id=other_participant.id,
-                    match_date=match_time['date'],
-                    match_time=match_time['time'],
-                    court_number=match_time['court'],
-                    status='запланирован'
-                )
-                db.session.add(match)
-    
-    db.session.commit()
-    
-    # Пересчитываем номера матчей в хронологическом порядке
-    renumber_matches_chronologically(tournament_id)
+    # Используем автоматическую проверку и создание недостающих матчей
+    check_and_create_missing_matches(tournament_id)
 
 def calculate_match_time_new(tournament, p1_id, p2_id):
     """Алгоритм Round-robin для равномерного распределения матчей"""
@@ -768,6 +748,53 @@ def calculate_match_time_new(tournament, p1_id, p2_id):
         return {'date': last_slot[0], 'time': last_slot[1], 'court': 1}
     
     return {'date': tournament.start_date, 'time': datetime.strptime('09:00', '%H:%M').time(), 'court': 1}
+
+def check_and_create_missing_matches(tournament_id):
+    """Проверка и автоматическое создание недостающих матчей"""
+    tournament = Tournament.query.get(tournament_id)
+    if not tournament:
+        return False
+    
+    # Получаем всех участников
+    participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+    n = len(participants)
+    if n < 2:
+        return False
+    
+    # Вычисляем необходимое количество матчей для кругового турнира
+    required_matches = n * (n - 1) // 2
+    
+    # Получаем количество существующих матчей
+    existing_matches_count = Match.query.filter_by(tournament_id=tournament_id).count()
+    
+    logger.info(f"Турнир {tournament_id}: участников={n}, требуется матчей={required_matches}, существует={existing_matches_count}")
+    
+    # Если матчей недостаточно, создаем недостающие
+    if existing_matches_count < required_matches:
+        logger.info(f"Создаем недостающие матчи: {required_matches - existing_matches_count}")
+        return create_all_missing_matches(tournament_id)
+    
+    return True
+
+def has_missing_matches(tournament_id):
+    """Проверка, есть ли недостающие матчи в турнире"""
+    tournament = Tournament.query.get(tournament_id)
+    if not tournament:
+        return False
+    
+    # Получаем всех участников
+    participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+    n = len(participants)
+    if n < 2:
+        return False
+    
+    # Вычисляем необходимое количество матчей для кругового турнира
+    required_matches = n * (n - 1) // 2
+    
+    # Получаем количество существующих матчей
+    existing_matches_count = Match.query.filter_by(tournament_id=tournament_id).count()
+    
+    return existing_matches_count < required_matches
 
 def create_all_missing_matches(tournament_id):
     """Создание всех недостающих матчей для турнира"""
@@ -2037,6 +2064,12 @@ def tournament_view(tournament_id):
     participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
     matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
     
+    # Проверяем и создаем недостающие матчи
+    check_and_create_missing_matches(tournament_id)
+    
+    # Обновляем данные после возможного создания матчей
+    matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+    
     # Создание шахматки и статистики
     chessboard = create_chessboard(participants, matches)
     statistics = calculate_statistics(participants, matches, tournament)
@@ -2114,6 +2147,9 @@ def tournament_view(tournament_id):
             'status': match.status
         })
     
+    # Проверяем, есть ли недостающие матчи
+    has_missing = has_missing_matches(tournament_id)
+    
     return render_template('tournament.html', 
                          tournament=tournament, 
                          participants=participants, 
@@ -2123,7 +2159,8 @@ def tournament_view(tournament_id):
                          matches_data=matches_data,
                          chessboard=chessboard,
                          statistics=statistics,
-                         next_match_ids=next_match_ids)
+                         next_match_ids=next_match_ids,
+                         has_missing_matches=has_missing)
 
 def debug_chessboard_to_file(participants, matches, tournament_id):
     """Запись данных турнирной таблицы в файл для отладки"""
