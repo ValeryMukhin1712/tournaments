@@ -36,7 +36,7 @@
                     </small>
                 </p>
                                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('tournament_view', tournament_id=tournament.id) }}" class="btn btn-outline-primary btn-sm">
+                        <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-eye me-1"></i>Просмотр
                         </a>
                         
@@ -369,17 +369,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Турнир успешно создан!');
-                    location.reload();
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
                 } else {
-                    alert('Ошибка: ' + data.error);
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Ошибка сервера: ' + response.status);
+                    });
                 }
             })
+            .then(data => {
+                alert('Турнир успешно создан!');
+                location.reload();
+            })
             .catch(error => {
-                alert('Ошибка при создании турнира: ' + error);
+                console.error('Ошибка при создании турнира:', error);
+                alert('Ошибка при создании турнира: ' + error.message);
             });
         });
     }
