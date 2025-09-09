@@ -41,77 +41,17 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Модели базы данных
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(120), nullable=False)
-    role = db.Column(db.String(20), default='участник')  # участник, доверенный_участник, администратор
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+# Импорт моделей из модулей
+from models import create_models
 
-class Tournament(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    sport_type = db.Column(db.String(50), nullable=False)  # теннис, бадминтон, волейбол
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
-    max_participants = db.Column(db.Integer, default=32)
-    court_count = db.Column(db.Integer, default=3)  # количество площадок
-    match_duration = db.Column(db.Integer, default=60)  # продолжительность матча в минутах
-    break_duration = db.Column(db.Integer, default=15)  # перерыв между матчами в минутах
-    points_win = db.Column(db.Integer, default=3)  # очки за победу
-    points_draw = db.Column(db.Integer, default=1)  # очки за ничью
-    points_loss = db.Column(db.Integer, default=0)  # очки за поражение
-    points_to_win = db.Column(db.Integer, default=21)  # количество очков для победы в матче
-    status = db.Column(db.String(20), default='регистрация')  # регистрация, активен, завершен
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Participant(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    name = db.Column(db.String(100), nullable=False)
-    is_team = db.Column(db.Boolean, default=False)
-    registered_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Match(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
-    participant1_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=False)
-    participant2_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=False)
-    score1 = db.Column(db.Integer)
-    score2 = db.Column(db.Integer)
-    winner_id = db.Column(db.Integer, db.ForeignKey('participant.id'))
-    match_date = db.Column(db.Date)
-    match_time = db.Column(db.Time)
-    court_number = db.Column(db.Integer)  # номер площадки
-    match_number = db.Column(db.Integer)  # последовательный номер игры
-    status = db.Column(db.String(20), default='запланирован')  # запланирован, в_процессе, завершен
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Связи для отображения имен участников
-    participant1 = db.relationship('Participant', foreign_keys=[participant1_id], backref='matches_as_p1')
-    participant2 = db.relationship('Participant', foreign_keys=[participant2_id], backref='matches_as_p2')
-
-class Notification(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    title = db.Column(db.String(100), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    is_read = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class MatchLog(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    action = db.Column(db.String(50), nullable=False)  # создан, изменен, удален
-    old_score1 = db.Column(db.Integer)
-    old_score2 = db.Column(db.Integer)
-    new_score1 = db.Column(db.Integer)
-    new_score2 = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+# Создание моделей с текущим экземпляром db
+models = create_models(db)
+User = models['User']
+Tournament = models['Tournament']
+Participant = models['Participant']
+Match = models['Match']
+Notification = models['Notification']
+MatchLog = models['MatchLog']
 
 @login_manager.user_loader
 def load_user(user_id):
