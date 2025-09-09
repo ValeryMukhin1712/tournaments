@@ -179,6 +179,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="setsToWin" class="form-label">Количество выигранных сетов для победы</label>
+                                <input type="number" class="form-control" id="setsToWin" value="2" min="1" max="5">
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -358,7 +366,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 points_win: parseInt(document.getElementById('pointsWin').value),
                 points_draw: parseInt(document.getElementById('pointsDraw').value),
                 points_loss: parseInt(document.getElementById('pointsLoss').value),
-                points_to_win: parseInt(document.getElementById('pointsToWin').value)
+                points_to_win: parseInt(document.getElementById('pointsToWin').value),
+                sets_to_win: parseInt(document.getElementById('setsToWin').value)
             };
             
             fetch('/api/tournaments', {

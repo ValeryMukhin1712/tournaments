@@ -138,7 +138,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 points_win=data.get('points_win', 3),
                 points_draw=data.get('points_draw', 1),
                 points_loss=data.get('points_loss', 0),
-                points_to_win=data.get('points_to_win', 21)
+                points_to_win=data.get('points_to_win', 21),
+                sets_to_win=data.get('sets_to_win', 2)
             )
             db.session.add(tournament)
             db.session.commit()

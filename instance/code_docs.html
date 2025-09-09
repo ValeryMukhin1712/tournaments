@@ -798,6 +798,107 @@ match_info = {
                             <li>✅ Сделать расписание более компактным и удобным</li>
                         </ul>
                     </div>
+                    
+                    <div class="entry">
+                        <h3>Добавление поля sets_to_win в модель турнира</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:05</p>
+                        <p><strong>Файл:</strong> models/tournament.py</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>points_to_win = db.Column(db.Integer, default=21)  # количество очков для победы в матче
+status = db.Column(db.String(20), default='регистрация')  # регистрация, активен, завершен</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>points_to_win = db.Column(db.Integer, default=21)  # количество очков для победы в матче
+sets_to_win = db.Column(db.Integer, default=2)  # количество выигранных сетов для победы
+status = db.Column(db.String(20), default='регистрация')  # регистрация, активен, завершен</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Добавить возможность настройки количества выигранных сетов для победы в турнире</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Обновление формы создания турнира</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:05</p>
+                        <p><strong>Файл:</strong> templates/index.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>&lt;div class="col-md-3"&gt;
+    &lt;div class="mb-3"&gt;
+        &lt;label for="pointsToWin" class="form-label"&gt;Очков для победы в матче&lt;/label&gt;
+        &lt;input type="number" class="form-control" id="pointsToWin" value="21" min="1" max="100"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>&lt;div class="col-md-3"&gt;
+    &lt;div class="mb-3"&gt;
+        &lt;label for="pointsToWin" class="form-label"&gt;Очков для победы в матче&lt;/label&gt;
+        &lt;input type="number" class="form-control" id="pointsToWin" value="21" min="1" max="100"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;div class="mb-3"&gt;
+            &lt;label for="setsToWin" class="form-label"&gt;Количество выигранных сетов для победы&lt;/label&gt;
+            &lt;input type="number" class="form-control" id="setsToWin" value="2" min="1" max="5"&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Добавить поле ввода для количества выигранных сетов с значением по умолчанию 2</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Обновление JavaScript обработки формы</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:05</p>
+                        <p><strong>Файл:</strong> templates/index.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>points_to_win: parseInt(document.getElementById('pointsToWin').value)</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>points_to_win: parseInt(document.getElementById('pointsToWin').value),
+sets_to_win: parseInt(document.getElementById('setsToWin').value)</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Включить новое поле sets_to_win в данные, отправляемые на сервер при создании турнира</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Обновление API endpoint создания турнира</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:05</p>
+                        <p><strong>Файл:</strong> routes/api.py</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>points_to_win=data.get('points_to_win', 21)
+)</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>points_to_win=data.get('points_to_win', 21),
+sets_to_win=data.get('sets_to_win', 2)
+)</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Обрабатывать новое поле sets_to_win при создании турнира через API</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Миграция базы данных</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:05</p>
+                        <p><strong>Файл:</strong> migrate_add_sets_to_win.py</p>
+                        <div class="code-block">
+                            <p><strong>Создан скрипт миграции:</strong></p>
+                            <pre><code># Добавляем поле sets_to_win с значением по умолчанию 2
+cursor.execute('ALTER TABLE tournament ADD COLUMN sets_to_win INTEGER DEFAULT 2')
+cursor.execute('UPDATE tournament SET sets_to_win = 2 WHERE sets_to_win IS NULL')</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Добавить новое поле в существующую таблицу tournament без потери данных</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

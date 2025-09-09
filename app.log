@@ -600,3 +600,66 @@
 2025-09-09 22:45:20,846 - INFO - 127.0.0.1 - - [09/Sep/2025 22:45:20] "GET /tournament/5 HTTP/1.1" 200 -
 2025-09-09 22:46:10,690 - INFO - 127.0.0.1 - - [09/Sep/2025 22:46:10] "GET /api/matches/1 HTTP/1.1" 200 -
 2025-09-09 22:46:26,136 - INFO - 127.0.0.1 - - [09/Sep/2025 22:46:26] "GET /api/matches/1 HTTP/1.1" 200 -
+2025-09-09 22:48:59,998 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-09 22:49:00,027 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\api.py', reloading
+2025-09-09 22:49:00,130 - INFO -  * Restarting with stat
+2025-09-09 22:49:00,194 - INFO -  * Restarting with stat
+2025-09-09 22:49:01,282 - WARNING -  * Debugger is active!
+2025-09-09 22:49:01,287 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 22:49:01,289 - WARNING -  * Debugger is active!
+2025-09-09 22:49:01,294 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 22:49:35,434 - INFO - 127.0.0.1 - - [09/Sep/2025 22:49:35] "[32mGET /tournament/5 HTTP/1.1[0m" 302 -
+2025-09-09 22:49:35,453 - INFO - 127.0.0.1 - - [09/Sep/2025 22:49:35] "GET /login?next=/tournament/5 HTTP/1.1" 200 -
+2025-09-09 22:49:38,469 - INFO - Попытка входа пользователя: admin
+2025-09-09 22:49:40,055 - INFO - Успешный вход пользователя: admin (ID: 1, Роль: администратор)
+2025-09-09 22:49:40,055 - INFO - 127.0.0.1 - - [09/Sep/2025 22:49:40] "[32mPOST /login?next=/tournament/5 HTTP/1.1[0m" 302 -
+2025-09-09 22:49:40,121 - INFO - 127.0.0.1 - - [09/Sep/2025 22:49:40] "GET / HTTP/1.1" 200 -
+2025-09-09 22:49:43,729 - INFO - 127.0.0.1 - - [09/Sep/2025 22:49:43] "GET /tournament/5 HTTP/1.1" 200 -
+2025-09-09 22:50:09,282 - INFO - 127.0.0.1 - - [09/Sep/2025 22:50:09] "GET /api/matches/1 HTTP/1.1" 200 -
+2025-09-09 22:55:54,954 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\models\\tournament.py', reloading
+2025-09-09 22:55:55,004 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\models\\tournament.py', reloading
+2025-09-09 22:55:55,071 - INFO -  * Restarting with stat
+2025-09-09 22:55:55,157 - INFO -  * Restarting with stat
+2025-09-09 22:55:56,279 - WARNING -  * Debugger is active!
+2025-09-09 22:55:56,285 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 22:55:56,285 - WARNING -  * Debugger is active!
+2025-09-09 22:55:56,290 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 22:56:24,018 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\api.py', reloading
+2025-09-09 22:56:24,067 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\api.py', reloading
+2025-09-09 22:56:24,137 - INFO -  * Restarting with stat
+2025-09-09 22:56:24,207 - INFO -  * Restarting with stat
+2025-09-09 22:56:25,229 - WARNING -  * Debugger is active!
+2025-09-09 22:56:25,233 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 22:56:25,275 - WARNING -  * Debugger is active!
+2025-09-09 22:56:25,278 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 23:00:06,869 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:06] "[32mGET /tournament/5 HTTP/1.1[0m" 302 -
+2025-09-09 23:00:06,941 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:06] "GET /login?next=/tournament/5 HTTP/1.1" 200 -
+2025-09-09 23:00:08,978 - INFO - Попытка входа пользователя: admin
+2025-09-09 23:00:10,570 - INFO - Успешный вход пользователя: admin (ID: 1, Роль: администратор)
+2025-09-09 23:00:10,572 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:10] "[32mPOST /login?next=/tournament/5 HTTP/1.1[0m" 302 -
+2025-09-09 23:00:10,976 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:10] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-09 23:00:11,153 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:11] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-09 23:00:11,173 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:11] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-09 23:00:11,262 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:11] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-09 23:00:11,309 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:11] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-09 23:00:14,570 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:14] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-09 23:00:14,616 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:14] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-09 23:00:14,621 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:14] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-09 23:00:14,651 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:14] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-09 23:00:14,684 - INFO - 127.0.0.1 - - [09/Sep/2025 23:00:14] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-09 23:01:21,383 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\api.py', reloading
+2025-09-09 23:01:21,439 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\models\\tournament.py', reloading
+2025-09-09 23:01:21,479 - INFO -  * Restarting with stat
+2025-09-09 23:01:21,560 - INFO -  * Restarting with stat
+2025-09-09 23:01:22,475 - WARNING -  * Debugger is active!
+2025-09-09 23:01:22,479 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 23:01:22,497 - WARNING -  * Debugger is active!
+2025-09-09 23:01:22,503 - INFO -  * Debugger PIN: 157-237-173
+2025-09-09 23:01:35,319 - INFO - The CSRF session token is missing.
+2025-09-09 23:01:35,320 - INFO - 127.0.0.1 - - [09/Sep/2025 23:01:35] "[31m[1mPOST /login?next=/tournament/5 HTTP/1.1[0m" 400 -
+2025-09-09 23:01:41,664 - INFO - The CSRF session token is missing.
+2025-09-09 23:01:41,665 - INFO - 127.0.0.1 - - [09/Sep/2025 23:01:41] "[31m[1mPOST /login?next=/tournament/5 HTTP/1.1[0m" 400 -
+2025-09-09 23:01:55,140 - INFO - 127.0.0.1 - - [09/Sep/2025 23:01:55] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-09 23:01:55,273 - INFO - 127.0.0.1 - - [09/Sep/2025 23:01:55] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-09 23:01:55,288 - INFO - 127.0.0.1 - - [09/Sep/2025 23:01:55] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-09 23:01:55,309 - INFO - 127.0.0.1 - - [09/Sep/2025 23:01:55] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -

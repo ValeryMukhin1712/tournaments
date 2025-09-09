@@ -20,6 +20,7 @@ def create_tournament_model(db):
         points_draw = db.Column(db.Integer, default=1)  # очки за ничью
         points_loss = db.Column(db.Integer, default=0)  # очки за поражение
         points_to_win = db.Column(db.Integer, default=21)  # количество очков для победы в матче
+        sets_to_win = db.Column(db.Integer, default=2)  # количество выигранных сетов для победы
         status = db.Column(db.String(20), default='регистрация')  # регистрация, активен, завершен
         created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
