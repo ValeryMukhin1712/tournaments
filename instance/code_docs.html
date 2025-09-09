@@ -985,6 +985,89 @@ cursor.execute('UPDATE tournament SET sets_to_win = 2 WHERE sets_to_win IS NULL'
                             <p><strong>Для того чтобы:</strong> Улучшить логическую группировку полей и сделать форму более компактной</p>
                         </div>
                     </div>
+                    
+                    <div class="entry">
+                        <h3>Выравнивание полей в форме создания турнира</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:20</p>
+                        <p><strong>Файл:</strong> templates/base.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+/* Выравнивание полей по полям ввода */
+.form-label {
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.form-control, .form-select {
+    height: 2.5rem;
+}</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Унифицировать высоту полей ввода и выровнять надписи по центру для более аккуратного вида формы</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Сокращение надписей полей в форме создания турнира</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:25</p>
+                        <p><strong>Файл:</strong> templates/index.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>&lt;label for="pointsWin" class="form-label"&gt;Очки за победу&lt;/label&gt;
+&lt;label for="pointsDraw" class="form-label"&gt;Очки за ничью&lt;/label&gt;
+&lt;label for="pointsLoss" class="form-label"&gt;Очки за поражение&lt;/label&gt;
+&lt;label for="pointsToWin" class="form-label"&gt;Очков для победы в матче&lt;/label&gt;</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>&lt;label for="pointsWin" class="form-label"&gt;за победу&lt;/label&gt;
+&lt;label for="pointsDraw" class="form-label"&gt;за ничью&lt;/label&gt;
+&lt;label for="pointsLoss" class="form-label"&gt;за поражение&lt;/label&gt;
+&lt;label for="pointsToWin" class="form-label"&gt;для победы&lt;/label&gt;</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Сделать надписи полей более компактными и улучшить читаемость формы</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Дополнительное сокращение надписей полей</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:30</p>
+                        <p><strong>Файл:</strong> templates/index.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>&lt;label for="pointsWin" class="form-label"&gt;за победу&lt;/label&gt;
+&lt;label for="pointsDraw" class="form-label"&gt;за ничью&lt;/label&gt;
+&lt;label for="pointsLoss" class="form-label"&gt;за поражение&lt;/label&gt;</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>&lt;label for="pointsWin" class="form-label"&gt;победа&lt;/label&gt;
+&lt;label for="pointsDraw" class="form-label"&gt;ничья&lt;/label&gt;
+&lt;label for="pointsLoss" class="form-label"&gt;поражение&lt;/label&gt;</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Сделать надписи максимально короткими для лучшей компактности формы</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
