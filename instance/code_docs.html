@@ -931,6 +931,60 @@ cursor.execute('UPDATE tournament SET sets_to_win = 2 WHERE sets_to_win IS NULL'
                             <p><strong>Для того чтобы:</strong> Выровнять поле "Количество выигранных сетов для победы" и сделать форму более аккуратной</p>
                         </div>
                     </div>
+                    
+                    <div class="entry">
+                        <h3>Перестановка полей в форме создания турнира</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:15</p>
+                        <p><strong>Файл:</strong> templates/index.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>&lt;div class="mb-3"&gt;
+    &lt;label for="maxParticipants" class="form-label"&gt;Максимум участников&lt;/label&gt;
+    &lt;input type="number" class="form-control" id="maxParticipants" value="32" min="4" max="100"&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-md-4"&gt;
+        &lt;!-- другие поля --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;!-- ... --&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;div class="mb-3"&gt;
+            &lt;label for="setsToWin" class="form-label"&gt;Количество выигранных сетов для победы&lt;/label&gt;
+            &lt;input type="number" class="form-control" id="setsToWin" value="2" min="1" max="5"&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;!-- Пустая колонка для выравнивания --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>&lt;div class="row"&gt;
+    &lt;div class="col-md-4"&gt;
+        &lt;!-- другие поля --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;!-- ... --&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;div class="mb-3"&gt;
+            &lt;label for="maxParticipants" class="form-label"&gt;Максимум участников&lt;/label&gt;
+            &lt;input type="number" class="form-control" id="maxParticipants" value="32" min="4" max="100"&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-6"&gt;
+        &lt;div class="mb-3"&gt;
+            &lt;label for="setsToWin" class="form-label"&gt;Количество выигранных сетов для победы&lt;/label&gt;
+            &lt;input type="number" class="form-control" id="setsToWin" value="2" min="1" max="5"&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Улучшить логическую группировку полей и сделать форму более компактной</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
