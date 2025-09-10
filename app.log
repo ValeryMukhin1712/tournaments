@@ -1357,3 +1357,20 @@
 2025-09-10 13:45:47,316 - INFO -  * Restarting with stat
 2025-09-10 13:45:48,413 - WARNING -  * Debugger is active!
 2025-09-10 13:45:48,416 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:46:47,155 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:46:47,156 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:46:47,158 - INFO -  * Restarting with stat
+2025-09-10 13:46:48,307 - WARNING -  * Debugger is active!
+2025-09-10 13:46:48,310 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:46:59,049 - INFO - 127.0.0.1 - - [10/Sep/2025 13:46:59] "GET / HTTP/1.1" 200 -
+2025-09-10 13:46:59,346 - INFO - 127.0.0.1 - - [10/Sep/2025 13:46:59] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-10 13:47:18,897 - INFO - 127.0.0.1 - - [10/Sep/2025 13:47:18] "GET /login HTTP/1.1" 200 -
+2025-09-10 13:47:21,159 - INFO - Попытка входа пользователя: admin
+2025-09-10 13:47:21,730 - INFO - Успешный вход пользователя: admin (ID: 1, Роль: администратор)
+2025-09-10 13:47:21,731 - INFO - 127.0.0.1 - - [10/Sep/2025 13:47:21] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-09-10 13:47:21,745 - INFO - 127.0.0.1 - - [10/Sep/2025 13:47:21] "GET / HTTP/1.1" 200 -
+2025-09-10 13:47:23,712 - INFO - 127.0.0.1 - - [10/Sep/2025 13:47:23] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:47:28,817 - INFO - 127.0.0.1 - - [10/Sep/2025 13:47:28] "GET /api/matches/1 HTTP/1.1" 200 -
