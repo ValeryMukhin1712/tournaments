@@ -320,7 +320,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Результат</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" form="matchResultForm" class="btn btn-primary btn-sm">Сохранить</button>
+                </div>
             </div>
             <div class="modal-body">
                 <form id="matchResultForm">
@@ -345,11 +348,9 @@
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <label for="editSet1Score1" class="form-label">Участник 1</label>
                                 <input type="number" class="form-control set-score" id="set1Score1" name="set1_score1" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}">
                             </div>
                             <div class="col-6">
-                                <label for="editSet1Score2" class="form-label">Участник 2</label>
                                 <input type="number" class="form-control set-score" id="set1Score2" name="set1_score2" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}">
                             </div>
                         </div>
@@ -363,11 +364,9 @@
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <label for="editSet2Score1" class="form-label">Участник 1</label>
                                 <input type="number" class="form-control set-score" id="set2Score1" name="set2_score1" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}">
                             </div>
                             <div class="col-6">
-                                <label for="editSet2Score2" class="form-label">Участник 2</label>
                                 <input type="number" class="form-control set-score" id="set2Score2" name="set2_score2" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}">
                             </div>
                         </div>
@@ -381,11 +380,9 @@
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <label for="editSet3Score1" class="form-label">Участник 1</label>
                                 <input type="number" class="form-control set-score" id="set3Score1" name="set3_score1" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}">
                             </div>
                             <div class="col-6">
-                                <label for="editSet3Score2" class="form-label">Участник 2</label>
                                 <input type="number" class="form-control set-score" id="set3Score2" name="set3_score2" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}">
                             </div>
                         </div>
@@ -398,25 +395,7 @@
                         </small>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="editMatchStart" class="form-label">Начало матча</label>
-                        <input type="text" class="form-control" id="matchStart" name="match_start" placeholder="dd.mm hh:mm" readonly>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="editCourtNumber" class="form-label">Площадка</label>
-                        <select class="form-select" id="courtNumber" name="court_number">
-                            <option value="">Выберите площадку</option>
-                            {% for i in range(1, tournament.court_count + 1) %}
-                            <option value="{{ i }}">Площадка {{ i }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="submit" form="matchResultForm" class="btn btn-primary">Сохранить</button>
             </div>
         </div>
     </div>
@@ -605,34 +584,6 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                     document.getElementById('set1Score2').value = defaultScore;
                 }
                 
-                // Заполняем площадку
-                document.getElementById('courtNumber').value = data.match.court_number || '';
-                
-                // Заполняем поле "Начало матча" данными из расписания
-                if (data.match.match_date && data.match.match_time) {
-                    const matchDate = new Date(data.match.match_date + 'T' + data.match.match_time);
-                    const formattedDate = matchDate.toLocaleDateString('ru-RU', { 
-                        day: '2-digit', 
-                        month: '2-digit' 
-                    });
-                    const formattedTime = matchDate.toLocaleTimeString('ru-RU', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                    document.getElementById('matchStart').value = `${formattedDate} ${formattedTime}`;
-                } else {
-                    // Если данных нет, показываем текущее время
-                    const now = new Date();
-                    const formattedDate = now.toLocaleDateString('ru-RU', { 
-                        day: '2-digit', 
-                        month: '2-digit' 
-                    });
-                    const formattedTime = now.toLocaleTimeString('ru-RU', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                    document.getElementById('matchStart').value = `${formattedDate} ${formattedTime}`;
-                }
             }
         })
         .catch(error => {
@@ -946,9 +897,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const formData = {
-                sets: setsData,
-                court_number: document.getElementById('courtNumber').value ? parseInt(document.getElementById('courtNumber').value) : null
+                sets: setsData
             };
+            
+            console.log('Отправка данных:', formData);
+            console.log('Match ID:', matchId);
             
             fetch(`/api/matches/${matchId}`, {
                 method: 'PUT',
@@ -958,13 +911,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Статус ответа:', response.status);
+                console.log('Заголовки ответа:', response.headers);
+                return response.json();
+            })
             .then(data => {
+                console.log('Данные ответа:', data);
                 if (data.success) {
                     alert('Результат матча сохранен!');
                     location.reload();
                 } else {
-                    alert('Ошибка: ' + data.error);
+                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
                 }
             })
             .catch(error => {
@@ -1236,11 +1194,10 @@ function checkSetCompletion(setNumber) {
 
 
 // Принудительное обновление кэша
-console.log('Версия формы: 3.0 - Единая форма результата матча');
+console.log('Версия формы: 3.3 - Минималистичная форма только с сетами');
 console.log('Проверка элементов формы:');
 console.log('set1Container:', document.getElementById('set1Container') ? 'найден' : 'НЕ НАЙДЕН');
 console.log('set2Container:', document.getElementById('set2Container') ? 'найден' : 'НЕ НАЙДЕН');
 console.log('set3Container:', document.getElementById('set3Container') ? 'найден' : 'НЕ НАЙДЕН');
-console.log('matchStart:', document.getElementById('matchStart') ? 'найден' : 'НЕ НАЙДЕН');
 </script>
 {% endblock %}

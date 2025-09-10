@@ -343,25 +343,45 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         data = request.get_json()
         
         try:
-            if 'score1' in data:
-                match.score1 = data['score1']
-            if 'score2' in data:
-                match.score2 = data['score2']
-            if 'winner_id' in data:
-                match.winner_id = data['winner_id']
-            if 'status' in data:
-                match.status = data['status']
+            # Обработка новой структуры с сетами
+            if 'sets' in data and data['sets']:
+                sets_data = data['sets']
+                # Берем результаты из первого сета для обратной совместимости
+                if len(sets_data) > 0:
+                    first_set = sets_data[0]
+                    match.score1 = first_set.get('score1', 0)
+                    match.score2 = first_set.get('score2', 0)
+                    
+                    # Определяем победителя
+                    if match.score1 > match.score2:
+                        match.winner_id = match.participant1_id
+                    elif match.score2 > match.score1:
+                        match.winner_id = match.participant2_id
+                    else:
+                        match.winner_id = None  # Ничья
+                    
+                    match.status = 'завершен'
+            else:
+                # Обратная совместимость со старой структурой
+                if 'score1' in data:
+                    match.score1 = data['score1']
+                if 'score2' in data:
+                    match.score2 = data['score2']
+                if 'winner_id' in data:
+                    match.winner_id = data['winner_id']
+                if 'status' in data:
+                    match.status = data['status']
             
             match.updated_at = datetime.utcnow()
             db.session.commit()
             
             logger.info(f"Матч {match_id} обновлен")
-            return jsonify({'message': 'Матч успешно обновлен'})
+            return jsonify({'success': True, 'message': 'Матч успешно обновлен'})
             
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при обновлении матча: {str(e)}")
-            return jsonify({'error': 'Ошибка при обновлении матча'}), 500
+            return jsonify({'success': False, 'error': f'Ошибка при обновлении матча: {str(e)}'}), 500
 
     @app.route('/api/matches/<int:match_id>', methods=['DELETE'])
     @login_required
