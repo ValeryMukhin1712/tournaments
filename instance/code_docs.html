@@ -1068,6 +1068,158 @@ cursor.execute('UPDATE tournament SET sets_to_win = 2 WHERE sets_to_win IS NULL'
                             <p><strong>Для того чтобы:</strong> Сделать надписи максимально короткими для лучшей компактности формы</p>
                         </div>
                     </div>
+                    
+                    <div class="entry">
+                        <h3>Исправление формы ввода результата матча</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:35</p>
+                        <p><strong>Файл:</strong> templates/tournament.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>&lt;div class="row mb-3"&gt;
+    &lt;div class="col-6"&gt;
+        &lt;label for="score1" class="form-label"&gt;Счет участника 1&lt;/label&gt;
+        &lt;input type="number" class="form-control" id="score1" name="score1" min="0" required&gt;
+    &lt;/div&gt;
+    &lt;div class="col-6"&gt;
+        &lt;label for="score2" class="form-label"&gt;Счет участника 2&lt;/label&gt;
+        &lt;input type="number" class="form-control" id="score2" name="score2" min="0" required&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>&lt;!-- Сет 1 --&gt;
+&lt;div class="mb-3" id="set1Container"&gt;
+    &lt;div class="d-flex align-items-center mb-2"&gt;
+        &lt;span class="badge bg-primary me-2"&gt;Сет 1&lt;/span&gt;
+        &lt;small class="text-muted"&gt;Очки для победы: {{ tournament.points_to_win }}&lt;/small&gt;
+    &lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-6"&gt;
+            &lt;label for="set1Score1" class="form-label"&gt;Участник 1&lt;/label&gt;
+            &lt;input type="number" class="form-control set-score" id="set1Score1" name="set1_score1" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}"&gt;
+        &lt;/div&gt;
+        &lt;div class="col-6"&gt;
+            &lt;label for="set1Score2" class="form-label"&gt;Участник 2&lt;/label&gt;
+            &lt;input type="number" class="form-control set-score" id="set1Score2" name="set1_score2" min="0" max="{{ tournament.points_to_win }}" value="{{ tournament.points_to_win }}"&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Сет 2 и Сет 3 аналогично --&gt;</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Поддержать многосетовые матчи с прогрессивным отображением полей</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>JavaScript функции для работы с сетами</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:35</p>
+                        <p><strong>Файл:</strong> templates/tournament.html</p>
+                        <div class="code-block">
+                            <p><strong>Добавлены функции:</strong></p>
+                            <pre><code>function resetSetsForm() {
+    // Скрываем все сеты кроме первого
+    document.getElementById('set2Container').style.display = 'none';
+    document.getElementById('set3Container').style.display = 'none';
+    
+    // Сбрасываем значения всех полей сетов
+    const defaultScore = {{ tournament.points_to_win }};
+    for (let i = 1; i <= 3; i++) {
+        document.getElementById(`set${i}Score1`).value = defaultScore;
+        document.getElementById(`set${i}Score2`).value = defaultScore;
+    }
+    
+    addSetEventListeners();
+}
+
+function checkSetCompletion(setNumber) {
+    const score1 = parseInt(document.getElementById(`set${setNumber}Score1`).value) || 0;
+    const score2 = parseInt(document.getElementById(`set${setNumber}Score2`).value) || 0;
+    const pointsToWin = {{ tournament.points_to_win }};
+    
+    const setCompleted = (score1 >= pointsToWin || score2 >= pointsToWin) && 
+                        (score1 !== score2) && 
+                        (score1 > 0 && score2 > 0);
+    
+    if (setCompleted && setNumber < 3) {
+        const nextSet = setNumber + 1;
+        document.getElementById(`set${nextSet}Container`).style.display = 'block';
+    }
+}</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Реализовать прогрессивное отображение сетов и автоматическую проверку завершения</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>Переименование формы и полей ввода результата матча</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:40</p>
+                        <p><strong>Файл:</strong> templates/tournament.html</p>
+                        <div class="code-block">
+                            <p><strong>Было:</strong></p>
+                            <pre><code>&lt;div class="row mb-3"&gt;
+    &lt;div class="col-6"&gt;
+        &lt;label for="matchDate" class="form-label"&gt;Дата матча&lt;/label&gt;
+        &lt;input type="date" class="form-control" id="matchDate" name="match_date"&gt;
+    &lt;/div&gt;
+    &lt;div class="col-6"&gt;
+        &lt;label for="matchTime" class="form-label"&gt;Время матча&lt;/label&gt;
+        &lt;input type="time" class="form-control" id="matchTime" name="match_time"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Стало:</strong></p>
+                            <pre><code>&lt;div class="mb-3"&gt;
+    &lt;label for="matchStart" class="form-label"&gt;Начало матча&lt;/label&gt;
+    &lt;input type="text" class="form-control" id="matchStart" name="match_start" placeholder="dd.mm hh:mm" readonly&gt;
+&lt;/div&gt;</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Упростить форму и автоматически заполнять время начала матча из расписания</p>
+                        </div>
+                    </div>
+                    
+                    <div class="entry">
+                        <h3>JavaScript для автоматического заполнения времени начала матча</h3>
+                        <p><strong>Дата:</strong> 09.09.2025 23:40</p>
+                        <p><strong>Файл:</strong> templates/tournament.html</p>
+                        <div class="code-block">
+                            <p><strong>Добавлен код:</strong></p>
+                            <pre><code>// Заполняем поле "Начало матча" данными из расписания
+const matches = {{ matches_data|tojson }};
+const existingMatch = matches.find(m => 
+    (m.participant1_id === p1Id && m.participant2_id === p2Id) ||
+    (m.participant1_id === p2Id && m.participant2_id === p1Id)
+);
+
+if (existingMatch && existingMatch.match_date && existingMatch.match_time) {
+    // Форматируем дату и время в формат dd.mm hh:mm
+    const matchDate = new Date(existingMatch.match_date + 'T' + existingMatch.match_time);
+    const formattedDate = matchDate.toLocaleDateString('ru-RU', { 
+        day: '2-digit', 
+        month: '2-digit' 
+    });
+    const formattedTime = matchDate.toLocaleTimeString('ru-RU', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    document.getElementById('matchStart').value = `${formattedDate} ${formattedTime}`;
+} else {
+    // Если данных нет, показываем текущее время
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('ru-RU', { 
+        day: '2-digit', 
+        month: '2-digit' 
+    });
+    const formattedTime = now.toLocaleTimeString('ru-RU', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    document.getElementById('matchStart').value = `${formattedDate} ${formattedTime}`;
+}</code></pre>
+                            
+                            <p><strong>Для того чтобы:</strong> Автоматически заполнять поле времени начала матча данными из расписания</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
