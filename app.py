@@ -11,6 +11,9 @@ import os
 import logging
 import secrets
 
+# Импорт конфигурации
+from config import DevelopmentConfig, ProductionConfig
+
 # Импорт моделей из модулей
 from models import create_models
 
@@ -18,9 +21,16 @@ from models import create_models
 from routes import register_routes
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Выбор конфигурации в зависимости от окружения
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config.from_object(ProductionConfig)
+else:
+    app.config.from_object(DevelopmentConfig)
+
+# Устанавливаем FLASK_ENV для корректной работы
+if not os.environ.get('FLASK_ENV'):
+    os.environ['FLASK_ENV'] = 'development'
 
 # Инициализация CSRF-защиты
 csrf = CSRFProtect(app)
@@ -32,14 +42,23 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
+if os.environ.get('FLASK_ENV') == 'production':
+    # Логирование для продакшена (Railway)
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]  # Только в консоль для Railway
+    )
+else:
+    # Логирование для разработки
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('app.log'),
+            logging.StreamHandler()
+        ]
+    )
 logger = logging.getLogger(__name__)
 
 # Инициализация базы данных
@@ -68,16 +87,21 @@ def load_user(user_id):
 # Функция инициализации базы данных
 def init_db():
     with app.app_context():
-        db.create_all()
-        
-        # Создание администратора по умолчанию
-        admin = User.query.filter_by(username='admin').first()
-        if not admin:
-            admin = User(username='admin', password_hash=generate_password_hash('admin123'), role='администратор')
-            db.session.add(admin)
-            db.session.commit()
-            print("Администратор создан: admin/admin123")
+        try:
+            db.create_all()
+            
+            # Создание администратора по умолчанию
+            admin = User.query.filter_by(username='admin').first()
+            if not admin:
+                admin = User(username='admin', password_hash=generate_password_hash('admin123'), role='администратор')
+                db.session.add(admin)
+                db.session.commit()
+                print("Администратор создан: admin/admin123")
+        except Exception as e:
+            print(f"Ошибка инициализации базы данных: {e}")
+            # Продолжаем работу, возможно база уже инициализирована
 
 if __name__ == '__main__':
+    # Инициализация базы данных только при запуске приложения
     init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)

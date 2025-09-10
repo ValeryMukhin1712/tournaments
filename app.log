@@ -1120,3 +1120,240 @@
 2025-09-10 13:11:53,510 - INFO - 127.0.0.1 - - [10/Sep/2025 13:11:53] "PUT /api/matches/7 HTTP/1.1" 200 -
 2025-09-10 13:11:55,396 - INFO - 127.0.0.1 - - [10/Sep/2025 13:11:55] "GET /tournament/6 HTTP/1.1" 200 -
 2025-09-10 13:12:13,916 - INFO - 127.0.0.1 - - [10/Sep/2025 13:12:13] "GET /api/matches/7 HTTP/1.1" 200 -
+2025-09-10 13:16:13,631 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-10 13:16:13,671 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\api.py', reloading
+2025-09-10 13:16:13,683 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-10 13:16:13,733 - INFO -  * Restarting with stat
+2025-09-10 13:16:13,791 - INFO -  * Restarting with stat
+2025-09-10 13:16:13,802 - INFO -  * Restarting with stat
+2025-09-10 13:16:14,848 - WARNING -  * Debugger is active!
+2025-09-10 13:16:14,852 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:16:14,863 - WARNING -  * Debugger is active!
+2025-09-10 13:16:14,869 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:16:14,884 - WARNING -  * Debugger is active!
+2025-09-10 13:16:14,889 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:17:01,755 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:01] "[32mGET /tournament/6 HTTP/1.1[0m" 302 -
+2025-09-10 13:17:01,790 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:01] "GET /login?next=/tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:17:03,468 - INFO - Попытка входа пользователя: admin
+2025-09-10 13:17:04,116 - INFO - Успешный вход пользователя: admin (ID: 1, Роль: администратор)
+2025-09-10 13:17:04,118 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:04] "[32mPOST /login?next=/tournament/6 HTTP/1.1[0m" 302 -
+2025-09-10 13:17:04,145 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:04] "GET / HTTP/1.1" 200 -
+2025-09-10 13:17:06,191 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:06] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:17:13,301 - INFO - Создано 6 матчей для турнира Новый турнир
+2025-09-10 13:17:13,301 - INFO - Создано 6 матчей для турнира Новый турнир
+2025-09-10 13:17:13,301 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:13] "POST /api/tournaments/6/reschedule HTTP/1.1" 200 -
+2025-09-10 13:17:15,182 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:15] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:17:19,832 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:19] "GET /api/matches/1 HTTP/1.1" 200 -
+2025-09-10 13:17:32,334 - INFO - Матч 1 обновлен
+2025-09-10 13:17:32,334 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:32] "PUT /api/matches/1 HTTP/1.1" 200 -
+2025-09-10 13:17:33,992 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:33] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:17:39,147 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:39] "GET /api/matches/2 HTTP/1.1" 200 -
+2025-09-10 13:17:44,064 - INFO - Матч 2 обновлен
+2025-09-10 13:17:44,064 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:44] "PUT /api/matches/2 HTTP/1.1" 200 -
+2025-09-10 13:17:45,700 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:45] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:17:48,906 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:48] "GET /api/matches/3 HTTP/1.1" 200 -
+2025-09-10 13:17:52,957 - INFO - Матч 3 обновлен
+2025-09-10 13:17:52,958 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:52] "PUT /api/matches/3 HTTP/1.1" 200 -
+2025-09-10 13:17:54,268 - INFO - 127.0.0.1 - - [10/Sep/2025 13:17:54] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-10 13:23:35,783 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:23:35,809 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:23:35,837 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:23:35,907 - INFO -  * Restarting with stat
+2025-09-10 13:23:35,949 - INFO -  * Restarting with stat
+2025-09-10 13:23:35,970 - INFO -  * Restarting with stat
+2025-09-10 13:23:36,886 - WARNING -  * Debugger is active!
+2025-09-10 13:23:36,886 - WARNING -  * Debugger is active!
+2025-09-10 13:23:36,891 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:23:36,913 - WARNING -  * Debugger is active!
+2025-09-10 13:23:36,919 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:23:40,756 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:23:40,774 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:23:40,834 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:23:40,853 - INFO -  * Restarting with stat
+2025-09-10 13:23:40,884 - INFO -  * Restarting with stat
+2025-09-10 13:23:40,966 - INFO -  * Restarting with stat
+2025-09-10 13:23:41,849 - WARNING -  * Debugger is active!
+2025-09-10 13:23:41,855 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:23:41,883 - WARNING -  * Debugger is active!
+2025-09-10 13:23:41,887 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:23:41,939 - WARNING -  * Debugger is active!
+2025-09-10 13:23:41,943 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:23:51,679 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:23:51,712 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:23:51,712 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:23:51,824 - INFO -  * Restarting with stat
+2025-09-10 13:23:51,859 - INFO -  * Restarting with stat
+2025-09-10 13:23:51,865 - INFO -  * Restarting with stat
+2025-09-10 13:31:23,357 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:31:23,358 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:31:23,359 - INFO -  * Restarting with stat
+2025-09-10 13:31:24,212 - WARNING -  * Debugger is active!
+2025-09-10 13:31:24,215 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:31:53,846 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:53] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:31:54,015 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:54] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:31:54,045 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:54] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-09-10 13:31:54,475 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:54] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:31:54,768 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:54] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:31:57,200 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:57] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:31:57,449 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:57] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:31:57,535 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:57] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:31:57,863 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:57] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:31:58,132 - INFO - 127.0.0.1 - - [10/Sep/2025 13:31:58] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:34:41,431 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:34:41,432 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:34:41,434 - INFO -  * Restarting with stat
+2025-09-10 13:34:42,642 - WARNING -  * Debugger is active!
+2025-09-10 13:34:42,646 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:34:54,714 - INFO - 127.0.0.1 - - [10/Sep/2025 13:34:54] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:35:02,991 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:02] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:35:03,093 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:03] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:35:03,124 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:03] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:35:03,506 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:03] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:35:03,756 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:03] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:35:06,363 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:06] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:35:06,642 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:06] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:35:06,712 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:06] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:35:07,041 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:07] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:35:07,294 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:07] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:35:23,523 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:23] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:35:23,787 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:23] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:35:23,863 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:23] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:35:24,218 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:24] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:35:24,474 - INFO - 127.0.0.1 - - [10/Sep/2025 13:35:24] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:35:56,375 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:35:56,376 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:35:56,378 - INFO -  * Restarting with stat
+2025-09-10 13:35:57,597 - WARNING -  * Debugger is active!
+2025-09-10 13:35:57,601 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:36:00,072 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:00] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:36:00,320 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:00] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:36:00,411 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:00] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:36:00,737 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:00] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:36:00,992 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:00] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:36:02,347 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:02] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:36:02,626 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:02] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:36:02,676 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:02] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:36:02,997 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:02] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:36:03,261 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:03] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:36:42,765 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:42] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:36:42,811 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:42] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:36:42,816 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:42] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:36:42,899 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:42] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:36:42,952 - INFO - 127.0.0.1 - - [10/Sep/2025 13:36:42] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:36:59,642 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:36:59,704 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:36:59,789 - INFO -  * Restarting with stat
+2025-09-10 13:36:59,844 - INFO -  * Restarting with stat
+2025-09-10 13:37:00,627 - WARNING -  * Debugger is active!
+2025-09-10 13:37:00,633 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:37:00,656 - WARNING -  * Debugger is active!
+2025-09-10 13:37:00,661 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:37:02,137 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:37:02,172 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\app.py', reloading
+2025-09-10 13:37:02,238 - INFO -  * Restarting with stat
+2025-09-10 13:37:02,281 - INFO -  * Restarting with stat
+2025-09-10 13:37:03,163 - WARNING -  * Debugger is active!
+2025-09-10 13:37:03,168 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:37:03,183 - WARNING -  * Debugger is active!
+2025-09-10 13:37:03,186 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:37:25,887 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:25] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:37:25,975 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:25] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:37:26,053 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:26] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:37:26,378 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:26] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:37:28,146 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:28] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:37:28,377 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:28] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:37:28,494 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:28] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:37:28,817 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:28] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:37:45,612 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:45] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:37:45,652 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:45] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:37:45,662 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:45] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:37:45,742 - INFO - 127.0.0.1 - - [10/Sep/2025 13:37:45] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:39:47,767 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:39:47,767 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:39:47,769 - INFO -  * Restarting with stat
+2025-09-10 13:39:48,757 - WARNING -  * Debugger is active!
+2025-09-10 13:39:48,762 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:39:55,449 - INFO - 127.0.0.1 - - [10/Sep/2025 13:39:55] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:39:55,556 - INFO - 127.0.0.1 - - [10/Sep/2025 13:39:55] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:39:55,556 - INFO - 127.0.0.1 - - [10/Sep/2025 13:39:55] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:39:55,609 - INFO - 127.0.0.1 - - [10/Sep/2025 13:39:55] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:40:48,507 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:40:48,508 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:40:48,510 - INFO -  * Restarting with stat
+2025-09-10 13:40:49,438 - WARNING -  * Debugger is active!
+2025-09-10 13:40:49,442 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:40:54,239 - INFO - 127.0.0.1 - - [10/Sep/2025 13:40:54] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-10 13:40:54,273 - INFO - 127.0.0.1 - - [10/Sep/2025 13:40:54] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-10 13:40:54,280 - INFO - 127.0.0.1 - - [10/Sep/2025 13:40:54] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-10 13:40:54,316 - INFO - 127.0.0.1 - - [10/Sep/2025 13:40:54] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-10 13:42:16,207 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:42:16,307 - INFO -  * Restarting with stat
+2025-09-10 13:42:17,180 - WARNING -  * Debugger is active!
+2025-09-10 13:42:17,186 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:42:37,478 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:42:37,563 - INFO -  * Restarting with stat
+2025-09-10 13:42:38,473 - WARNING -  * Debugger is active!
+2025-09-10 13:42:38,478 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:42:53,319 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:42:53,320 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:42:53,322 - INFO -  * Restarting with stat
+2025-09-10 13:42:54,290 - WARNING -  * Debugger is active!
+2025-09-10 13:42:54,294 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:43:02,244 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:43:02,319 - INFO -  * Restarting with stat
+2025-09-10 13:43:02,786 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:43:02,872 - INFO -  * Restarting with stat
+2025-09-10 13:43:03,192 - WARNING -  * Debugger is active!
+2025-09-10 13:43:03,197 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:43:03,701 - WARNING -  * Debugger is active!
+2025-09-10 13:43:03,705 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:43:04,645 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:43:04,733 - INFO -  * Restarting with stat
+2025-09-10 13:43:05,190 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:43:05,320 - INFO -  * Restarting with stat
+2025-09-10 13:43:05,856 - WARNING -  * Debugger is active!
+2025-09-10 13:43:05,863 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:43:06,300 - WARNING -  * Debugger is active!
+2025-09-10 13:43:06,304 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:44:29,703 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:44:29,787 - INFO -  * Restarting with stat
+2025-09-10 13:44:30,033 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:44:30,135 - INFO -  * Restarting with stat
+2025-09-10 13:44:30,721 - WARNING -  * Debugger is active!
+2025-09-10 13:44:30,725 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:44:30,981 - WARNING -  * Debugger is active!
+2025-09-10 13:44:30,986 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:45:08,317 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.21:5000
+2025-09-10 13:45:08,317 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-10 13:45:08,319 - INFO -  * Restarting with stat
+2025-09-10 13:45:09,568 - WARNING -  * Debugger is active!
+2025-09-10 13:45:09,570 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:45:46,353 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:45:46,459 - INFO -  * Restarting with stat
+2025-09-10 13:45:47,227 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\config.py', reloading
+2025-09-10 13:45:47,306 - WARNING -  * Debugger is active!
+2025-09-10 13:45:47,312 - INFO -  * Debugger PIN: 157-237-173
+2025-09-10 13:45:47,316 - INFO -  * Restarting with stat
+2025-09-10 13:45:48,413 - WARNING -  * Debugger is active!
+2025-09-10 13:45:48,416 - INFO -  * Debugger PIN: 157-237-173

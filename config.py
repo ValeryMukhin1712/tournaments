@@ -8,7 +8,7 @@ from datetime import timedelta
 class Config:
     """Базовая конфигурация"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/tournament.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/tournament.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Настройки безопасности
@@ -26,9 +26,16 @@ class Config:
 class DevelopmentConfig(Config):
     """Конфигурация для разработки"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/tournament.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///tournament.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProductionConfig(Config):
     """Конфигурация для продакшена"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/tournament.db'
+    # Railway автоматически предоставляет DATABASE_URL для PostgreSQL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    
+    # Настройки безопасности для продакшена
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
