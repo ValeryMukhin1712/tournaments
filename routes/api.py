@@ -168,20 +168,23 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         match = Match.query.get_or_404(match_id)
         
         return jsonify({
-            'id': match.id,
-            'tournament_id': match.tournament_id,
-            'participant1_id': match.participant1_id,
-            'participant2_id': match.participant2_id,
-            'score1': match.score1,
-            'score2': match.score2,
-            'winner_id': match.winner_id,
-            'match_date': match.match_date.isoformat() if match.match_date else None,
-            'match_time': match.match_time.isoformat() if match.match_time else None,
-            'court_number': match.court_number,
-            'match_number': match.match_number,
-            'status': match.status,
-            'created_at': match.created_at.isoformat(),
-            'updated_at': match.updated_at.isoformat()
+            'success': True,
+            'match': {
+                'id': match.id,
+                'tournament_id': match.tournament_id,
+                'participant1_id': match.participant1_id,
+                'participant2_id': match.participant2_id,
+                'score1': match.score1,
+                'score2': match.score2,
+                'winner_id': match.winner_id,
+                'match_date': match.match_date.isoformat() if match.match_date else None,
+                'match_time': match.match_time.isoformat() if match.match_time else None,
+                'court_number': match.court_number,
+                'match_number': match.match_number,
+                'status': match.status,
+                'created_at': match.created_at.isoformat(),
+                'updated_at': match.updated_at.isoformat()
+            }
         })
 
     # ===== ТУРНИРЫ (дополнительные маршруты) =====

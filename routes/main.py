@@ -149,6 +149,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         return stats
 
+def calculate_sets_score(match):
+    """Расчет счета сетов для матча"""
+    if not match or match.status != 'завершен':
+        return None
+    
+    # Пока используем простую логику - в будущем можно расширить для хранения данных сетов
+    # Для демонстрации считаем, что если есть score1 и score2, то это результат первого сета
+    if match.score1 is not None and match.score2 is not None:
+        # Определяем победителя первого сета
+        if match.score1 > match.score2:
+            return "1:0"  # Участник 1 выиграл первый сет
+        elif match.score2 > match.score1:
+            return "0:1"  # Участник 2 выиграл первый сет
+        else:
+            return "0:0"  # Ничья (не должно происходить по правилам)
+    return None
+
 def create_chessboard(participants, matches):
     """Создание шахматки для отображения результатов"""
     print(f"DEBUG: create_chessboard вызвана с {len(participants)} участниками и {len(matches)} матчами")
@@ -176,11 +193,16 @@ def create_chessboard(participants, matches):
                             score = f"{match.score1}:{match.score2}"
                         else:
                             score = f"{match.score2}:{match.score1}"
+                        
+                        # Рассчитываем счет сетов
+                        sets_score = calculate_sets_score(match)
+                        
                         chessboard[p1.id][p2.id] = {
                             'type': 'result',
                             'value': score,
                             'match_id': match.id,
-                            'editable': True
+                            'editable': True,
+                            'sets_score': sets_score
                         }
                     else:
                         # Отображаем время матча и номер площадки в ячейке
@@ -200,7 +222,7 @@ def create_chessboard(participants, matches):
                             'type': 'upcoming',
                             'value': full_display,
                             'match_id': match.id,
-                            'editable': False,
+                            'editable': True,
                             'date': match.match_date,
                             'time': match.match_time,
                             'court': match.court_number,
@@ -384,6 +406,9 @@ def create_tournament_schedule_display(matches, participants):
         participant1_name = participants_dict.get(match.participant1_id, {}).name if match.participant1_id else f"Участник {match.participant1_id}"
         participant2_name = participants_dict.get(match.participant2_id, {}).name if match.participant2_id else f"Участник {match.participant2_id}"
         
+        # Рассчитываем счет сетов
+        sets_score = calculate_sets_score(match)
+        
         match_info = {
             'id': match.id,
             'global_number': getattr(match, 'global_match_number', match.match_number or 0),
@@ -393,6 +418,7 @@ def create_tournament_schedule_display(matches, participants):
             'participant2': participant2_name,
             'status': match.status,
             'score': f"{match.score1}:{match.score2}" if match.score1 is not None and match.score2 is not None else None,
+            'sets_score': sets_score,
             'match_number': match.match_number
         }
         
