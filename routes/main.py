@@ -278,6 +278,9 @@ def generate_tournament_schedule(participants, tournament, db, Match):
     current_date = start_date
     current_time = start_time
     
+    # Счетчики матчей на каждой площадке для равномерного распределения
+    court_usage = {i: 0 for i in range(max_courts)}
+    
     # Генерируем матчи по круговой схеме
     for round_num in range(rounds):
         logger.info(f"Генерация тура {round_num + 1}")
@@ -306,9 +309,11 @@ def generate_tournament_schedule(participants, tournament, db, Match):
             round_matches.append((participant1, participant2))
         
         # Распределяем матчи тура по времени и площадкам
+        # Все матчи тура начинаются в одно время на разных площадках
         for i, (participant1, participant2) in enumerate(round_matches):
-            # Выбираем площадку (циклически)
-            court_number = (i % max_courts) + 1
+            # Выбираем площадку с наименьшим количеством матчей для равномерного распределения
+            court_number = min(court_usage.keys(), key=lambda k: court_usage[k]) + 1
+            court_usage[court_number - 1] += 1
             
             # Создаем матч
             match = Match(
@@ -324,27 +329,29 @@ def generate_tournament_schedule(participants, tournament, db, Match):
             
             db.session.add(match)
             matches.append(match)
-            
-            # Обновляем время для следующего матча
-            current_datetime = datetime.combine(current_date, current_time)
-            next_time = current_datetime + timedelta(minutes=match_duration + break_duration)
-            current_time = next_time.time()
-            
-            # Если время больше времени окончания, переходим на следующий день
-            if current_time > end_time:
-                current_date = current_date + timedelta(days=1)
-                current_time = start_time
-            
             match_number += 1
         
-        # После каждого тура проверяем, нужно ли переходить на следующий день
-        # Если текущее время превышает время окончания, переходим на следующий день
+        # После завершения тура переходим к следующему временному слоту
+        current_datetime = datetime.combine(current_date, current_time)
+        next_time = current_datetime + timedelta(minutes=match_duration + break_duration)
+        current_time = next_time.time()
+        
+        # Если время больше времени окончания, переходим на следующий день
         if current_time > end_time:
             current_date = current_date + timedelta(days=1)
             current_time = start_time
     
     db.session.commit()
+    
+    # Логируем статистику распределения по площадкам
+    court_stats = {}
+    for match in matches:
+        court = match.court_number
+        court_stats[court] = court_stats.get(court, 0) + 1
+    
     logger.info(f"Создано {len(matches)} матчей для турнира {tournament.name} по круговой схеме")
+    logger.info(f"Распределение по площадкам: {court_stats}")
+    
     return matches
 
 def find_best_time_slot(participant1, participant2, participant_matches, 

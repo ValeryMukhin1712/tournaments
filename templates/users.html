@@ -178,16 +178,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Статус ответа:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Данные ответа:', data);
                 if (data.success) {
                     alert('Участник успешно создан!');
                     location.reload();
                 } else {
-                    alert('Ошибка: ' + data.error);
+                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
                 }
             })
             .catch(error => {
+                console.error('Ошибка при создании пользователя:', error);
                 alert('Ошибка при создании пользователя: ' + error);
             });
         });
@@ -243,16 +248,21 @@ function deleteUser(userId, username) {
                 'X-CSRFToken': getCSRFToken()
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Статус ответа при удалении:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Данные ответа при удалении:', data);
             if (data.success) {
                 alert('Участник успешно удален!');
                 location.reload();
             } else {
-                alert('Ошибка: ' + data.error);
+                alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
             }
         })
         .catch(error => {
+            console.error('Ошибка при удалении пользователя:', error);
             alert('Ошибка при удалении пользователя: ' + error);
         });
     }

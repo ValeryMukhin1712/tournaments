@@ -38,6 +38,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             logger.info(f"Создан новый участник: {data['username']} (ID: {user.id})")
             return jsonify({
+                'success': True,
                 'message': 'Участник успешно создан',
                 'user': {
                     'id': user.id,
@@ -110,7 +111,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         db.session.commit()
         
         logger.info(f"Участник {username} удален")
-        return jsonify({'message': 'Участник успешно удален'})
+        return jsonify({'success': True, 'message': 'Участник успешно удален'})
 
     # ===== ТУРНИРЫ =====
     
