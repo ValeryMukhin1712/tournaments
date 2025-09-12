@@ -238,7 +238,7 @@ def create_chessboard(participants, matches):
     return chessboard
 
 def generate_tournament_schedule(participants, tournament, db, Match):
-    """Генерация расписания матчей для турнира с равномерной занятостью игроков"""
+    """Генерация расписания матчей для турнира по методу круговой жеребьёвки"""
     if len(participants) < 2:
         return []
     
@@ -248,84 +248,101 @@ def generate_tournament_schedule(participants, tournament, db, Match):
         db.session.delete(match)
     db.session.commit()
     
-    # Создаем все возможные пары участников
-    matches_to_create = []
-    for i in range(len(participants)):
-        for j in range(i + 1, len(participants)):
-            matches_to_create.append((participants[i], participants[j]))
-    
-    # Сортируем матчи по именам участников для консистентности
-    matches_to_create.sort(key=lambda x: (x[0].name, x[1].name))
-    
     # Настройки расписания
     start_date = tournament.start_date
-    start_time = datetime.strptime("09:00", "%H:%M").time()  # Начало в 9:00
-    match_duration = 60  # Длительность матча в минутах
-    break_duration = 15  # Перерыв между матчами в минутах
+    start_time = tournament.start_time  # Время начала матчей из настроек турнира
+    end_time = tournament.end_time  # Время окончания матчей из настроек турнира
+    match_duration = tournament.match_duration or 60  # Длительность матча в минутах
+    break_duration = tournament.break_duration or 15  # Перерыв между матчами в минутах
     max_courts = min(tournament.court_count or 4, 4)  # Максимум 4 площадки
     
-    # Создаем расписание с равномерной занятостью
-    matches = []
-    participant_matches = {p.id: [] for p in participants}  # Счетчик матчей для каждого участника
-    court_schedule = {i: [] for i in range(1, max_courts + 1)}  # Расписание для каждой площадки
+    # Создаем копию списка участников для работы
+    participants_list = participants.copy()
     
+    # Если нечетное количество участников, добавляем фиктивного участника "отдых"
+    has_bye = len(participants_list) % 2 == 1
+    if has_bye:
+        # Создаем фиктивного участника для "отдыха"
+        bye_participant = type('ByeParticipant', (), {
+            'id': -1,
+            'name': 'Отдых',
+            'tournament_id': tournament.id
+        })()
+        participants_list.append(bye_participant)
+    
+    n = len(participants_list)
+    rounds = n - 1  # Количество туров для круговой системы
+    
+    matches = []
     match_number = 1
     current_date = start_date
     current_time = start_time
     
-    for participant1, participant2 in matches_to_create:
-        # Находим площадку с наименьшей загрузкой
-        best_court = min(court_schedule.keys(), key=lambda c: len(court_schedule[c]))
+    # Генерируем матчи по круговой схеме
+    for round_num in range(rounds):
+        logger.info(f"Генерация тура {round_num + 1}")
         
-        # Находим время, когда оба участника свободны
-        best_time = find_best_time_slot(participant1, participant2, participant_matches, 
-                                      current_date, current_time, match_duration, break_duration)
+        # Создаем пары для текущего тура
+        round_matches = []
         
-        if best_time is None:
-            # Если не можем найти время в текущий день, переходим на следующий
-            current_date = current_date + timedelta(days=1)
-            current_time = datetime.strptime("09:00", "%H:%M").time()
-            best_time = (current_date, current_time)
+        # Классическая круговая схема: фиксируем первого участника, остальных сдвигаем по кругу
+        for i in range(n // 2):
+            if i == 0:
+                # Первая пара: фиксированный участник (индекс 0) vs сдвинутый последний участник
+                p1_index = 0
+                p2_index = (n - 1 - round_num) % (n - 1) + 1
+            else:
+                # Остальные пары: сдвигаем по кругу
+                p1_index = (i + round_num) % (n - 1) + 1
+                p2_index = (n - 1 - i + round_num) % (n - 1) + 1
+            
+            participant1 = participants_list[p1_index]
+            participant2 = participants_list[p2_index]
+            
+            # Пропускаем матчи с фиктивным участником "отдых"
+            if participant1.id == -1 or participant2.id == -1:
+                continue
+                
+            round_matches.append((participant1, participant2))
         
-        match_date, match_time = best_time
+        # Распределяем матчи тура по времени и площадкам
+        for i, (participant1, participant2) in enumerate(round_matches):
+            # Выбираем площадку (циклически)
+            court_number = (i % max_courts) + 1
+            
+            # Создаем матч
+            match = Match(
+                tournament_id=tournament.id,
+                participant1_id=participant1.id,
+                participant2_id=participant2.id,
+                match_date=current_date,
+                match_time=current_time,
+                court_number=court_number,
+                match_number=match_number,
+                status='запланирован'
+            )
+            
+            db.session.add(match)
+            matches.append(match)
+            
+            # Обновляем время для следующего матча
+            current_datetime = datetime.combine(current_date, current_time)
+            next_time = current_datetime + timedelta(minutes=match_duration + break_duration)
+            current_time = next_time.time()
+            
+            # Если время больше времени окончания, переходим на следующий день
+            if current_time > end_time:
+                current_date = current_date + timedelta(days=1)
+                current_time = start_time
+            
+            match_number += 1
         
-        # Создаем матч
-        match = Match(
-            tournament_id=tournament.id,
-            participant1_id=participant1.id,
-            participant2_id=participant2.id,
-            match_date=match_date,
-            match_time=match_time,
-            court_number=best_court,
-            match_number=match_number,
-            status='запланирован'
-        )
-        
-        db.session.add(match)
-        matches.append(match)
-        
-        # Обновляем статистику участников
-        participant_matches[participant1.id].append((match_date, match_time, match_duration))
-        participant_matches[participant2.id].append((match_date, match_time, match_duration))
-        
-        # Обновляем расписание площадки
-        court_schedule[best_court].append((match_date, match_time, match_duration))
-        
-        # Обновляем время для следующего матча
-        current_datetime = datetime.combine(match_date, match_time)
-        next_time = current_datetime + timedelta(minutes=match_duration + break_duration)
-        current_date = next_time.date()
-        current_time = next_time.time()
-        
-        # Если время больше 18:00, переходим на следующий день
-        if current_time > datetime.strptime("18:00", "%H:%M").time():
-            current_date = current_date + timedelta(days=1)
-            current_time = datetime.strptime("09:00", "%H:%M").time()
-        
-        match_number += 1
+        # После каждого тура переходим на следующий день
+        current_date = current_date + timedelta(days=1)
+        current_time = start_time
     
     db.session.commit()
-    logger.info(f"Создано {len(matches)} матчей для турнира {tournament.name}")
+    logger.info(f"Создано {len(matches)} матчей для турнира {tournament.name} по круговой схеме")
     return matches
 
 def find_best_time_slot(participant1, participant2, participant_matches, 

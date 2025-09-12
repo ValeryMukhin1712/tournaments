@@ -135,6 +135,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 court_count=data.get('court_count', 3),
                 match_duration=data.get('match_duration', 60),
                 break_duration=data.get('break_duration', 15),
+                start_time=datetime.strptime(data.get('start_time', '09:00'), '%H:%M').time(),
+                end_time=datetime.strptime(data.get('end_time', '17:00'), '%H:%M').time(),
                 points_win=data.get('points_win', 3),
                 points_draw=data.get('points_draw', 1),
                 points_loss=data.get('points_loss', 0),

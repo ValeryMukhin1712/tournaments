@@ -144,6 +144,20 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="startTime" class="form-label">Время начала матчей</label>
+                                <input type="time" class="form-control" id="startTime" value="09:00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="endTime" class="form-label">Время окончания матчей</label>
+                                <input type="time" class="form-control" id="endTime" value="17:00">
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Система подсчета очков -->
                     <div class="mb-3">
@@ -365,6 +379,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 court_count: parseInt(document.getElementById('courtCount').value),
                 match_duration: parseInt(document.getElementById('matchDuration').value),
                 break_duration: parseInt(document.getElementById('breakDuration').value),
+                start_time: document.getElementById('startTime').value,
+                end_time: document.getElementById('endTime').value,
                 points_win: parseInt(document.getElementById('pointsWin').value),
                 points_draw: parseInt(document.getElementById('pointsDraw').value),
                 points_loss: parseInt(document.getElementById('pointsLoss').value),
