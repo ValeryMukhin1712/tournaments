@@ -75,7 +75,7 @@
                     </li>
                     {% if current_user.role in ['администратор', 'доверенный_участник'] %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('users_list') }}">Пользователи</a>
+                        <a class="nav-link" href="{{ url_for('users_list') }}">Участники</a>
                     </li>
                     {% endif %}
                     {% endif %}

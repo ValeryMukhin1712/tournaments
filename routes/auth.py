@@ -46,6 +46,6 @@ def create_auth_routes(app, db, User):
     def logout():
         username = current_user.username
         logout_user()
-        logger.info(f"Пользователь {username} вышел из системы")
+        logger.info(f"Участник {username} вышел из системы")
         flash('Вы успешно вышли из системы', 'info')
         return redirect(url_for('login'))

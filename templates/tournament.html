@@ -1111,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Пользователь успешно создан! Теперь вы можете войти в систему.');
+                    alert('Участник успешно создан! Теперь вы можете войти в систему.');
                     bootstrap.Modal.getInstance(document.getElementById('registerUserModal')).hide();
                     // Перенаправляем на страницу входа
                     window.location.href = '/login';

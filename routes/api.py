@@ -24,7 +24,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         
         # Проверяем, существует ли пользователь
         if User.query.filter_by(username=data['username']).first():
-            return jsonify({'error': 'Пользователь с таким именем уже существует'}), 400
+            return jsonify({'error': 'Участник с таким именем уже существует'}), 400
         
         try:
             # Создаем нового пользователя
@@ -36,9 +36,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.add(user)
             db.session.commit()
             
-            logger.info(f"Создан новый пользователь: {data['username']} (ID: {user.id})")
+            logger.info(f"Создан новый участник: {data['username']} (ID: {user.id})")
             return jsonify({
-                'message': 'Пользователь успешно создан',
+                'message': 'Участник успешно создан',
                 'user': {
                     'id': user.id,
                     'username': user.username,
@@ -109,8 +109,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         db.session.delete(user)
         db.session.commit()
         
-        logger.info(f"Пользователь {username} удален")
-        return jsonify({'message': 'Пользователь успешно удален'})
+        logger.info(f"Участник {username} удален")
+        return jsonify({'message': 'Участник успешно удален'})
 
     # ===== ТУРНИРЫ =====
     
@@ -217,7 +217,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             ).first()
             
             if existing_user_participant:
-                return jsonify({'error': f'Пользователь уже участвует в турнире'}), 400
+                return jsonify({'error': f'Участник уже участвует в турнире'}), 400
         
         try:
             participant = Participant(
@@ -230,6 +230,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.commit()
             
             logger.info(f"Добавлен участник {data['name']} в турнир {tournament.name}")
+            
+            # Автоматически генерируем расписание после добавления участника
+            from routes.main import generate_tournament_schedule
+            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            if len(participants) >= 2:
+                try:
+                    generate_tournament_schedule(participants, tournament, db, Match)
+                    logger.info(f"Расписание автоматически обновлено для турнира {tournament.name}")
+                except Exception as e:
+                    logger.error(f"Ошибка при генерации расписания: {str(e)}")
+            
             return jsonify({
                 'message': 'Участник успешно добавлен',
                 'participant': {
@@ -291,6 +302,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Удаляем самого участника
             db.session.delete(participant)
             db.session.commit()
+            
+            # Автоматически генерируем расписание после удаления участника
+            from routes.main import generate_tournament_schedule
+            tournament = Tournament.query.get(tournament_id)
+            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            if len(participants) >= 2:
+                try:
+                    generate_tournament_schedule(participants, tournament, db, Match)
+                    logger.info(f"Расписание автоматически обновлено после удаления участника из турнира {tournament.name}")
+                except Exception as e:
+                    logger.error(f"Ошибка при генерации расписания после удаления участника: {str(e)}")
             
             logger.info(f"Участник {participant_name} и {len(matches_to_delete)} связанных матчей удалены из турнира {tournament_id}")
             return jsonify({'message': 'Участник успешно удален'})

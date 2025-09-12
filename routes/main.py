@@ -337,9 +337,11 @@ def generate_tournament_schedule(participants, tournament, db, Match):
             
             match_number += 1
         
-        # После каждого тура переходим на следующий день
-        current_date = current_date + timedelta(days=1)
-        current_time = start_time
+        # После каждого тура проверяем, нужно ли переходить на следующий день
+        # Если текущее время превышает время окончания, переходим на следующий день
+        if current_time > end_time:
+            current_date = current_date + timedelta(days=1)
+            current_time = start_time
     
     db.session.commit()
     logger.info(f"Создано {len(matches)} матчей для турнира {tournament.name} по круговой схеме")
