@@ -26,7 +26,7 @@
                                  {% if current_user.is_authenticated %}
                      {% if current_user.role in ['администратор', 'доверенный_участник'] %}
                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
-                         <i class="fas fa-user-plus me-2"></i>Добавить участника
+                         <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
                      </button>
                      {% endif %}
                      {% if current_user.role == 'администратор' %}
@@ -407,7 +407,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Добавить участника</h5>
+                <h5 class="modal-title">Добавить участника в турнир</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -662,16 +662,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('1. Преобразование response.json() - статус:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('2. Данные ответа:', data);
                 if (data.success) {
+                    console.log('3. СТАРТ ВЕТКИ "УСПЕШНЫЙ СЦЕНАРИЙ"');
                     alert('Участник добавлен!');
                     location.reload();
                 } else {
+                    console.log('4. СЦЕНАРИЙ ОШИБОК - data.success = false, error:', data.error);
                     alert('Ошибка: ' + data.error);
                 }
             })
             .catch(error => {
+                console.log('5. СЦЕНАРИЙ ОШИБОК - catch блок, error:', error);
                 alert('Ошибка при добавлении участника: ' + error);
             });
         });
@@ -858,7 +865,7 @@ function addSelectedUsers() {
         
         let message = '';
         if (addedCount > 0) {
-            message += `Успешно добавлено: ${addedCount} пользователей. `;
+            message += `Успешно добавлено: ${addedCount} участников. `;
         }
         if (errorCount > 0) {
             message += `Ошибок: ${errorCount}. `;
@@ -1063,15 +1070,20 @@ function deleteParticipant(participantId, participantName) {
             }
         })
         .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Ошибка сервера: ' + response.status);
+            console.log('Статус ответа:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            return response.json();
         })
         .then(data => {
-            alert('Участник успешно удален!');
-            location.reload();
+            console.log('Данные ответа:', data);
+            if (data.success) {
+                alert('Участник успешно удален!');
+                location.reload();
+            } else {
+                alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+            }
         })
         .catch(error => {
             console.error('Ошибка при удалении участника:', error);

@@ -303,19 +303,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.delete(participant)
             db.session.commit()
             
-            # Автоматически генерируем расписание после удаления участника
-            from routes.main import generate_tournament_schedule
-            tournament = Tournament.query.get(tournament_id)
-            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-            if len(participants) >= 2:
-                try:
-                    generate_tournament_schedule(participants, tournament, db, Match)
-                    logger.info(f"Расписание автоматически обновлено после удаления участника из турнира {tournament.name}")
-                except Exception as e:
-                    logger.error(f"Ошибка при генерации расписания после удаления участника: {str(e)}")
-            
             logger.info(f"Участник {participant_name} и {len(matches_to_delete)} связанных матчей удалены из турнира {tournament_id}")
-            return jsonify({'message': 'Участник успешно удален'})
+            
+            return jsonify({'success': True, 'message': 'Участник успешно удален'})
             
         except Exception as e:
             db.session.rollback()
