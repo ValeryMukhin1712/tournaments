@@ -189,7 +189,14 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 'match_number': match.match_number,
                 'status': match.status,
                 'created_at': match.created_at.isoformat(),
-                'updated_at': match.updated_at.isoformat()
+                'updated_at': match.updated_at.isoformat(),
+                # Данные сетов
+                'set1_score1': match.set1_score1,
+                'set1_score2': match.set1_score2,
+                'set2_score1': match.set2_score1,
+                'set2_score2': match.set2_score2,
+                'set3_score1': match.set3_score1,
+                'set3_score2': match.set3_score2
             }
         })
 
@@ -278,7 +285,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         db.session.commit()
         
         logger.info(f"Турнир {tournament_name} удален")
-        return jsonify({'message': 'Турнир успешно удален'})
+        return jsonify({'success': True, 'message': 'Турнир успешно удален'})
 
     @app.route('/api/tournaments/<int:tournament_id>/participants/<int:participant_id>', methods=['DELETE'])
     @login_required
@@ -389,11 +396,24 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     else:
                         match.winner_id = None  # Ничья
                 
-                # Для обратной совместимости сохраняем результаты первого сета
-                if len(sets_data) > 0:
-                    first_set = sets_data[0]
-                    match.score1 = first_set.get('score1', 0)
-                    match.score2 = first_set.get('score2', 0)
+                # Сохраняем данные всех сетов
+                for set_data in sets_data:
+                    set_number = set_data.get('set_number', 1)
+                    score1 = set_data.get('score1', 0)
+                    score2 = set_data.get('score2', 0)
+                    
+                    if set_number == 1:
+                        match.set1_score1 = score1
+                        match.set1_score2 = score2
+                        # Для обратной совместимости сохраняем результаты первого сета
+                        match.score1 = score1
+                        match.score2 = score2
+                    elif set_number == 2:
+                        match.set2_score1 = score1
+                        match.set2_score2 = score2
+                    elif set_number == 3:
+                        match.set3_score1 = score1
+                        match.set3_score2 = score2
                 
                 match.status = 'завершен'
                 
@@ -482,7 +502,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         db.session.commit()
         
         logger.info(f"Матч {match_id} удален")
-        return jsonify({'message': 'Матч успешно удален'})
+        return jsonify({'success': True, 'message': 'Матч успешно удален'})
 
     # ===== ДОПОЛНИТЕЛЬНЫЕ ENDPOINTS =====
     
@@ -534,7 +554,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             if success:
                 logger.info(f"Отладочный файл создан для турнира {tournament_id}")
-                return jsonify({'message': f'Отладочный файл создан: debug_chessboard_{tournament_id}.txt'})
+                return jsonify({'success': True, 'message': f'Отладочный файл создан: debug_chessboard_{tournament_id}.txt'})
             else:
                 return jsonify({'error': 'Ошибка при создании отладочного файла'}), 500
         except Exception as e:
