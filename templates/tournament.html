@@ -64,14 +64,14 @@
                                  <th>Ничьих</th>
                                  <th>Поражений</th>
                                  <th>Очки</th>
-                                 <th>Разница мячей</th>
+                                 <th>Разница очков</th>
                                  <th>Действия</th>
                              </tr>
                          </thead>
                         <tbody>
                             {% for participant in participants %}
                             <tr>
-                                <td>{{ loop.index }}</td>
+                                <td>{{ positions[participant.id] }}</td>
                                 <td>
                                     <strong>{{ participant.name }}</strong>
                                     {% if participant.is_team %}
@@ -138,9 +138,27 @@
                                         {% set cell_data = chessboard[p1.id][p2.id] %}
                                         {% if cell_data.type == 'result' %}
                                             <div class="d-flex flex-column align-items-center">
-                                                <span class="badge bg-success mb-1">{{ cell_data.value }}</span>
-                                                {% if cell_data.sets_score %}
-                                                <small class="text-muted">{{ cell_data.sets_score }}</small>
+                                                {% if cell_data.is_winner %}
+                                                    <span class="badge bg-success text-white mb-1">{{ cell_data.value }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary text-white mb-1">{{ cell_data.value }}</span>
+                                                {% endif %}
+                                                {% if cell_data.sets_details %}
+                                                <small class="text-muted">{{ cell_data.sets_details }}</small>
+                                                {% endif %}
+                                                {% if cell_data.editable and current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                                <button class="btn btn-sm btn-outline-warning" 
+                                                        onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
+                                                        title="Редактировать результат">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        {% elif cell_data.type == 'in_progress' %}
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge bg-warning text-dark mb-1">{{ cell_data.value }}</span>
+                                                {% if cell_data.sets_details %}
+                                                <small class="text-muted">{{ cell_data.sets_details }}</small>
                                                 {% endif %}
                                                 {% if cell_data.editable and current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
                                                 <button class="btn btn-sm btn-outline-warning" 
@@ -275,9 +293,13 @@
                                     </td>
                                     <td class="text-center">
                                         {% if match.score %}
-                                            <span class="badge bg-success">{{ match.score }}</span>
-                                            {% if match.sets_score %}
-                                            <br><small class="text-muted">{{ match.sets_score }}</small>
+                                            {% if match.status == 'завершен' %}
+                                                <span class="badge bg-success text-white">{{ match.score }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">{{ match.score }}</span>
+                                            {% endif %}
+                                            {% if match.sets_details %}
+                                            <br><small class="text-muted">{{ match.sets_details }}</small>
                                             {% endif %}
                                         {% else %}
                                             <span class="text-muted">—</span>

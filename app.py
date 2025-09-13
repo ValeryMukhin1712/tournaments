@@ -228,12 +228,7 @@ register_routes(app, db, User, Tournament, Participant, Match, Notification, Mat
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Выполняем миграцию при запуске приложения (для Railway)
-with app.app_context():
-    try:
-        migrate_database()
-    except Exception as e:
-        print(f"Ошибка при выполнении миграции: {e}")
+# Миграция будет выполнена в функции init_db()
 
 # Функция инициализации базы данных
 def init_db():

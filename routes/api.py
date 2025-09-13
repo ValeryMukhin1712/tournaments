@@ -415,37 +415,54 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                         match.set3_score1 = score1
                         match.set3_score2 = score2
                 
-                match.status = 'завершен'
-                
-                # Начисляем очки участникам матча
-                tournament = Tournament.query.get(match.tournament_id)
-                if tournament:
-                    # Получаем участников конкретного матча
-                    participant1 = Participant.query.get(match.participant1_id)
-                    participant2 = Participant.query.get(match.participant2_id)
+                # Определяем статус матча на основе выигранных сетов
+                if 'sets_won_1' in data and 'sets_won_2' in data:
+                    sets_won_1 = data['sets_won_1']
+                    sets_won_2 = data['sets_won_2']
                     
-                    if participant1 and participant2:
-                        # Сбрасываем очки участников (убираем старые очки за этот матч)
-                        # Это нужно для корректного пересчета при изменении результата
-                        participant1.points = (participant1.points or 0)
-                        participant2.points = (participant2.points or 0)
+                    # Если счёт 1:1, матч ещё не завершён
+                    if sets_won_1 == 1 and sets_won_2 == 1:
+                        match.status = 'играют'
+                    # Если кто-то выиграл 2 сета, матч завершён
+                    elif sets_won_1 >= 2 or sets_won_2 >= 2:
+                        match.status = 'завершен'
+                    # Если счёт 0:0 или 1:0/0:1, матч в процессе
+                    else:
+                        match.status = 'играют'
+                else:
+                    # Если нет данных о выигранных сетах, считаем матч завершённым
+                    match.status = 'завершен'
+                
+                # Начисляем очки участникам матча только если матч завершён
+                if match.status == 'завершен':
+                    tournament = Tournament.query.get(match.tournament_id)
+                    if tournament:
+                        # Получаем участников конкретного матча
+                        participant1 = Participant.query.get(match.participant1_id)
+                        participant2 = Participant.query.get(match.participant2_id)
                         
-                        # Начисляем очки за результат матча
-                        if match.winner_id == participant1.id:
-                            # Участник 1 победил
-                            participant1.points += (tournament.points_win or 3)
-                            participant2.points += (tournament.points_loss or 0)
-                        elif match.winner_id == participant2.id:
-                            # Участник 2 победил
-                            participant2.points += (tournament.points_win or 3)
-                            participant1.points += (tournament.points_loss or 0)
-                        else:
-                            # Ничья
-                            participant1.points += (tournament.points_draw or 1)
-                            participant2.points += (tournament.points_draw or 1)
-                        
-                        db.session.commit()
-                        logger.info(f"Начислены очки за матч {match_id}: участник {participant1.name} = {participant1.points}, участник {participant2.name} = {participant2.points}")
+                        if participant1 and participant2:
+                            # Сбрасываем очки участников (убираем старые очки за этот матч)
+                            # Это нужно для корректного пересчета при изменении результата
+                            participant1.points = (participant1.points or 0)
+                            participant2.points = (participant2.points or 0)
+                            
+                            # Начисляем очки за результат матча
+                            if match.winner_id == participant1.id:
+                                # Участник 1 победил
+                                participant1.points += (tournament.points_win or 3)
+                                participant2.points += (tournament.points_loss or 0)
+                            elif match.winner_id == participant2.id:
+                                # Участник 2 победил
+                                participant2.points += (tournament.points_win or 3)
+                                participant1.points += (tournament.points_loss or 0)
+                            else:
+                                # Ничья
+                                participant1.points += (tournament.points_draw or 1)
+                                participant2.points += (tournament.points_draw or 1)
+                            
+                            db.session.commit()
+                            logger.info(f"Начислены очки за матч {match_id}: участник {participant1.name} = {participant1.points}, участник {participant2.name} = {participant2.points}")
             else:
                 # Обратная совместимость со старой структурой
                 if 'score1' in data:
