@@ -154,8 +154,12 @@ def calculate_sets_score(match):
     if not match or match.status != 'завершен':
         return None
     
-    # Пока используем простую логику - в будущем можно расширить для хранения данных сетов
-    # Для демонстрации считаем, что если есть score1 и score2, то это результат первого сета
+    # Используем поля sets_won_1 и sets_won_2 для отображения общего счета по сетам
+    if match.sets_won_1 is not None and match.sets_won_2 is not None:
+        return f"{match.sets_won_1}:{match.sets_won_2}"
+    
+    # Если поля sets_won не заполнены, но есть данные о счете первого сета
+    # (для обратной совместимости со старыми данными)
     if match.score1 is not None and match.score2 is not None:
         # Определяем победителя первого сета
         if match.score1 > match.score2:
@@ -164,6 +168,7 @@ def calculate_sets_score(match):
             return "0:1"  # Участник 2 выиграл первый сет
         else:
             return "0:0"  # Ничья (не должно происходить по правилам)
+    
     return None
 
 def create_chessboard(participants, matches):
@@ -189,13 +194,18 @@ def create_chessboard(participants, matches):
                 
                 if match:
                     if match.status == 'завершен':
-                        if match.participant1_id == p1.id:
-                            score = f"{match.score1}:{match.score2}"
-                        else:
-                            score = f"{match.score2}:{match.score1}"
-                        
                         # Рассчитываем счет сетов
                         sets_score = calculate_sets_score(match)
+                        
+                        # Используем счет сетов как основной отображаемый счет
+                        if sets_score:
+                            score = sets_score
+                        else:
+                            # Fallback на счет первого сета для старых данных
+                            if match.participant1_id == p1.id:
+                                score = f"{match.score1}:{match.score2}"
+                            else:
+                                score = f"{match.score2}:{match.score1}"
                         
                         chessboard[p1.id][p2.id] = {
                             'type': 'result',
@@ -435,6 +445,14 @@ def create_tournament_schedule_display(matches, participants):
         # Рассчитываем счет сетов
         sets_score = calculate_sets_score(match)
         
+        # Определяем отображаемый счет
+        display_score = None
+        if match.status == 'завершен':
+            if sets_score:
+                display_score = sets_score
+            elif match.score1 is not None and match.score2 is not None:
+                display_score = f"{match.score1}:{match.score2}"
+        
         match_info = {
             'id': match.id,
             'global_number': getattr(match, 'global_match_number', match.match_number or 0),
@@ -443,7 +461,7 @@ def create_tournament_schedule_display(matches, participants):
             'participant1': participant1_name,
             'participant2': participant2_name,
             'status': match.status,
-            'score': f"{match.score1}:{match.score2}" if match.score1 is not None and match.score2 is not None else None,
+            'score': display_score,
             'sets_score': sets_score,
             'match_number': match.match_number
         }

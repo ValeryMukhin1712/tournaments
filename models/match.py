@@ -16,6 +16,13 @@ def create_match_model(db):
         score = db.Column(db.String(20))  # результат матча в формате "2:1"
         sets_won_1 = db.Column(db.Integer, default=0)  # количество выигранных сетов участником 1
         sets_won_2 = db.Column(db.Integer, default=0)  # количество выигранных сетов участником 2
+        # Данные сетов
+        set1_score1 = db.Column(db.Integer)  # счет первого сета участника 1
+        set1_score2 = db.Column(db.Integer)  # счет первого сета участника 2
+        set2_score1 = db.Column(db.Integer)  # счет второго сета участника 1
+        set2_score2 = db.Column(db.Integer)  # счет второго сета участника 2
+        set3_score1 = db.Column(db.Integer)  # счет третьего сета участника 1
+        set3_score2 = db.Column(db.Integer)  # счет третьего сета участника 2
         winner_id = db.Column(db.Integer, db.ForeignKey('participant.id'))
         match_date = db.Column(db.Date)
         match_time = db.Column(db.Time)

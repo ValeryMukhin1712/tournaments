@@ -11,6 +11,7 @@ import os
 import logging
 import secrets
 import sqlite3
+from sqlalchemy import create_engine, text, inspect
 
 # Импорт конфигурации
 from config import DevelopmentConfig, ProductionConfig
@@ -20,6 +21,73 @@ from models import create_models
 
 # Импорт и регистрация маршрутов
 from routes import register_routes
+
+def migrate_database():
+    """Выполняет миграцию базы данных, добавляя недостающие колонки"""
+    try:
+        # Получаем URL базы данных
+        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+        print(f"🔧 Выполняем миграцию базы данных: {db_uri}")
+        
+        # Создаем подключение
+        engine = create_engine(db_uri)
+        
+        with engine.connect() as conn:
+            # Проверяем существование таблиц
+            inspector = inspect(engine)
+            tables = inspector.get_table_names()
+            
+            print(f"📋 Найденные таблицы: {tables}")
+            
+            # Добавляем колонку points в таблицу participant
+            if 'participant' in tables:
+                try:
+                    # Проверяем, существует ли колонка points
+                    columns = inspector.get_columns('participant')
+                    column_names = [col['name'] for col in columns]
+                    
+                    if 'points' not in column_names:
+                        print("➕ Добавляем колонку 'points' в таблицу 'participant'...")
+                        conn.execute(text("ALTER TABLE participant ADD COLUMN points INTEGER DEFAULT 0"))
+                        conn.commit()
+                        print("✅ Колонка 'points' успешно добавлена")
+                    else:
+                        print("✅ Колонка 'points' уже существует в таблице 'participant'")
+                        
+                except Exception as e:
+                    print(f"❌ Ошибка при добавлении колонки 'points': {e}")
+            
+            # Добавляем колонки для сетов в таблицу match
+            if 'match' in tables:
+                try:
+                    columns = inspector.get_columns('match')
+                    column_names = [col['name'] for col in columns]
+                    
+                    # Добавляем колонки для сетов
+                    set_columns = [
+                        'set1_score1', 'set1_score2',
+                        'set2_score1', 'set2_score2', 
+                        'set3_score1', 'set3_score2'
+                    ]
+                    
+                    for col in set_columns:
+                        if col not in column_names:
+                            print(f"➕ Добавляем колонку '{col}' в таблицу 'match'...")
+                            conn.execute(text(f"ALTER TABLE match ADD COLUMN {col} INTEGER DEFAULT 0"))
+                            conn.commit()
+                            print(f"✅ Колонка '{col}' успешно добавлена")
+                        else:
+                            print(f"✅ Колонка '{col}' уже существует в таблице 'match'")
+                            
+                except Exception as e:
+                    print(f"❌ Ошибка при добавлении колонок сетов: {e}")
+        
+        print("🎉 Миграция базы данных завершена успешно!")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Ошибка при миграции базы данных: {e}")
+        return False
 
 def check_missing_fields():
     """Проверяет и выводит недостающие поля в базе данных"""
@@ -48,7 +116,8 @@ def check_missing_fields():
                 'participant': ['id', 'tournament_id', 'user_id', 'name', 'is_team', 'points', 'registered_at'],
                 'match': ['id', 'tournament_id', 'participant1_id', 'participant2_id', 'match_date', 
                          'match_time', 'court_number', 'match_number', 'score1', 'score2', 'score', 
-                         'sets_won_1', 'sets_won_2', 'winner_id', 'status', 'created_at', 'updated_at'],
+                         'sets_won_1', 'sets_won_2', 'winner_id', 'status', 'created_at', 'updated_at',
+                         'set1_score1', 'set1_score2', 'set2_score1', 'set2_score2', 'set3_score1', 'set3_score2'],
                 'notification': ['id', 'user_id', 'message', 'is_read', 'created_at'],
                 'match_log': ['id', 'match_id', 'action', 'details', 'created_at']
             }
@@ -159,10 +228,25 @@ register_routes(app, db, User, Tournament, Participant, Match, Notification, Mat
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Выполняем миграцию при запуске приложения (для Railway)
+with app.app_context():
+    try:
+        migrate_database()
+    except Exception as e:
+        print(f"Ошибка при выполнении миграции: {e}")
+
 # Функция инициализации базы данных
 def init_db():
     with app.app_context():
         try:
+            # Сначала выполняем миграцию базы данных
+            print("\n" + "="*60)
+            print("🔧 ВЫПОЛНЕНИЕ МИГРАЦИИ БАЗЫ ДАННЫХ")
+            print("="*60)
+            migrate_database()
+            print("="*60 + "\n")
+            
+            # Создаем таблицы
             db.create_all()
             
             # Создание администратора по умолчанию
