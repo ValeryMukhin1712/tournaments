@@ -89,7 +89,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Добавить пользователя</h5>
+                <h5 class="modal-title">Добавить участника</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -215,16 +215,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ role: newRole })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Статус ответа при изменении роли:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Данные ответа при изменении роли:', data);
                 if (data.success) {
                     alert('Роль пользователя успешно изменена!');
                     location.reload();
                 } else {
-                    alert('Ошибка: ' + data.error);
+                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
                 }
             })
             .catch(error => {
+                console.error('Ошибка при изменении роли:', error);
                 alert('Ошибка при изменении роли: ' + error);
             });
         });

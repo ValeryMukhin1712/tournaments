@@ -69,7 +69,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         db.session.commit()
         
         logger.info(f"Роль пользователя {user.username} изменена с {old_role} на {user.role}")
-        return jsonify({'message': 'Роль успешно изменена'})
+        return jsonify({'success': True, 'message': 'Роль успешно изменена'})
 
     @app.route('/api/users', methods=['GET'])
     @login_required
@@ -179,6 +179,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 'participant2_id': match.participant2_id,
                 'score1': match.score1,
                 'score2': match.score2,
+                'score': match.score,
+                'sets_won_1': match.sets_won_1,
+                'sets_won_2': match.sets_won_2,
                 'winner_id': match.winner_id,
                 'match_date': match.match_date.isoformat() if match.match_date else None,
                 'match_time': match.match_time.isoformat() if match.match_time else None,
@@ -199,7 +202,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         data = request.get_json()
         
         if not data or not data.get('name'):
-            return jsonify({'error': 'Необходимо имя участника'}), 400
+            return jsonify({'success': False, 'error': 'Необходимо имя участника'}), 400
         
         # Проверяем дубликаты
         existing_participant = Participant.query.filter_by(
@@ -208,7 +211,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         ).first()
         
         if existing_participant:
-            return jsonify({'error': f'Участник с именем "{data["name"]}" уже существует в турнире'}), 400
+            return jsonify({'success': False, 'error': f'Участник с именем "{data["name"]}" уже существует в турнире'}), 400
         
         # Если указан user_id, проверяем, что пользователь не участвует в турнире
         if data.get('user_id'):
@@ -218,7 +221,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             ).first()
             
             if existing_user_participant:
-                return jsonify({'error': f'Участник уже участвует в турнире'}), 400
+                return jsonify({'success': False, 'error': f'Участник уже участвует в турнире'}), 400
         
         try:
             participant = Participant(
@@ -243,6 +246,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     logger.error(f"Ошибка при генерации расписания: {str(e)}")
             
             return jsonify({
+                'success': True,
                 'message': 'Участник успешно добавлен',
                 'participant': {
                     'id': participant.id,
@@ -254,7 +258,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при добавлении участника: {str(e)}")
-            return jsonify({'error': 'Ошибка при добавлении участника'}), 500
+            return jsonify({'success': False, 'error': 'Ошибка при добавлении участника'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>', methods=['DELETE'])
     @login_required
@@ -364,21 +368,64 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Обработка новой структуры с сетами
             if 'sets' in data and data['sets']:
                 sets_data = data['sets']
-                # Берем результаты из первого сета для обратной совместимости
+                
+                # Сохраняем результат матча в формате "2:1"
+                if 'result' in data:
+                    match.score = data['result']
+                
+                # Определяем победителя на основе выигранных сетов
+                if 'sets_won_1' in data and 'sets_won_2' in data:
+                    sets_won_1 = data['sets_won_1']
+                    sets_won_2 = data['sets_won_2']
+                    
+                    # Сохраняем количество выигранных сетов
+                    match.sets_won_1 = sets_won_1
+                    match.sets_won_2 = sets_won_2
+                    
+                    if sets_won_1 > sets_won_2:
+                        match.winner_id = match.participant1_id
+                    elif sets_won_2 > sets_won_1:
+                        match.winner_id = match.participant2_id
+                    else:
+                        match.winner_id = None  # Ничья
+                
+                # Для обратной совместимости сохраняем результаты первого сета
                 if len(sets_data) > 0:
                     first_set = sets_data[0]
                     match.score1 = first_set.get('score1', 0)
                     match.score2 = first_set.get('score2', 0)
+                
+                match.status = 'завершен'
+                
+                # Начисляем очки участникам матча
+                tournament = Tournament.query.get(match.tournament_id)
+                if tournament:
+                    # Получаем участников конкретного матча
+                    participant1 = Participant.query.get(match.participant1_id)
+                    participant2 = Participant.query.get(match.participant2_id)
                     
-                    # Определяем победителя
-                    if match.score1 > match.score2:
-                        match.winner_id = match.participant1_id
-                    elif match.score2 > match.score1:
-                        match.winner_id = match.participant2_id
-                    else:
-                        match.winner_id = None  # Ничья
-                    
-                    match.status = 'завершен'
+                    if participant1 and participant2:
+                        # Сбрасываем очки участников (убираем старые очки за этот матч)
+                        # Это нужно для корректного пересчета при изменении результата
+                        participant1.points = (participant1.points or 0)
+                        participant2.points = (participant2.points or 0)
+                        
+                        # Начисляем очки за результат матча
+                        if match.winner_id == participant1.id:
+                            # Участник 1 победил
+                            participant1.points += (tournament.points_win or 3)
+                            participant2.points += (tournament.points_loss or 0)
+                        elif match.winner_id == participant2.id:
+                            # Участник 2 победил
+                            participant2.points += (tournament.points_win or 3)
+                            participant1.points += (tournament.points_loss or 0)
+                        else:
+                            # Ничья
+                            participant1.points += (tournament.points_draw or 1)
+                            participant2.points += (tournament.points_draw or 1)
+                        
+                        db.session.commit()
+                        logger.info(f"Начислены очки за матч {match_id}: участник {participant1.name} = {participant1.points}, участник {participant2.name} = {participant2.points}")
             else:
                 # Обратная совместимость со старой структурой
                 if 'score1' in data:
@@ -389,6 +436,28 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     match.winner_id = data['winner_id']
                 if 'status' in data:
                     match.status = data['status']
+                
+                # Начисляем очки для старой структуры
+                if match.status == 'завершен' and match.winner_id:
+                    tournament = Tournament.query.get(match.tournament_id)
+                    if tournament:
+                        participant1 = Participant.query.get(match.participant1_id)
+                        participant2 = Participant.query.get(match.participant2_id)
+                        
+                        if participant1 and participant2:
+                            if match.winner_id == participant1.id:
+                                participant1.points = (participant1.points or 0) + (tournament.points_win or 3)
+                                participant2.points = (participant2.points or 0) + (tournament.points_loss or 0)
+                            elif match.winner_id == participant2.id:
+                                participant2.points = (participant2.points or 0) + (tournament.points_win or 3)
+                                participant1.points = (participant1.points or 0) + (tournament.points_loss or 0)
+                            else:
+                                # Ничья
+                                participant1.points = (participant1.points or 0) + (tournament.points_draw or 1)
+                                participant2.points = (participant2.points or 0) + (tournament.points_draw or 1)
+                            
+                            db.session.commit()
+                            logger.info(f"Начислены очки за матч {match_id} (старая структура)")
             
             match.updated_at = datetime.utcnow()
             db.session.commit()

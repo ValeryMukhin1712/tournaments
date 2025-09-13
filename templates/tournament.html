@@ -142,7 +142,7 @@
                                                 {% if cell_data.sets_score %}
                                                 <small class="text-muted">{{ cell_data.sets_score }}</small>
                                                 {% endif %}
-                                                {% if cell_data.editable %}
+                                                {% if cell_data.editable and current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
                                                 <button class="btn btn-sm btn-outline-warning" 
                                                         onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
                                                         title="Редактировать результат">
@@ -192,11 +192,15 @@
                                                   {% endif %}
                                               </div>
                                         {% elif cell_data.type == 'empty' %}
+                                            {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
                                             <button class="btn btn-outline-primary btn-sm" 
                                                     onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
                                                     style="min-width: 60px;">
                                                 <i class="fas fa-plus"></i>
                                             </button>
+                                            {% else %}
+                                            <span class="text-muted">—</span>
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 </td>
@@ -289,11 +293,15 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
+                                        {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
                                         <button class="btn btn-sm btn-outline-primary" 
                                                 onclick="openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', 0, 0)"
                                                 title="Редактировать матч">
                                             <i class="fas fa-edit"></i>
                                         </button>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -357,7 +365,7 @@
                     </div>
                     
                     <!-- Сет 2 -->
-                    <div class="mb-3" id="set2Container" style="display: none;">
+                    <div class="mb-3" id="set2Container">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-info me-2">Сет 2</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
@@ -373,17 +381,17 @@
                     </div>
                     
                     <!-- Сет 3 -->
-                    <div class="mb-3" id="set3Container" style="display: none;">
+                    <div class="mb-3" id="set3Container">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-warning me-2">Сет 3</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <input type="number" class="form-control set-score" id="set3Score1" name="set3_score1" min="0" value="{{ tournament.points_to_win }}">
+                                <input type="number" class="form-control set-score" id="set3Score1" name="set3_score1" min="0" value="">
                             </div>
                             <div class="col-6">
-                                <input type="number" class="form-control set-score" id="set3Score2" name="set3_score2" min="0" value="{{ tournament.points_to_win }}">
+                                <input type="number" class="form-control set-score" id="set3Score2" name="set3_score2" min="0" value="">
                             </div>
                         </div>
                     </div>
@@ -577,36 +585,57 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                 // Если есть существующие результаты, заполняем их
                 if (data.match.score1 !== null && data.match.score2 !== null) {
                     console.log('Загружаем существующие результаты:', data.match.score1, ':', data.match.score2);
-                    document.getElementById('set1Score1').value = data.match.score1;
-                    document.getElementById('set1Score2').value = data.match.score2;
+                    console.log('Результат матча:', data.match.score);
+                    console.log('Выигранные сеты:', data.match.sets_won_1, ':', data.match.sets_won_2);
                     
-                    // Если матч завершен, показываем все сеты для редактирования
-                    if (data.match.status === 'завершен') {
-                        // Показываем все сеты для завершенных матчей
-                        document.getElementById('set2Container').style.display = 'block';
-                        document.getElementById('set3Container').style.display = 'block';
-                        
-                        // Заполняем дополнительные сеты (пока используем те же данные)
-                        document.getElementById('set2Score1').value = data.match.score1;
-                        document.getElementById('set2Score2').value = data.match.score2;
-                        document.getElementById('set3Score1').value = data.match.score1;
-                        document.getElementById('set3Score2').value = data.match.score2;
+                    // Заполняем все сеты данными из базы
+                    document.getElementById('set1Score1').value = data.match.set1_score1 || data.match.score1 || defaultScore;
+                    document.getElementById('set1Score2').value = data.match.set1_score2 || data.match.score2 || defaultScore;
+                    
+                    // Показываем все сеты для редактирования
+                    document.getElementById('set2Container').style.display = 'block';
+                    document.getElementById('set3Container').style.display = 'block';
+                    
+                    // Заполняем второй сет
+                    if (data.match.set2_score1 !== null && data.match.set2_score2 !== null) {
+                        document.getElementById('set2Score1').value = data.match.set2_score1;
+                        document.getElementById('set2Score2').value = data.match.set2_score2;
+                    } else {
+                        document.getElementById('set2Score1').value = defaultScore;
+                        document.getElementById('set2Score2').value = defaultScore;
+                    }
+                    
+                    // Заполняем третий сет
+                    if (data.match.set3_score1 !== null && data.match.set3_score2 !== null) {
+                        document.getElementById('set3Score1').value = data.match.set3_score1;
+                        document.getElementById('set3Score2').value = data.match.set3_score2;
+                    } else {
+                        document.getElementById('set3Score1').value = '';
+                        document.getElementById('set3Score2').value = '';
                     }
                 } else {
                     console.log('Нет существующих результатов, используем значения по умолчанию');
-                    // Иначе используем значения по умолчанию
+                    // Иначе используем значения по умолчанию для всех сетов
                     document.getElementById('set1Score1').value = defaultScore;
                     document.getElementById('set1Score2').value = defaultScore;
+                    document.getElementById('set2Score1').value = defaultScore;
+                    document.getElementById('set2Score2').value = defaultScore;
+                    document.getElementById('set3Score1').value = '';
+                    document.getElementById('set3Score2').value = '';
                 }
                 
             }
         })
         .catch(error => {
             console.error('Ошибка при загрузке данных матча:', error);
-            // В случае ошибки используем значения по умолчанию
+            // В случае ошибки используем значения по умолчанию для всех сетов
             const defaultScore = {{ tournament.points_to_win }};
             document.getElementById('set1Score1').value = defaultScore;
             document.getElementById('set1Score2').value = defaultScore;
+            document.getElementById('set2Score1').value = defaultScore;
+            document.getElementById('set2Score2').value = defaultScore;
+            document.getElementById('set3Score1').value = '';
+            document.getElementById('set3Score2').value = '';
         });
     
     new bootstrap.Modal(document.getElementById('matchResultModal')).show();
@@ -900,26 +929,46 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const matchId = document.getElementById('matchId').value;
             
-            // Собираем данные сетов
+            // Собираем данные сетов и рассчитываем результат
             const setsData = [];
+            let setsWon1 = 0;
+            let setsWon2 = 0;
+            const pointsToWin = {{ tournament.points_to_win }};
+            
             for (let i = 1; i <= 3; i++) {
-                const container = document.getElementById(`set${i}Container`);
-                if (container.style.display !== 'none') {
-                    const score1 = parseInt(document.getElementById(`set${i}Score1`).value) || 0;
-                    const score2 = parseInt(document.getElementById(`set${i}Score2`).value) || 0;
+                const score1 = parseInt(document.getElementById(`set${i}Score1`).value) || 0;
+                const score2 = parseInt(document.getElementById(`set${i}Score2`).value) || 0;
+                
+                if (score1 > 0 || score2 > 0) {
+                    // Проверяем, завершен ли сет
+                    const difference = Math.abs(score1 - score2);
+                    const setCompleted = difference >= 2 && (score1 >= pointsToWin || score2 >= pointsToWin);
                     
-                    if (score1 > 0 || score2 > 0) {
-                        setsData.push({
-                            set_number: i,
-                            score1: score1,
-                            score2: score2
-                        });
+                    if (setCompleted) {
+                        if (score1 > score2) {
+                            setsWon1++;
+                        } else {
+                            setsWon2++;
+                        }
                     }
+                    
+                    setsData.push({
+                        set_number: i,
+                        score1: score1,
+                        score2: score2,
+                        completed: setCompleted
+                    });
                 }
             }
             
+            // Формируем результат матча в формате "2:1" или "2:0"
+            const matchResult = `${setsWon1}:${setsWon2}`;
+            
             const formData = {
-                sets: setsData
+                sets: setsData,
+                result: matchResult,
+                sets_won_1: setsWon1,
+                sets_won_2: setsWon2
             };
             
             console.log('Отправка данных:', formData);
@@ -1141,25 +1190,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function resetSetsForm() {
     console.log('Сброс формы сетов...');
-    // Скрываем все сеты кроме первого
+    // Показываем все сеты сразу
     const set1 = document.getElementById('set1Container');
     const set2 = document.getElementById('set2Container');
     const set3 = document.getElementById('set3Container');
     
     if (set1) set1.style.display = 'block';
-    if (set2) set2.style.display = 'none';
-    if (set3) set3.style.display = 'none';
+    if (set2) set2.style.display = 'block';
+    if (set3) set3.style.display = 'block';
     
-    console.log('set1Container отображен:', set1 ? 'да' : 'НЕ НАЙДЕН');
-    console.log('set2Container скрыт:', set2 ? 'да' : 'НЕ НАЙДЕН');
-    console.log('set3Container скрыт:', set3 ? 'да' : 'НЕ НАЙДЕН');
+    console.log('Все сеты отображены');
     
     // Сбрасываем значения всех полей сетов
     const defaultScore = {{ tournament.points_to_win }};
-    for (let i = 1; i <= 3; i++) {
-        document.getElementById(`set${i}Score1`).value = defaultScore;
-        document.getElementById(`set${i}Score2`).value = defaultScore;
-    }
+    document.getElementById('set1Score1').value = defaultScore;
+    document.getElementById('set1Score2').value = defaultScore;
+    document.getElementById('set2Score1').value = defaultScore;
+    document.getElementById('set2Score2').value = defaultScore;
+    document.getElementById('set3Score1').value = '';
+    document.getElementById('set3Score2').value = '';
     
     // Добавляем обработчики событий для полей сетов
     addSetEventListeners();
@@ -1214,20 +1263,24 @@ function checkSetCompletion(setNumber) {
             // Подсчитываем выигранные сеты
             updateSetsWon();
             
-            // Показываем следующий сет, если это не последний
-            if (setNumber < 3) {
-                const nextSet = setNumber + 1;
-                const nextContainer = document.getElementById(`set${nextSet}Container`);
-                if (nextContainer) {
-                    nextContainer.style.display = 'block';
-                    console.log(`Показан сет ${nextSet}`);
-                } else {
-                    console.error(`Сет ${nextSet} не найден!`);
-                }
-            }
+            // Проверяем, нужно ли заблокировать третий сет
+            // Третий сет всегда доступен
         } else if (difference < 2 && (score1 >= pointsToWin || score2 >= pointsToWin)) {
             console.log(`Сет ${setNumber}: недостаточная разница очков (${difference} < 2)`);
         }
+    }
+}
+
+function checkThirdSetLock() {
+    // Третий сет всегда доступен для редактирования
+    const set3Container = document.getElementById('set3Container');
+    const set3Score1 = document.getElementById('set3Score1');
+    const set3Score2 = document.getElementById('set3Score2');
+    
+    if (set3Container && set3Score1 && set3Score2) {
+        set3Container.style.opacity = '1';
+        set3Score1.disabled = false;
+        set3Score2.disabled = false;
     }
 }
 
@@ -1289,13 +1342,10 @@ function updateSetsDisplay(setsWon1, setsWon2, matchWinner) {
         infoElement.innerHTML = originalText + setsInfo;
     }
     
-    // Если определен победитель матча, скрываем третий сет
-    if (matchWinner) {
-        const set3Container = document.getElementById('set3Container');
-        if (set3Container) {
-            set3Container.style.display = 'none';
-            console.log('Третий сет скрыт - победитель матча определен');
-        }
+    // Третий сет всегда отображается
+    const set3Container = document.getElementById('set3Container');
+    if (set3Container) {
+        set3Container.style.display = 'block';
     }
 }
 
