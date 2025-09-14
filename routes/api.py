@@ -396,6 +396,38 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     else:
                         match.winner_id = None  # Ничья
                 
+                # Получаем настройки турнира для проверки правил
+                tournament = Tournament.query.get(match.tournament_id)
+                points_to_win = tournament.points_to_win if tournament else 21
+                
+                # Проверяем правильность результатов сетов
+                for set_data in sets_data:
+                    set_number = set_data.get('set_number', 1)
+                    score1 = set_data.get('score1', 0)
+                    score2 = set_data.get('score2', 0)
+                    completed = set_data.get('completed', False)
+                    
+                    # Проверяем валидность счета
+                    if score1 > 0 and score2 > 0:
+                        difference = abs(score1 - score2)
+                        
+                        # Если кто-то набрал больше очков для победы, проверяем разницу
+                        if score1 > points_to_win or score2 > points_to_win:
+                            if difference > 2:
+                                return jsonify({
+                                    'success': False,
+                                    'error': f'Неверный счет в сете {set_number}: {score1}:{score2}. Если разница {difference} > 2, то сет должен быть завершен. Максимальный счет: {min(score1, score2) + 2}:{min(score1, score2)}'
+                                }), 400
+                        
+                        # Если сет помечен как завершенный, проверяем правила победы
+                        if completed:
+                            # Проверяем: кто-то набрал необходимое количество очков И разница больше 1
+                            if not ((score1 >= points_to_win or score2 >= points_to_win) and difference > 1):
+                                return jsonify({
+                                    'success': False,
+                                    'error': f'Сет {set_number} не может быть завершен со счетом {score1}:{score2}. Для победы нужно набрать {points_to_win} очков с разницей больше 1.'
+                                }), 400
+                
                 # Сохраняем данные всех сетов
                 for set_data in sets_data:
                     set_number = set_data.get('set_number', 1)

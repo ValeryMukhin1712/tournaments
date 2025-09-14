@@ -19,7 +19,7 @@ def create_tournament_model(db):
         start_time = db.Column(db.Time, default=lambda: datetime.strptime("09:00", "%H:%M").time())  # время начала матчей
         end_time = db.Column(db.Time, default=lambda: datetime.strptime("17:00", "%H:%M").time())  # время окончания матчей
         points_win = db.Column(db.Integer, default=3)  # очки за победу
-        points_draw = db.Column(db.Integer, default=1)  # очки за ничью
+        points_draw = db.Column(db.Integer, default=0)  # очки за ничью
         points_loss = db.Column(db.Integer, default=0)  # очки за поражение
         points_to_win = db.Column(db.Integer, default=21)  # количество очков для победы в матче
         sets_to_win = db.Column(db.Integer, default=2)  # количество выигранных сетов для победы

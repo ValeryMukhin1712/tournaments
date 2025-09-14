@@ -251,7 +251,7 @@ def export_tournament(tournament_id):
         # Создаем Excel файл
         filepath, filename = create_excel_export(tournament, participants, matches, statistics, positions)
         
-        flash(f'Турнир успешно экспортирован в файл {filename}', 'success')
+        flash(f'Турнир успешно экспортирован в файл {filename} в папку загрузок', 'success')
         
         # Отправляем файл пользователю
         return send_file(filepath, as_attachment=True, download_name=filename)

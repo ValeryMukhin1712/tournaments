@@ -8,6 +8,35 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def get_downloads_folder():
+    """Определяет папку Загрузки/Downloads пользователя"""
+    try:
+        # Получаем путь к домашней папке пользователя
+        home = os.path.expanduser("~")
+        
+        # Проверяем разные варианты папки загрузок
+        possible_downloads = [
+            os.path.join(home, "Downloads"),  # Windows (английский)
+            os.path.join(home, "Загрузки"),   # Windows (русский)
+            os.path.join(home, "downloads"),  # Linux (английский)
+            os.path.join(home, "загрузки"),   # Linux (русский)
+        ]
+        
+        # Ищем существующую папку
+        for downloads_path in possible_downloads:
+            if os.path.exists(downloads_path) and os.path.isdir(downloads_path):
+                return downloads_path
+        
+        # Если не найдена, создаем папку Downloads в домашней директории
+        downloads_path = os.path.join(home, "Downloads")
+        os.makedirs(downloads_path, exist_ok=True)
+        return downloads_path
+        
+    except Exception as e:
+        logger.warning(f"Не удалось определить папку загрузок: {e}")
+        # Fallback на текущую директорию
+        return os.getcwd()
+
 def create_excel_export(tournament, participants, matches, statistics, positions):
     """Создает Excel файл с данными турнира"""
     try:
@@ -28,11 +57,9 @@ def create_excel_export(tournament, participants, matches, statistics, positions
         date_str = datetime.now().strftime('%Y%m%d_%H%M')
         filename = f"{tournament_name}_{date_str}.xlsx"
         
-        # Создаем папку если не существует
-        excel_dir = os.path.join(os.getcwd(), 'Excel_data')
-        os.makedirs(excel_dir, exist_ok=True)
-        
-        filepath = os.path.join(excel_dir, filename)
+        # Используем папку загрузок пользователя
+        downloads_dir = get_downloads_folder()
+        filepath = os.path.join(downloads_dir, filename)
         
         # Сохраняем файл
         wb.save(filepath)

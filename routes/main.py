@@ -47,9 +47,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         # Сортируем участников для турнирной таблицы по имени
         participants_for_chessboard.sort(key=lambda x: x.name)
+        print(f"DEBUG: Участники для турнирной таблицы (по именам): {[p.name for p in participants_for_chessboard]}")
         
-        # Сортируем участников для таблицы статистики по занимаемым местам
-        participants_for_statistics.sort(key=lambda x: positions.get(x.id, 999))
+        # Сортируем участников для таблицы статистики по занимаемым местам, при одинаковом месте - по имени
+        participants_for_statistics.sort(key=lambda x: (positions.get(x.id, 999), x.name))
+        print(f"DEBUG: Участники для статистики (по местам): {[p.name for p in participants_for_statistics]}")
         
         # Создаем турнирную таблицу (сортировка по имени)
         chessboard_data = create_chessboard_data(tournament, participants_for_chessboard, matches)
@@ -58,13 +60,25 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         schedule_display = create_tournament_schedule_display(matches, participants)
         
         
-        # Создаем participants_with_stats для шаблона (сортировка по местам)
+        # Создаем participants_with_stats для таблицы статистики (сортировка по местам)
         participants_with_stats = []
         for participant in participants_for_statistics:
             participant_stats = statistics.get(participant.id, {
                 'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
             })
             participants_with_stats.append({
+                'participant': participant,
+                'stats': participant_stats,
+                'position': positions.get(participant.id, 1)
+            })
+        
+        # Создаем participants_with_stats для турнирной таблицы (сортировка по именам)
+        participants_with_stats_chessboard = []
+        for participant in participants_for_chessboard:
+            participant_stats = statistics.get(participant.id, {
+                'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
+            })
+            participants_with_stats_chessboard.append({
                 'participant': participant,
                 'stats': participant_stats,
                 'position': positions.get(participant.id, 1)
@@ -99,13 +113,14 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         return render_template('tournament.html', 
                              tournament=tournament, 
-                             participants=participants_for_statistics,  # Для таблицы статистики - сортировка по местам
+                             participants=participants_for_chessboard,  # Для турнирной таблицы - сортировка по именам
                              matches=matches,
                              chessboard=chessboard_data,
                              schedule_display=schedule_display,
                              statistics=statistics,
                              positions=positions,
-                             participants_with_stats=participants_with_stats,
+                             participants_with_stats=participants_with_stats,  # Для таблицы статистики - сортировка по местам
+                             participants_with_stats_chessboard=participants_with_stats_chessboard,  # Для турнирной таблицы - сортировка по именам
                              participants_data=participants_data,
                              matches_data=matches_data)
 
@@ -273,10 +288,15 @@ def format_sets_details_for_participant(match, participant_id):
     # Используем стандартный счёт по умолчанию
     default_score = 21
     
+    print(f"DEBUG format_sets_details_for_participant: match_id={match.id}, participant_id={participant_id}")
+    print(f"DEBUG: match.participant1_id={match.participant1_id}, match.participant2_id={match.participant2_id}")
+    
     # Проверяем каждый сет
     for i in range(1, 4):
         score1 = getattr(match, f'set{i}_score1', None)
         score2 = getattr(match, f'set{i}_score2', None)
+        
+        print(f"DEBUG: Set {i} - score1={score1}, score2={score2}")
         
         if score1 is not None and score2 is not None and (score1 > 0 or score2 > 0):
             # Не показываем сет, если оба участника набрали счёт по умолчанию
@@ -284,14 +304,15 @@ def format_sets_details_for_participant(match, participant_id):
                 # Если participant_id - это participant1, то счёт как есть
                 if match.participant1_id == participant_id:
                     sets_details.append(f"{score1}:{score2}")
+                    print(f"DEBUG: Participant is participant1, adding {score1}:{score2}")
                 else:
                     # Если participant_id - это participant2, то меняем местами
                     sets_details.append(f"{score2}:{score1}")
+                    print(f"DEBUG: Participant is participant2, adding {score2}:{score1}")
     
-    if sets_details:
-        return "/".join(sets_details)
-    
-    return None
+    result = "/".join(sets_details) if sets_details else None
+    print(f"DEBUG: Final result: {result}")
+    return result
 
 def calculate_sets_points_difference(match):
     """Рассчитывает суммарную разность очков в сетах для участника 1"""
@@ -316,13 +337,12 @@ def create_chessboard(participants, matches):
     print(f"DEBUG: create_chessboard вызвана с {len(participants)} участниками и {len(matches)} матчами")
     chessboard = {}
     
-    # Сортируем участников по имени для консистентности
-    sorted_participants = sorted(participants, key=lambda p: p.name)
-    print(f"DEBUG: Отсортированные участники: {[p.name for p in sorted_participants]}")
+    # Участники уже отсортированы в tournament_detail, используем их как есть
+    print(f"DEBUG: Участники для шахматки: {[p.name for p in participants]}")
     
-    for p1 in sorted_participants:
+    for p1 in participants:
         chessboard[p1.id] = {}
-        for p2 in sorted_participants:
+        for p2 in participants:
             if p1.id == p2.id:
                 # Диагональ
                 chessboard[p1.id][p2.id] = {'type': 'diagonal', 'value': '—'}
@@ -431,6 +451,9 @@ def generate_tournament_schedule(participants, tournament, db, Match):
         db.session.delete(match)
     db.session.commit()
     
+    # Очищаем дублированные матчи, если они есть
+    cleanup_duplicate_matches(tournament.id, db, Match)
+    
     # Настройки расписания
     start_date = tournament.start_date
     start_time = tournament.start_time  # Время начала матчей из настроек турнира
@@ -464,6 +487,9 @@ def generate_tournament_schedule(participants, tournament, db, Match):
     # Счетчики матчей на каждой площадке для равномерного распределения
     court_usage = {i: 0 for i in range(max_courts)}
     
+    # Множество для отслеживания уже созданных матчей (избегаем дубликатов)
+    created_matches = set()
+    
     # Генерируем матчи по круговой схеме
     for round_num in range(rounds):
         logger.info(f"Генерация тура {round_num + 1}")
@@ -488,12 +514,44 @@ def generate_tournament_schedule(participants, tournament, db, Match):
             # Пропускаем матчи с фиктивным участником "отдых"
             if participant1.id == -1 or participant2.id == -1:
                 continue
-                
+            
+            # Создаем уникальный ключ для матча (упорядоченный по ID участников)
+            match_key = tuple(sorted([participant1.id, participant2.id]))
+            
+            # Проверяем, не был ли уже создан такой матч
+            if match_key in created_matches:
+                logger.warning(f"Пропускаем дублированный матч: {participant1.name} vs {participant2.name}")
+                continue
+            
+            # Добавляем матч в множество созданных
+            created_matches.add(match_key)
             round_matches.append((participant1, participant2))
         
         # Распределяем матчи тура по времени и площадкам
         # Все матчи тура начинаются в одно время на разных площадках
         for i, (participant1, participant2) in enumerate(round_matches):
+            # Дополнительная проверка на дубликаты перед созданием матча
+            existing_match = Match.query.filter_by(
+                tournament_id=tournament.id,
+                participant1_id=participant1.id,
+                participant2_id=participant2.id
+            ).first()
+            
+            if existing_match:
+                logger.warning(f"Матч {participant1.name} vs {participant2.name} уже существует в базе данных")
+                continue
+            
+            # Проверяем обратный порядок участников
+            existing_match_reverse = Match.query.filter_by(
+                tournament_id=tournament.id,
+                participant1_id=participant2.id,
+                participant2_id=participant1.id
+            ).first()
+            
+            if existing_match_reverse:
+                logger.warning(f"Матч {participant2.name} vs {participant1.name} уже существует в базе данных")
+                continue
+            
             # Выбираем площадку с наименьшим количеством матчей для равномерного распределения
             court_number = min(court_usage.keys(), key=lambda k: court_usage[k]) + 1
             court_usage[court_number - 1] += 1
@@ -650,6 +708,40 @@ def create_tournament_schedule_display(matches, participants):
         schedule[date_str]['matches'].sort(key=lambda x: x['time'])
     
     return schedule
+
+def cleanup_duplicate_matches(tournament_id, db, Match):
+    """Очищает дублированные матчи в турнире"""
+    try:
+        # Получаем все матчи турнира
+        matches = Match.query.filter_by(tournament_id=tournament_id).all()
+        
+        # Создаем словарь для отслеживания уникальных матчей
+        unique_matches = {}
+        duplicates_to_remove = []
+        
+        for match in matches:
+            # Создаем ключ для матча (упорядоченный по ID участников)
+            match_key = tuple(sorted([match.participant1_id, match.participant2_id]))
+            
+            if match_key in unique_matches:
+                # Найден дубликат, добавляем в список для удаления
+                duplicates_to_remove.append(match)
+                logger.warning(f"Найден дублированный матч: {match.participant1_id} vs {match.participant2_id} (ID: {match.id})")
+            else:
+                # Первый матч с такой парой участников
+                unique_matches[match_key] = match
+        
+        # Удаляем дубликаты
+        for duplicate in duplicates_to_remove:
+            db.session.delete(duplicate)
+        
+        if duplicates_to_remove:
+            db.session.commit()
+            logger.info(f"Удалено {len(duplicates_to_remove)} дублированных матчей")
+        
+    except Exception as e:
+        logger.error(f"Ошибка при очистке дублированных матчей: {e}")
+        db.session.rollback()
 
 def debug_chessboard_to_file(participants, matches, tournament_id):
     """Запись данных турнирной таблицы в файл для отладки"""
