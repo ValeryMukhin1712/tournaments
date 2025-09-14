@@ -5091,3 +5091,50 @@
 2025-09-14 14:44:18,631 - WARNING -  * Debugger is active!
 2025-09-14 14:44:18,631 - WARNING -  * Debugger is active!
 2025-09-14 14:44:18,635 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 14:53:29,508 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:29] "[32mGET /tournament/1 HTTP/1.1[0m" 302 -
+2025-09-14 14:53:29,535 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:29] "GET /login?next=/tournament/1 HTTP/1.1" 200 -
+2025-09-14 14:53:29,866 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-14 14:53:31,768 - INFO - Попытка входа пользователя: admin
+2025-09-14 14:53:32,394 - INFO - Успешный вход пользователя: admin (ID: 1, Роль: администратор)
+2025-09-14 14:53:32,394 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:32] "[32mPOST /login?next=/tournament/1 HTTP/1.1[0m" 302 -
+2025-09-14 14:53:32,427 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:32] "GET / HTTP/1.1" 200 -
+2025-09-14 14:53:33,761 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:33] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-14 14:53:55,810 - INFO - 127.0.0.1 - - [14/Sep/2025 14:53:55] "GET /api/matches/6 HTTP/1.1" 200 -
+2025-09-14 14:55:48,047 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-14 14:55:48,078 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-14 14:55:48,165 - INFO -  * Restarting with stat
+2025-09-14 14:55:48,194 - INFO -  * Restarting with stat
+2025-09-14 14:55:49,144 - WARNING -  * Debugger is active!
+2025-09-14 14:55:49,149 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 14:55:49,150 - WARNING -  * Debugger is active!
+2025-09-14 14:55:49,154 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 14:55:54,331 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-14 14:55:54,374 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-14 14:55:54,440 - INFO -  * Restarting with stat
+2025-09-14 14:55:54,492 - INFO -  * Restarting with stat
+2025-09-14 14:55:55,439 - WARNING -  * Debugger is active!
+2025-09-14 14:55:55,449 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 14:55:55,481 - WARNING -  * Debugger is active!
+2025-09-14 14:55:55,483 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 16:03:21,255 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-14 16:03:21,357 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0\\routes\\main.py', reloading
+2025-09-14 16:03:21,404 - INFO -  * Restarting with stat
+2025-09-14 16:03:21,529 - INFO -  * Restarting with stat
+2025-09-14 16:03:22,778 - WARNING -  * Debugger is active!
+2025-09-14 16:03:22,784 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 16:03:22,840 - WARNING -  * Debugger is active!
+2025-09-14 16:03:22,846 - INFO -  * Debugger PIN: 415-386-562
+2025-09-14 16:18:42,019 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:42] "[32mGET /tournament/1 HTTP/1.1[0m" 302 -
+2025-09-14 16:18:42,052 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:42] "GET /login?next=/tournament/1 HTTP/1.1" 200 -
+2025-09-14 16:18:42,347 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-14 16:18:44,237 - INFO - Попытка входа пользователя: admin
+2025-09-14 16:18:44,975 - INFO - Успешный вход пользователя: admin (ID: 1, Роль: администратор)
+2025-09-14 16:18:44,991 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:44] "[32mPOST /login?next=/tournament/1 HTTP/1.1[0m" 302 -
+2025-09-14 16:18:45,025 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:45] "GET / HTTP/1.1" 200 -
+2025-09-14 16:18:47,709 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:47] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-14 16:18:59,792 - INFO - 127.0.0.1 - - [14/Sep/2025 16:18:59] "GET /api/matches/4 HTTP/1.1" 200 -
+2025-09-14 16:19:07,599 - INFO - 127.0.0.1 - - [14/Sep/2025 16:19:07] "GET /api/matches/4 HTTP/1.1" 200 -
+2025-09-14 16:19:07,632 - INFO - Начислены очки за матч 4: участник 2 = 2, участник 4 = 3
+2025-09-14 16:19:07,653 - INFO - Матч 4 обновлен
+2025-09-14 16:19:07,654 - INFO - 127.0.0.1 - - [14/Sep/2025 16:19:07] "PUT /api/matches/4 HTTP/1.1" 200 -
+2025-09-14 16:19:07,687 - INFO - 127.0.0.1 - - [14/Sep/2025 16:19:07] "GET /tournament/1 HTTP/1.1" 200 -

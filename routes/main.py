@@ -41,19 +41,26 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         statistics = calculate_statistics(participants, matches, tournament)
         positions = calculate_participant_positions(participants, statistics)
         
-        # Сортируем участников по занимаемым местам
-        participants.sort(key=lambda x: positions.get(x.id, 999))
+        # Создаем копии списков для разных целей
+        participants_for_chessboard = participants.copy()
+        participants_for_statistics = participants.copy()
         
-        # Создаем турнирную таблицу
-        chessboard_data = create_chessboard_data(tournament, participants, matches)
+        # Сортируем участников для турнирной таблицы по имени
+        participants_for_chessboard.sort(key=lambda x: x.name)
         
-        # Создаем детальное расписание
+        # Сортируем участников для таблицы статистики по занимаемым местам
+        participants_for_statistics.sort(key=lambda x: positions.get(x.id, 999))
+        
+        # Создаем турнирную таблицу (сортировка по имени)
+        chessboard_data = create_chessboard_data(tournament, participants_for_chessboard, matches)
+        
+        # Создаем детальное расписание (используем исходный список)
         schedule_display = create_tournament_schedule_display(matches, participants)
         
         
-        # Создаем participants_with_stats для шаблона
+        # Создаем participants_with_stats для шаблона (сортировка по местам)
         participants_with_stats = []
-        for participant in participants:
+        for participant in participants_for_statistics:
             participant_stats = statistics.get(participant.id, {
                 'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
             })
@@ -92,7 +99,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         return render_template('tournament.html', 
                              tournament=tournament, 
-                             participants=participants, 
+                             participants=participants_for_statistics,  # Для таблицы статистики - сортировка по местам
                              matches=matches,
                              chessboard=chessboard_data,
                              schedule_display=schedule_display,
