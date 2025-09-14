@@ -57,17 +57,33 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="statisticsTable">
                                                  <thead>
                              <tr>
-                                 <th>Место</th>
-                                 <th>Участник</th>
-                                 <th>Игр</th>
-                                 <th>Побед</th>
-                                 <th>Ничьих</th>
-                                 <th>Поражений</th>
-                                 <th>Очки</th>
-                                 <th>Разница очков</th>
+                                 <th class="sortable" data-column="position">
+                                     Место <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="name">
+                                     Участник <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="games">
+                                     Игр <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="wins">
+                                     Побед <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="draws">
+                                     Ничьих <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="losses">
+                                     Поражений <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="points">
+                                     Очки <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable" data-column="goal_difference">
+                                     Разница очков <i class="fas fa-sort ms-1"></i>
+                                 </th>
                                  <th>Действия</th>
                              </tr>
                          </thead>
@@ -544,6 +560,112 @@
 
 {% block scripts %}
 <script>
+// Инициализация сортировки таблицы статистики
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTableSorting();
+});
+
+// Функция инициализации сортировки таблицы
+function initializeTableSorting() {
+    const table = document.getElementById('statisticsTable');
+    if (!table) return;
+    
+    const sortableHeaders = table.querySelectorAll('.sortable');
+    let currentSort = { column: null, direction: 'asc' };
+    
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.column;
+            
+            // Определяем направление сортировки
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.direction = 'asc';
+            }
+            currentSort.column = column;
+            
+            // Обновляем визуальные индикаторы
+            updateSortIndicators(sortableHeaders, column, currentSort.direction);
+            
+            // Сортируем таблицу
+            sortTable(table, column, currentSort.direction);
+        });
+    });
+}
+
+// Функция обновления визуальных индикаторов сортировки
+function updateSortIndicators(headers, activeColumn, direction) {
+    headers.forEach(header => {
+        header.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+        if (header.dataset.column === activeColumn) {
+            header.classList.add('sorted', `sorted-${direction}`);
+        }
+    });
+}
+
+// Функция сортировки таблицы
+function sortTable(table, column, direction) {
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (column) {
+            case 'position':
+                aValue = parseInt(a.cells[0].textContent) || 0;
+                bValue = parseInt(b.cells[0].textContent) || 0;
+                break;
+            case 'name':
+                aValue = a.cells[1].textContent.trim();
+                bValue = b.cells[1].textContent.trim();
+                break;
+            case 'games':
+                aValue = parseInt(a.cells[2].textContent) || 0;
+                bValue = parseInt(b.cells[2].textContent) || 0;
+                break;
+            case 'wins':
+                aValue = parseInt(a.cells[3].textContent) || 0;
+                bValue = parseInt(b.cells[3].textContent) || 0;
+                break;
+            case 'draws':
+                aValue = parseInt(a.cells[4].textContent) || 0;
+                bValue = parseInt(b.cells[4].textContent) || 0;
+                break;
+            case 'losses':
+                aValue = parseInt(a.cells[5].textContent) || 0;
+                bValue = parseInt(b.cells[5].textContent) || 0;
+                break;
+            case 'points':
+                aValue = parseInt(a.cells[6].textContent) || 0;
+                bValue = parseInt(b.cells[6].textContent) || 0;
+                break;
+            case 'goal_difference':
+                aValue = parseInt(a.cells[7].textContent) || 0;
+                bValue = parseInt(b.cells[7].textContent) || 0;
+                break;
+            default:
+                return 0;
+        }
+        
+        // Сравнение значений
+        if (column === 'name') {
+            // Для текстовых значений
+            return direction === 'asc' 
+                ? aValue.localeCompare(bValue, 'ru')
+                : bValue.localeCompare(aValue, 'ru');
+        } else {
+            // Для числовых значений
+            return direction === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+    });
+    
+    // Очищаем tbody и добавляем отсортированные строки
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+}
+
 // Добавляем обработчики кликов на все ячейки шахматки
 document.addEventListener('DOMContentLoaded', function() {
     const table = document.querySelector('.table-bordered');
@@ -971,45 +1093,103 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Формируем результат матча в формате "2:1" или "2:0"
-            const matchResult = `${setsWon1}:${setsWon2}`;
+            // Получаем ID участников из формы для правильного сопоставления
+            const participant1Name = document.getElementById('participant1Name').value;
+            const participant2Name = document.getElementById('participant2Name').value;
             
-            const formData = {
-                sets: setsData,
-                result: matchResult,
-                sets_won_1: setsWon1,
-                sets_won_2: setsWon2
-            };
+            // Получаем данные участников из турнира для определения их ID
+            const participants = {{ participants_data|tojson }};
+            const p1 = participants.find(p => p.name === participant1Name);
+            const p2 = participants.find(p => p.name === participant2Name);
             
-            console.log('Отправка данных:', formData);
-            console.log('Match ID:', matchId);
-            
-            fetch(`/api/matches/${matchId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
-                console.log('Статус ответа:', response.status);
-                console.log('Заголовки ответа:', response.headers);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Данные ответа:', data);
-                if (data.success) {
-                    // Результат матча сохранен
-                    location.reload();
-                } else {
-                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при сохранении результата:', error);
-                alert('Ошибка при сохранении результата: ' + error.message);
-            });
+            // Определяем правильный порядок sets_won на основе ID участников в матче
+            let sets_won_participant1, sets_won_participant2;
+            if (p1 && p2) {
+                // Получаем данные матча для определения participant1_id и participant2_id
+                fetch(`/api/matches/${matchId}`, {
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                })
+                .then(response => response.json())
+                .then(matchData => {
+                    if (matchData.success) {
+                        const match = matchData.match;
+                        
+                        // Определяем правильный порядок sets_won
+                        if (match.participant1_id === p1.id) {
+                            // Участник 1 в форме = participant1 в матче
+                            sets_won_participant1 = setsWon1;
+                            sets_won_participant2 = setsWon2;
+                        } else {
+                            // Участник 1 в форме = participant2 в матче
+                            sets_won_participant1 = setsWon2;
+                            sets_won_participant2 = setsWon1;
+                        }
+                        
+                        // Формируем результат матча в формате "2:1" или "2:0"
+                        const matchResult = `${sets_won_participant1}:${sets_won_participant2}`;
+                        
+                        // Корректируем данные сетов для правильного сопоставления с базой данных
+                        const correctedSetsData = setsData.map(setData => {
+                            const correctedSet = { ...setData };
+                            
+                            // Если участник 1 в форме = participant2 в матче, меняем местами счет
+                            if (match.participant1_id !== p1.id) {
+                                const temp = correctedSet.score1;
+                                correctedSet.score1 = correctedSet.score2;
+                                correctedSet.score2 = temp;
+                            }
+                            
+                            return correctedSet;
+                        });
+                        
+                        const formData = {
+                            sets: correctedSetsData,
+                            result: matchResult,
+                            sets_won_1: sets_won_participant1,
+                            sets_won_2: sets_won_participant2
+                        };
+                        
+                        console.log('Отправка данных:', formData);
+                        console.log('Match ID:', matchId);
+                        console.log('Participant1 ID:', match.participant1_id, 'Name:', participant1Name);
+                        console.log('Participant2 ID:', match.participant2_id, 'Name:', participant2Name);
+                        
+                        // Отправляем данные
+                        return fetch(`/api/matches/${matchId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCSRFToken()
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                    } else {
+                        throw new Error('Ошибка получения данных матча');
+                    }
+                })
+                .then(response => {
+                    console.log('Статус ответа:', response.status);
+                    console.log('Заголовки ответа:', response.headers);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Данные ответа:', data);
+                    if (data.success) {
+                        // Результат матча сохранен
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при сохранении результата:', error);
+                    alert('Ошибка при сохранении результата: ' + error.message);
+                });
+            } else {
+                alert('Ошибка: не удалось найти участников матча');
+            }
         });
     }
 });

@@ -37,12 +37,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         participants = Participant.query.filter_by(tournament_id=tournament_id).all()
         matches = Match.query.filter_by(tournament_id=tournament_id).all()
         
-        # Сортируем участников по имени
-        participants.sort(key=lambda x: x.name)
-        
         # Создаем статистику и рассчитываем места участников
         statistics = calculate_statistics(participants, matches, tournament)
         positions = calculate_participant_positions(participants, statistics)
+        
+        # Сортируем участников по занимаемым местам
+        participants.sort(key=lambda x: positions.get(x.id, 999))
         
         # Создаем турнирную таблицу
         chessboard_data = create_chessboard_data(tournament, participants, matches)

@@ -49,6 +49,31 @@
             align-items: center;
             margin-bottom: 0.5rem;
         }
+        /* Стили для сортируемых заголовков таблицы */
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .sortable:hover {
+            background-color: #f8f9fa;
+        }
+        .sortable i {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .sortable:hover i {
+            opacity: 1;
+        }
+        .sortable.sorted i {
+            opacity: 1;
+        }
+        .sortable.sorted-asc i:before {
+            content: "\f0de"; /* fa-sort-up */
+        }
+        .sortable.sorted-desc i:before {
+            content: "\f0dd"; /* fa-sort-down */
+        }
         .form-control, .form-select {
             height: 2.5rem;
         }
