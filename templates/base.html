@@ -442,22 +442,142 @@
                 margin-bottom: 0.5rem;
             }
 
-            /* Показываем мобильные карточки вместо таблиц */
+            /* Для статистики участников - уменьшаем столбцы вместо карточек */
+            #statisticsTable {
+                font-size: 0.75rem;
+            }
+            
+            #statisticsTable th,
+            #statisticsTable td {
+                padding: 0.25rem 0.125rem;
+                white-space: nowrap;
+            }
+            
+            #statisticsTable th:nth-child(1), /* P */
+            #statisticsTable td:nth-child(1) {
+                width: 30px;
+                min-width: 30px;
+            }
+            
+            #statisticsTable th:nth-child(2), /* name */
+            #statisticsTable td:nth-child(2) {
+                width: 80px;
+                min-width: 80px;
+            }
+            
+            #statisticsTable th:nth-child(3), /* G */
+            #statisticsTable td:nth-child(3) {
+                width: 25px;
+                min-width: 25px;
+            }
+            
+            #statisticsTable th:nth-child(4), /* W */
+            #statisticsTable td:nth-child(4) {
+                width: 25px;
+                min-width: 25px;
+            }
+            
+            #statisticsTable th:nth-child(5), /* D (если есть) */
+            #statisticsTable td:nth-child(5) {
+                width: 25px;
+                min-width: 25px;
+            }
+            
+            #statisticsTable th:nth-child(6), /* L */
+            #statisticsTable td:nth-child(6) {
+                width: 25px;
+                min-width: 25px;
+            }
+            
+            #statisticsTable th:nth-child(7), /* Pt */
+            #statisticsTable td:nth-child(7) {
+                width: 30px;
+                min-width: 30px;
+            }
+            
+            #statisticsTable th:nth-child(8), /* Bal */
+            #statisticsTable td:nth-child(8) {
+                width: 30px;
+                min-width: 30px;
+            }
+            
+            #statisticsTable th:nth-child(9), /* del */
+            #statisticsTable td:nth-child(9) {
+                width: 40px;
+                min-width: 40px;
+            }
+
+            /* Отключаем мобильные карточки - оставляем только таблицы */
             .mobile-table-card {
-                display: block;
+                display: none !important;
             }
 
             .table-responsive {
-                display: none;
+                display: block !important;
             }
 
             /* Специальные стили для турнирной таблицы на мобильных */
             .chessboard-mobile {
-                display: block;
+                display: none !important;
             }
 
             .chessboard-desktop {
-                display: none;
+                display: block !important;
+            }
+            
+            /* Стили для турнирной таблицы на мобильных */
+            .chessboard-desktop table {
+                font-size: 0.6rem;
+                table-layout: fixed;
+            }
+            
+            .chessboard-desktop th,
+            .chessboard-desktop td {
+                padding: 0.1rem 0.05rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .chessboard-desktop th:first-child,
+            .chessboard-desktop td:first-child {
+                width: 50px;
+                min-width: 50px;
+                max-width: 50px;
+            }
+            
+            .chessboard-desktop th:nth-child(2),
+            .chessboard-desktop td:nth-child(2) {
+                width: 35px;
+                min-width: 35px;
+                max-width: 35px;
+            }
+            
+            .chessboard-desktop th:nth-child(3),
+            .chessboard-desktop td:nth-child(3) {
+                width: 30px;
+                min-width: 30px;
+                max-width: 30px;
+            }
+            
+            /* Ячейки с участниками - делаем их максимально компактными */
+            .chessboard-desktop th:nth-child(n+4),
+            .chessboard-desktop td:nth-child(n+4) {
+                width: 45px;
+                min-width: 45px;
+                max-width: 45px;
+                padding: 0.05rem;
+            }
+            
+            /* Уменьшаем размеры бейджей в ячейках */
+            .chessboard-desktop .badge {
+                font-size: 0.5rem;
+                padding: 0.15rem 0.25rem;
+            }
+            
+            /* Уменьшаем размеры текста в ячейках */
+            .chessboard-desktop small {
+                font-size: 0.45rem;
             }
         }
 
@@ -477,6 +597,59 @@
 
             .chessboard-desktop {
                 display: block;
+            }
+            
+            /* Компактные стили для турнирной таблицы на десктопе */
+            .chessboard-desktop table {
+                font-size: 0.75rem;
+                table-layout: fixed;
+            }
+            
+            .chessboard-desktop th,
+            .chessboard-desktop td {
+                padding: 0.2rem 0.1rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .chessboard-desktop th:first-child,
+            .chessboard-desktop td:first-child {
+                width: 80px;
+                min-width: 80px;
+                max-width: 80px;
+            }
+            
+            .chessboard-desktop th:nth-child(2),
+            .chessboard-desktop td:nth-child(2) {
+                width: 50px;
+                min-width: 50px;
+                max-width: 50px;
+            }
+            
+            .chessboard-desktop th:nth-child(3),
+            .chessboard-desktop td:nth-child(3) {
+                width: 40px;
+                min-width: 40px;
+                max-width: 40px;
+            }
+            
+            /* Ячейки с участниками */
+            .chessboard-desktop th:nth-child(n+4),
+            .chessboard-desktop td:nth-child(n+4) {
+                width: 60px;
+                min-width: 60px;
+                max-width: 60px;
+                padding: 0.1rem;
+            }
+            
+            .chessboard-desktop .badge {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.3rem;
+            }
+            
+            .chessboard-desktop small {
+                font-size: 0.5rem;
             }
         }
 
