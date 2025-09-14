@@ -40,16 +40,9 @@
                             <i class="fas fa-eye me-1"></i>Просмотр
                         </a>
                         
-                        {% if not current_user.is_authenticated %}
-                        <!-- Для незарегистрированных пользователей -->
-                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#participateModal" data-tournament-id="{{ tournament.id }}">
-                            <i class="fas fa-trophy me-1"></i>Хочу участвовать
-                        </button>
-                        {% else %}
+                        {% if current_user.is_authenticated %}
                         <!-- Для зарегистрированных пользователей -->
                         {% set is_participant = tournament.participants | selectattr('user_id', 'equalto', current_user.id) | list | length > 0 or tournament.participants | selectattr('name', 'equalto', current_user.username) | list | length > 0 %}
-                        
-
                         
                         {% if not is_participant %}
                         <button class="btn btn-warning btn-sm" onclick="registerForTournament({{ tournament.id }})">
@@ -213,42 +206,6 @@
 </div>
 {% endif %}
 
-<!-- Модальное окно "Хочу участвовать" -->
-<div class="modal fade" id="participateModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Регистрация и участие в турнире</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Для участия в турнире необходимо зарегистрироваться. После регистрации вы автоматически будете добавлены в турнир.
-                </div>
-                <form id="participateForm">
-                    <input type="hidden" id="tournamentId" name="tournament_id">
-                    <div class="mb-3">
-                        <label for="participateUsername" class="form-label">Имя пользователя</label>
-                        <input type="text" class="form-control" id="participateUsername" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="participatePassword" class="form-label">Пароль</label>
-                        <input type="password" class="form-control" id="participatePassword" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="participateConfirmPassword" class="form-label">Подтвердите пароль</label>
-                        <input type="password" class="form-control" id="participateConfirmPassword" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="submit" form="participateForm" class="btn btn-warning">Зарегистрироваться и участвовать</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 {% endblock %}
 
@@ -415,101 +372,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Обработка формы "Хочу участвовать"
-    const participateForm = document.getElementById('participateForm');
-    if (participateForm) {
-        console.log('Форма participateForm найдена, добавляем обработчик');
-        participateForm.addEventListener('submit', function(e) {
-            console.log('Форма отправлена');
-            e.preventDefault();
-            
-            const password = document.getElementById('participatePassword').value;
-            const confirmPassword = document.getElementById('participateConfirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                alert('Пароли не совпадают!');
-                return;
-            }
-            
-            const formData = {
-                username: document.getElementById('participateUsername').value,
-                password: password
-            };
-            
-            // Используем новый endpoint для полного процесса
-            const tournamentId = document.getElementById('tournamentId').value;
-            console.log('Отправляем запрос на турнир ID:', tournamentId, 'с данными:', formData);
-            
-            fetch(`/api/tournaments/${tournamentId}/register-and-participate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
-                console.log('Получен ответ:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Данные ответа:', data);
-                if (data.success) {
-                    alert('Вы успешно зарегистрированы, авторизованы и добавлены в турнир!');
-                    bootstrap.Modal.getInstance(document.getElementById('participateModal')).hide();
-                    // Обновляем страницу для отображения авторизованного состояния
-                    window.location.reload();
-                } else {
-                    alert('Ошибка: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка запроса:', error);
-                alert('Ошибка: ' + error.message);
-            });
-        });
-    } else {
-        console.log('Форма participateForm НЕ найдена!');
-    }
-    
-    // Устанавливаем tournament_id при открытии модального окна
-    const participateModal = document.getElementById('participateModal');
-    if (participateModal) {
-        console.log('Модальное окно participateModal найдено, добавляем обработчик');
-        participateModal.addEventListener('show.bs.modal', function(event) {
-            console.log('Модальное окно открывается');
-            const button = event.relatedTarget;
-            const tournamentId = button.getAttribute('data-tournament-id');
-            console.log('Tournament ID из кнопки:', tournamentId);
-            document.getElementById('tournamentId').value = tournamentId;
-            console.log('Tournament ID установлен в скрытое поле:', document.getElementById('tournamentId').value);
-        });
-    } else {
-        console.log('Модальное окно participateModal НЕ найдено!');
-    }
 });
 
 // Функция регистрации на турнир
 function registerForTournament(tournamentId) {
     if (confirm('Вы уверены, что хотите участвовать в этом турнире?')) {
-        fetch(`/api/tournaments/${tournamentId}/register`, {
+        // Получаем имя текущего пользователя
+        const userName = '{{ current_user.username }}';
+        
+        fetch(`/api/tournaments/${tournamentId}/participants`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
-            }
+            },
+            body: JSON.stringify({
+                name: userName,
+                is_team: false
+            })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Вы успешно зарегистрированы на турнир!');
+                alert('Вы успешно добавлены в турнир!');
                 location.reload();
             } else {
-                alert('Ошибка: ' + data.error);
+                alert('Ошибка: ' + (data.error || data.message || 'Неизвестная ошибка'));
             }
         })
         .catch(error => {
-            alert('Ошибка при регистрации: ' + error);
+            alert('Ошибка при добавлении в турнир: ' + error);
         });
     }
 }

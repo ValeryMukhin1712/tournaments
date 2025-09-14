@@ -35,9 +35,12 @@
                          <i class="fas fa-plus-circle me-2"></i>Создать недостающие матчи
                      </button>
                      {% endif %}
-                     <button class="btn btn-warning" onclick="rescheduleTournament()">
+                     <button class="btn btn-warning me-2" onclick="rescheduleTournament()">
                          <i class="fas fa-sync-alt me-2"></i>Пересчитать расписание
                      </button>
+                     <a href="{{ url_for('export_tournament', tournament_id=tournament.id) }}" class="btn btn-success">
+                         <i class="fas fa-file-excel me-2"></i>Выгрузить в Excel
+                     </a>
                      {% endif %}
                  {% endif %}
             </div>
@@ -137,35 +140,27 @@
                                     {% else %}
                                         {% set cell_data = chessboard[p1.id][p2.id] %}
                                         {% if cell_data.type == 'result' %}
-                                            <div class="d-flex flex-column align-items-center">
+                                            <div class="d-flex flex-column align-items-center" 
+                                                 onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
+                                                 style="cursor: pointer;" 
+                                                 title="Нажмите для редактирования результата">
                                                 {% if cell_data.is_winner %}
                                                     <span class="badge bg-success text-white mb-1">{{ cell_data.value }}</span>
                                                 {% else %}
-                                                    <span class="badge bg-secondary text-white mb-1">{{ cell_data.value }}</span>
+                                                    <span class="badge bg-danger text-white mb-1">{{ cell_data.value }}</span>
                                                 {% endif %}
                                                 {% if cell_data.sets_details %}
                                                 <small class="text-muted">{{ cell_data.sets_details }}</small>
-                                                {% endif %}
-                                                {% if cell_data.editable and current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
-                                                <button class="btn btn-sm btn-outline-warning" 
-                                                        onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
-                                                        title="Редактировать результат">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
                                                 {% endif %}
                                             </div>
                                         {% elif cell_data.type == 'in_progress' %}
-                                            <div class="d-flex flex-column align-items-center">
+                                            <div class="d-flex flex-column align-items-center" 
+                                                 onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
+                                                 style="cursor: pointer;" 
+                                                 title="Нажмите для редактирования результата">
                                                 <span class="badge bg-warning text-dark mb-1">{{ cell_data.value }}</span>
                                                 {% if cell_data.sets_details %}
                                                 <small class="text-muted">{{ cell_data.sets_details }}</small>
-                                                {% endif %}
-                                                {% if cell_data.editable and current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
-                                                <button class="btn btn-sm btn-outline-warning" 
-                                                        onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
-                                                        title="Редактировать результат">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
                                                 {% endif %}
                                             </div>
                                         {% elif cell_data.type == 'upcoming' %}
@@ -181,7 +176,10 @@
                                               } %}
                                               {% set court_color = court_colors.get(cell_data.court, 'secondary') %}
                                               
-                                              <div class="text-center position-relative">
+                                              <div class="text-center position-relative" 
+                                                   onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
+                                                   style="cursor: pointer;" 
+                                                   title="Нажмите для редактирования результата">
                                                   <!-- Основной контейнер с цветом площадки -->
                                                   <div class="{% if cell_data.is_next %}border border-warning border-1 rounded p-1 bg-warning bg-opacity-15 shadow-sm{% elif cell_data.is_second %}border border-success border-1 rounded p-1 bg-success bg-opacity-15 shadow-sm{% else %}border border-{{ court_color }} border-1 rounded p-1 bg-{{ court_color }} bg-opacity-10{% endif %}" style="height: 70px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                                                       <!-- Верхняя часть -->
@@ -198,24 +196,14 @@
                                                       </div>
                                                   </div>
                                                   
-                                                  <!-- Дополнительные индикаторы для ближайших матчей -->
-                                                  {% if cell_data.is_next %}
-                                                      <div class="position-absolute top-0 start-0 translate-middle">
-                                                          <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.6rem; padding: 2px 6px;">1</span>
-                                                      </div>
-                                                  {% elif cell_data.is_second %}
-                                                      <div class="position-absolute top-0 start-0 translate-middle">
-                                                          <span class="badge bg-success text-white rounded-pill" style="font-size: 0.6rem; padding: 2px 6px;">2</span>
-                                                      </div>
-                                                  {% endif %}
                                               </div>
                                         {% elif cell_data.type == 'empty' %}
                                             {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
-                                            <button class="btn btn-outline-primary btn-sm" 
-                                                    onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')"
-                                                    style="min-width: 60px;">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
+                                            <div onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
+                                                 style="cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center;" 
+                                                 title="Нажмите для создания матча">
+                                                <span class="text-muted">+</span>
+                                            </div>
                                             {% else %}
                                             <span class="text-muted">—</span>
                                             {% endif %}
@@ -1012,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 console.log('Данные ответа:', data);
                 if (data.success) {
-                    alert('Результат матча сохранен!');
+                    // Результат матча сохранен
                     location.reload();
                 } else {
                     alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
@@ -227,6 +227,39 @@ register_routes(app, db, User, Tournament, Participant, Match, Notification, Mat
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# Маршрут для экспорта в Excel
+@app.route('/tournament/<int:tournament_id>/export')
+@login_required
+def export_tournament(tournament_id):
+    """Экспорт турнира в Excel"""
+    try:
+        from routes.export import create_excel_export
+        from routes.main import calculate_statistics, calculate_participant_positions
+        
+        tournament = Tournament.query.get_or_404(tournament_id)
+        participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+        matches = Match.query.filter_by(tournament_id=tournament_id).all()
+        
+        # Сортируем участников по имени
+        participants.sort(key=lambda x: x.name)
+        
+        # Создаем статистику и рассчитываем места участников
+        statistics = calculate_statistics(participants, matches, tournament)
+        positions = calculate_participant_positions(participants, statistics)
+        
+        # Создаем Excel файл
+        filepath, filename = create_excel_export(tournament, participants, matches, statistics, positions)
+        
+        flash(f'Турнир успешно экспортирован в файл {filename}', 'success')
+        
+        # Отправляем файл пользователю
+        return send_file(filepath, as_attachment=True, download_name=filename)
+        
+    except Exception as e:
+        logger.error(f"Ошибка при экспорте турнира: {e}")
+        flash(f'Ошибка при экспорте турнира: {str(e)}', 'error')
+        return redirect(url_for('tournament_detail', tournament_id=tournament_id))
 
 # Миграция будет выполнена в функции init_db()
 

@@ -1,10 +1,11 @@
 """
 Основные маршруты приложения
 """
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 import logging
+# Tournament передается как параметр в функции
 
 logger = logging.getLogger(__name__)
 
@@ -39,17 +40,16 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Сортируем участников по имени
         participants.sort(key=lambda x: x.name)
         
+        # Создаем статистику и рассчитываем места участников
+        statistics = calculate_statistics(participants, matches, tournament)
+        positions = calculate_participant_positions(participants, statistics)
+        
         # Создаем турнирную таблицу
         chessboard_data = create_chessboard_data(tournament, participants, matches)
         
         # Создаем детальное расписание
         schedule_display = create_tournament_schedule_display(matches, participants)
         
-        # Создаем статистику
-        statistics = calculate_statistics(participants, matches, tournament)
-        
-        # Рассчитываем места участников
-        positions = calculate_participant_positions(participants, statistics)
         
         # Создаем participants_with_stats для шаблона
         participants_with_stats = []
@@ -109,75 +109,105 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         print(f"DEBUG: Турнирная таблица создана: {len(chessboard)} строк")
         return chessboard
 
-    def calculate_statistics(participants, matches, tournament):
-        """Расчет статистики участников"""
-        stats = {}
-        for participant in participants:
-            stats[participant.id] = {
-                'games': 0,
-                'wins': 0,
-                'losses': 0,
-                'draws': 0,
-                'points': 0,
-                'goal_difference': 0
-            }
-        
-        for match in matches:
-            if match.status == 'завершен':
-                p1_id = match.participant1_id
-                p2_id = match.participant2_id
+
+def calculate_statistics(participants, matches, tournament):
+    """Расчет статистики участников"""
+    stats = {}
+    for participant in participants:
+        stats[participant.id] = {
+            'games': 0,
+            'wins': 0,
+            'losses': 0,
+            'draws': 0,
+            'points': 0,
+            'goal_difference': 0
+        }
+    
+    for match in matches:
+        if match.status == 'завершен':
+            p1_id = match.participant1_id
+            p2_id = match.participant2_id
+            
+            # Обновляем статистику
+            stats[p1_id]['games'] += 1
+            stats[p2_id]['games'] += 1
+            
+            # Используем новую логику с sets_won
+            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                if match.sets_won_1 > match.sets_won_2:
+                    stats[p1_id]['wins'] += 1
+                    stats[p2_id]['losses'] += 1
+                    stats[p1_id]['points'] += (tournament.points_win or 3)
+                    stats[p2_id]['points'] += (tournament.points_loss or 0)
+                elif match.sets_won_2 > match.sets_won_1:
+                    stats[p2_id]['wins'] += 1
+                    stats[p1_id]['losses'] += 1
+                    stats[p2_id]['points'] += (tournament.points_win or 3)
+                    stats[p1_id]['points'] += (tournament.points_loss or 0)
+                else:
+                    # Ничья по сетам
+                    stats[p1_id]['draws'] += 1
+                    stats[p2_id]['draws'] += 1
+                    stats[p1_id]['points'] += (tournament.points_draw or 1)
+                    stats[p2_id]['points'] += (tournament.points_draw or 1)
                 
-                # Обновляем статистику
-                stats[p1_id]['games'] += 1
-                stats[p2_id]['games'] += 1
+                # Рассчитываем разность очков в сетах
+                sets_points_diff = calculate_sets_points_difference(match)
+                stats[p1_id]['goal_difference'] += sets_points_diff
+                stats[p2_id]['goal_difference'] -= sets_points_diff
                 
-                # Используем новую логику с sets_won
-                if match.sets_won_1 is not None and match.sets_won_2 is not None:
-                    if match.sets_won_1 > match.sets_won_2:
-                        stats[p1_id]['wins'] += 1
-                        stats[p2_id]['losses'] += 1
-                        stats[p1_id]['points'] += (tournament.points_win or 3)
-                        stats[p2_id]['points'] += (tournament.points_loss or 0)
-                    elif match.sets_won_2 > match.sets_won_1:
-                        stats[p2_id]['wins'] += 1
-                        stats[p1_id]['losses'] += 1
-                        stats[p2_id]['points'] += (tournament.points_win or 3)
-                        stats[p1_id]['points'] += (tournament.points_loss or 0)
-                    else:
-                        # Ничья по сетам
-                        stats[p1_id]['draws'] += 1
-                        stats[p2_id]['draws'] += 1
-                        stats[p1_id]['points'] += (tournament.points_draw or 1)
-                        stats[p2_id]['points'] += (tournament.points_draw or 1)
-                    
-                    # Рассчитываем разность очков в сетах
-                    sets_points_diff = calculate_sets_points_difference(match)
-                    stats[p1_id]['goal_difference'] += sets_points_diff
-                    stats[p2_id]['goal_difference'] -= sets_points_diff
-                    
-                # Fallback на старую логику для обратной совместимости
-                elif match.score1 is not None and match.score2 is not None:
-                    if match.score1 > match.score2:
-                        stats[p1_id]['wins'] += 1
-                        stats[p2_id]['losses'] += 1
-                        stats[p1_id]['points'] += (tournament.points_win or 3)
-                        stats[p2_id]['points'] += (tournament.points_loss or 0)
-                    elif match.score1 < match.score2:
-                        stats[p2_id]['wins'] += 1
-                        stats[p1_id]['losses'] += 1
-                        stats[p2_id]['points'] += (tournament.points_win or 3)
-                        stats[p1_id]['points'] += (tournament.points_loss or 0)
-                    else:
-                        # Ничья
-                        stats[p1_id]['draws'] += 1
-                        stats[p2_id]['draws'] += 1
-                        stats[p1_id]['points'] += (tournament.points_draw or 1)
-                        stats[p2_id]['points'] += (tournament.points_draw or 1)
-                    
-                    stats[p1_id]['goal_difference'] += match.score1 - match.score2
-                    stats[p2_id]['goal_difference'] += match.score2 - match.score1
+            # Fallback на старую логику для обратной совместимости
+            elif match.score1 is not None and match.score2 is not None:
+                if match.score1 > match.score2:
+                    stats[p1_id]['wins'] += 1
+                    stats[p2_id]['losses'] += 1
+                    stats[p1_id]['points'] += (tournament.points_win or 3)
+                    stats[p2_id]['points'] += (tournament.points_loss or 0)
+                elif match.score1 < match.score2:
+                    stats[p2_id]['wins'] += 1
+                    stats[p1_id]['losses'] += 1
+                    stats[p2_id]['points'] += (tournament.points_win or 3)
+                    stats[p1_id]['points'] += (tournament.points_loss or 0)
+                else:
+                    # Ничья
+                    stats[p1_id]['draws'] += 1
+                    stats[p2_id]['draws'] += 1
+                    stats[p1_id]['points'] += (tournament.points_draw or 1)
+                    stats[p2_id]['points'] += (tournament.points_draw or 1)
+                
+                stats[p1_id]['goal_difference'] += match.score1 - match.score2
+                stats[p2_id]['goal_difference'] += match.score2 - match.score1
+    
+    return stats
+
+def calculate_participant_positions(participants, statistics):
+    """Расчет мест участников в турнире"""
+    # Сортируем участников по очкам (убывание), затем по разности мячей (убывание)
+    sorted_participants = sorted(participants, key=lambda p: (
+        -statistics.get(p.id, {}).get('points', 0),
+        -statistics.get(p.id, {}).get('goal_difference', 0)
+    ))
+    
+    positions = {}
+    current_position = 1
+    
+    for i, participant in enumerate(sorted_participants):
+        participant_id = participant.id
+        participant_stats = statistics.get(participant_id, {})
         
-        return stats
+        # Если это не первый участник, проверяем, нужно ли увеличить позицию
+        if i > 0:
+            prev_participant = sorted_participants[i-1]
+            prev_stats = statistics.get(prev_participant.id, {})
+            
+            # Если очки или разность мячей отличаются, увеличиваем позицию
+            if (participant_stats.get('points', 0) != prev_stats.get('points', 0) or
+                participant_stats.get('goal_difference', 0) != prev_stats.get('goal_difference', 0)):
+                current_position = i + 1
+        
+        positions[participant_id] = current_position
+    
+    return positions
 
 def calculate_sets_score(match):
     """Расчет счета сетов для матча"""
@@ -208,13 +238,18 @@ def format_sets_details(match):
     
     sets_details = []
     
+    # Используем стандартный счёт по умолчанию
+    default_score = 21
+    
     # Проверяем каждый сет
     for i in range(1, 4):
         score1 = getattr(match, f'set{i}_score1', None)
         score2 = getattr(match, f'set{i}_score2', None)
         
         if score1 is not None and score2 is not None and (score1 > 0 or score2 > 0):
-            sets_details.append(f"{score1}:{score2}")
+            # Не показываем сет, если оба участника набрали счёт по умолчанию
+            if not (score1 == default_score and score2 == default_score):
+                sets_details.append(f"{score1}:{score2}")
     
     if sets_details:
         return "/".join(sets_details)
@@ -228,18 +263,23 @@ def format_sets_details_for_participant(match, participant_id):
     
     sets_details = []
     
+    # Используем стандартный счёт по умолчанию
+    default_score = 21
+    
     # Проверяем каждый сет
     for i in range(1, 4):
         score1 = getattr(match, f'set{i}_score1', None)
         score2 = getattr(match, f'set{i}_score2', None)
         
         if score1 is not None and score2 is not None and (score1 > 0 or score2 > 0):
-            # Если participant_id - это participant1, то счёт как есть
-            if match.participant1_id == participant_id:
-                sets_details.append(f"{score1}:{score2}")
-            else:
-                # Если participant_id - это participant2, то меняем местами
-                sets_details.append(f"{score2}:{score1}")
+            # Не показываем сет, если оба участника набрали счёт по умолчанию
+            if not (score1 == default_score and score2 == default_score):
+                # Если participant_id - это participant1, то счёт как есть
+                if match.participant1_id == participant_id:
+                    sets_details.append(f"{score1}:{score2}")
+                else:
+                    # Если participant_id - это participant2, то меняем местами
+                    sets_details.append(f"{score2}:{score1}")
     
     if sets_details:
         return "/".join(sets_details)
@@ -263,52 +303,6 @@ def calculate_sets_points_difference(match):
     
     return total_diff
 
-def calculate_participant_positions(participants, statistics):
-    """Рассчитывает места участников на основе статистики"""
-    # Создаем список участников с их статистикой для сортировки
-    participants_with_stats = []
-    for participant in participants:
-        stats = statistics.get(participant.id, {
-            'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
-        })
-        participants_with_stats.append({
-            'participant': participant,
-            'stats': stats
-        })
-    
-    # Сортируем участников по критериям:
-    # 1. Количество очков (по убыванию)
-    # 2. Разность очков (по убыванию)
-    # 3. Количество побед (по убыванию)
-    # 4. Имя участника (по алфавиту) для стабильности сортировки
-    participants_with_stats.sort(key=lambda x: (
-        -x['stats']['points'],  # Больше очков = выше место
-        -x['stats']['goal_difference'],  # Больше разность = выше место
-        -x['stats']['wins'],  # Больше побед = выше место
-        x['participant'].name  # По алфавиту для стабильности
-    ))
-    
-    # Назначаем места
-    positions = {}
-    current_position = 1
-    
-    for i, participant_data in enumerate(participants_with_stats):
-        participant_id = participant_data['participant'].id
-        
-        # Если это не первый участник и статистика отличается от предыдущего
-        if i > 0:
-            prev_stats = participants_with_stats[i-1]['stats']
-            curr_stats = participant_data['stats']
-            
-            # Если очки, разность очков и количество побед одинаковые - одинаковое место
-            if (prev_stats['points'] != curr_stats['points'] or 
-                prev_stats['goal_difference'] != curr_stats['goal_difference'] or
-                prev_stats['wins'] != curr_stats['wins']):
-                current_position = i + 1
-        
-        positions[participant_id] = current_position
-    
-    return positions
 
 def create_chessboard(participants, matches):
     """Создание шахматки для отображения результатов"""
@@ -688,3 +682,4 @@ def debug_chessboard_to_file(participants, matches, tournament_id):
     except Exception as e:
         print(f"Ошибка при записи отладочного файла: {str(e)}")
         return False
+
