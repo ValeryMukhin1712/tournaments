@@ -166,6 +166,23 @@ def check_missing_fields():
 
 app = Flask(__name__)
 
+# Функция для получения иконки спорта
+def get_sport_icon(sport_type):
+    """Возвращает CSS класс иконки Font Awesome для соответствующего вида спорта"""
+    sport_icons = {
+        'настольный теннис': 'fa-table-tennis',
+        'теннис': 'fa-table-tennis',
+        'бадминтон': 'fa-trophy',  # Трофей для бадминтона
+        'волейбол': 'fa-volleyball-ball',  # Волейбольный мяч
+        'футбол': 'fa-futbol',
+        'баскетбол': 'fa-basketball-ball',
+        'другой': 'fa-trophy'
+    }
+    return sport_icons.get(sport_type.lower(), 'fa-trophy')
+
+# Регистрируем функцию в Jinja2
+app.jinja_env.globals.update(get_sport_icon=get_sport_icon)
+
 # Выбор конфигурации в зависимости от окружения
 if os.environ.get('FLASK_ENV') == 'production':
     app.config.from_object(ProductionConfig)

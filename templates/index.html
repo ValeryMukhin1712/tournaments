@@ -27,7 +27,7 @@
 
                 </div>
                 <p class="card-text text-muted">
-                    <i class="fas fa-table-tennis me-1"></i>{{ tournament.sport_type }}
+                    <i class="fas {{ get_sport_icon(tournament.sport_type) }} me-1"></i>{{ tournament.sport_type }}
                 </p>
                 <p class="card-text">
                     <small class="text-muted">

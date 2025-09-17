@@ -17,7 +17,7 @@
             <div>
                 <h1 class="mb-1">{{ tournament.name }} <small class="text-muted">v2.1</small></h1>
                 <p class="text-muted mb-0">
-                    <i class="fas fa-table-tennis me-1"></i>{{ tournament.sport_type }} • 
+                    <i class="fas {{ get_sport_icon(tournament.sport_type) }} me-1"></i>{{ tournament.sport_type }} • 
                     <i class="fas fa-calendar me-1"></i>{{ tournament.start_date.strftime('%d.%m.%Y') }} - {{ tournament.end_date.strftime('%d.%m.%Y') }}
                 </p>
             </div>
@@ -78,12 +78,12 @@
                                  <th class="sortable" data-column="losses">
                                      Поражений <i class="fas fa-sort ms-1"></i>
                                  </th>
-                                 <th class="sortable" data-column="points">
-                                     Очки <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 <th class="sortable" data-column="goal_difference">
-                                     Разница очков <i class="fas fa-sort ms-1"></i>
-                                 </th>
+                                <th class="sortable" data-column="points">
+                                    Очки<br><small>в турнире</small> <i class="fas fa-sort ms-1"></i>
+                                </th>
+                                <th class="sortable" data-column="goal_difference">
+                                    Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
+                                </th>
                                  <th>Действия</th>
                              </tr>
                          </thead>
@@ -352,7 +352,7 @@
 
 
 <!-- Модальное окно для ввода результата матча -->
-<div class="modal fade" id="matchResultModal" tabindex="-1">
+<div class="modal fade" id="matchResultModal" tabindex="-1" data-match-id="">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -697,6 +697,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function openMatchResultModal(matchId, p1Name, p2Name) {
     console.log('Открытие формы результата матча:', p1Name, 'vs', p2Name);
     
+    // Устанавливаем ID матча в модальном окне
+    document.getElementById('matchResultModal').setAttribute('data-match-id', matchId);
+    
     // Заполняем форму
     document.getElementById('matchId').value = matchId;
     document.getElementById('participant1Name').value = p1Name;
@@ -806,6 +809,9 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
             document.getElementById('set3Score1').value = '';
             document.getElementById('set3Score2').value = '';
         });
+    
+    // Сбрасываем флаг предложения сохранения для нового матча
+    resetMatchCompletionPrompt();
     
     new bootstrap.Modal(document.getElementById('matchResultModal')).show();
 }
@@ -1497,20 +1503,24 @@ function addSetEventListeners() {
     document.getElementById('set1Score1').addEventListener('input', function() {
         validateSetScore(1);
         checkSetCompletion(1);
+        updateSetsWon(); // Обновляем статус 3-го сета
     });
     document.getElementById('set1Score2').addEventListener('input', function() {
         validateSetScore(1);
         checkSetCompletion(1);
+        updateSetsWon(); // Обновляем статус 3-го сета
     });
     
     // Обработчики для сета 2
     document.getElementById('set2Score1').addEventListener('input', function() {
         validateSetScore(2);
         checkSetCompletion(2);
+        updateSetsWon(); // Обновляем статус 3-го сета
     });
     document.getElementById('set2Score2').addEventListener('input', function() {
         validateSetScore(2);
         checkSetCompletion(2);
+        updateSetsWon(); // Обновляем статус 3-го сета
     });
     
     // Обработчики для сета 3
@@ -1611,19 +1621,28 @@ function updateSetsWon() {
     // Определяем победителя матча (нужно выиграть 2 сета)
     const setsToWin = {{ tournament.sets_to_win }};
     let matchWinner = null;
+    let matchCompleted = false;
+    
     if (setsWon1 >= setsToWin) {
         matchWinner = 1;
+        matchCompleted = true;
         console.log('Победитель матча: Участник 1');
     } else if (setsWon2 >= setsToWin) {
         matchWinner = 2;
+        matchCompleted = true;
         console.log('Победитель матча: Участник 2');
     }
     
     // Обновляем отображение
-    updateSetsDisplay(setsWon1, setsWon2, matchWinner);
+    updateSetsDisplay(setsWon1, setsWon2, matchWinner, matchCompleted);
+    
+    // Если матч завершен, предлагаем сохранить результат
+    if (matchCompleted) {
+        showMatchCompletionPrompt(matchWinner);
+    }
 }
 
-function updateSetsDisplay(setsWon1, setsWon2, matchWinner) {
+function updateSetsDisplay(setsWon1, setsWon2, matchWinner, matchCompleted = false) {
     // Обновляем информационную панель с количеством выигранных сетов
     const infoElement = document.querySelector('.mb-3 small');
     if (infoElement) {
@@ -1641,6 +1660,100 @@ function updateSetsDisplay(setsWon1, setsWon2, matchWinner) {
     const set3Container = document.getElementById('set3Container');
     if (set3Container) {
         set3Container.style.display = 'block';
+        
+        // Блокируем 3-й сет если:
+        // 1. Матч завершен (кто-то выиграл 2 сета)
+        // 2. Первые два сета не завершены
+        const set3Score1 = document.getElementById('set3Score1');
+        const set3Score2 = document.getElementById('set3Score2');
+        
+        if (set3Score1 && set3Score2) {
+            // Проверяем, завершены ли первые два сета
+            const set1Completed = isSetCompleted(1);
+            const set2Completed = isSetCompleted(2);
+            const firstTwoSetsCompleted = set1Completed && set2Completed;
+            
+            // Блокируем если матч завершен ИЛИ первые два сета не завершены
+            const shouldBlockSet3 = matchCompleted || !firstTwoSetsCompleted;
+            
+            if (shouldBlockSet3) {
+                set3Score1.disabled = true;
+                set3Score2.disabled = true;
+                set3Score1.style.backgroundColor = '#f8f9fa';
+                set3Score2.style.backgroundColor = '#f8f9fa';
+                
+                if (matchCompleted) {
+                    set3Score1.title = 'Матч завершен - редактирование заблокировано';
+                    set3Score2.title = 'Матч завершен - редактирование заблокировано';
+                } else {
+                    set3Score1.title = 'Сначала завершите первые два сета';
+                    set3Score2.title = 'Сначала завершите первые два сета';
+                }
+            } else {
+                // Разблокируем 3-й сет только если первые два завершены и матч не завершен
+                set3Score1.disabled = false;
+                set3Score2.disabled = false;
+                set3Score1.style.backgroundColor = '';
+                set3Score2.style.backgroundColor = '';
+                set3Score1.title = '';
+                set3Score2.title = '';
+            }
+        }
+    }
+}
+
+// Функция для проверки завершения сета
+function isSetCompleted(setNumber) {
+    const score1 = parseInt(document.getElementById(`set${setNumber}Score1`).value) || 0;
+    const score2 = parseInt(document.getElementById(`set${setNumber}Score2`).value) || 0;
+    const pointsToWin = {{ tournament.points_to_win }};
+    
+    if (score1 > 0 && score2 > 0) {
+        const difference = Math.abs(score1 - score2);
+        // Сет завершен, если кто-то набрал необходимое количество очков И разница больше 1
+        return (score1 >= pointsToWin || score2 >= pointsToWin) && difference > 1;
+    }
+    
+    return false;
+}
+
+// Функция для показа предложения сохранить результат при завершении матча
+function showMatchCompletionPrompt(winner) {
+    // Проверяем, не показывали ли уже это предложение для текущего матча
+    const currentMatchId = document.getElementById('matchResultModal').getAttribute('data-match-id');
+    const promptKey = `match_completion_prompt_${currentMatchId}`;
+    
+    if (sessionStorage.getItem(promptKey)) {
+        return; // Уже показывали предложение для этого матча
+    }
+    
+    // Получаем имена участников
+    const participant1Name = document.getElementById('p1Name').textContent;
+    const participant2Name = document.getElementById('p2Name').textContent;
+    const winnerName = winner === 1 ? participant1Name : participant2Name;
+    
+    // Показываем предложение сохранить результат
+    const saveResult = confirm(
+        `Матч завершен! Победитель: ${winnerName}\n\n` +
+        `Хотите сохранить результат матча сейчас?\n\n` +
+        `Нажмите "OK" для сохранения или "Отмена" чтобы продолжить редактирование.`
+    );
+    
+    if (saveResult) {
+        // Автоматически сохраняем результат
+        document.getElementById('matchResultForm').dispatchEvent(new Event('submit'));
+    }
+    
+    // Помечаем, что предложение уже показывали
+    sessionStorage.setItem(promptKey, 'true');
+}
+
+// Функция для сброса флага предложения при открытии модального окна
+function resetMatchCompletionPrompt() {
+    const currentMatchId = document.getElementById('matchResultModal').getAttribute('data-match-id');
+    if (currentMatchId) {
+        const promptKey = `match_completion_prompt_${currentMatchId}`;
+        sessionStorage.removeItem(promptKey);
     }
 }
 
