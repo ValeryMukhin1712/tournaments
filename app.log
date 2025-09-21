@@ -6940,3 +6940,576 @@
 2025-09-21 06:37:19,563 - INFO -  * Debugger PIN: 604-572-470
 2025-09-21 06:37:26,121 - INFO - 127.0.0.1 - - [21/Sep/2025 06:37:26] "GET /tournament/1 HTTP/1.1" 200 -
 2025-09-21 06:37:26,712 - INFO - 127.0.0.1 - - [21/Sep/2025 06:37:26] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 08:10:41,244 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-21 08:10:41,245 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-21 08:10:41,249 - INFO -  * Restarting with stat
+2025-09-21 08:10:42,541 - WARNING -  * Debugger is active!
+2025-09-21 08:10:42,548 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:10:50,546 - INFO - 127.0.0.1 - - [21/Sep/2025 08:10:50] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:10:50,853 - INFO - 127.0.0.1 - - [21/Sep/2025 08:10:50] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 08:11:03,837 - INFO - 127.0.0.1 - - [21/Sep/2025 08:11:03] "GET / HTTP/1.1" 200 -
+2025-09-21 08:11:09,647 - INFO - 127.0.0.1 - - [21/Sep/2025 08:11:09] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:11:14,496 - INFO - 127.0.0.1 - - [21/Sep/2025 08:11:14] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:11:14,874 - INFO - 127.0.0.1 - - [21/Sep/2025 08:11:14] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:11:17,805 - INFO - 127.0.0.1 - - [21/Sep/2025 08:11:17] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:12:21,272 - INFO - 127.0.0.1 - - [21/Sep/2025 08:12:21] "GET / HTTP/1.1" 200 -
+2025-09-21 08:12:27,444 - INFO - 127.0.0.1 - - [21/Sep/2025 08:12:27] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:12:36,628 - INFO - 127.0.0.1 - - [21/Sep/2025 08:12:36] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:12:36,960 - INFO - 127.0.0.1 - - [21/Sep/2025 08:12:36] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:12:50,705 - INFO - 127.0.0.1 - - [21/Sep/2025 08:12:50] "GET / HTTP/1.1" 200 -
+2025-09-21 08:12:59,241 - INFO - 127.0.0.1 - - [21/Sep/2025 08:12:59] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:13:09,045 - INFO - 127.0.0.1 - - [21/Sep/2025 08:13:09] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:13:09,377 - INFO - 127.0.0.1 - - [21/Sep/2025 08:13:09] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:13:26,250 - INFO - 127.0.0.1 - - [21/Sep/2025 08:13:26] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:15:57,156 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 08:15:57,262 - INFO -  * Restarting with stat
+2025-09-21 08:15:58,546 - WARNING -  * Debugger is active!
+2025-09-21 08:15:58,551 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:16:19,097 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 08:16:19,202 - INFO -  * Restarting with stat
+2025-09-21 08:16:20,228 - WARNING -  * Debugger is active!
+2025-09-21 08:16:20,234 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:16:42,821 - INFO - 127.0.0.1 - - [21/Sep/2025 08:16:42] "GET / HTTP/1.1" 200 -
+2025-09-21 08:16:49,594 - INFO - 127.0.0.1 - - [21/Sep/2025 08:16:49] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:16:54,999 - INFO - 127.0.0.1 - - [21/Sep/2025 08:16:54] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:16:55,345 - INFO - 127.0.0.1 - - [21/Sep/2025 08:16:55] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:17:01,185 - INFO - 127.0.0.1 - - [21/Sep/2025 08:17:01] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:20:33,701 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:20:33,819 - INFO -  * Restarting with stat
+2025-09-21 08:20:34,955 - WARNING -  * Debugger is active!
+2025-09-21 08:20:34,957 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:21:11,533 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:21:11,635 - INFO -  * Restarting with stat
+2025-09-21 08:21:12,658 - WARNING -  * Debugger is active!
+2025-09-21 08:21:12,665 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:21:23,794 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:21:23,912 - INFO -  * Restarting with stat
+2025-09-21 08:21:25,031 - WARNING -  * Debugger is active!
+2025-09-21 08:21:25,035 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:21:47,848 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:21:47,959 - INFO -  * Restarting with stat
+2025-09-21 08:21:49,012 - WARNING -  * Debugger is active!
+2025-09-21 08:21:49,016 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:22:00,437 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:22:00,558 - INFO -  * Restarting with stat
+2025-09-21 08:22:01,606 - WARNING -  * Debugger is active!
+2025-09-21 08:22:01,610 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:22:23,325 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:23] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:22:24,883 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 08:22:40,097 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:40] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:22:41,055 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 08:22:47,589 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:47] "GET / HTTP/1.1" 200 -
+2025-09-21 08:22:53,227 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:53] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:22:58,485 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:58] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:22:58,849 - INFO - 127.0.0.1 - - [21/Sep/2025 08:22:58] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:23:03,759 - INFO - 127.0.0.1 - - [21/Sep/2025 08:23:03] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:23:25,948 - ERROR - ќшибка при создании расписани€: name 'Match' is not defined
+2025-09-21 08:23:25,951 - INFO - 127.0.0.1 - - [21/Sep/2025 08:23:25] "[35m[1mPOST /api/tournaments/1/reschedule HTTP/1.1[0m" 500 -
+2025-09-21 08:23:54,667 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:23:54,784 - INFO -  * Restarting with stat
+2025-09-21 08:23:55,876 - WARNING -  * Debugger is active!
+2025-09-21 08:23:55,881 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:23:58,745 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:23:58,863 - INFO -  * Restarting with stat
+2025-09-21 08:23:59,969 - WARNING -  * Debugger is active!
+2025-09-21 08:23:59,972 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:24:11,447 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:24:11,598 - INFO -  * Restarting with stat
+2025-09-21 08:24:12,666 - WARNING -  * Debugger is active!
+2025-09-21 08:24:12,671 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:26:55,643 - INFO - The CSRF session token is missing.
+2025-09-21 08:26:55,643 - INFO - 127.0.0.1 - - [21/Sep/2025 08:26:55] "[31m[1mPOST /api/tournaments/1/reschedule HTTP/1.1[0m" 400 -
+2025-09-21 08:27:04,315 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:04] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:27:06,683 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:06] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:27:08,033 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:08] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 08:27:19,466 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:19] "GET / HTTP/1.1" 200 -
+2025-09-21 08:27:25,511 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:25] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:27:29,962 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:29] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:27:30,310 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:30] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:27:34,701 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:34] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:27:42,842 - ERROR - ќшибка при создании расписани€: name 'db' is not defined
+2025-09-21 08:27:42,845 - INFO - 127.0.0.1 - - [21/Sep/2025 08:27:42] "[35m[1mPOST /api/tournaments/1/reschedule HTTP/1.1[0m" 500 -
+2025-09-21 08:28:13,982 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:28:14,100 - INFO -  * Restarting with stat
+2025-09-21 08:28:15,221 - WARNING -  * Debugger is active!
+2025-09-21 08:28:15,226 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:28:18,178 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:28:18,294 - INFO -  * Restarting with stat
+2025-09-21 08:28:19,493 - WARNING -  * Debugger is active!
+2025-09-21 08:28:19,499 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:28:27,372 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:28:27,475 - INFO -  * Restarting with stat
+2025-09-21 08:28:28,513 - WARNING -  * Debugger is active!
+2025-09-21 08:28:28,517 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:30:15,053 - INFO - The CSRF session token is missing.
+2025-09-21 08:30:15,053 - INFO - 127.0.0.1 - - [21/Sep/2025 08:30:15] "[31m[1mPOST /api/tournaments/1/reschedule HTTP/1.1[0m" 400 -
+2025-09-21 08:31:40,091 - INFO - 127.0.0.1 - - [21/Sep/2025 08:31:40] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:31:42,342 - INFO - 127.0.0.1 - - [21/Sep/2025 08:31:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 08:32:03,434 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:03] "GET / HTTP/1.1" 200 -
+2025-09-21 08:32:08,893 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:08] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 08:32:15,241 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:15] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 08:32:15,605 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:15] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 08:32:18,738 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:18] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:32:23,088 - INFO - —оздано 6 матчей дл€ турнира п
+2025-09-21 08:32:23,088 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:23] "POST /api/tournaments/1/reschedule HTTP/1.1" 200 -
+2025-09-21 08:32:24,966 - INFO - 127.0.0.1 - - [21/Sep/2025 08:32:24] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:33:05,737 - INFO - ƒобавлен участник 5 в турнир п
+2025-09-21 08:33:05,744 - INFO - 127.0.0.1 - - [21/Sep/2025 08:33:05] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-21 08:33:07,658 - INFO - 127.0.0.1 - - [21/Sep/2025 08:33:07] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:33:14,217 - INFO - ƒобавлен участник 6 в турнир п
+2025-09-21 08:33:14,223 - INFO - 127.0.0.1 - - [21/Sep/2025 08:33:14] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-21 08:33:16,139 - INFO - 127.0.0.1 - - [21/Sep/2025 08:33:16] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:33:26,673 - INFO - —оздано 15 матчей дл€ турнира п
+2025-09-21 08:33:26,673 - INFO - 127.0.0.1 - - [21/Sep/2025 08:33:26] "POST /api/tournaments/1/reschedule HTTP/1.1" 200 -
+2025-09-21 08:33:29,122 - INFO - 127.0.0.1 - - [21/Sep/2025 08:33:29] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 08:46:38,795 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:46:38,912 - INFO -  * Restarting with stat
+2025-09-21 08:46:40,152 - WARNING -  * Debugger is active!
+2025-09-21 08:46:40,157 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:46:48,329 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:46:48,443 - INFO -  * Restarting with stat
+2025-09-21 08:46:49,526 - WARNING -  * Debugger is active!
+2025-09-21 08:46:49,528 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 08:47:00,149 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 08:47:00,262 - INFO -  * Restarting with stat
+2025-09-21 08:47:01,377 - WARNING -  * Debugger is active!
+2025-09-21 08:47:01,382 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 09:08:59,426 - INFO - The CSRF session token is missing.
+2025-09-21 09:08:59,426 - INFO - 127.0.0.1 - - [21/Sep/2025 09:08:59] "[31m[1mPOST /api/tournaments/1/reschedule HTTP/1.1[0m" 400 -
+2025-09-21 09:09:33,146 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 09:09:33,248 - INFO -  * Restarting with stat
+2025-09-21 09:09:34,309 - WARNING -  * Debugger is active!
+2025-09-21 09:09:34,311 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 09:09:50,259 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 09:09:50,361 - INFO -  * Restarting with stat
+2025-09-21 09:09:51,301 - WARNING -  * Debugger is active!
+2025-09-21 09:09:51,305 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 09:10:04,224 - INFO - The CSRF session token is missing.
+2025-09-21 09:10:04,227 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:04] "[31m[1mPOST /api/tournaments/1/reschedule HTTP/1.1[0m" 400 -
+2025-09-21 09:10:09,632 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:09] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 09:10:10,011 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:10] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 09:10:16,296 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:16] "GET / HTTP/1.1" 200 -
+2025-09-21 09:10:19,109 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:19] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 09:10:22,246 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:22] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 09:10:22,641 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:22] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 09:10:26,395 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:26] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 09:10:34,210 - INFO - —оздано 15 матчей дл€ турнира п
+2025-09-21 09:10:34,210 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:34] "POST /api/tournaments/1/reschedule HTTP/1.1" 200 -
+2025-09-21 09:10:35,824 - INFO - 127.0.0.1 - - [21/Sep/2025 09:10:35] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 09:12:44,940 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 09:12:45,042 - INFO -  * Restarting with stat
+2025-09-21 09:12:46,146 - WARNING -  * Debugger is active!
+2025-09-21 09:12:46,149 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 09:13:22,651 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 09:13:22,750 - INFO -  * Restarting with stat
+2025-09-21 09:13:23,702 - WARNING -  * Debugger is active!
+2025-09-21 09:13:23,706 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 09:13:33,701 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 09:13:33,783 - INFO -  * Restarting with stat
+2025-09-21 09:13:34,750 - WARNING -  * Debugger is active!
+2025-09-21 09:13:34,752 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 09:15:26,624 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:26] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 09:15:27,023 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:27] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 09:15:33,096 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:33] "GET / HTTP/1.1" 200 -
+2025-09-21 09:15:45,793 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:45] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 09:15:49,790 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:49] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 09:15:50,160 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:50] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 09:15:52,640 - INFO - 127.0.0.1 - - [21/Sep/2025 09:15:52] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:12:33,394 - INFO - 127.0.0.1 - - [21/Sep/2025 11:12:33] "GET / HTTP/1.1" 200 -
+2025-09-21 11:12:43,457 - INFO - 127.0.0.1 - - [21/Sep/2025 11:12:43] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:12:47,991 - INFO - 127.0.0.1 - - [21/Sep/2025 11:12:47] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:12:48,322 - INFO - 127.0.0.1 - - [21/Sep/2025 11:12:48] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:14:22,933 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:14:23,061 - INFO -  * Restarting with stat
+2025-09-21 11:18:26,405 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-21 11:18:26,406 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-21 11:18:26,407 - INFO -  * Restarting with stat
+2025-09-21 11:18:27,371 - WARNING -  * Debugger is active!
+2025-09-21 11:18:27,375 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:19:26,115 - INFO - 127.0.0.1 - - [21/Sep/2025 11:19:26] "GET / HTTP/1.1" 200 -
+2025-09-21 11:19:37,356 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:19:37,454 - INFO -  * Restarting with stat
+2025-09-21 11:19:38,453 - WARNING -  * Debugger is active!
+2025-09-21 11:19:38,456 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:20:10,013 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:10] "GET / HTTP/1.1" 200 -
+2025-09-21 11:20:10,160 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:10] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 11:20:15,541 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:15] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:20:18,862 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:18] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:20:19,265 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:19] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:20:26,064 - INFO - “урнир 'п' (ID: 1) удален админом yand
+2025-09-21 11:20:26,064 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:26] "DELETE /api/tournaments/1 HTTP/1.1" 200 -
+2025-09-21 11:20:28,080 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:28] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:20:37,018 - INFO - 127.0.0.1 - - [21/Sep/2025 11:20:37] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-09-21 11:24:55,969 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:24:56,063 - INFO -  * Restarting with stat
+2025-09-21 11:24:57,020 - WARNING -  * Debugger is active!
+2025-09-21 11:24:57,023 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:25:46,518 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\models\\tournament.py', reloading
+2025-09-21 11:25:46,623 - INFO -  * Restarting with stat
+2025-09-21 11:25:47,580 - WARNING -  * Debugger is active!
+2025-09-21 11:25:47,584 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:26:13,262 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\models\\tournament.py', reloading
+2025-09-21 11:26:13,355 - INFO -  * Restarting with stat
+2025-09-21 11:26:14,312 - WARNING -  * Debugger is active!
+2025-09-21 11:26:14,316 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:27:12,928 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:12] "[32mGET /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:27:12,959 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:12] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:27:13,207 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 11:27:20,085 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:20] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:27:20,123 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:20] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:27:22,561 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:22] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-09-21 11:27:43,071 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:43] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:27:43,387 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:43] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:27:47,206 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:47] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:27:58,802 - INFO - ƒобавлен участник 1 в турнир пинг-понг1
+2025-09-21 11:27:58,802 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:58] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-21 11:27:59,917 - INFO - 127.0.0.1 - - [21/Sep/2025 11:27:59] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:28:04,285 - INFO - ƒобавлен участник 2 в турнир пинг-понг1
+2025-09-21 11:28:04,286 - INFO - 127.0.0.1 - - [21/Sep/2025 11:28:04] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-21 11:28:07,495 - INFO - 127.0.0.1 - - [21/Sep/2025 11:28:07] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:28:12,293 - INFO - ƒобавлен участник 3 в турнир пинг-понг1
+2025-09-21 11:28:12,293 - INFO - 127.0.0.1 - - [21/Sep/2025 11:28:12] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-21 11:30:26,999 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:30:27,105 - INFO -  * Restarting with stat
+2025-09-21 11:30:28,121 - WARNING -  * Debugger is active!
+2025-09-21 11:30:28,126 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:30:44,261 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:30:44,358 - INFO -  * Restarting with stat
+2025-09-21 11:30:45,316 - WARNING -  * Debugger is active!
+2025-09-21 11:30:45,321 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:31:09,883 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:09] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:31:23,370 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:23] "GET / HTTP/1.1" 200 -
+2025-09-21 11:31:26,209 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:26] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:31:30,265 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:30] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:31:30,599 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:30] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:31:34,798 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:34] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:31:47,293 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:47] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-21 11:31:47,632 - INFO - 127.0.0.1 - - [21/Sep/2025 11:31:47] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:32:33,782 - INFO - —оздано 6 матчей дл€ турнира пинг-понг1
+2025-09-21 11:32:33,783 - INFO - 127.0.0.1 - - [21/Sep/2025 11:32:33] "POST /api/tournaments/1/reschedule HTTP/1.1" 200 -
+2025-09-21 11:32:36,148 - INFO - 127.0.0.1 - - [21/Sep/2025 11:32:36] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:35:42,500 - INFO - —оздано 6 матчей дл€ турнира пинг-понг1
+2025-09-21 11:35:42,500 - INFO - 127.0.0.1 - - [21/Sep/2025 11:35:42] "POST /api/tournaments/1/reschedule HTTP/1.1" 200 -
+2025-09-21 11:35:43,630 - INFO - 127.0.0.1 - - [21/Sep/2025 11:35:43] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:36:39,877 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:39] "GET / HTTP/1.1" 200 -
+2025-09-21 11:36:42,828 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:42] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:36:46,365 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:46] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:36:46,684 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:46] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:36:50,690 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:50] "[32mGET /admin-logout HTTP/1.1[0m" 302 -
+2025-09-21 11:36:50,784 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:50] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:36:56,665 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:56] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:36:56,988 - INFO - 127.0.0.1 - - [21/Sep/2025 11:36:56] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:42:40,628 - INFO - 127.0.0.1 - - [21/Sep/2025 11:42:40] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:42:40,818 - INFO - 127.0.0.1 - - [21/Sep/2025 11:42:40] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 11:42:49,390 - INFO - 127.0.0.1 - - [21/Sep/2025 11:42:49] "GET / HTTP/1.1" 200 -
+2025-09-21 11:43:53,895 - INFO - 127.0.0.1 - - [21/Sep/2025 11:43:53] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:44:44,269 - INFO - 127.0.0.1 - - [21/Sep/2025 11:44:44] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:44:44,285 - INFO - 127.0.0.1 - - [21/Sep/2025 11:44:44] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:44:51,853 - INFO - 127.0.0.1 - - [21/Sep/2025 11:44:51] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:44:52,633 - INFO - 127.0.0.1 - - [21/Sep/2025 11:44:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 11:47:07,913 - INFO - 127.0.0.1 - - [21/Sep/2025 11:47:07] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:47:08,110 - INFO - 127.0.0.1 - - [21/Sep/2025 11:47:08] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 11:47:20,310 - INFO - 127.0.0.1 - - [21/Sep/2025 11:47:20] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:47:51,916 - INFO - 127.0.0.1 - - [21/Sep/2025 11:47:51] "[32mGET /api/matches/1 HTTP/1.1[0m" 302 -
+2025-09-21 11:47:52,235 - INFO - 127.0.0.1 - - [21/Sep/2025 11:47:52] "GET /login?next=/api/matches/1 HTTP/1.1" 200 -
+2025-09-21 11:48:06,972 - INFO - 127.0.0.1 - - [21/Sep/2025 11:48:06] "[32mGET /api/matches/1 HTTP/1.1[0m" 302 -
+2025-09-21 11:48:07,288 - INFO - 127.0.0.1 - - [21/Sep/2025 11:48:07] "GET /login?next=/api/matches/1 HTTP/1.1" 200 -
+2025-09-21 11:49:11,678 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:49:11,786 - INFO -  * Restarting with stat
+2025-09-21 11:49:12,807 - WARNING -  * Debugger is active!
+2025-09-21 11:49:12,811 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:49:17,872 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:49:17,966 - INFO -  * Restarting with stat
+2025-09-21 11:49:18,958 - WARNING -  * Debugger is active!
+2025-09-21 11:49:18,962 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:49:31,229 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:49:31,320 - INFO -  * Restarting with stat
+2025-09-21 11:49:32,289 - WARNING -  * Debugger is active!
+2025-09-21 11:49:32,293 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:49:44,542 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:49:44,652 - INFO -  * Restarting with stat
+2025-09-21 11:49:45,571 - WARNING -  * Debugger is active!
+2025-09-21 11:49:45,576 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:50:01,816 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:01] "[35m[1mGET /api/matches/1 HTTP/1.1[0m" 500 -
+2025-09-21 11:50:07,641 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:07] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:50:07,911 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 11:50:31,738 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:31] "GET / HTTP/1.1" 200 -
+2025-09-21 11:50:34,243 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:34] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 11:50:39,379 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:39] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 11:50:39,744 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:39] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 11:50:42,283 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:42] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:50:46,920 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:46] "[35m[1mGET /api/matches/1 HTTP/1.1[0m" 500 -
+2025-09-21 11:50:56,343 - INFO - 127.0.0.1 - - [21/Sep/2025 11:50:56] "[35m[1mGET /api/matches/1 HTTP/1.1[0m" 500 -
+2025-09-21 11:51:53,476 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:51:53,581 - INFO -  * Restarting with stat
+2025-09-21 11:51:54,557 - WARNING -  * Debugger is active!
+2025-09-21 11:51:54,560 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:51:57,375 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:51:57,475 - INFO -  * Restarting with stat
+2025-09-21 11:51:58,413 - WARNING -  * Debugger is active!
+2025-09-21 11:51:58,417 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:52:01,164 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:52:01,265 - INFO -  * Restarting with stat
+2025-09-21 11:52:02,208 - WARNING -  * Debugger is active!
+2025-09-21 11:52:02,213 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:52:14,390 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\api.py', reloading
+2025-09-21 11:52:14,473 - INFO -  * Restarting with stat
+2025-09-21 11:52:15,459 - WARNING -  * Debugger is active!
+2025-09-21 11:52:15,462 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:52:32,008 - INFO - 127.0.0.1 - - [21/Sep/2025 11:52:32] "[31m[1mGET /api/matches/1 HTTP/1.1[0m" 401 -
+2025-09-21 11:52:38,176 - INFO - 127.0.0.1 - - [21/Sep/2025 11:52:38] "[31m[1mGET /api/matches/1 HTTP/1.1[0m" 401 -
+2025-09-21 11:52:50,650 - INFO - 127.0.0.1 - - [21/Sep/2025 11:52:50] "[31m[1mGET /api/matches/1 HTTP/1.1[0m" 401 -
+2025-09-21 11:53:01,534 - INFO - 127.0.0.1 - - [21/Sep/2025 11:53:01] "[31m[1mGET /api/matches/1 HTTP/1.1[0m" 401 -
+2025-09-21 11:55:49,192 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 11:55:49,298 - INFO -  * Restarting with stat
+2025-09-21 11:55:50,325 - WARNING -  * Debugger is active!
+2025-09-21 11:55:50,329 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:56:08,484 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 11:56:08,604 - INFO -  * Restarting with stat
+2025-09-21 11:56:09,599 - WARNING -  * Debugger is active!
+2025-09-21 11:56:09,603 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 11:56:54,006 - INFO - 127.0.0.1 - - [21/Sep/2025 11:56:54] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 11:56:54,252 - INFO - 127.0.0.1 - - [21/Sep/2025 11:56:54] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:01:42,693 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:01:42,795 - INFO -  * Restarting with stat
+2025-09-21 12:01:43,789 - WARNING -  * Debugger is active!
+2025-09-21 12:01:43,793 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:02:27,026 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:27] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:02:27,341 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:27] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:02:29,005 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:02:29,191 - INFO -  * Restarting with stat
+2025-09-21 12:02:30,139 - WARNING -  * Debugger is active!
+2025-09-21 12:02:30,142 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:02:38,975 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:38] "[32mGET /admin-dashboard HTTP/1.1[0m" 302 -
+2025-09-21 12:02:38,993 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:38] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 12:02:39,784 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:39] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 12:02:43,183 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:43] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 12:02:43,515 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:43] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 12:02:50,897 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:50] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:02:56,703 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:56] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:02:56,989 - INFO - 127.0.0.1 - - [21/Sep/2025 12:02:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:03:08,328 - INFO - 127.0.0.1 - - [21/Sep/2025 12:03:08] "GET /api/matches/1 HTTP/1.1" 200 -
+2025-09-21 12:03:19,530 - INFO - 127.0.0.1 - - [21/Sep/2025 12:03:19] "GET /api/matches/1 HTTP/1.1" 200 -
+2025-09-21 12:03:19,888 - INFO - Ќачислены очки за матч 1: участник 3 = 1, участник 4 = 0
+2025-09-21 12:03:19,903 - INFO - ћатч 1 обновлен
+2025-09-21 12:03:19,905 - INFO - 127.0.0.1 - - [21/Sep/2025 12:03:19] "PUT /api/matches/1 HTTP/1.1" 200 -
+2025-09-21 12:03:20,127 - INFO - 127.0.0.1 - - [21/Sep/2025 12:03:20] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:05:15,679 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:05:15,779 - INFO -  * Restarting with stat
+2025-09-21 12:05:16,838 - WARNING -  * Debugger is active!
+2025-09-21 12:05:16,842 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:05:20,760 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:05:20,855 - INFO -  * Restarting with stat
+2025-09-21 12:05:21,834 - WARNING -  * Debugger is active!
+2025-09-21 12:05:21,837 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:05:34,122 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:05:34,221 - INFO -  * Restarting with stat
+2025-09-21 12:05:35,222 - WARNING -  * Debugger is active!
+2025-09-21 12:05:35,227 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:06:03,572 - INFO - 127.0.0.1 - - [21/Sep/2025 12:06:03] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:06:03,803 - INFO - 127.0.0.1 - - [21/Sep/2025 12:06:03] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:08:45,420 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:08:45,518 - INFO -  * Restarting with stat
+2025-09-21 12:08:46,503 - WARNING -  * Debugger is active!
+2025-09-21 12:08:46,506 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:08:52,868 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:08:52,970 - INFO -  * Restarting with stat
+2025-09-21 12:08:53,922 - WARNING -  * Debugger is active!
+2025-09-21 12:08:53,925 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:09:08,796 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:09:08,894 - INFO -  * Restarting with stat
+2025-09-21 12:09:09,889 - WARNING -  * Debugger is active!
+2025-09-21 12:09:09,894 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:09:27,003 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:09:27,096 - INFO -  * Restarting with stat
+2025-09-21 12:09:27,989 - WARNING -  * Debugger is active!
+2025-09-21 12:09:27,992 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:09:35,229 - INFO - 127.0.0.1 - - [21/Sep/2025 12:09:35] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:09:35,456 - INFO - 127.0.0.1 - - [21/Sep/2025 12:09:35] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:10:02,361 - INFO - 127.0.0.1 - - [21/Sep/2025 12:10:02] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:10:02,745 - INFO - 127.0.0.1 - - [21/Sep/2025 12:10:02] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:30:46,271 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-21 12:30:46,272 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-21 12:30:46,274 - INFO -  * Restarting with stat
+2025-09-21 12:30:47,305 - WARNING -  * Debugger is active!
+2025-09-21 12:30:47,308 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:31:28,390 - INFO - 127.0.0.1 - - [21/Sep/2025 12:31:28] "GET / HTTP/1.1" 200 -
+2025-09-21 12:31:45,620 - INFO - 127.0.0.1 - - [21/Sep/2025 12:31:45] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 12:31:50,118 - INFO - 127.0.0.1 - - [21/Sep/2025 12:31:50] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 12:31:50,498 - INFO - 127.0.0.1 - - [21/Sep/2025 12:31:50] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 12:31:55,513 - INFO - 127.0.0.1 - - [21/Sep/2025 12:31:55] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:32:08,547 - INFO - 127.0.0.1 - - [21/Sep/2025 12:32:08] "GET /api/matches/2 HTTP/1.1" 200 -
+2025-09-21 12:32:14,807 - INFO - 127.0.0.1 - - [21/Sep/2025 12:32:14] "GET /api/matches/2 HTTP/1.1" 200 -
+2025-09-21 12:32:15,174 - INFO - ћатч 2 обновлен
+2025-09-21 12:32:15,174 - INFO - 127.0.0.1 - - [21/Sep/2025 12:32:15] "PUT /api/matches/2 HTTP/1.1" 200 -
+2025-09-21 12:32:15,394 - INFO - 127.0.0.1 - - [21/Sep/2025 12:32:15] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:40:58,603 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:40:58,717 - INFO -  * Restarting with stat
+2025-09-21 12:40:59,706 - WARNING -  * Debugger is active!
+2025-09-21 12:40:59,710 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:41:12,762 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:12] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:41:13,355 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:41:13,463 - INFO -  * Restarting with stat
+2025-09-21 12:41:14,459 - WARNING -  * Debugger is active!
+2025-09-21 12:41:14,463 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:41:34,301 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:34] "GET / HTTP/1.1" 200 -
+2025-09-21 12:41:37,281 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:37] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 12:41:40,859 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:40] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 12:41:41,211 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:41] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 12:41:43,541 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:43] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:41:49,432 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:49] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:41:49,661 - INFO - 127.0.0.1 - - [21/Sep/2025 12:41:49] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:42:01,415 - INFO - 127.0.0.1 - - [21/Sep/2025 12:42:01] "GET /api/matches/3 HTTP/1.1" 200 -
+2025-09-21 12:42:08,480 - INFO - 127.0.0.1 - - [21/Sep/2025 12:42:08] "GET /api/matches/3 HTTP/1.1" 200 -
+2025-09-21 12:42:08,811 - INFO - ћатч 3 обновлен
+2025-09-21 12:42:08,812 - INFO - 127.0.0.1 - - [21/Sep/2025 12:42:08] "PUT /api/matches/3 HTTP/1.1" 200 -
+2025-09-21 12:42:09,058 - INFO - 127.0.0.1 - - [21/Sep/2025 12:42:09] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:43:15,703 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:15] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:43:15,884 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:43:30,038 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:30] "GET / HTTP/1.1" 200 -
+2025-09-21 12:43:32,736 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:32] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 12:43:36,347 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:36] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 12:43:36,687 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:36] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 12:43:39,589 - INFO - 127.0.0.1 - - [21/Sep/2025 12:43:39] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:50:56,523 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:50:56,636 - INFO -  * Restarting with stat
+2025-09-21 12:50:57,670 - WARNING -  * Debugger is active!
+2025-09-21 12:50:57,674 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:51:02,742 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:51:02,839 - INFO -  * Restarting with stat
+2025-09-21 12:51:03,810 - WARNING -  * Debugger is active!
+2025-09-21 12:51:03,813 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:51:17,503 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 12:51:17,595 - INFO -  * Restarting with stat
+2025-09-21 12:51:18,590 - WARNING -  * Debugger is active!
+2025-09-21 12:51:18,594 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 12:52:43,285 - INFO - 127.0.0.1 - - [21/Sep/2025 12:52:43] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 12:52:43,453 - INFO - 127.0.0.1 - - [21/Sep/2025 12:52:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 12:52:55,377 - INFO - 127.0.0.1 - - [21/Sep/2025 12:52:55] "GET / HTTP/1.1" 200 -
+2025-09-21 12:54:28,510 - INFO - 127.0.0.1 - - [21/Sep/2025 12:54:28] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 12:54:32,876 - INFO - 127.0.0.1 - - [21/Sep/2025 12:54:32] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 12:54:32,908 - INFO - 127.0.0.1 - - [21/Sep/2025 12:54:32] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 12:54:35,645 - INFO - 127.0.0.1 - - [21/Sep/2025 12:54:35] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:00:21,252 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:00:21,361 - INFO -  * Restarting with stat
+2025-09-21 13:00:22,353 - WARNING -  * Debugger is active!
+2025-09-21 13:00:22,356 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:00:47,805 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:00:47,976 - INFO -  * Restarting with stat
+2025-09-21 13:00:48,877 - WARNING -  * Debugger is active!
+2025-09-21 13:00:48,881 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:00:56,571 - INFO - 127.0.0.1 - - [21/Sep/2025 13:00:56] "GET / HTTP/1.1" 200 -
+2025-09-21 13:01:04,486 - INFO - 127.0.0.1 - - [21/Sep/2025 13:01:04] "GET / HTTP/1.1" 200 -
+2025-09-21 13:01:04,678 - INFO - 127.0.0.1 - - [21/Sep/2025 13:01:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 13:01:18,338 - INFO - 127.0.0.1 - - [21/Sep/2025 13:01:18] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 13:01:23,164 - INFO - 127.0.0.1 - - [21/Sep/2025 13:01:23] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 13:01:23,554 - INFO - 127.0.0.1 - - [21/Sep/2025 13:01:23] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 13:01:26,118 - INFO - 127.0.0.1 - - [21/Sep/2025 13:01:26] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:03:44,746 - INFO - 127.0.0.1 - - [21/Sep/2025 13:03:44] "GET / HTTP/1.1" 200 -
+2025-09-21 13:03:49,124 - INFO - 127.0.0.1 - - [21/Sep/2025 13:03:49] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 13:03:53,400 - INFO - 127.0.0.1 - - [21/Sep/2025 13:03:53] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 13:03:53,726 - INFO - 127.0.0.1 - - [21/Sep/2025 13:03:53] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 13:03:56,887 - INFO - 127.0.0.1 - - [21/Sep/2025 13:03:56] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:06:49,113 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:06:49,236 - INFO -  * Restarting with stat
+2025-09-21 13:06:50,282 - WARNING -  * Debugger is active!
+2025-09-21 13:06:50,286 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:07:12,159 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:07:12,257 - INFO -  * Restarting with stat
+2025-09-21 13:07:13,213 - WARNING -  * Debugger is active!
+2025-09-21 13:07:13,216 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:07:35,754 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:35] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:07:35,975 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:35] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 13:07:42,787 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:42] "GET / HTTP/1.1" 200 -
+2025-09-21 13:07:46,480 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:46] "GET / HTTP/1.1" 200 -
+2025-09-21 13:07:46,798 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-21 13:07:48,607 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:48] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 13:07:52,060 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:52] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 13:07:52,443 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:52] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 13:07:54,435 - INFO - 127.0.0.1 - - [21/Sep/2025 13:07:54] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:09:37,412 - INFO - 127.0.0.1 - - [21/Sep/2025 13:09:37] "GET /api/matches/3 HTTP/1.1" 200 -
+2025-09-21 13:09:48,472 - INFO - 127.0.0.1 - - [21/Sep/2025 13:09:48] "GET /api/matches/3 HTTP/1.1" 200 -
+2025-09-21 13:09:48,808 - INFO - ћатч 3 обновлен
+2025-09-21 13:09:48,808 - INFO - 127.0.0.1 - - [21/Sep/2025 13:09:48] "PUT /api/matches/3 HTTP/1.1" 200 -
+2025-09-21 13:09:49,060 - INFO - 127.0.0.1 - - [21/Sep/2025 13:09:49] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:09:55,460 - INFO - 127.0.0.1 - - [21/Sep/2025 13:09:55] "GET /api/matches/4 HTTP/1.1" 200 -
+2025-09-21 13:10:02,286 - INFO - 127.0.0.1 - - [21/Sep/2025 13:10:02] "GET /api/matches/4 HTTP/1.1" 200 -
+2025-09-21 13:10:02,570 - INFO - ћатч 4 обновлен
+2025-09-21 13:10:02,571 - INFO - 127.0.0.1 - - [21/Sep/2025 13:10:02] "PUT /api/matches/4 HTTP/1.1" 200 -
+2025-09-21 13:10:02,610 - INFO - 127.0.0.1 - - [21/Sep/2025 13:10:02] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:12:10,704 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-21 13:12:10,705 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-21 13:12:10,707 - INFO -  * Restarting with stat
+2025-09-21 13:12:11,725 - WARNING -  * Debugger is active!
+2025-09-21 13:12:11,730 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:14:31,512 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:14:31,607 - INFO -  * Restarting with stat
+2025-09-21 13:14:32,588 - WARNING -  * Debugger is active!
+2025-09-21 13:14:32,592 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:14:36,468 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:14:36,561 - INFO -  * Restarting with stat
+2025-09-21 13:14:37,539 - WARNING -  * Debugger is active!
+2025-09-21 13:14:37,543 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:14:52,309 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:14:52,410 - INFO -  * Restarting with stat
+2025-09-21 13:14:53,353 - WARNING -  * Debugger is active!
+2025-09-21 13:14:53,359 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:15:20,485 - INFO - 127.0.0.1 - - [21/Sep/2025 13:15:20] "GET / HTTP/1.1" 200 -
+2025-09-21 13:15:23,221 - INFO - 127.0.0.1 - - [21/Sep/2025 13:15:23] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-21 13:15:26,685 - INFO - 127.0.0.1 - - [21/Sep/2025 13:15:26] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-21 13:15:27,018 - INFO - 127.0.0.1 - - [21/Sep/2025 13:15:27] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-21 13:15:29,407 - INFO - ћатч 1: статус=завершен, sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=3
+2025-09-21 13:15:29,408 - INFO - ћатч 1: итоговый счет=2:0
+2025-09-21 13:15:29,408 - INFO - ћатч 2: итоговый счет=None
+2025-09-21 13:15:29,408 - INFO - ћатч 3: итоговый счет=None
+2025-09-21 13:15:29,409 - INFO - ћатч 4: итоговый счет=None
+2025-09-21 13:15:29,409 - INFO - ћатч 5: итоговый счет=None
+2025-09-21 13:15:29,409 - INFO - ћатч 6: итоговый счет=None
+2025-09-21 13:15:29,486 - INFO - 127.0.0.1 - - [21/Sep/2025 13:15:29] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-21 13:15:36,748 - INFO - 127.0.0.1 - - [21/Sep/2025 13:15:36] "GET /api/matches/2 HTTP/1.1" 200 -
+2025-09-21 13:21:02,773 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:21:02,880 - INFO -  * Restarting with stat
+2025-09-21 13:21:03,858 - WARNING -  * Debugger is active!
+2025-09-21 13:21:03,864 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:21:34,126 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\check_matches.py', reloading
+2025-09-21 13:21:34,221 - INFO -  * Restarting with stat
+2025-09-21 13:21:35,302 - WARNING -  * Debugger is active!
+2025-09-21 13:21:35,305 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:21:42,797 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\check_matches.py', reloading
+2025-09-21 13:21:42,890 - INFO -  * Restarting with stat
+2025-09-21 13:21:43,850 - WARNING -  * Debugger is active!
+2025-09-21 13:21:43,854 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:21:58,589 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:21:58,682 - INFO -  * Restarting with stat
+2025-09-21 13:21:59,688 - WARNING -  * Debugger is active!
+2025-09-21 13:21:59,691 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:22:19,398 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:22:19,492 - INFO -  * Restarting with stat
+2025-09-21 13:22:20,470 - WARNING -  * Debugger is active!
+2025-09-21 13:22:20,473 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:22:23,216 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:22:23,318 - INFO -  * Restarting with stat
+2025-09-21 13:22:24,386 - WARNING -  * Debugger is active!
+2025-09-21 13:22:24,390 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:22:25,911 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:22:26,005 - INFO -  * Restarting with stat
+2025-09-21 13:22:27,040 - WARNING -  * Debugger is active!
+2025-09-21 13:22:27,044 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:22:30,971 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:22:31,064 - INFO -  * Restarting with stat
+2025-09-21 13:22:32,210 - WARNING -  * Debugger is active!
+2025-09-21 13:22:32,216 - INFO -  * Debugger PIN: 124-712-536
+2025-09-21 13:22:51,739 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 Ч 2025_09_14_1\\routes\\main.py', reloading
+2025-09-21 13:22:51,892 - INFO -  * Restarting with stat

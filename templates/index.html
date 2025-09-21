@@ -6,12 +6,19 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-6">
-            <div class="text-center mb-5">
+            <div class="text-center mb-5 position-relative">
                 <h1 class="display-4 mb-3">
                     <i class="fas fa-trophy text-primary me-3"></i>
                     Страница 1 - Турнирная система
                 </h1>
                 <p class="lead text-muted">Выберите вашу роль для продолжения</p>
+                
+                <!-- Кнопка админа в правом верхнем углу -->
+                <div class="position-absolute" style="top: 0; right: 0;">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
+                        <i class="fas fa-user-shield me-1"></i>admin
+                    </button>
+                </div>
             </div>
             
             <div class="row g-4">
@@ -109,6 +116,102 @@
         </div>
     </div>
 </div>
+
+<script>
+function adminLogin() {
+    // Показываем модальное окно для входа админа
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'adminLoginModal';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-shield me-2"></i>Вход администратора системы
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminLoginForm">
+                        <div class="mb-3">
+                            <label for="adminUsername" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="adminUsername" value="admin" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="adminPassword" placeholder="Введите пароль">
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Данные для входа:</strong><br>
+                            Логин: <code>admin</code><br>
+                            Пароль: <code>adm444</code>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" onclick="performAdminLogin()">
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Удаляем модальное окно после закрытия
+    modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+
+function performAdminLogin() {
+    const password = document.getElementById('adminPassword').value;
+    
+    // Показываем индикатор загрузки
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Вход...';
+    button.disabled = true;
+    
+    // Отправляем запрос на сервер
+    fetch('/admin-system-login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            username: 'admin',
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Успешный вход - перенаправляем на панель управления
+            window.location.href = data.redirect_url;
+        } else {
+            // Ошибка - восстанавливаем кнопку
+            button.innerHTML = originalText;
+            button.disabled = false;
+            alert('Ошибка: ' + data.message);
+            document.getElementById('adminPassword').focus();
+        }
+    })
+    .catch(error => {
+        // Ошибка сети - восстанавливаем кнопку
+        button.innerHTML = originalText;
+        button.disabled = false;
+        alert('Ошибка сети: ' + error.message);
+        document.getElementById('adminPassword').focus();
+    });
+}
+</script>
 
 {% endblock %}
 

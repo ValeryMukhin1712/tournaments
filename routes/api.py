@@ -9,6 +9,147 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def create_smart_schedule(tournament, participants, Match, db):
+    """
+    Создает расписание матчей по раундам согласно новому алгоритму:
+    1. Определение количества матчей и раундов
+    2. Распределение матчей по раундам и площадкам
+    3. Расчет времени каждого раунда
+    4. Итоговая схема времени
+    """
+    from datetime import date, time, timedelta
+    import random
+    
+    # Параметры турнира
+    n = len(participants)  # число участников
+    k = tournament.court_count or 4  # число площадок
+    time_match = tournament.match_duration or 60  # длительность матча в минутах
+    time_break = tournament.break_duration or 15  # длительность перерыва в минутах
+    start_time = tournament.start_time or time(9, 0)
+    end_time = tournament.end_time or time(18, 0)
+    start_date = tournament.start_date or date.today()
+    
+    if n < 2:
+        return 0
+    
+    # Шаг 1: Определение количества матчей и раундов
+    # Общее число матчей: M = n(n-1)/2
+    total_matches = n * (n - 1) // 2
+    
+    # Число раундов: R = n-1 (для четного числа участников)
+    # Если нечетное, добавляем фиктивного участника
+    is_odd = n % 2 == 1
+    if is_odd:
+        R = n  # для нечетного числа участников
+    else:
+        R = n - 1
+    
+    # Шаг 2: Создание списка всех матчей
+    matches_to_schedule = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            matches_to_schedule.append((participants[i], participants[j]))
+    
+    # Перемешиваем матчи для случайности
+    random.shuffle(matches_to_schedule)
+    
+    # Шаг 3: Распределение матчей по раундам
+    rounds = [[] for _ in range(R)]
+    used_participants = set()
+    
+    for match in matches_to_schedule:
+        participant1, participant2 = match
+        
+        # Находим раунд, где оба участника еще не играли
+        best_round = -1
+        for round_idx in range(R):
+            round_participants = set()
+            for existing_match in rounds[round_idx]:
+                round_participants.add(existing_match[0].id)
+                round_participants.add(existing_match[1].id)
+            
+            if (participant1.id not in round_participants and 
+                participant2.id not in round_participants):
+                best_round = round_idx
+                break
+        
+        if best_round != -1:
+            rounds[best_round].append(match)
+        else:
+            # Если не нашли подходящий раунд, добавляем в первый доступный
+            for round_idx in range(R):
+                if len(rounds[round_idx]) < k:  # не больше чем площадок
+                    rounds[round_idx].append(match)
+                    break
+    
+    # Шаг 4: Расчет времени и создание матчей
+    scheduled_matches = []
+    match_number = 1
+    current_date = start_date
+    
+    for round_idx, round_matches in enumerate(rounds):
+        if not round_matches:
+            continue
+            
+        # Количество матчей в раунде
+        matches_in_round = len(round_matches)
+        
+        # Время раунда: T_round = t_match + (m-1) * t_break
+        # где m = min(k, matches_in_round)
+        m = min(k, matches_in_round)
+        T_round = time_match + (m - 1) * time_break
+        
+        # Время начала раунда: start_time_for_r = (r - 1) * T_round
+        round_start_minutes = round_idx * T_round
+        round_start_time = add_minutes_to_time(start_time, round_start_minutes)
+        
+        # Проверяем, не выходим ли за пределы рабочего дня
+        round_end_time = add_minutes_to_time(round_start_time, T_round)
+        
+        # Если раунд не помещается в текущий день, переходим на следующий
+        if round_end_time > end_time:
+            current_date += timedelta(days=1)
+            round_start_time = start_time
+            round_end_time = add_minutes_to_time(round_start_time, T_round)
+        
+        # Распределяем матчи по площадкам
+        for match_idx, (participant1, participant2) in enumerate(round_matches):
+            court_number = (match_idx % k) + 1
+            
+            # Время начала матча в раунде
+            if match_idx < m:
+                # Матчи, которые начинаются одновременно
+                match_start_time = round_start_time
+            else:
+                # Матчи, которые начинаются после завершения предыдущих
+                match_start_time = add_minutes_to_time(round_start_time, 
+                                                     time_match + (match_idx - m) * (time_match + time_break))
+            
+            # Создаем матч
+            match = Match(
+                tournament_id=tournament.id,
+                participant1_id=participant1.id,
+                participant2_id=participant2.id,
+                status='запланирован',
+                match_date=current_date,
+                match_time=match_start_time,
+                court_number=court_number,
+                match_number=match_number
+            )
+            db.session.add(match)
+            scheduled_matches.append(match)
+            match_number += 1
+    
+    return len(scheduled_matches)
+
+
+def add_minutes_to_time(time_obj, minutes):
+    """Добавляет минуты к времени"""
+    from datetime import datetime, timedelta
+    dt = datetime.combine(date.today(), time_obj)
+    new_dt = dt + timedelta(minutes=minutes)
+    return new_dt.time()
+
 def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin):
     """Создает API маршруты приложения"""
     
@@ -165,10 +306,27 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     # ===== МАТЧИ =====
     
     @app.route('/api/matches/<int:match_id>', methods=['GET'])
-    @login_required
     def get_match(match_id):
         """Получение информации о матче"""
+        from flask import session
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
+        
+        admin = TournamentAdmin.query.get(session['admin_id'])
+        if not admin or not admin.is_active:
+            return jsonify({'error': 'Неверная авторизация'}), 401
+        
         match = Match.query.get_or_404(match_id)
+        
+        # Проверяем права (создатель турнира или системный админ)
+        tournament = Tournament.query.get(match.tournament_id)
+        if not tournament:
+            return jsonify({'error': 'Турнир не найден'}), 404
+            
+        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+            return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
         
         return jsonify({
             'success': True,
@@ -240,11 +398,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.add(participant)
             db.session.commit()
             
-            logger.info(f"Добавлен участник {data['name']} в турнир {tournament.name}")
-            
             return jsonify({
                 'success': True,
-                'message': 'Участник успешно добавлен',
                 'participant': {
                     'id': participant.id,
                     'name': participant.name,
@@ -258,24 +413,56 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'success': False, 'error': 'Ошибка при добавлении участника'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>', methods=['DELETE'])
-    @login_required
     def delete_tournament(tournament_id):
         """Удаление турнира"""
-        if current_user.role != 'администратор':
-            return jsonify({'error': 'Недостаточно прав'}), 403
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
         
         tournament = Tournament.query.get_or_404(tournament_id)
-        tournament_name = tournament.name
         
-        # Удаляем связанные данные
-        Participant.query.filter_by(tournament_id=tournament_id).delete()
-        Match.query.filter_by(tournament_id=tournament_id).delete()
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except Exception as e:
+            logger.warning(f"CSRF validation failed: {e}")
+            return jsonify({'error': 'Неверный CSRF токен'}), 400
         
-        db.session.delete(tournament)
-        db.session.commit()
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
         
-        logger.info(f"Турнир {tournament_name} удален")
-        return jsonify({'success': True, 'message': 'Турнир успешно удален'})
+        admin = TournamentAdmin.query.get(session['admin_id'])
+        if not admin or not admin.is_active:
+            return jsonify({'error': 'Неверная авторизация'}), 401
+        
+        # Проверяем права (создатель турнира или системный админ)
+        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+            return jsonify({'error': 'Недостаточно прав для удаления турнира'}), 403
+        
+        try:
+            # Удаляем все связанные данные
+            # 1. Удаляем матчи
+            Match.query.filter_by(tournament_id=tournament_id).delete()
+            
+            # 2. Удаляем участников
+            Participant.query.filter_by(tournament_id=tournament_id).delete()
+            
+            # 3. Удаляем турнир
+            tournament_name = tournament.name
+            db.session.delete(tournament)
+            
+            db.session.commit()
+            
+            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin.name}")
+            return jsonify({
+                'success': True, 
+                'message': f'Турнир "{tournament_name}" успешно удален'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении турнира {tournament_id}: {str(e)}")
+            return jsonify({'error': 'Ошибка при удалении турнира'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>/participants/<int:participant_id>', methods=['DELETE'])
     @login_required
@@ -355,10 +542,36 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'error': 'Ошибка при создании матча'}), 500
 
     @app.route('/api/matches/<int:match_id>', methods=['PUT'])
-    @login_required
     def update_match(match_id):
         """Обновление матча"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except Exception as e:
+            logger.warning(f"CSRF validation failed: {e}")
+            return jsonify({'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
+        
+        admin = TournamentAdmin.query.get(session['admin_id'])
+        if not admin or not admin.is_active:
+            return jsonify({'error': 'Неверная авторизация'}), 401
+        
         match = Match.query.get_or_404(match_id)
+        
+        # Проверяем права (создатель турнира или системный админ)
+        tournament = Tournament.query.get(match.tournament_id)
+        if not tournament:
+            return jsonify({'error': 'Турнир не найден'}), 404
+            
+        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+            return jsonify({'error': 'Недостаточно прав для изменения матча'}), 403
+        
         data = request.get_json()
         
         try:
@@ -530,13 +743,36 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'success': False, 'error': f'Ошибка при обновлении матча: {str(e)}'}), 500
 
     @app.route('/api/matches/<int:match_id>', methods=['DELETE'])
-    @login_required
     def delete_match(match_id):
         """Удаление матча"""
-        if current_user.role != 'администратор':
-            return jsonify({'error': 'Недостаточно прав'}), 403
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except Exception as e:
+            logger.warning(f"CSRF validation failed: {e}")
+            return jsonify({'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
+        
+        admin = TournamentAdmin.query.get(session['admin_id'])
+        if not admin or not admin.is_active:
+            return jsonify({'error': 'Неверная авторизация'}), 401
         
         match = Match.query.get_or_404(match_id)
+        
+        # Проверяем права (создатель турнира или системный админ)
+        tournament = Tournament.query.get(match.tournament_id)
+        if not tournament:
+            return jsonify({'error': 'Турнир не найден'}), 404
+            
+        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+            return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
+        
         db.session.delete(match)
         db.session.commit()
         
@@ -549,8 +785,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     def reschedule_tournament(tournament_id):
         """Пересчет расписания турнира"""
         from flask import session
+        from flask_wtf.csrf import validate_csrf
         
         tournament = Tournament.query.get_or_404(tournament_id)
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except Exception as e:
+            logger.warning(f"CSRF validation failed: {e}")
+            return jsonify({'error': 'Неверный CSRF токен'}), 400
         
         # Проверяем авторизацию через сессию
         if 'admin_id' not in session:
@@ -572,22 +816,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Удаляем существующие матчи
             Match.query.filter_by(tournament_id=tournament_id).delete()
             
-            # Создаем матчи между всеми участниками
-            from datetime import date, time
-            matches_created = 0
-            for i in range(len(participants)):
-                for j in range(i + 1, len(participants)):
-                    match = Match(
-                        tournament_id=tournament_id,
-                        participant1_id=participants[i].id,
-                        participant2_id=participants[j].id,
-                        status='запланирован',
-                        match_date=date.today(),  # Устанавливаем сегодняшнюю дату
-                        match_time=time(9, 0),    # Устанавливаем время 09:00
-                        court_number=1            # Устанавливаем корт 1
-                    )
-                    db.session.add(match)
-                    matches_created += 1
+            # Создаем умное расписание
+            matches_created = create_smart_schedule(tournament, participants, Match, db)
             
             db.session.commit()
             

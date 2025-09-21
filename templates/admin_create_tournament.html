@@ -111,19 +111,19 @@
                         <div class="row mb-3">
                             <div class="col-md-3">
                                 <label for="match_duration" class="form-label fw-bold">Длительность матча (мин)</label>
-                                <input type="number" class="form-control" id="match_duration" name="match_duration" value="60" min="15" max="300">
+                                <input type="number" class="form-control" id="match_duration" name="match_duration" value="10" min="5" max="300">
                             </div>
                             <div class="col-md-3">
                                 <label for="break_duration" class="form-label fw-bold">Перерыв (мин)</label>
-                                <input type="number" class="form-control" id="break_duration" name="break_duration" value="15" min="0" max="60">
+                                <input type="number" class="form-control" id="break_duration" name="break_duration" value="5" min="0" max="60">
                             </div>
                             <div class="col-md-3">
                                 <label for="sets_to_win" class="form-label fw-bold">Сетов для победы</label>
-                                <input type="number" class="form-control" id="sets_to_win" name="sets_to_win" value="2" min="1" max="5">
+                                <input type="number" class="form-control" id="sets_to_win" name="sets_to_win" value="3" min="1" max="5">
                             </div>
                             <div class="col-md-3">
                                 <label for="points_to_win" class="form-label fw-bold">Очков для победы в сете</label>
-                                <input type="number" class="form-control" id="points_to_win" name="points_to_win" value="21" min="1" max="100">
+                                <input type="number" class="form-control" id="points_to_win" name="points_to_win" value="11" min="1" max="100">
                             </div>
                         </div>
 
@@ -180,6 +180,89 @@ document.addEventListener('DOMContentLoaded', function() {
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         startDateInput.value = `${year}-${month}-${day}`;
+    }
+    
+    // Настройки по умолчанию для разных видов спорта
+    const sportSettings = {
+        'пинг-понг': {
+            match_duration: 10,
+            break_duration: 5,
+            points_to_win: 11,
+            sets_to_win: 3
+        },
+        'бадминтон': {
+            match_duration: 20,
+            break_duration: 5,
+            points_to_win: 21,
+            sets_to_win: 2
+        },
+        'волейбол': {
+            match_duration: 20,
+            break_duration: 5,
+            points_to_win: 25,
+            sets_to_win: 3
+        },
+        'другое': {
+            match_duration: 60,
+            break_duration: 15,
+            points_to_win: 21,
+            sets_to_win: 2
+        }
+    };
+    
+    // Обработчик изменения вида спорта
+    const sportTypeSelect = document.getElementById('sport_type');
+    if (sportTypeSelect) {
+        sportTypeSelect.addEventListener('change', function() {
+            const selectedSport = this.value;
+            const settings = sportSettings[selectedSport];
+            
+            if (settings) {
+                // Обновляем значения полей
+                const matchDurationInput = document.getElementById('match_duration');
+                const breakDurationInput = document.getElementById('break_duration');
+                const pointsToWinInput = document.getElementById('points_to_win');
+                const setsToWinInput = document.getElementById('sets_to_win');
+                
+                if (matchDurationInput) matchDurationInput.value = settings.match_duration;
+                if (breakDurationInput) breakDurationInput.value = settings.break_duration;
+                if (pointsToWinInput) pointsToWinInput.value = settings.points_to_win;
+                if (setsToWinInput) setsToWinInput.value = settings.sets_to_win;
+                
+                // Показываем уведомление о изменении настроек
+                showSportSettingsNotification(selectedSport, settings);
+            }
+        });
+        
+        // Устанавливаем начальные значения для пинг-понга
+        sportTypeSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Функция для показа уведомления об изменении настроек
+    function showSportSettingsNotification(sport, settings) {
+        // Создаем уведомление
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Настройки для ${sport}:</strong><br>
+            • Длительность матча: ${settings.match_duration} мин<br>
+            • Перерыв: ${settings.break_duration} мин<br>
+            • Очков для победы: ${settings.points_to_win}<br>
+            • Сетов для победы: ${settings.sets_to_win}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Добавляем уведомление на страницу
+        document.body.appendChild(notification);
+        
+        // Автоматически скрываем через 5 секунд
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
     }
 });
 </script>

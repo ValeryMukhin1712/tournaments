@@ -31,7 +31,7 @@
 
     <!-- Статистика -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card bg-primary text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -46,7 +46,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -61,22 +61,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>{{ tournaments|selectattr('status', 'equalto', 'регистрация')|list|length }}</h4>
-                            <p class="mb-0">Регистрация</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-user-plus fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card bg-secondary text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -143,12 +128,19 @@
                                         </td>
                                         <td>{{ tournament.start_date.strftime('%d.%m.%Y') if tournament.start_date else '-' }}</td>
                                         <td>{{ tournament.end_date.strftime('%d.%m.%Y') if tournament.end_date else '-' }}</td>
-                                        <td>{{ tournament.participants|length if tournament.participants else 0 }}</td>
+                                        <td>{{ tournament.participant_count }}</td>
                                         <td>{{ tournament.created_at.strftime('%d.%m.%Y %H:%M') if tournament.created_at else '-' }}</td>
                                         <td>
-                        <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-eye me-1"></i>Просмотр
-                        </a>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>Просмотр
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="deleteTournament({{ tournament.id }}, '{{ tournament.name }}')"
+                                                        title="Удалить турнир">
+                                                    <i class="fas fa-trash me-1"></i>Удалить
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -170,4 +162,51 @@
         </div>
     </div>
 </div>
+
+<script>
+// Функция для удаления турнира
+function deleteTournament(tournamentId, tournamentName) {
+    if (confirm(`Вы уверены, что хотите удалить турнир "${tournamentName}"?\n\nЭто действие нельзя отменить! Все данные турнира (участники, матчи, результаты) будут безвозвратно удалены.`)) {
+        // Показываем индикатор загрузки
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Удаление...';
+        button.disabled = true;
+        
+        fetch(`/api/tournaments/${tournamentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.error || 'Ошибка при удалении турнира');
+                });
+            }
+        })
+        .then(data => {
+            // Успешное удаление - перезагружаем страницу
+            alert('Турнир успешно удален!');
+            window.location.reload();
+        })
+        .catch(error => {
+            // Ошибка - восстанавливаем кнопку
+            button.innerHTML = originalText;
+            button.disabled = false;
+            alert('Ошибка при удалении турнира: ' + error.message);
+        });
+    }
+}
+
+// Функция для получения CSRF токена
+function getCSRFToken() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    return token ? token.getAttribute('content') : '';
+}
+</script>
 {% endblock %}
