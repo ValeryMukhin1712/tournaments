@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf import FlaskForm
-from flask_mail import Mail, Message
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -173,7 +172,6 @@ def get_sport_icon(sport_type):
     sport_icons = {
         'настольный теннис': 'fa-table-tennis',
         'теннис': 'fa-table-tennis',
-        'пинг-понг': 'fa-table-tennis',
         'бадминтон': 'fa-trophy',  # Трофей для бадминтона
         'волейбол': 'fa-volleyball-ball',  # Волейбольный мяч
         'футбол': 'fa-futbol',
@@ -227,9 +225,6 @@ logger = logging.getLogger(__name__)
 # Инициализация базы данных
 db = SQLAlchemy(app)
 
-# Инициализация Flask-Mail
-mail = Mail(app)
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -242,10 +237,9 @@ Participant = models['Participant']
 Match = models['Match']
 Notification = models['Notification']
 MatchLog = models['MatchLog']
-TournamentAdmin = models['TournamentAdmin']
 
 # Импорт и регистрация маршрутов
-register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin)
+register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog)
 
 @login_manager.user_loader
 def load_user(user_id):
