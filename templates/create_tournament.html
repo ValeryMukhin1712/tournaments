@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Страница 6 - Создать турнир - Турнирная система{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="text-center mb-4">
+                <h1 class="display-5 mb-3">
+                    <i class="fas fa-plus-circle text-success me-3"></i>
+                    Создать новый турнир
+                </h1>
+                <p class="lead text-muted">Заполните форму для получения токена турнира</p>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <!-- Имя пользователя -->
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Ваше имя или псевдоним
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="name" name="name" 
+                                   placeholder="Введите ваше имя" required>
+                            <div class="form-text">Это имя будет отображаться как организатор турнира</div>
+                        </div>
+                        
+                        <!-- Способ получения токена -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-envelope me-2"></i>Как хотите получить токен для создания турнира?
+                            </label>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="contact_method" 
+                                               id="email_method" value="email" required>
+                                        <label class="form-check-label" for="email_method">
+                                            <i class="fas fa-envelope me-2"></i>По e-mail
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="contact_method" 
+                                               id="telegram_method" value="telegram" required>
+                                        <label class="form-check-label" for="telegram_method">
+                                            <i class="fab fa-telegram me-2"></i>В Telegram
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Поле для email -->
+                        <div class="mb-4" id="email_field" style="display: none;">
+                            <label for="email" class="form-label fw-bold">
+                                <i class="fas fa-at me-2"></i>E-mail адрес
+                            </label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" 
+                                   placeholder="example@email.com">
+                            <div class="form-text">Токен будет отправлен на указанный e-mail</div>
+                        </div>
+                        
+                        <!-- Поле для Telegram ID -->
+                        <div class="mb-4" id="telegram_field" style="display: none;">
+                            <label for="telegram_id" class="form-label fw-bold">
+                                <i class="fab fa-telegram me-2"></i>Telegram User ID
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="telegram_id" name="telegram_id" 
+                                   placeholder="@username или 123456789">
+                            <div class="form-text">Введите ваш Telegram username (@username) или User ID</div>
+                        </div>
+                        
+                        <!-- Информация о токене -->
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-2"></i>О токене турнира
+                            </h6>
+                            <p class="mb-0">
+                                После заполнения формы вы получите токен <strong>47</strong> для создания и управления турниром. 
+                                Сохраните этот токен в безопасном месте - он понадобится для доступа к функциям администратора.
+                            </p>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>Назад
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Получить токен
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emailMethod = document.getElementById('email_method');
+    const telegramMethod = document.getElementById('telegram_method');
+    const emailField = document.getElementById('email_field');
+    const telegramField = document.getElementById('telegram_field');
+    const emailInput = document.getElementById('email');
+    const telegramInput = document.getElementById('telegram_id');
+    
+    // Обработка изменения способа получения токена
+    function updateFields() {
+        if (emailMethod.checked) {
+            emailField.style.display = 'block';
+            telegramField.style.display = 'none';
+            emailInput.required = true;
+            telegramInput.required = false;
+            telegramInput.value = '';
+        } else if (telegramMethod.checked) {
+            emailField.style.display = 'none';
+            telegramField.style.display = 'block';
+            emailInput.required = false;
+            telegramInput.required = true;
+            emailInput.value = '';
+        }
+    }
+    
+    emailMethod.addEventListener('change', updateFields);
+    telegramMethod.addEventListener('change', updateFields);
+    
+    // Валидация формы
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const selectedMethod = document.querySelector('input[name="contact_method"]:checked');
+        
+        if (!selectedMethod) {
+            e.preventDefault();
+            alert('Пожалуйста, выберите способ получения токена');
+            return;
+        }
+        
+        if (selectedMethod.value === 'email' && !emailInput.value.trim()) {
+            e.preventDefault();
+            alert('Пожалуйста, введите e-mail адрес');
+            emailInput.focus();
+            return;
+        }
+        
+        if (selectedMethod.value === 'telegram' && !telegramInput.value.trim()) {
+            e.preventDefault();
+            alert('Пожалуйста, введите Telegram ID');
+            telegramInput.focus();
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Страница 7 - Выбрать турнир - Турнирная система{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-users text-info me-3"></i>
+                    Выбрать турнир для участия
+                </h1>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Назад
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if tournaments %}
+    <div class="row">
+        {% for tournament in tournaments %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">{{ tournament.name }}</h5>
+                        <span class="badge bg-primary">{{ tournament.sport_type }}</span>
+                    </div>
+                    
+                    <p class="card-text text-muted">
+                        <i class="fas {{ get_sport_icon(tournament.sport_type) }} me-1"></i>
+                        {{ tournament.sport_type }}
+                    </p>
+                    
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ tournament.start_date.strftime('%d.%m.%Y') }} - {{ tournament.end_date.strftime('%d.%m.%Y') }}
+                        </small>
+                    </p>
+                    
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-users me-1"></i>
+                            Участников: {{ tournament.participants|length }}
+                            {% if tournament.max_participants %}
+                                / {{ tournament.max_participants }}
+                            {% endif %}
+                        </small>
+                    </p>
+                    
+                    {% if tournament.description %}
+                    <p class="card-text">
+                        <small class="text-muted">{{ tournament.description[:100] }}{% if tournament.description|length > 100 %}...{% endif %}</small>
+                    </p>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>Просмотр турнира
+                        </a>
+                        
+                        {% if current_user.is_authenticated %}
+                            {% set is_participant = tournament.participants | selectattr('user_id', 'equalto', current_user.id) | list | length > 0 or tournament.participants | selectattr('name', 'equalto', current_user.username) | list | length > 0 %}
+                            
+                            {% if not is_participant %}
+                                {% if tournament.max_participants and tournament.participants|length >= tournament.max_participants %}
+                                    <button class="btn btn-secondary disabled">
+                                        <i class="fas fa-times me-1"></i>Турнир заполнен
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-success" onclick="registerForTournament({{ tournament.id }})">
+                                        <i class="fas fa-trophy me-1"></i>Участвовать
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <span class="btn btn-success disabled">
+                                    <i class="fas fa-check me-1"></i>Вы уже участвуете
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-warning">
+                                <i class="fas fa-sign-in-alt me-1"></i>Войти для участия
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+        <h3 class="text-muted">Турниры не найдены</h3>
+        <p class="text-muted">Пока нет доступных турниров для участия.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-2"></i>Вернуться на главную
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Функция регистрации на турнир
+function registerForTournament(tournamentId) {
+    if (confirm('Вы уверены, что хотите участвовать в этом турнире?')) {
+        // Получаем имя текущего пользователя
+        const userName = '{{ current_user.username if current_user.is_authenticated else "" }}';
+        
+        if (!userName) {
+            alert('Необходимо войти в систему для участия в турнире');
+            window.location.href = '{{ url_for("login") }}';
+            return;
+        }
+        
+        fetch(`/api/tournaments/${tournamentId}/participants`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                name: userName,
+                is_team: false
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Вы успешно добавлены в турнир!');
+                location.reload();
+            } else {
+                alert('Ошибка: ' + (data.error || data.message || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении в турнир: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %}
+

@@ -7,6 +7,7 @@ from .participant import create_participant_model
 from .match import create_match_model
 from .notification import create_notification_model
 from .match_log import create_match_log_model
+from .tournament_admin import create_tournament_admin_model
 
 def create_models(db):
     """Создает все модели с переданным экземпляром db"""
@@ -16,6 +17,7 @@ def create_models(db):
     Match = create_match_model(db)
     Notification = create_notification_model(db)
     MatchLog = create_match_log_model(db)
+    TournamentAdmin = create_tournament_admin_model(db)
     
     return {
         'User': User,
@@ -23,5 +25,6 @@ def create_models(db):
         'Participant': Participant,
         'Match': Match,
         'Notification': Notification,
-        'MatchLog': MatchLog
+        'MatchLog': MatchLog,
+        'TournamentAdmin': TournamentAdmin
     }

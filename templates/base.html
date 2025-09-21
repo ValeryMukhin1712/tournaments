@@ -98,11 +98,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Мои турниры</a>
                     </li>
-                    {% if current_user.role in ['администратор', 'доверенный_участник'] %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('users_list') }}">Участники</a>
-                    </li>
-                    {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -117,10 +112,6 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
                         </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Войти</a>
                     </li>
                     {% endif %}
                 </ul>

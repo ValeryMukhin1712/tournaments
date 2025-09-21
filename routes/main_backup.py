@@ -1,0 +1,1150 @@
+"""
+Основные маршруты приложения
+"""
+from flask import render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask_login import login_required, current_user
+from datetime import datetime, timedelta
+import logging
+# Tournament передается как параметр в функции
+
+logger = logging.getLogger(__name__)
+
+def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin):
+    """Создает основные маршруты приложения"""
+    
+    def check_tournament_access(tournament_id, admin_id=None):
+        """Проверяет права доступа к турниру"""
+        from flask import session
+        
+        # Получаем турнир
+        tournament = Tournament.query.get(tournament_id)
+        if not tournament:
+            return False, "Турнир не найден"
+        
+        # Проверяем, является ли пользователь системным админом
+        if admin_id:
+            admin = TournamentAdmin.query.get(admin_id)
+            if admin and admin.email == 'admin@system':
+                return True, tournament
+        
+        # Проверяем, является ли пользователь админом этого турнира
+        if tournament.admin_id == admin_id:
+            return True, tournament
+        
+        # Проверяем сессию админа
+        session_admin_id = session.get('admin_id')
+        if session_admin_id:
+            session_admin = TournamentAdmin.query.get(session_admin_id)
+            if session_admin:
+                # Системный админ имеет доступ ко всем турнирам
+                if session_admin.email == 'admin@system':
+                    return True, tournament
+                # Админ турнира имеет доступ только к своим турнирам
+                if tournament.admin_id == session_admin_id:
+                    return True, tournament
+        
+        return False, "У вас нет прав доступа к этому турниру"
+    
+    def get_current_admin():
+        """Получает текущего админа из сессии"""
+        from flask import session
+        admin_id = session.get('admin_id')
+        if admin_id:
+            return TournamentAdmin.query.get(admin_id)
+        return None
+    
+    @app.route('/')
+    def index():
+        # Новая стартовая страница с выбором роли
+        return render_template('index.html')
+    
+    @app.route('/tournaments')
+    def tournaments_list():
+        """Список всех турниров для просмотра"""
+        tournaments = Tournament.query.all()
+        # Загружаем участников для каждого турнира
+        for tournament in tournaments:
+            tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
+        return render_template('tournaments.html', tournaments=tournaments)
+    
+    @app.route('/create-tournament', methods=['GET', 'POST'])
+    def create_tournament_form():
+        """Страница создания нового турнира"""
+        if request.method == 'POST':
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.form.get('csrf_token'))
+            except:
+                flash('Ошибка безопасности. Попробуйте еще раз.', 'error')
+                return render_template('create_tournament.html')
+            
+            # Получаем данные формы
+            name = request.form.get('name')
+            email = request.form.get('email')
+            telegram_id = request.form.get('telegram_id')
+            contact_method = request.form.get('contact_method')
+            
+            if not name:
+                flash('Пожалуйста, введите ваше имя', 'error')
+                return render_template('create_tournament.html')
+            
+            if contact_method == 'email' and not email:
+                flash('Пожалуйста, введите email', 'error')
+                return render_template('create_tournament.html')
+            
+            if contact_method == 'telegram' and not telegram_id:
+                flash('Пожалуйста, введите Telegram ID', 'error')
+                return render_template('create_tournament.html')
+            
+            # Генерируем токен турнира 47
+            tournament_token = "47"
+            
+            # Сохраняем админа в базе данных
+            try:
+                # Проверяем, существует ли уже админ с таким email
+                existing_admin = TournamentAdmin.query.filter_by(email=email).first()
+                
+                if existing_admin:
+                    # Обновляем существующего админа
+                    existing_admin.name = name
+                    existing_admin.token = tournament_token
+                    existing_admin.is_active = True
+                    db.session.commit()
+                    admin = existing_admin
+                else:
+                    # Создаем нового админа
+                    admin = TournamentAdmin(
+                        name=name,
+                        email=email,
+                        token=tournament_token,
+                        is_active=True
+                    )
+                    db.session.add(admin)
+                    db.session.commit()
+                
+                logger.info(f"Админ турнира создан/обновлен: {name} ({email}) с токеном {tournament_token}")
+                
+            except Exception as e:
+                logger.error(f"Ошибка сохранения админа: {e}")
+                db.session.rollback()
+                flash('Ошибка при сохранении данных админа', 'error')
+                return render_template('create_tournament.html')
+            
+            # Отправляем токен
+            if contact_method == 'email':
+                try:
+                    from flask_mail import Message
+                    from app import mail
+                    
+                    msg = Message(
+                        subject='Токен для создания турнира',
+                        recipients=[email],
+                        body=f'''
+Здравствуйте, {name}!
+
+Ваш токен для создания турнира: {tournament_token}
+
+Используйте этот токен для доступа к функциям администратора турнира.
+
+С уважением,
+Команда Турнирной системы
+                        ''',
+                        html=f'''
+                        <h2>Токен для создания турнира</h2>
+                        <p>Здравствуйте, <strong>{name}</strong>!</p>
+                        <p>Ваш токен для создания турнира: <strong style="font-size: 24px; color: #007bff;">{tournament_token}</strong></p>
+                        <p>Используйте этот токен для доступа к функциям администратора турнира.</p>
+                        <hr>
+                        <p><em>С уважением,<br>Команда Турнирной системы</em></p>
+                        '''
+                    )
+                    mail.send(msg)
+                    flash(f'Токен турнира {tournament_token} отправлен на email: {email}', 'success')
+                except Exception as e:
+                    logger.error(f"Ошибка отправки email: {e}")
+                    flash(f'Токен турнира: {tournament_token}. Ошибка отправки email, но токен сохранен.', 'warning')
+            else:
+                # Для Telegram пока просто показываем сообщение
+                flash(f'Токен турнира {tournament_token} отправлен в Telegram: {telegram_id}', 'success')
+            
+            return redirect(url_for('index'))
+        
+        return render_template('create_tournament.html')
+    
+    @app.route('/join-tournament')
+    def join_tournament():
+        """Страница для выбора турнира для участия"""
+        tournaments = Tournament.query.all()
+        return render_template('join_tournament.html', tournaments=tournaments)
+    
+    
+    @app.route('/participant-tournament')
+    def participant_tournament():
+        """Страница для участников турниров"""
+        if not current_user.is_authenticated:
+            flash('Необходимо войти в систему', 'error')
+            return redirect(url_for('login'))
+        
+        # Получаем турниры, в которых участвует текущий пользователь
+        user_participations = Participant.query.filter_by(user_id=current_user.id).all()
+        tournament_ids = [p.tournament_id for p in user_participations]
+        tournaments = Tournament.query.filter(Tournament.id.in_(tournament_ids)).all()
+        
+        for tournament in tournaments:
+            tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
+        
+        return render_template('participant_tournament.html', tournaments=tournaments)
+
+    @app.route('/users')
+    @login_required
+    def users_list():
+        if current_user.role != 'администратор':
+            flash('У вас нет прав для доступа к этой странице', 'error')
+            return redirect(url_for('index'))
+        
+        users = User.query.all()
+        return render_template('users.html', users=users)
+
+    @app.route('/tournament/<int:tournament_id>')
+    @login_required
+    def tournament_detail(tournament_id):
+        # Проверяем права доступа к турниру
+        has_access, result = check_tournament_access(tournament_id)
+        if not has_access:
+            flash(result, 'error')
+            return redirect(url_for('index'))
+        
+        tournament = result
+        participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+        matches = Match.query.filter_by(tournament_id=tournament_id).all()
+        
+        # Создаем статистику и рассчитываем места участников
+        statistics = calculate_statistics(participants, matches, tournament)
+        positions = calculate_participant_positions(participants, statistics)
+        
+        # Создаем копии списков для разных целей
+        participants_for_chessboard = participants.copy()
+        participants_for_statistics = participants.copy()
+        
+        # Сортируем участников для турнирной таблицы по имени
+        participants_for_chessboard.sort(key=lambda x: x.name)
+        print(f"DEBUG: Участники для турнирной таблицы (по именам): {[p.name for p in participants_for_chessboard]}")
+        
+        # Сортируем участников для таблицы статистики по занимаемым местам, при одинаковом месте - по имени
+        participants_for_statistics.sort(key=lambda x: (positions.get(x.id, 999), x.name))
+        print(f"DEBUG: Участники для статистики (по местам): {[p.name for p in participants_for_statistics]}")
+        
+        # Создаем турнирную таблицу (сортировка по имени)
+        chessboard_data = create_chessboard_data(tournament, participants_for_chessboard, matches)
+        
+        # Создаем детальное расписание (используем исходный список)
+        schedule_display = create_tournament_schedule_display(matches, participants)
+        
+        
+        # Создаем participants_with_stats для таблицы статистики (сортировка по местам)
+        participants_with_stats = []
+        for participant in participants_for_statistics:
+            participant_stats = statistics.get(participant.id, {
+                'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
+            })
+            participants_with_stats.append({
+                'participant': participant,
+                'stats': participant_stats,
+                'position': positions.get(participant.id, 1)
+            })
+        
+        # Создаем participants_with_stats для турнирной таблицы (сортировка по именам)
+        participants_with_stats_chessboard = []
+        for participant in participants_for_chessboard:
+            participant_stats = statistics.get(participant.id, {
+                'games': 0, 'wins': 0, 'losses': 0, 'draws': 0, 'points': 0, 'goal_difference': 0
+            })
+            participants_with_stats_chessboard.append({
+                'participant': participant,
+                'stats': participant_stats,
+                'position': positions.get(participant.id, 1)
+            })
+        
+        # Преобразуем участников в словари для JSON сериализации
+        participants_data = []
+        for participant in participants:
+            participants_data.append({
+                'id': participant.id,
+                'name': participant.name,
+                'is_team': participant.is_team,
+                'user_id': participant.user_id
+            })
+        
+        # Преобразуем матчи в словари для JSON сериализации
+        matches_data = []
+        for match in matches:
+            matches_data.append({
+                'id': match.id,
+                'participant1_id': match.participant1_id,
+                'participant2_id': match.participant2_id,
+                'score1': match.score1,
+                'score2': match.score2,
+                'winner_id': match.winner_id,
+                'match_date': match.match_date.isoformat() if match.match_date else None,
+                'match_time': match.match_time.isoformat() if match.match_time else None,
+                'court_number': match.court_number,
+                'match_number': match.match_number,
+                'status': match.status
+            })
+        
+        return render_template('tournament.html', 
+                             tournament=tournament, 
+                             participants=participants_for_chessboard,  # Для турнирной таблицы - сортировка по именам
+                             matches=matches,
+                             chessboard=chessboard_data,
+                             schedule_display=schedule_display,
+                             statistics=statistics,
+                             positions=positions,
+                             participants_with_stats=participants_with_stats,  # Для таблицы статистики - сортировка по местам
+                             participants_with_stats_chessboard=participants_with_stats_chessboard,  # Для турнирной таблицы - сортировка по именам
+                             participants_data=participants_data,
+                             matches_data=matches_data)
+
+    def create_chessboard_data(tournament, participants, matches):
+        """Создает данные для турнирной таблицы"""
+        print(f"DEBUG: Создание турнирной таблицы для {len(participants)} участников и {len(matches)} матчей")
+        chessboard = create_chessboard(participants, matches)
+        print(f"DEBUG: Турнирная таблица создана: {len(chessboard)} строк")
+        return chessboard
+
+
+def calculate_statistics(participants, matches, tournament):
+    """Расчет статистики участников"""
+    stats = {}
+    for participant in participants:
+        stats[participant.id] = {
+            'games': 0,
+            'wins': 0,
+            'losses': 0,
+            'draws': 0,
+            'points': 0,
+            'goal_difference': 0
+        }
+    
+    for match in matches:
+        if match.status == 'завершен':
+            p1_id = match.participant1_id
+            p2_id = match.participant2_id
+            
+            # Обновляем статистику
+            stats[p1_id]['games'] += 1
+            stats[p2_id]['games'] += 1
+            
+            # Используем новую логику с sets_won
+            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                if match.sets_won_1 > match.sets_won_2:
+                    stats[p1_id]['wins'] += 1
+                    stats[p2_id]['losses'] += 1
+                    stats[p1_id]['points'] += (tournament.points_win or 3)
+                    stats[p2_id]['points'] += (tournament.points_loss or 0)
+                elif match.sets_won_2 > match.sets_won_1:
+                    stats[p2_id]['wins'] += 1
+                    stats[p1_id]['losses'] += 1
+                    stats[p2_id]['points'] += (tournament.points_win or 3)
+                    stats[p1_id]['points'] += (tournament.points_loss or 0)
+                else:
+                    # Ничья по сетам
+                    stats[p1_id]['draws'] += 1
+                    stats[p2_id]['draws'] += 1
+                    stats[p1_id]['points'] += (tournament.points_draw or 1)
+                    stats[p2_id]['points'] += (tournament.points_draw or 1)
+                
+                # Рассчитываем разность очков в сетах
+                sets_points_diff = calculate_sets_points_difference(match)
+                stats[p1_id]['goal_difference'] += sets_points_diff
+                stats[p2_id]['goal_difference'] -= sets_points_diff
+                
+            # Fallback на старую логику для обратной совместимости
+            elif match.score1 is not None and match.score2 is not None:
+                if match.score1 > match.score2:
+                    stats[p1_id]['wins'] += 1
+                    stats[p2_id]['losses'] += 1
+                    stats[p1_id]['points'] += (tournament.points_win or 3)
+                    stats[p2_id]['points'] += (tournament.points_loss or 0)
+                elif match.score1 < match.score2:
+                    stats[p2_id]['wins'] += 1
+                    stats[p1_id]['losses'] += 1
+                    stats[p2_id]['points'] += (tournament.points_win or 3)
+                    stats[p1_id]['points'] += (tournament.points_loss or 0)
+                else:
+                    # Ничья
+                    stats[p1_id]['draws'] += 1
+                    stats[p2_id]['draws'] += 1
+                    stats[p1_id]['points'] += (tournament.points_draw or 1)
+                    stats[p2_id]['points'] += (tournament.points_draw or 1)
+                
+                stats[p1_id]['goal_difference'] += match.score1 - match.score2
+                stats[p2_id]['goal_difference'] += match.score2 - match.score1
+    
+    return stats
+
+def calculate_participant_positions(participants, statistics):
+    """Расчет мест участников в турнире"""
+    # Сортируем участников по очкам (убывание), затем по разности мячей (убывание)
+    sorted_participants = sorted(participants, key=lambda p: (
+        -statistics.get(p.id, {}).get('points', 0),
+        -statistics.get(p.id, {}).get('goal_difference', 0)
+    ))
+    
+    positions = {}
+    current_position = 1
+    
+    for i, participant in enumerate(sorted_participants):
+        participant_id = participant.id
+        participant_stats = statistics.get(participant_id, {})
+        
+        # Если это не первый участник, проверяем, нужно ли увеличить позицию
+        if i > 0:
+            prev_participant = sorted_participants[i-1]
+            prev_stats = statistics.get(prev_participant.id, {})
+            
+            # Если очки или разность мячей отличаются, увеличиваем позицию
+            if (participant_stats.get('points', 0) != prev_stats.get('points', 0) or
+                participant_stats.get('goal_difference', 0) != prev_stats.get('goal_difference', 0)):
+                current_position = i + 1
+        
+        positions[participant_id] = current_position
+    
+    return positions
+
+def calculate_sets_score(match):
+    """Расчет счета сетов для матча"""
+    if not match or match.status not in ['завершен', 'играют']:
+        return None
+    
+    # Используем поля sets_won_1 и sets_won_2 для отображения общего счета по сетам
+    if match.sets_won_1 is not None and match.sets_won_2 is not None:
+        return f"{match.sets_won_1}:{match.sets_won_2}"
+    
+    # Если поля sets_won не заполнены, но есть данные о счете первого сета
+    # (для обратной совместимости со старыми данными)
+    if match.score1 is not None and match.score2 is not None:
+        # Определяем победителя первого сета
+        if match.score1 > match.score2:
+            return "1:0"  # Участник 1 выиграл первый сет
+        elif match.score2 > match.score1:
+            return "0:1"  # Участник 2 выиграл первый сет
+        else:
+            return "0:0"  # Ничья (не должно происходить по правилам)
+    
+    return None
+
+def format_sets_details(match):
+    """Форматирует детали сетов в формате 11:6/5:11/13:11"""
+    if not match:
+        return None
+    
+    sets_details = []
+    
+    # Используем стандартный счёт по умолчанию
+    default_score = 21
+    
+    # Проверяем каждый сет
+    for i in range(1, 4):
+        score1 = getattr(match, f'set{i}_score1', None)
+        score2 = getattr(match, f'set{i}_score2', None)
+        
+        if score1 is not None and score2 is not None and (score1 > 0 or score2 > 0):
+            # Не показываем сет, если оба участника набрали счёт по умолчанию
+            if not (score1 == default_score and score2 == default_score):
+                sets_details.append(f"{score1}:{score2}")
+    
+    if sets_details:
+        return "/".join(sets_details)
+    
+    return None
+
+def format_sets_details_for_participant(match, participant_id):
+    """Форматирует детали сетов с точки зрения конкретного участника"""
+    if not match:
+        return None
+    
+    sets_details = []
+    
+    # Используем стандартный счёт по умолчанию
+    default_score = 21
+    
+    print(f"DEBUG format_sets_details_for_participant: match_id={match.id}, participant_id={participant_id}")
+    print(f"DEBUG: match.participant1_id={match.participant1_id}, match.participant2_id={match.participant2_id}")
+    
+    # Проверяем каждый сет
+    for i in range(1, 4):
+        score1 = getattr(match, f'set{i}_score1', None)
+        score2 = getattr(match, f'set{i}_score2', None)
+        
+        print(f"DEBUG: Set {i} - score1={score1}, score2={score2}")
+        
+        if score1 is not None and score2 is not None and (score1 > 0 or score2 > 0):
+            # Не показываем сет, если оба участника набрали счёт по умолчанию
+            if not (score1 == default_score and score2 == default_score):
+                # Если participant_id - это participant1, то счёт как есть
+                if match.participant1_id == participant_id:
+                    sets_details.append(f"{score1}:{score2}")
+                    print(f"DEBUG: Participant is participant1, adding {score1}:{score2}")
+                else:
+                    # Если participant_id - это participant2, то меняем местами
+                    sets_details.append(f"{score2}:{score1}")
+                    print(f"DEBUG: Participant is participant2, adding {score2}:{score1}")
+    
+    result = "/".join(sets_details) if sets_details else None
+    print(f"DEBUG: Final result: {result}")
+    return result
+
+def calculate_sets_points_difference(match):
+    """Рассчитывает суммарную разность очков в сетах для участника 1"""
+    if not match:
+        return 0
+    
+    total_diff = 0
+    
+    # Проверяем каждый сет
+    for i in range(1, 4):
+        score1 = getattr(match, f'set{i}_score1', None)
+        score2 = getattr(match, f'set{i}_score2', None)
+        
+        if score1 is not None and score2 is not None and (score1 > 0 or score2 > 0):
+            total_diff += (score1 - score2)
+    
+    return total_diff
+
+
+def create_chessboard(participants, matches):
+    """Создание шахматки для отображения результатов"""
+    print(f"DEBUG: create_chessboard вызвана с {len(participants)} участниками и {len(matches)} матчами")
+    chessboard = {}
+    
+    # Участники уже отсортированы в tournament_detail, используем их как есть
+    print(f"DEBUG: Участники для шахматки: {[p.name for p in participants]}")
+    
+    for p1 in participants:
+        chessboard[p1.id] = {}
+        for p2 in participants:
+            if p1.id == p2.id:
+                # Диагональ
+                chessboard[p1.id][p2.id] = {'type': 'diagonal', 'value': '—'}
+            else:
+                # Поиск матча между участниками
+                match = next((m for m in matches 
+                            if (m.participant1_id == p1.id and m.participant2_id == p2.id) or
+                               (m.participant1_id == p2.id and m.participant2_id == p1.id)), None)
+                
+                if match:
+                    if match.status in ['завершен', 'играют']:
+                        # Рассчитываем счет сетов
+                        sets_score = calculate_sets_score(match)
+                        
+                        # Форматируем детали сетов с учетом того, чья это строчка
+                        sets_details = format_sets_details_for_participant(match, p1.id)
+                        
+                        # Определяем счёт с точки зрения участника p1 (чья это строчка)
+                        if sets_score:
+                            # Разбираем счёт сетов
+                            if ':' in sets_score:
+                                sets_won_1, sets_won_2 = map(int, sets_score.split(':'))
+                                
+                                # Если p1 - это participant1, то счёт как есть
+                                if match.participant1_id == p1.id:
+                                    score = f"{sets_won_1}:{sets_won_2}"
+                                else:
+                                    # Если p1 - это participant2, то меняем местами
+                                    score = f"{sets_won_2}:{sets_won_1}"
+                            else:
+                                score = sets_score
+                        else:
+                            # Fallback на счет первого сета для старых данных
+                            if match.participant1_id == p1.id:
+                                score = f"{match.score1}:{match.score2}"
+                            else:
+                                score = f"{match.score2}:{match.score1}"
+                        
+                        # Определяем тип отображения в зависимости от статуса
+                        if match.status == 'завершен':
+                            cell_type = 'result'
+                        else:  # играют
+                            cell_type = 'in_progress'
+                        
+                        # Определяем, выиграл ли участник p1 этот матч
+                        is_winner = False
+                        if match.status == 'завершен' and sets_score:
+                            if ':' in sets_score:
+                                sets_won_1, sets_won_2 = map(int, sets_score.split(':'))
+                                if match.participant1_id == p1.id:
+                                    is_winner = sets_won_1 > sets_won_2
+                                else:
+                                    is_winner = sets_won_2 > sets_won_1
+                        
+                        chessboard[p1.id][p2.id] = {
+                            'type': cell_type,
+                            'value': score,
+                            'match_id': match.id,
+                            'editable': True,
+                            'sets_score': sets_score,
+                            'sets_details': sets_details,
+                            'status': match.status,
+                            'is_winner': is_winner
+                        }
+                    else:
+                        # Отображаем время матча и номер площадки в ячейке
+                        time_display = ""
+                        if match.match_date and match.match_time:
+                            time_display = f"{match.match_time.strftime('%H:%M')}"
+                        elif match.match_time:
+                            time_display = match.match_time.strftime('%H:%M')
+                        else:
+                            time_display = 'Запланирован'
+                        
+                        # Добавляем номер площадки
+                        court_display = f"Пл.{match.court_number}" if match.court_number else ""
+                        full_display = f"{time_display} {court_display}".strip()
+                        
+                        chessboard[p1.id][p2.id] = {
+                            'type': 'upcoming',
+                            'value': full_display,
+                            'match_id': match.id,
+                            'editable': True,
+                            'date': match.match_date,
+                            'time': match.match_time,
+                            'court': match.court_number,
+                            'full_info': f"Площадка {match.court_number}, {match.match_date.strftime('%d.%m')} {match.match_time.strftime('%H:%M')}" if match.match_date and match.match_time else f"Площадка {match.court_number}"
+                        }
+                else:
+                    chessboard[p1.id][p2.id] = {'type': 'empty', 'value': ''}
+    
+    print(f"DEBUG: Турнирная таблица создана: {len(chessboard)} участников")
+    for p1_id, row in chessboard.items():
+        print(f"DEBUG: Участник {p1_id}: {len(row)} ячеек")
+    
+    return chessboard
+
+def generate_tournament_schedule(participants, tournament, db, Match):
+    """Генерация расписания матчей для турнира по методу круговой жеребьёвки"""
+    if len(participants) < 2:
+        return []
+    
+    # Удаляем существующие матчи
+    existing_matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    for match in existing_matches:
+        db.session.delete(match)
+    db.session.commit()
+    
+    # Очищаем дублированные матчи, если они есть
+    cleanup_duplicate_matches(tournament.id, db, Match)
+    
+    # Настройки расписания
+    start_date = tournament.start_date
+    start_time = tournament.start_time  # Время начала матчей из настроек турнира
+    end_time = tournament.end_time  # Время окончания матчей из настроек турнира
+    match_duration = tournament.match_duration or 60  # Длительность матча в минутах
+    break_duration = tournament.break_duration or 15  # Перерыв между матчами в минутах
+    max_courts = min(tournament.court_count or 4, 4)  # Максимум 4 площадки
+    
+    # Создаем копию списка участников для работы
+    participants_list = participants.copy()
+    
+    # Если нечетное количество участников, добавляем фиктивного участника "отдых"
+    has_bye = len(participants_list) % 2 == 1
+    if has_bye:
+        # Создаем фиктивного участника для "отдыха"
+        bye_participant = type('ByeParticipant', (), {
+            'id': -1,
+            'name': 'Отдых',
+            'tournament_id': tournament.id
+        })()
+        participants_list.append(bye_participant)
+    
+    n = len(participants_list)
+    rounds = n - 1  # Количество туров для круговой системы
+    
+    matches = []
+    match_number = 1
+    current_date = start_date
+    current_time = start_time
+    
+    # Счетчики матчей на каждой площадке для равномерного распределения
+    court_usage = {i: 0 for i in range(max_courts)}
+    
+    # Множество для отслеживания уже созданных матчей (избегаем дубликатов)
+    created_matches = set()
+    
+    # Генерируем матчи по круговой схеме
+    for round_num in range(rounds):
+        logger.info(f"Генерация тура {round_num + 1}")
+        
+        # Создаем пары для текущего тура
+        round_matches = []
+        
+        # Классическая круговая схема: фиксируем первого участника, остальных сдвигаем по кругу
+        for i in range(n // 2):
+            if i == 0:
+                # Первая пара: фиксированный участник (индекс 0) vs сдвинутый последний участник
+                p1_index = 0
+                p2_index = (n - 1 - round_num) % (n - 1) + 1
+            else:
+                # Остальные пары: сдвигаем по кругу
+                p1_index = (i + round_num) % (n - 1) + 1
+                p2_index = (n - 1 - i + round_num) % (n - 1) + 1
+            
+            participant1 = participants_list[p1_index]
+            participant2 = participants_list[p2_index]
+            
+            # Пропускаем матчи с фиктивным участником "отдых"
+            if participant1.id == -1 or participant2.id == -1:
+                continue
+            
+            # Создаем уникальный ключ для матча (упорядоченный по ID участников)
+            match_key = tuple(sorted([participant1.id, participant2.id]))
+            
+            # Проверяем, не был ли уже создан такой матч
+            if match_key in created_matches:
+                logger.warning(f"Пропускаем дублированный матч: {participant1.name} vs {participant2.name}")
+                continue
+            
+            # Добавляем матч в множество созданных
+            created_matches.add(match_key)
+            round_matches.append((participant1, participant2))
+        
+        # Распределяем матчи тура по времени и площадкам
+        # Все матчи тура начинаются в одно время на разных площадках
+        for i, (participant1, participant2) in enumerate(round_matches):
+            # Дополнительная проверка на дубликаты перед созданием матча
+            existing_match = Match.query.filter_by(
+                tournament_id=tournament.id,
+                participant1_id=participant1.id,
+                participant2_id=participant2.id
+            ).first()
+            
+            if existing_match:
+                logger.warning(f"Матч {participant1.name} vs {participant2.name} уже существует в базе данных")
+                continue
+            
+            # Проверяем обратный порядок участников
+            existing_match_reverse = Match.query.filter_by(
+                tournament_id=tournament.id,
+                participant1_id=participant2.id,
+                participant2_id=participant1.id
+            ).first()
+            
+            if existing_match_reverse:
+                logger.warning(f"Матч {participant2.name} vs {participant1.name} уже существует в базе данных")
+                continue
+            
+            # Выбираем площадку с наименьшим количеством матчей для равномерного распределения
+            court_number = min(court_usage.keys(), key=lambda k: court_usage[k]) + 1
+            court_usage[court_number - 1] += 1
+            
+            # Создаем матч
+            match = Match(
+                tournament_id=tournament.id,
+                participant1_id=participant1.id,
+                participant2_id=participant2.id,
+                match_date=current_date,
+                match_time=current_time,
+                court_number=court_number,
+                match_number=match_number,
+                status='запланирован'
+            )
+            
+            db.session.add(match)
+            matches.append(match)
+            match_number += 1
+        
+        # После завершения тура переходим к следующему временному слоту
+        current_datetime = datetime.combine(current_date, current_time)
+        next_time = current_datetime + timedelta(minutes=match_duration + break_duration)
+        current_time = next_time.time()
+        
+        # Если время больше времени окончания, переходим на следующий день
+        if current_time > end_time:
+            current_date = current_date + timedelta(days=1)
+            current_time = start_time
+    
+    db.session.commit()
+    
+    # Логируем статистику распределения по площадкам
+    court_stats = {}
+    for match in matches:
+        court = match.court_number
+        court_stats[court] = court_stats.get(court, 0) + 1
+    
+    logger.info(f"Создано {len(matches)} матчей для турнира {tournament.name} по круговой схеме")
+    logger.info(f"Распределение по площадкам: {court_stats}")
+    
+    return matches
+
+def find_best_time_slot(participant1, participant2, participant_matches, 
+                       start_date, start_time, match_duration, break_duration):
+    """Находит лучшее время для матча, когда оба участника свободны"""
+    current_date = start_date
+    current_time = start_time
+    
+    # Проверяем следующие 7 дней
+    for day in range(7):
+        check_date = current_date + timedelta(days=day)
+        check_time = datetime.strptime("09:00", "%H:%M").time() if day > 0 else start_time
+        
+        # Проверяем время с 9:00 до 18:00
+        while check_time <= datetime.strptime("18:00", "%H:%M").time():
+            # Проверяем, свободны ли оба участника в это время
+            if is_participant_free(participant1.id, participant_matches, check_date, check_time, match_duration) and \
+               is_participant_free(participant2.id, participant_matches, check_date, check_time, match_duration):
+                return (check_date, check_time)
+            
+            # Переходим к следующему временному слоту
+            current_datetime = datetime.combine(check_date, check_time)
+            next_time = current_datetime + timedelta(minutes=match_duration + break_duration)
+            check_time = next_time.time()
+            
+            # Если время больше 18:00, переходим к следующему дню
+            if check_time > datetime.strptime("18:00", "%H:%M").time():
+                break
+    
+    return None
+
+def is_participant_free(participant_id, participant_matches, check_date, check_time, match_duration):
+    """Проверяет, свободен ли участник в указанное время"""
+    participant_schedule = participant_matches.get(participant_id, [])
+    
+    check_start = datetime.combine(check_date, check_time)
+    check_end = check_start + timedelta(minutes=match_duration)
+    
+    for match_date, match_time, duration in participant_schedule:
+        match_start = datetime.combine(match_date, match_time)
+        match_end = match_start + timedelta(minutes=duration)
+        
+        # Проверяем пересечение временных интервалов
+        if not (check_end <= match_start or check_start >= match_end):
+            return False
+    
+    return True
+
+def create_tournament_schedule_display(matches, participants):
+    """Создает детальное расписание турнира для отображения"""
+    if not matches:
+        return {}
+    
+    # Сортируем все матчи по дате и времени для сквозной нумерации
+    sorted_matches = sorted(matches, key=lambda m: (m.match_date or datetime.min.date(), m.match_time or datetime.min.time()))
+    
+    # Создаем сквозную нумерацию
+    for i, match in enumerate(sorted_matches, 1):
+        match.global_match_number = i
+    
+    # Группируем матчи по дням
+    schedule = {}
+    participants_dict = {p.id: p for p in participants}
+    
+    for match in sorted_matches:
+        if not match.match_date:
+            continue
+            
+        date_str = match.match_date.strftime('%Y-%m-%d')
+        if date_str not in schedule:
+            schedule[date_str] = {
+                'date': match.match_date,
+                'date_display': match.match_date.strftime('%d.%m.%Y'),
+                'matches': []
+            }
+        
+        # Получаем имена участников
+        participant1_name = participants_dict.get(match.participant1_id, {}).name if match.participant1_id else f"Участник {match.participant1_id}"
+        participant2_name = participants_dict.get(match.participant2_id, {}).name if match.participant2_id else f"Участник {match.participant2_id}"
+        
+        # Рассчитываем счет сетов
+        sets_score = calculate_sets_score(match)
+        
+        # Форматируем детали сетов
+        sets_details = format_sets_details(match)
+        
+        # Определяем отображаемый счет
+        display_score = None
+        if match.status in ['завершен', 'играют']:
+            if sets_score:
+                display_score = sets_score
+            elif match.score1 is not None and match.score2 is not None:
+                display_score = f"{match.score1}:{match.score2}"
+        
+        match_info = {
+            'id': match.id,
+            'global_number': getattr(match, 'global_match_number', match.match_number or 0),
+            'time': match.match_time.strftime('%H:%M') if match.match_time else 'TBD',
+            'court': match.court_number or 0,
+            'participant1': participant1_name,
+            'participant2': participant2_name,
+            'status': match.status,
+            'score': display_score,
+            'sets_score': sets_score,
+            'sets_details': sets_details,
+            'match_number': match.match_number
+        }
+        
+        schedule[date_str]['matches'].append(match_info)
+    
+    # Сортируем матчи по времени в каждом дне
+    for date_str in schedule:
+        schedule[date_str]['matches'].sort(key=lambda x: x['time'])
+    
+    return schedule
+
+def cleanup_duplicate_matches(tournament_id, db, Match):
+    """Очищает дублированные матчи в турнире"""
+    try:
+        # Получаем все матчи турнира
+        matches = Match.query.filter_by(tournament_id=tournament_id).all()
+        
+        # Создаем словарь для отслеживания уникальных матчей
+        unique_matches = {}
+        duplicates_to_remove = []
+        
+        for match in matches:
+            # Создаем ключ для матча (упорядоченный по ID участников)
+            match_key = tuple(sorted([match.participant1_id, match.participant2_id]))
+            
+            if match_key in unique_matches:
+                # Найден дубликат, добавляем в список для удаления
+                duplicates_to_remove.append(match)
+                logger.warning(f"Найден дублированный матч: {match.participant1_id} vs {match.participant2_id} (ID: {match.id})")
+            else:
+                # Первый матч с такой парой участников
+                unique_matches[match_key] = match
+        
+        # Удаляем дубликаты
+        for duplicate in duplicates_to_remove:
+            db.session.delete(duplicate)
+        
+        if duplicates_to_remove:
+            db.session.commit()
+            logger.info(f"Удалено {len(duplicates_to_remove)} дублированных матчей")
+        
+    except Exception as e:
+        logger.error(f"Ошибка при очистке дублированных матчей: {e}")
+        db.session.rollback()
+
+def debug_chessboard_to_file(participants, matches, tournament_id):
+    """Запись данных турнирной таблицы в файл для отладки"""
+    try:
+        with open(f'debug_chessboard_{tournament_id}.txt', 'w', encoding='utf-8') as f:
+            f.write(f"=== ОТЛАДКА ТУРНИРНОЙ ТАБЛИЦЫ (Турнир ID: {tournament_id}) ===\n\n")
+            
+            # Информация об участниках
+            f.write("УЧАСТНИКИ:\n")
+            for i, p in enumerate(participants, 1):
+                f.write(f"{i}. ID: {p.id}, Имя: '{p.name}', User ID: {p.user_id}\n")
+            f.write(f"Всего участников: {len(participants)}\n\n")
+            
+            # Информация о матчах
+            f.write("МАТЧИ:\n")
+            for i, m in enumerate(matches, 1):
+                f.write(f"{i}. ID: {m.id}, Участники: {m.participant1_id} vs {m.participant2_id}, "
+                       f"Статус: {m.status}, Дата: {m.match_date}, Время: {m.match_time}, "
+                       f"Площадка: {m.court_number}, Счет: {m.score1}:{m.score2}\n")
+            f.write(f"Всего матчей: {len(matches)}\n\n")
+            
+            # Создаем шахматку для анализа
+            chessboard = create_chessboard(participants, matches)
+            sorted_participants = sorted(participants, key=lambda p: p.name)
+            
+            f.write("СОЗДАНИЕ ШАХМАТКИ:\n")
+            for p1 in sorted_participants:
+                f.write(f"\nСтрока для участника {p1.id} ('{p1.name}'):\n")
+                for p2 in sorted_participants:
+                    cell = chessboard[p1.id][p2.id]
+                    f.write(f"  [{p1.id}][{p2.id}] = {cell['type']} ({cell['value']})\n")
+            
+            f.write(f"\n=== КОНЕЦ ОТЛАДКИ ===\n")
+            
+        print(f"Данные турнирной таблицы записаны в файл debug_chessboard_{tournament_id}.txt")
+        return True
+    except Exception as e:
+        print(f"Ошибка при записи отладочного файла: {str(e)}")
+        return False
+
+    # ===== МАРШРУТЫ ДЛЯ АДМИНОВ ТУРНИРОВ =====
+    
+    @app.route('/admin-tournament', methods=['GET', 'POST'])
+    def admin_tournament():
+        """Страница входа для админов турниров"""
+        if request.method == 'POST':
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.form.get('csrf_token'))
+            except:
+                flash('Ошибка безопасности. Попробуйте еще раз.', 'error')
+                return render_template('admin_tournament.html')
+            
+            # Получаем данные формы
+            email = request.form.get('email')
+            token = request.form.get('token')
+            
+            if not email or not token:
+                flash('Пожалуйста, заполните все поля', 'error')
+                return render_template('admin_tournament.html')
+            
+            # Ищем админа по email и токену
+            admin = TournamentAdmin.query.filter_by(
+                email=email, 
+                token=token, 
+                is_active=True
+            ).first()
+            
+            if admin:
+                # Сохраняем админа в сессии
+                from flask import session
+                session['admin_id'] = admin.id
+                session['admin_name'] = admin.name
+                session['admin_email'] = admin.email
+                
+                flash(f'Добро пожаловать, {admin.name}!', 'success')
+                return redirect(url_for('admin_dashboard'))
+            else:
+                flash('Неверный email или токен', 'error')
+                return render_template('admin_tournament.html')
+        
+        return render_template('admin_tournament.html')
+    
+    @app.route('/admin-dashboard')
+    def admin_dashboard():
+        """Панель управления админа турниров"""
+        from flask import session
+        
+        # Проверяем, что админ авторизован
+        if 'admin_id' not in session:
+            flash('Необходима авторизация', 'error')
+            return redirect(url_for('admin_tournament'))
+        
+        admin_id = session['admin_id']
+        admin = TournamentAdmin.query.get(admin_id)
+        
+        if not admin or not admin.is_active:
+            flash('Админ не найден или деактивирован', 'error')
+            return redirect(url_for('admin_tournament'))
+        
+        # Получаем турниры этого админа
+        if admin.email == 'admin@system':
+            # Системный админ видит все турниры
+            tournaments = Tournament.query.all()
+        else:
+            # Обычный админ видит только свои турниры
+            tournaments = Tournament.query.filter_by(admin_id=admin_id).all()
+        
+        return render_template('admin_dashboard.html', 
+                             admin=admin, 
+                             tournaments=tournaments)
+    
+    @app.route('/admin-create-tournament', methods=['GET', 'POST'])
+    def admin_create_tournament():
+        """Создание турнира админом"""
+        from flask import session
+        
+        # Проверяем, что админ авторизован
+        if 'admin_id' not in session:
+            flash('Необходима авторизация', 'error')
+            return redirect(url_for('admin_tournament'))
+        
+        admin_id = session['admin_id']
+        admin = TournamentAdmin.query.get(admin_id)
+        
+        if not admin or not admin.is_active:
+            flash('Админ не найден или деактивирован', 'error')
+            return redirect(url_for('admin_tournament'))
+        
+        if request.method == 'POST':
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.form.get('csrf_token'))
+            except:
+                flash('Ошибка безопасности. Попробуйте еще раз.', 'error')
+                return render_template('admin_create_tournament.html', admin=admin)
+            
+            # Получаем данные формы
+            name = request.form.get('name')
+            description = request.form.get('description')
+            start_date = request.form.get('start_date')
+            end_date = request.form.get('end_date')
+            max_participants = request.form.get('max_participants', type=int)
+            court_count = request.form.get('court_count', type=int)
+            match_duration = request.form.get('match_duration', type=int)
+            break_duration = request.form.get('break_duration', type=int)
+            sets_to_win = request.form.get('sets_to_win', type=int)
+            points_to_win = request.form.get('points_to_win', type=int)
+            points_win = request.form.get('points_win', type=int)
+            points_draw = request.form.get('points_draw', type=int)
+            points_loss = request.form.get('points_loss', type=int)
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            
+            # Валидация
+            if not name:
+                flash('Название турнира обязательно', 'error')
+                return render_template('admin_create_tournament.html', admin=admin)
+            
+            try:
+                # Создаем турнир
+                tournament = Tournament(
+                    name=name,
+                    description=description or '',
+                    start_date=datetime.strptime(start_date, '%Y-%m-%d').date() if start_date else None,
+                    end_date=datetime.strptime(end_date, '%Y-%m-%d').date() if end_date else None,
+                    max_participants=max_participants or 32,
+                    court_count=court_count or 4,
+                    match_duration=match_duration or 60,
+                    break_duration=break_duration or 15,
+                    sets_to_win=sets_to_win or 2,
+                    points_to_win=points_to_win or 21,
+                    points_win=points_win or 3,
+                    points_draw=points_draw or 1,
+                    points_loss=points_loss or 0,
+                    start_time=start_time or '09:00',
+                    end_time=end_time or '18:00',
+                    admin_id=admin_id,
+                    created_at=datetime.utcnow()
+                )
+                
+                db.session.add(tournament)
+                db.session.commit()
+                
+                flash(f'Турнир "{name}" успешно создан!', 'success')
+                return redirect(url_for('admin_dashboard'))
+                
+            except Exception as e:
+                db.session.rollback()
+                logger.error(f"Ошибка создания турнира: {e}")
+                flash('Ошибка при создании турнира', 'error')
+                return render_template('admin_create_tournament.html', admin=admin)
+        
+        return render_template('admin_create_tournament.html', admin=admin)
+    
+    @app.route('/admin-logout')
+    def admin_logout():
+        """Выход админа"""
+        from flask import session
+        session.pop('admin_id', None)
+        session.pop('admin_name', None)
+        session.pop('admin_email', None)
+        flash('Вы вышли из системы', 'info')
+        return redirect(url_for('admin_tournament'))
+
+
+# ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ВНЕ create_main_routes) =====
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+
+# ������� ������� create_main_routes
+
+
+

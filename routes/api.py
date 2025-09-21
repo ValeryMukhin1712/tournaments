@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog):
+def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin):
     """Создает API маршруты приложения"""
     
     # ===== ПОЛЬЗОВАТЕЛИ =====
@@ -241,16 +241,6 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.commit()
             
             logger.info(f"Добавлен участник {data['name']} в турнир {tournament.name}")
-            
-            # Автоматически генерируем расписание после добавления участника
-            from routes.main import generate_tournament_schedule
-            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-            if len(participants) >= 2:
-                try:
-                    generate_tournament_schedule(participants, tournament, db, Match)
-                    logger.info(f"Расписание автоматически обновлено для турнира {tournament.name}")
-                except Exception as e:
-                    logger.error(f"Ошибка при генерации расписания: {str(e)}")
             
             return jsonify({
                 'success': True,
@@ -556,29 +546,55 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     # ===== ДОПОЛНИТЕЛЬНЫЕ ENDPOINTS =====
     
     @app.route('/api/tournaments/<int:tournament_id>/reschedule', methods=['POST'])
-    @login_required
     def reschedule_tournament(tournament_id):
         """Пересчет расписания турнира"""
-        if current_user.role != 'администратор':
-            return jsonify({'error': 'Недостаточно прав'}), 403
+        from flask import session
         
         tournament = Tournament.query.get_or_404(tournament_id)
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
+        
+        admin = TournamentAdmin.query.get(session['admin_id'])
+        if not admin or not admin.is_active:
+            return jsonify({'error': 'Неверная авторизация'}), 401
+        
+        # Проверяем права (создатель турнира)
+        if admin.id != tournament.admin_id:
+            return jsonify({'error': 'Недостаточно прав'}), 403
         participants = Participant.query.filter_by(tournament_id=tournament_id).all()
         
         if len(participants) < 2:
             return jsonify({'error': 'Недостаточно участников для создания расписания'}), 400
         
         try:
-            # Импортируем функцию генерации расписания
-            from routes.main import generate_tournament_schedule
+            # Удаляем существующие матчи
+            Match.query.filter_by(tournament_id=tournament_id).delete()
             
-            # Генерируем новое расписание
-            matches = generate_tournament_schedule(participants, tournament, db, Match)
+            # Создаем матчи между всеми участниками
+            from datetime import date, time
+            matches_created = 0
+            for i in range(len(participants)):
+                for j in range(i + 1, len(participants)):
+                    match = Match(
+                        tournament_id=tournament_id,
+                        participant1_id=participants[i].id,
+                        participant2_id=participants[j].id,
+                        status='запланирован',
+                        match_date=date.today(),  # Устанавливаем сегодняшнюю дату
+                        match_time=time(9, 0),    # Устанавливаем время 09:00
+                        court_number=1            # Устанавливаем корт 1
+                    )
+                    db.session.add(match)
+                    matches_created += 1
             
-            logger.info(f"Создано {len(matches)} матчей для турнира {tournament.name}")
+            db.session.commit()
+            
+            logger.info(f"Создано {matches_created} матчей для турнира {tournament.name}")
             return jsonify({
-                'message': f'Расписание создано: {len(matches)} матчей',
-                'matches_count': len(matches)
+                'message': f'Расписание создано: {matches_created} матчей',
+                'matches_count': matches_created
             })
         except Exception as e:
             logger.error(f"Ошибка при создании расписания: {str(e)}")

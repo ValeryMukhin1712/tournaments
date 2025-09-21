@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Страница 4 - Создание турнира{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-plus-circle me-2"></i>Страница 4 - Создание турнира</h2>
+                    <p class="text-muted">Админ: <strong>{{ admin.name }}</strong></p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                        <!-- Основная информация -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary"><i class="fas fa-info-circle me-2"></i>Основная информация</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="name" class="form-label fw-bold">Название турнира *</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="sport_type" class="form-label fw-bold">Вид спорта</label>
+                                <select class="form-select" id="sport_type" name="sport_type">
+                                    <option value="пинг-понг">Пинг-понг</option>
+                                    <option value="бадминтон">Бадминтон</option>
+                                    <option value="волейбол">Волейбол</option>
+                                    <option value="другое">Другое</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="description" class="form-label fw-bold">Описание</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Краткое описание турнира"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Даты и время -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary"><i class="fas fa-calendar me-2"></i>Даты и время</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="start_date" class="form-label fw-bold">Дата начала *</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="court_count" class="form-label fw-bold">Количество площадок</label>
+                                <input type="number" class="form-control" id="court_count" name="court_count" value="4" min="1" max="20">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="start_time" class="form-label fw-bold">Время начала</label>
+                                <input type="time" class="form-control" id="start_time" name="start_time" value="09:00">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="end_time" class="form-label fw-bold">Время окончания</label>
+                                <input type="time" class="form-control" id="end_time" name="end_time" value="18:00">
+                            </div>
+                        </div>
+
+                        <!-- Настройки матчей -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary"><i class="fas fa-cog me-2"></i>Настройки матчей</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="match_duration" class="form-label fw-bold">Длительность матча (мин)</label>
+                                <input type="number" class="form-control" id="match_duration" name="match_duration" value="60" min="15" max="300">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="break_duration" class="form-label fw-bold">Перерыв (мин)</label>
+                                <input type="number" class="form-control" id="break_duration" name="break_duration" value="15" min="0" max="60">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sets_to_win" class="form-label fw-bold">Сетов для победы</label>
+                                <input type="number" class="form-control" id="sets_to_win" name="sets_to_win" value="2" min="1" max="5">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="points_to_win" class="form-label fw-bold">Очков для победы в сете</label>
+                                <input type="number" class="form-control" id="points_to_win" name="points_to_win" value="21" min="1" max="100">
+                            </div>
+                        </div>
+
+                        <!-- Система очков -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary"><i class="fas fa-star me-2"></i>Система очков</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="points_win" class="form-label fw-bold">Очки за победу</label>
+                                <input type="number" class="form-control" id="points_win" name="points_win" value="1" min="0" max="10">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="points_draw" class="form-label fw-bold">Очки за ничью</label>
+                                <input type="number" class="form-control" id="points_draw" name="points_draw" value="1" min="0" max="10">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="points_loss" class="form-label fw-bold">Очки за поражение</label>
+                                <input type="number" class="form-control" id="points_loss" name="points_loss" value="0" min="0" max="10">
+                            </div>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary me-md-2">
+                                        <i class="fas fa-times me-2"></i>Отмена
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Создать турнир
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Устанавливаем текущую дату по умолчанию
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('start_date');
+    if (startDateInput && !startDateInput.value) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        startDateInput.value = `${year}-${month}-${day}`;
+    }
+});
+</script>
+{% endblock %}
+

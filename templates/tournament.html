@@ -1,7 +1,7 @@
 
- {% extends "base.html" %}дейс
+{% extends "base.html" %}
 
-{% block title %}{{ tournament.name }} - Турнирная система v2.1{% endblock %}
+{% block title %}Страница 10 - {{ tournament.name }} - Турнирная система v2.1{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -18,14 +18,25 @@
                 <h1 class="mb-1">{{ tournament.name }} <small class="text-muted">v2.1</small></h1>
                 <p class="text-muted mb-0">
                     <i class="fas {{ get_sport_icon(tournament.sport_type) }} me-1"></i>{{ tournament.sport_type }} • 
-                    <i class="fas fa-calendar me-1"></i>{{ tournament.start_date.strftime('%d.%m.%Y') }} - {{ tournament.end_date.strftime('%d.%m.%Y') }}
+                    <i class="fas fa-calendar me-1"></i>
+                    {% if tournament.start_date %}
+                        {{ tournament.start_date.strftime('%d.%m.%Y') }}
+                    {% else %}
+                        Дата не указана
+                    {% endif %}
+                    {% if tournament.end_date %}
+                        - {{ tournament.end_date.strftime('%d.%m.%Y') }}
+                    {% endif %}
                 </p>
             </div>
             <div class="d-flex gap-2">
 
-                                 {% if current_user.is_authenticated %}
-                     {% if current_user.role in ['администратор', 'доверенный_участник'] %}
+                     {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                         <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
+                     </button>
+                     {% else %}
+                     <button class="btn btn-primary" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
                      </button>
                      {% endif %}
@@ -42,7 +53,6 @@
                          <i class="fas fa-file-excel me-2"></i>Выгрузить в Excel
                      </a>
                      {% endif %}
-                 {% endif %}
             </div>
         </div>
     </div>
@@ -107,7 +117,7 @@
                                  <td>{{ participant_stats.points }}</td>
                                  <td>{{ participant_stats.goal_difference }}</td>
                                 <td>
-                                    {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                    {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')" title="Удалить участника">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -211,13 +221,19 @@
                                                       
                                                       <!-- Время матча - внизу -->
                                                       <div class="mt-auto">
-                                                          <small class="d-block text-dark fw-bold text-center" style="font-size: 0.6rem; background-color: rgba(255, 255, 255, 0.95); padding: 1px 3px; border-radius: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ cell_data.date.strftime('%d.%m') }} {{ cell_data.time.strftime('%H:%M') }}</small>
+                                                          <small class="d-block text-dark fw-bold text-center" style="font-size: 0.6rem; background-color: rgba(255, 255, 255, 0.95); padding: 1px 3px; border-radius: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                              {% if cell_data.date and cell_data.time %}
+                                                                  {{ cell_data.date.strftime('%d.%m') }} {{ cell_data.time.strftime('%H:%M') }}
+                                                              {% else %}
+                                                                  Время не указано
+                                                              {% endif %}
+                                                          </small>
                                                       </div>
                                                   </div>
                                                   
                                               </div>
                                         {% elif cell_data.type == 'empty' %}
-                                            {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                            {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
                                             <div onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
                                                  style="cursor: pointer; height: 100%; display: flex; align-items: center; justify-content: center;" 
                                                  title="Нажмите для создания матча">
@@ -322,7 +338,7 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        {% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+                                        {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
                                         <button class="btn btn-sm btn-outline-primary" 
                                                 onclick="openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', 0, 0)"
                                                 title="Редактировать матч">
@@ -439,7 +455,7 @@
 </div>
 
 <!-- Модальное окно добавления участника -->
-{% if current_user.is_authenticated and current_user.role in ['администратор', 'доверенный_участник'] %}
+{% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
 <div class="modal fade" id="addParticipantModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
