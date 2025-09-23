@@ -1392,9 +1392,143 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Сортируем участников по очкам (убывание)
         participants_with_stats.sort(key=lambda x: x['points'], reverse=True)
         
+        # Создаем данные для турнирной таблицы (шахматки)
+        participants_with_stats_chessboard = []
+        chessboard = {}
+        
+        for i, participant_data in enumerate(participants_with_stats):
+            participant = participant_data['participant']
+            participant_stats = {
+                'points': participant_data['points'],
+                'wins': participant_data['wins'],
+                'losses': participant_data['losses'],
+                'games': participant_data['wins'] + participant_data['losses']
+            }
+            
+            participants_with_stats_chessboard.append({
+                'participant': participant,
+                'stats': participant_stats,
+                'position': i + 1
+            })
+            
+            # Создаем шахматку с данными матчей
+            chessboard[participant.id] = {}
+            for other_participant_data in participants_with_stats:
+                other_participant = other_participant_data['participant']
+                if participant.id != other_participant.id:
+                    # Ищем матч между этими участниками
+                    match = next((m for m in matches if 
+                                (m.participant1_id == participant.id and m.participant2_id == other_participant.id) or
+                                (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
+                    
+                    if match:
+                        if match.status == 'завершен':
+                            # Определяем победителя и счет
+                            if match.participant1_id == participant.id:
+                                score = f"{match.sets_won_1}:{match.sets_won_2}"
+                                is_winner = match.sets_won_1 > match.sets_won_2
+                            else:
+                                score = f"{match.sets_won_2}:{match.sets_won_1}"
+                                is_winner = match.sets_won_2 > match.sets_won_1
+                            
+                            # Формируем детали сетов
+                            sets_details = ""
+                            sets_list = []
+                            points_to_win = 21 if tournament.sport_type == 'бадминтон' else 11
+                            
+                            if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
+                                if match.participant1_id == participant.id:
+                                    sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                                else:
+                                    sets_list.append(f"{match.set1_score2}:{match.set1_score1}")
+                            if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
+                                if match.participant1_id == participant.id:
+                                    sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                                else:
+                                    sets_list.append(f"{match.set2_score2}:{match.set2_score1}")
+                            if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
+                                if match.participant1_id == participant.id:
+                                    sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                                else:
+                                    sets_list.append(f"{match.set3_score2}:{match.set3_score1}")
+                            if sets_list:
+                                sets_details = ", ".join(sets_list)
+                            
+                            chessboard[participant.id][other_participant.id] = {
+                                'type': 'result',
+                                'value': score,
+                                'match_id': match.id,
+                                'is_winner': is_winner,
+                                'sets_details': sets_details
+                            }
+                        elif match.status in ['в процессе', 'играют']:
+                            # Матч в процессе
+                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                if match.participant1_id == participant.id:
+                                    score = f"{match.sets_won_1}:{match.sets_won_2}"
+                                else:
+                                    score = f"{match.sets_won_2}:{match.sets_won_1}"
+                                
+                                # Формируем детали сетов
+                                sets_details = ""
+                                sets_list = []
+                                points_to_win = 21 if tournament.sport_type == 'бадминтон' else 11
+                                
+                                if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
+                                    if match.participant1_id == participant.id:
+                                        sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                                    else:
+                                        sets_list.append(f"{match.set1_score2}:{match.set1_score1}")
+                                if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
+                                    if match.participant1_id == participant.id:
+                                        sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                                    else:
+                                        sets_list.append(f"{match.set2_score2}:{match.set2_score1}")
+                                if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
+                                    if match.participant1_id == participant.id:
+                                        sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                                    else:
+                                        sets_list.append(f"{match.set3_score2}:{match.set3_score1}")
+                                if sets_list:
+                                    sets_details = ", ".join(sets_list)
+                                
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'sets_details': sets_details
+                                }
+                            else:
+                                # Нет счета - показываем "В процессе"
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': 'В процессе',
+                                    'match_id': match.id
+                                }
+                        else:
+                            # Матч запланирован
+                            chessboard[participant.id][other_participant.id] = {
+                                'type': 'upcoming',
+                                'value': 'vs',
+                                'match_id': match.id,
+                                'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
+                                'court_number': match.court_number,
+                                'time': match.match_time,
+                                'court': match.court_number
+                            }
+                    else:
+                        # Матч не найден
+                        chessboard[participant.id][other_participant.id] = {
+                            'type': 'empty',
+                            'value': '',
+                            'match_id': None
+                        }
+        
         return render_template('tournament_view.html', 
                              tournament=tournament,
                              participants=participants_with_stats,
+                             participants_with_stats_chessboard=participants_with_stats_chessboard,
+                             chessboard=chessboard,
                              schedule_display=schedule_display,
                              is_participant=is_participant,
                              participant_name=participant_name)

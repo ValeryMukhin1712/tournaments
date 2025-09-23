@@ -38,12 +38,18 @@
                      <button class="btn btn-info btn-sm" onclick="generateSchedule()">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
                      </button>
+                     <button class="btn btn-success btn-sm" onclick="exportTournament()">
+                         <i class="fas fa-download me-1"></i><span class="d-none d-sm-inline">Выгрузка</span><span class="d-sm-none">Выгрузка</span>
+                     </button>
                      {% else %}
                      <button class="btn btn-primary btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
                      </button>
                      <button class="btn btn-info btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
+                     </button>
+                     <button class="btn btn-success btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
+                         <i class="fas fa-download me-1"></i><span class="d-none d-sm-inline">Выгрузка</span><span class="d-sm-none">Выгрузка</span>
                      </button>
                      {% endif %}
                      {% if current_user.role == 'системный администратор' %}
@@ -1836,6 +1842,33 @@ function generateSchedule() {
         .catch(error => {
             console.error('Ошибка:', error);
             alert('Ошибка при составлении расписания. Попробуйте еще раз.');
+        });
+    }
+}
+
+// Функция для выгрузки турнира в Excel
+function exportTournament() {
+    if (confirm('Отправить данные турнира на email администратора в формате Excel?')) {
+        const csrfToken = getCSRFToken();
+        
+        fetch(`/api/tournaments/{{ tournament.id }}/export`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Данные турнира успешно отправлены на email администратора!');
+            } else {
+                alert('Ошибка при выгрузке: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Ошибка при выгрузке. Попробуйте еще раз.');
         });
     }
 }

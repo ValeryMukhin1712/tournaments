@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf import FlaskForm
+from flask_mail import Mail
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -22,8 +23,19 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Настройки email
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'tournaments.master@gmail.com'
+app.config['MAIL_PASSWORD'] = 'jqjahujrmrnyzfbo'
+app.config['MAIL_DEFAULT_SENDER'] = 'tournaments.master@gmail.com'
+
 # Инициализация CSRF-защиты
 csrf = CSRFProtect(app)
+
+# Инициализация Flask-Mail
+mail = Mail(app)
 
 # Форма для входа
 class LoginForm(FlaskForm):

@@ -1627,3 +1627,169 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при составлении расписания: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при составлении расписания'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/export', methods=['POST'])
+    def export_tournament(tournament_id):
+        """Экспорт данных турнира в Excel и отправка на email администратора"""
+        try:
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.headers.get('X-CSRFToken'))
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Получаем участников турнира
+            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            
+            # Получаем матчи турнира
+            matches = Match.query.filter_by(tournament_id=tournament_id).all()
+            
+            # Создаем Excel файл с помощью pandas
+            import pandas as pd
+            import io
+            from flask_mail import Mail, Message
+            from datetime import datetime
+            
+            # Создаем Excel файл в памяти
+            output = io.BytesIO()
+            
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                # Лист 1: Информация о турнире
+                tournament_info = pd.DataFrame({
+                    'Параметр': ['Название', 'Спорт', 'Дата начала', 'Количество участников', 'Количество кортов', 'Длительность матча (мин)', 'Длительность перерыва (мин)'],
+                    'Значение': [
+                        tournament.name,
+                        tournament.sport_type or 'Теннис',
+                        tournament.start_date.strftime('%d.%m.%Y') if tournament.start_date else 'Не указана',
+                        len(participants),
+                        tournament.court_count or 4,
+                        tournament.match_duration or 15,
+                        tournament.break_duration or 2
+                    ]
+                })
+                tournament_info.to_excel(writer, sheet_name='Информация о турнире', index=False)
+                
+                # Лист 2: Участники
+                participants_data = []
+                for i, participant in enumerate(participants, 1):
+                    # Подсчитываем статистику участника
+                    wins = 0
+                    losses = 0
+                    points = participant.points or 0
+                    
+                    for match in matches:
+                        if match.status == 'завершен':
+                            if match.participant1_id == participant.id:
+                                if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                    if match.sets_won_1 > match.sets_won_2:
+                                        wins += 1
+                                    elif match.sets_won_1 < match.sets_won_2:
+                                        losses += 1
+                            elif match.participant2_id == participant.id:
+                                if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                    if match.sets_won_1 < match.sets_won_2:
+                                        wins += 1
+                                    elif match.sets_won_1 > match.sets_won_2:
+                                        losses += 1
+                    
+                    participants_data.append({
+                        'Место': i,
+                        'Участник': participant.name,
+                        'Игр': wins + losses,
+                        'Побед': wins,
+                        'Поражений': losses,
+                        'Очки': points
+                    })
+                
+                participants_df = pd.DataFrame(participants_data)
+                participants_df.to_excel(writer, sheet_name='Участники', index=False)
+                
+                # Лист 3: Матчи
+                matches_data = []
+                for match in matches:
+                    # Находим участников по ID
+                    participant1 = next((p for p in participants if p.id == match.participant1_id), None)
+                    participant2 = next((p for p in participants if p.id == match.participant2_id), None)
+                    
+                    matches_data.append({
+                        'Дата': match.match_date.strftime('%d.%m.%Y') if match.match_date else 'Не указана',
+                        'Время': match.match_time.strftime('%H:%M') if match.match_time else 'Не указано',
+                        'Корт': match.court_number or 'Не указан',
+                        'Участник 1': participant1.name if participant1 else 'Неизвестно',
+                        'Участник 2': participant2.name if participant2 else 'Неизвестно',
+                        'Счет': f"{match.sets_won_1}:{match.sets_won_2}" if match.sets_won_1 is not None and match.sets_won_2 is not None else 'Не завершен',
+                        'Статус': match.status,
+                        'Сет 1': f"{match.set1_score1}:{match.set1_score2}" if match.set1_score1 is not None and match.set1_score2 is not None else '',
+                        'Сет 2': f"{match.set2_score1}:{match.set2_score2}" if match.set2_score1 is not None and match.set2_score2 is not None else '',
+                        'Сет 3': f"{match.set3_score1}:{match.set3_score2}" if match.set3_score1 is not None and match.set3_score2 is not None else ''
+                    })
+                
+                matches_df = pd.DataFrame(matches_data)
+                matches_df.to_excel(writer, sheet_name='Матчи', index=False)
+            
+            # Получаем данные Excel файла
+            output.seek(0)
+            excel_data = output.getvalue()
+            
+            # Отправляем email с Excel файлом
+            try:
+                from flask_mail import Message
+                
+                # Создаем сообщение
+                msg = Message(
+                    subject=f'Данные турнира "{tournament.name}"',
+                    sender=app.config['MAIL_DEFAULT_SENDER'],
+                    recipients=['yandvm@yandex.ru'],  # Email администратора турнира
+                    body=f'''
+Здравствуйте!
+
+Во вложении вы найдете полные данные турнира "{tournament.name}".
+
+Файл содержит:
+- Информацию о турнире
+- Статистику участников
+- Детали всех матчей
+
+Дата экспорта: {datetime.now().strftime('%d.%m.%Y %H:%M')}
+
+С уважением,
+Турнирная система
+                    '''
+                )
+                
+                # Прикрепляем Excel файл
+                msg.attach(
+                    filename=f'tournament_{tournament.name}_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx',
+                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    data=excel_data
+                )
+                
+                # Отправляем письмо (используем глобальный объект mail)
+                from flask import current_app
+                mail = current_app.extensions['mail']
+                mail.send(msg)
+                
+                logger.info(f"Данные турнира '{tournament.name}' отправлены на email yandvm@yandex.ru")
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Данные турнира "{tournament.name}" успешно отправлены на email администратора!'
+                })
+                
+            except Exception as email_error:
+                logger.error(f"Ошибка при отправке email: {email_error}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Ошибка при отправке email: {str(email_error)}'
+                }), 500
+            
+        except Exception as e:
+            logger.error(f"Ошибка при экспорте турнира: {e}")
+            return jsonify({'success': False, 'error': f'Ошибка при экспорте турнира: {str(e)}'}), 500
