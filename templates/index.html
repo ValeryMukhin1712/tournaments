@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Страница 1 - Главная - Турнирная система{% endblock %}
+{% block title %}Главная - Турнирная система{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,7 +9,7 @@
             <div class="text-center mb-5 position-relative">
                 <h1 class="display-4 mb-3">
                     <i class="fas fa-trophy text-primary me-3"></i>
-                    Страница 1 - Турнирная система
+                    Турнирная система
                 </h1>
                 <p class="lead text-muted">Выберите вашу роль для продолжения</p>
                 
@@ -22,7 +22,7 @@
             </div>
             
             <div class="row g-4">
-                <!-- Создание нового турнира -->
+                <!-- 1. Создание нового турнира -->
                 <div class="col-md-6">
                     <div class="card h-100 border-0 shadow-sm d-flex">
                         <div class="card-body text-center p-4 d-flex flex-column">
@@ -31,43 +31,25 @@
                             </div>
                             <h4 class="card-title">Хочу создать новый турнир и стать его админом</h4>
                             <p class="card-text text-muted flex-grow-1">
-                                Хотите организовать свой турнир? Получите токен для создания и управления турниром.
+                                Получите токен для создания и управления турниром. После получения токена используйте кнопку "Войти как админ турнира".
                             </p>
-                            <a href="{{ url_for('create_tournament_form') }}" class="btn btn-success btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-arrow-right me-2"></i>Вперёд!
+                            <a href="{{ url_for('request_token') }}" class="btn btn-success btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-key me-2"></i>Получить токен
                             </a>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Выбор турнира для участия -->
-                <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm d-flex">
-                        <div class="card-body text-center p-4 d-flex flex-column">
-                            <div class="mb-3">
-                                <i class="fas fa-users fa-3x text-info"></i>
-                            </div>
-                            <h4 class="card-title">Выбрать турнир для участия</h4>
-                            <p class="card-text text-muted flex-grow-1">
-                                Посмотрите доступные турниры и зарегистрируйтесь для участия.
-                            </p>
-                            <a href="{{ url_for('join_tournament') }}" class="btn btn-info btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                Выбрать турнир
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Админ турнира -->
+                <!-- 2. Вход как админ турнира -->
                 <div class="col-md-6">
                     <div class="card h-100 border-0 shadow-sm d-flex">
                         <div class="card-body text-center p-4 d-flex flex-column">
                             <div class="mb-3">
                                 <i class="fas fa-crown fa-3x text-warning"></i>
                             </div>
-                            <h4 class="card-title">войти как Админ турнира</h4>
+                            <h4 class="card-title">Войти как админ турнира</h4>
                             <p class="card-text text-muted flex-grow-1">
-                                Управляйте турнирами, участниками и результатами матчей.
+                                Войдите с помощью email и токена для управления своими турнирами.
                             </p>
                             <a href="{{ url_for('admin_tournament') }}" class="btn btn-warning btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-sign-in-alt me-2"></i>Войти
@@ -75,8 +57,8 @@
                         </div>
                     </div>
                 </div>
-                    
-                <!-- Участник турнира -->
+                
+                <!-- 3. Вход как участник турнира -->
                 <div class="col-md-6">
                     <div class="card h-100 border-0 shadow-sm d-flex">
                         <div class="card-body text-center p-4 d-flex flex-column">
@@ -85,15 +67,33 @@
                             </div>
                             <h4 class="card-title">Войти как участник турнира</h4>
                             <p class="card-text text-muted flex-grow-1">
-                                Просматривайте свои турниры, результаты и расписание матчей.
+                                Введите ваше имя для просмотра турниров, в которых вы участвуете.
                             </p>
-                            <a href="{{ url_for('participant_tournament') }}" class="btn btn-primary btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-user me-2"></i>Мои турниры
+                            <button onclick="showParticipantLogin()" class="btn btn-primary btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user me-2"></i>Войти
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. Просмотр всех турниров -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm d-flex">
+                        <div class="card-body text-center p-4 d-flex flex-column">
+                            <div class="mb-3">
+                                <i class="fas fa-list fa-3x text-info"></i>
+                            </div>
+                            <h4 class="card-title">Просмотр всех турниров</h4>
+                            <p class="card-text text-muted flex-grow-1">
+                                Посмотрите все доступные турниры без входа в систему.
+                            </p>
+                            <a href="{{ url_for('tournaments_list') }}" class="btn btn-info btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-eye me-2"></i>Смотреть турниры
                             </a>
                         </div>
                     </div>
                 </div>
-                        </div>
+            </div>
             
             <!-- Дополнительная информация -->
             <div class="row mt-5">
@@ -142,12 +142,6 @@ function adminLogin() {
                             <label for="adminPassword" class="form-label">Пароль</label>
                             <input type="password" class="form-control" id="adminPassword" placeholder="Введите пароль">
                         </div>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Данные для входа:</strong><br>
-                            Логин: <code>admin</code><br>
-                            Пароль: <code>adm444</code>
-                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -179,18 +173,33 @@ function performAdminLogin() {
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Вход...';
     button.disabled = true;
     
+    // Получаем CSRF токен
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
     // Отправляем запрос на сервер
     fetch('/admin-system-login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({
             username: 'admin',
             password: password
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        // Проверяем, что ответ действительно JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            // Если не JSON, читаем как текст для отладки
+            return response.text().then(text => {
+                console.error('Сервер вернул не JSON ответ:', text);
+                throw new Error('Сервер вернул не JSON ответ. Проверьте консоль для деталей.');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Успешный вход - перенаправляем на панель управления
@@ -207,8 +216,103 @@ function performAdminLogin() {
         // Ошибка сети - восстанавливаем кнопку
         button.innerHTML = originalText;
         button.disabled = false;
-        alert('Ошибка сети: ' + error.message);
+        console.error('Ошибка входа:', error);
+        alert('Ошибка входа: ' + error.message);
         document.getElementById('adminPassword').focus();
+    });
+}
+
+
+function showParticipantLogin() {
+    // Показываем модальное окно для входа участника
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'participantLoginModal';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-check me-2"></i>Вход участника турнира
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="participantLoginForm">
+                        <div class="mb-3">
+                            <label for="participantName" class="form-label">Ваше имя</label>
+                            <input type="text" class="form-control" id="participantName" placeholder="Введите ваше имя">
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Вход участника:</strong><br>
+                            Введите ваше имя для просмотра турниров, в которых вы участвуете.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="performParticipantLogin()">
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Удаляем модальное окно после закрытия
+    modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+
+function performParticipantLogin() {
+    const name = document.getElementById('participantName').value;
+    
+    if (!name) {
+        alert('Пожалуйста, введите ваше имя');
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Вход...';
+    button.disabled = true;
+    
+    // Получаем CSRF токен
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Сохраняем имя участника в сессии и перенаправляем
+    fetch('/participant-login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `name=${encodeURIComponent(name)}&csrf_token=${csrfToken}`
+    })
+    .then(response => {
+        if (response.ok) {
+            // Успешный вход - перенаправляем на страницу участника
+            window.location.href = '/participant-tournaments';
+        } else {
+            // Ошибка - восстанавливаем кнопку
+            button.innerHTML = originalText;
+            button.disabled = false;
+            alert('Ошибка входа. Попробуйте снова.');
+        }
+    })
+    .catch(error => {
+        // Ошибка сети - восстанавливаем кнопку
+        button.innerHTML = originalText;
+        button.disabled = false;
+        console.error('Ошибка входа:', error);
+        alert('Ошибка входа: ' + error.message);
     });
 }
 </script>

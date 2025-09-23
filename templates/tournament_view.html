@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Просмотр турнира - {{ tournament.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>
+                        {{ tournament.name }}
+                    </h1>
+                    <p class="text-muted mb-0">Режим просмотра</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('participant_tournaments') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Назад к турнирам
+                    </a>
+                </div>
+            </div>
+
+            <!-- Информация о турнире -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Информация о турнире
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Спорт:</strong> {{ tournament.sport_type or 'Теннис' }}</p>
+                                    <p><strong>Дата начала:</strong> 
+                                        {% if tournament.start_date %}
+                                            {{ tournament.start_date.strftime('%d.%m.%Y') }}
+                                        {% else %}
+                                            Не указана
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Участников:</strong> {{ participants|length }}</p>
+                                </div>
+                            </div>
+                            {% if tournament.description %}
+                            <div class="mt-3">
+                                <strong>Описание:</strong>
+                                <p class="mt-1">{{ tournament.description }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Таблица участников -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users me-2"></i>
+                                Участники турнира
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if participants %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Место</th>
+                                            <th>Участник</th>
+                                            <th>Победы</th>
+                                            <th>Поражения</th>
+                                            <th>Очки</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in participants %}
+                                        <tr class="{% if item.is_current_participant %}table-success{% endif %}">
+                                            <td>
+                                                <strong>{{ loop.index }}</strong>
+                                                {% if loop.index == 1 %}
+                                                    <i class="fas fa-crown text-warning ms-1"></i>
+                                                {% elif loop.index == 2 %}
+                                                    <i class="fas fa-medal text-secondary ms-1"></i>
+                                                {% elif loop.index == 3 %}
+                                                    <i class="fas fa-award text-warning ms-1"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <strong>{{ item.participant.name }}</strong>
+                                                {% if item.is_current_participant %}
+                                                    <span class="badge bg-success ms-2">Вы</span>
+                                                {% endif %}
+                                            </td>
+                                            <td><span class="badge bg-success">{{ item.wins }}</span></td>
+                                            <td><span class="badge bg-danger">{{ item.losses }}</span></td>
+                                            <td><strong>{{ item.points }}</strong></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">В турнире пока нет участников</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Расписание матчей -->
+            {% if schedule_display %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Расписание матчей
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if schedule_display %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 100px;">Время</th>
+                                                <th style="width: 80px;">Площадка</th>
+                                                <th>Участники</th>
+                                                <th style="width: 100px;">Счет</th>
+                                                <th style="width: 120px;">Статус</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for date_str, day_data in schedule_display.items() %}
+                                            <tr class="table-info">
+                                                <td colspan="6" class="fw-bold text-center py-2">
+                                                    <i class="fas fa-calendar-day me-2"></i>{{ day_data.date_display }}
+                                                </td>
+                                            </tr>
+                                            {% for match in day_data.matches %}
+                                            <tr {% if match.is_participant_match %}class="table-primary"{% endif %}>
+                                                <td class="text-center">
+                                                    <span class="badge bg-primary">{{ match.global_number or loop.index }}</span>
+                                                </td>
+                                                <td class="fw-bold text-primary">{{ match.time }}</td>
+                                                <td class="text-center">
+                                                    {% if match.court and match.court > 0 %}
+                                                        {% set court_colors = {
+                                                            1: 'primary',
+                                                            2: 'info', 
+                                                            3: 'success',
+                                                            4: 'warning',
+                                                            5: 'danger',
+                                                            6: 'secondary',
+                                                            7: 'dark',
+                                                            8: 'light'
+                                                        } %}
+                                                        {% set court_color = court_colors.get(match.court, 'secondary') %}
+                                                        <span class="badge bg-{{ court_color }}">
+                                                            Пл. {{ match.court }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <strong>{{ match.participant1 }}</strong> vs <strong>{{ match.participant2 }}</strong>
+                                                    {% if match.is_participant_match %}
+                                                        <span class="badge bg-primary ms-2">Ваш матч</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if match.score and match.status != 'запланирован' %}
+                                                        {% if match.status == 'завершен' %}
+                                                            <span class="badge bg-success text-white">{{ match.score }}</span>
+                                                        {% elif match.status in ['в процессе', 'играют'] %}
+                                                            <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning text-dark">{{ match.score }}</span>
+                                                        {% endif %}
+                                                        {% if match.sets_details %}
+                                                        <br><small class="text-muted" {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge 
+                                                        {% if match.status == 'завершен' %}bg-success
+                                                        {% elif match.status == 'запланирован' %}bg-info
+                                                        {% else %}bg-secondary{% endif %}"
+                                                        {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
+                                                        {{ match.status }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Расписание матчей пока не составлено</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

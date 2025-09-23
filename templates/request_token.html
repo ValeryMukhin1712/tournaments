@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Запрос токена - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Запрос токена для создания турнира</h1>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-key me-2"></i>Получите токен для создания турнира
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Что такое токен?</strong><br>
+                        Токен - это уникальный ключ, который позволит вам создавать и управлять турнирами. 
+                        После получения токена вы сможете войти в систему как администратор турнира.
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('request_token') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Ваше имя *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">Назад</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-key me-2"></i>Получить токен
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Информация о том, что происходит после запроса -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-question-circle me-2"></i>Что происходит после отправки запроса?
+                    </h6>
+                    <ol class="mb-0">
+                        <li>Вы получите уникальный токен для входа в систему</li>
+                        <li>С помощью этого токена вы сможете создавать турниры</li>
+                        <li>Токен будет действителен в течение 30 дней</li>
+                        <li>Сохраните токен в надежном месте - он понадобится для входа</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

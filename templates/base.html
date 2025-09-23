@@ -77,13 +77,54 @@
         .form-control, .form-select {
             height: 2.5rem;
         }
+        /* Стили для кнопок навигации */
+        .nav-buttons {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .nav-btn-home {
+            background-color: #28a745;
+            color: white;
+        }
+        .nav-btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        .nav-btn-home:hover {
+            background-color: #218838;
+            color: white;
+        }
+        .nav-btn-back:hover {
+            background-color: #5a6268;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <span class="badge bg-secondary me-2" id="pageNumber">#</span>
                 <i class="fas fa-trophy me-2"></i>Турнирная система
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -133,6 +174,16 @@
 
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Кнопки навигации -->
+    <div class="nav-buttons">
+        <a href="{{ url_for('index') }}" class="nav-btn nav-btn-home" title="На главную">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="javascript:history.back()" class="nav-btn nav-btn-back" title="Назад">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
 
     <footer class="bg-light mt-5 py-4">
         <div class="container text-center">
@@ -230,34 +281,6 @@
     });
     </script>
     
-    <!-- Скрипт для нумерации страниц -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Определяем номер страницы на основе URL
-        const path = window.location.pathname;
-        let pageNumber = '#';
-        
-        if (path === '/' || path === '/index') {
-            pageNumber = '1';
-        } else if (path.startsWith('/login')) {
-            pageNumber = '2';
-        } else if (path.startsWith('/tournament/')) {
-            pageNumber = '3';
-        } else if (path.startsWith('/users')) {
-            pageNumber = '4';
-        } else if (path.startsWith('/register')) {
-            pageNumber = '5';
-        } else {
-            pageNumber = '?';
-        }
-        
-        // Обновляем номер страницы
-        const pageNumberElement = document.getElementById('pageNumber');
-        if (pageNumberElement) {
-            pageNumberElement.textContent = pageNumber;
-        }
-    });
-    </script>
     
     {% block scripts %}{% endblock %}
 </body>

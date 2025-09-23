@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование турнира - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-edit"></i> Редактирование турнира
+                <small class="text-muted">- {{ tournament.name }}</small>
+            </h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog"></i> Основные настройки
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="edit-tournament-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Название турнира *</label>
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           value="{{ tournament.name }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sport_type" class="form-label">Вид спорта</label>
+                                    <select class="form-select" id="sport_type" name="sport_type">
+                                        <option value="настольный теннис" {% if tournament.sport_type == 'настольный теннис' %}selected{% endif %}>Настольный теннис</option>
+                                        <option value="теннис" {% if tournament.sport_type == 'теннис' %}selected{% endif %}>Теннис</option>
+                                        <option value="бадминтон" {% if tournament.sport_type == 'бадминтон' %}selected{% endif %}>Бадминтон</option>
+                                        <option value="волейбол" {% if tournament.sport_type == 'волейбол' %}selected{% endif %}>Волейбол</option>
+                                        <option value="футбол" {% if tournament.sport_type == 'футбол' %}selected{% endif %}>Футбол</option>
+                                        <option value="баскетбол" {% if tournament.sport_type == 'баскетбол' %}selected{% endif %}>Баскетбол</option>
+                                        <option value="другой" {% if tournament.sport_type == 'другой' %}selected{% endif %}>Другой</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ tournament.description or '' }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label">Дата начала *</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                                           value="{{ tournament.start_date.strftime('%Y-%m-%d') if tournament.start_date else '' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="max_participants" class="form-label">Максимум участников</label>
+                                    <input type="number" class="form-control" id="max_participants" name="max_participants" 
+                                           value="{{ tournament.max_participants or 32 }}" min="2" max="128">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_time" class="form-label">Время начала</label>
+                                    <input type="time" class="form-control" id="start_time" name="start_time" 
+                                           value="{{ tournament.start_time.strftime('%H:%M') if tournament.start_time else '09:00' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_time" class="form-label">Время окончания</label>
+                                    <input type="time" class="form-control" id="end_time" name="end_time" 
+                                           value="{{ tournament.end_time.strftime('%H:%M') if tournament.end_time else '18:00' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <h6 class="text-primary">Настройки матчей</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="court_count" class="form-label">Количество площадок</label>
+                                    <input type="number" class="form-control" id="court_count" name="court_count" 
+                                           value="{{ tournament.court_count or 4 }}" min="1" max="20">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="match_duration" class="form-label">Длительность матча (мин)</label>
+                                    <input type="number" class="form-control" id="match_duration" name="match_duration" 
+                                           value="{{ tournament.match_duration or 60 }}" min="5" max="300">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="break_duration" class="form-label">Перерыв между матчами (мин)</label>
+                                    <input type="number" class="form-control" id="break_duration" name="break_duration" 
+                                           value="{{ tournament.break_duration or 15 }}" min="0" max="60">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="sets_to_win" class="form-label">Сетов для победы</label>
+                                    <input type="number" class="form-control" id="sets_to_win" name="sets_to_win" 
+                                           value="{{ tournament.sets_to_win or 2 }}" min="1" max="5">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="points_to_win" class="form-label">Очков для победы в сете</label>
+                                    <input type="number" class="form-control" id="points_to_win" name="points_to_win" 
+                                           value="{{ tournament.points_to_win or 21 }}" min="1" max="50">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="points_win" class="form-label">Очки за победу</label>
+                                    <input type="number" class="form-control" id="points_win" name="points_win" 
+                                           value="{{ tournament.points_win or 1 }}" min="0" max="10">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="points_draw" class="form-label">Очки за ничью</label>
+                                    <input type="number" class="form-control" id="points_draw" name="points_draw" 
+                                           value="{{ tournament.points_draw or 1 }}" min="0" max="10">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="points_loss" class="form-label">Очки за поражение</label>
+                                    <input type="number" class="form-control" id="points_loss" name="points_loss" 
+                                           value="{{ tournament.points_loss or 0 }}" min="0" max="10">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-secondary me-md-2" onclick="history.back()">
+                                <i class="fas fa-arrow-left"></i> Отмена
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Информация о турнире
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID турнира:</strong> {{ tournament.id }}</p>
+                    <p><strong>Создан:</strong> {{ tournament.created_at.strftime('%d.%m.%Y %H:%M') if tournament.created_at else 'Не указано' }}</p>
+                    <p><strong>Участников:</strong> <span class="badge bg-primary">{{ participant_count or 0 }}</span></p>
+                    <p><strong>Матчей:</strong> <span class="badge bg-info">{{ match_count or 0 }}</span></p>
+                    <p><strong>Статус:</strong> 
+                        <span class="badge bg-success">{{ tournament.status or 'активен' }}</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Опасные действия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-warning" onclick="rescheduleTournament()">
+                            <i class="fas fa-refresh"></i> Пересчитать расписание
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTournament()">
+                            <i class="fas fa-trash"></i> Удалить турнир
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+document.getElementById('edit-tournament-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Показываем индикатор загрузки
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+    submitBtn.disabled = true;
+    
+    fetch('/api/admin/tournaments/{{ tournament.id }}', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Турнир успешно обновлен', 'success');
+        } else {
+            showAlert('Ошибка при обновлении турнира: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('Ошибка при обновлении турнира: ' + error, 'danger');
+    })
+    .finally(() => {
+        // Восстанавливаем кнопку
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function rescheduleTournament() {
+    if (confirm('Вы уверены, что хотите пересчитать расписание турнира? Все существующие матчи будут удалены и созданы заново.')) {
+        fetch('/api/tournaments/{{ tournament.id }}/reschedule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showAlert(data.message, 'success');
+            } else {
+                showAlert('Ошибка при пересчете расписания: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('Ошибка при пересчете расписания: ' + error, 'danger');
+        });
+    }
+}
+
+function deleteTournament() {
+    if (confirm('ВНИМАНИЕ! Вы уверены, что хотите удалить этот турнир? Это действие нельзя отменить!')) {
+        fetch('/api/tournaments/{{ tournament.id }}', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Турнир успешно удален', 'success');
+                setTimeout(() => {
+                    window.location.href = '/admin-dashboard';
+                }, 2000);
+            } else {
+                showAlert('Ошибка при удалении турнира: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('Ошибка при удалении турнира: ' + error, 'danger');
+        });
+    }
+}
+
+function showAlert(message, type) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alert, document.querySelector('.container').firstChild);
+}
+</script>
+{% endblock %}

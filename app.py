@@ -12,6 +12,9 @@ import logging
 import secrets
 import sqlite3
 from sqlalchemy import create_engine, text, inspect
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Импорт конфигурации
 from config import DevelopmentConfig, ProductionConfig
@@ -183,6 +186,37 @@ def get_sport_icon(sport_type):
 # Регистрируем функцию в Jinja2
 app.jinja_env.globals.update(get_sport_icon=get_sport_icon)
 
+def send_email(to_email, subject, body):
+    """Отправляет email"""
+    try:
+        # Проверяем, настроены ли учетные данные для email
+        if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD'):
+            app.logger.warning("Настройки email не заданы. Пропускаем отправку письма.")
+            return False
+        
+        # Создаем сообщение
+        msg = MIMEMultipart()
+        msg['From'] = app.config.get('MAIL_DEFAULT_SENDER', app.config['MAIL_USERNAME'])
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        
+        # Добавляем текст сообщения
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        
+        # Подключаемся к серверу и отправляем
+        server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        server.starttls()
+        server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+        text = msg.as_string()
+        server.sendmail(app.config['MAIL_USERNAME'], to_email, text)
+        server.quit()
+        
+        app.logger.info(f"Email отправлен на {to_email}: {subject}")
+        return True
+    except Exception as e:
+        app.logger.error(f"Ошибка отправки email на {to_email}: {e}")
+        return False
+
 # Выбор конфигурации в зависимости от окружения
 if os.environ.get('FLASK_ENV') == 'production':
     app.config.from_object(ProductionConfig)
@@ -192,6 +226,8 @@ else:
 # Устанавливаем FLASK_ENV для корректной работы
 if not os.environ.get('FLASK_ENV'):
     os.environ['FLASK_ENV'] = 'development'
+
+# Настройки email уже загружены из конфигурации
 
 # Инициализация CSRF-защиты
 csrf = CSRFProtect(app)
@@ -237,9 +273,12 @@ Participant = models['Participant']
 Match = models['Match']
 Notification = models['Notification']
 MatchLog = models['MatchLog']
+Token = models['Token']
+
+# Модели уже созданы и зарегистрированы
 
 # Импорт и регистрация маршрутов
-register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog)
+register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -284,15 +323,23 @@ def export_tournament(tournament_id):
 def init_db():
     with app.app_context():
         try:
-            # Сначала выполняем миграцию базы данных
+            # Создаем таблицы через SQLAlchemy
+            print("\n" + "="*60)
+            print("🔧 СОЗДАНИЕ ТАБЛИЦ БАЗЫ ДАННЫХ")
+            print("="*60)
+            
+            # Создаем все таблицы
+            db.create_all()
+            print("✅ Таблицы созданы через SQLAlchemy")
+            
+            print("="*60 + "\n")
+            
+            # Затем выполняем миграцию базы данных
             print("\n" + "="*60)
             print("🔧 ВЫПОЛНЕНИЕ МИГРАЦИИ БАЗЫ ДАННЫХ")
             print("="*60)
             migrate_database()
             print("="*60 + "\n")
-            
-            # Создаем таблицы
-            db.create_all()
             
             # Создание администратора по умолчанию
             admin = User.query.filter_by(username='admin').first()

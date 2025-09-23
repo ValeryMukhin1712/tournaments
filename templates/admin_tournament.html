@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Вход как админ турниров - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Вход как админ турниров</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin_tournament') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email админа</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="token" class="form-label">Токен</label>
+                            <input type="text" class="form-control" id="token" name="token" required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Используйте email и токен для входа
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">Назад</a>
+                            <button type="submit" class="btn btn-primary">Войти</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Показываем уведомление об успешном копировании
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>Скопировано: ${text}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        
+        // Автоматически скрываем уведомление через 3 секунды
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }).catch(function(err) {
+        console.error('Ошибка копирования: ', err);
+        alert('Не удалось скопировать в буфер обмена');
+    });
+}
+</script>
+{% endblock %}

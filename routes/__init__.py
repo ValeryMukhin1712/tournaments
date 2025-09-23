@@ -5,8 +5,8 @@ from .main import create_main_routes
 from .auth import create_auth_routes
 from .api import create_api_routes
 
-def register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin):
+def register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):
     """Регистрирует все маршруты приложения"""
-    create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin)
+    create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token)
     create_auth_routes(app, db, User)
-    create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin)
+    create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token)

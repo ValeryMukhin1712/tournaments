@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Список турниров - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-trophy"></i> Список турниров
+                <small class="text-muted">- Все доступные турниры</small>
+            </h1>
+        </div>
+    </div>
+    
+    <!-- Статистика турниров -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Всего турниров</h5>
+                    <h3 class="text-primary">{{ tournaments|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Активных турниров</h5>
+                    <h3 class="text-success">{{ tournaments|selectattr('status', 'equalto', 'активен')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Завершенных турниров</h5>
+                    <h3 class="text-info">{{ tournaments|selectattr('status', 'equalto', 'завершен')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Регистрация</h5>
+                    <h3 class="text-warning">{{ tournaments|selectattr('status', 'equalto', 'регистрация')|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Список турниров -->
+    <div class="row">
+        {% if tournaments %}
+            {% for tournament in tournaments %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ tournament.name }}</h5>
+                        {% if tournament.status == 'активен' %}
+                            <span class="badge bg-success">{{ tournament.status }}</span>
+                        {% elif tournament.status == 'завершен' %}
+                            <span class="badge bg-secondary">{{ tournament.status }}</span>
+                        {% elif tournament.status == 'регистрация' %}
+                            <span class="badge bg-warning">{{ tournament.status }}</span>
+                        {% else %}
+                            <span class="badge bg-info">{{ tournament.status }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Вид спорта</h6>
+                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
+                        </div>
+                        
+                        {% if tournament.description %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Описание</h6>
+                            <p class="card-text">{{ tournament.description[:100] }}{% if tournament.description|length > 100 %}...{% endif %}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h6 class="text-muted">Дата начала</h6>
+                                <p class="mb-0">
+                                    {% if tournament.start_date %}
+                                        {{ tournament.start_date.strftime('%d.%m.%Y') }}
+                                    {% else %}
+                                        <span class="text-muted">Не указана</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-muted">Участники</h6>
+                                <p class="mb-0">
+                                    <span class="badge bg-primary">{{ tournament.participants|length }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {% if tournament.participants %}
+                        <div class="mb-3">
+                            <h6 class="text-muted">Список участников</h6>
+                            <div class="participants-list" style="max-height: 100px; overflow-y: auto;">
+                                {% for participant in tournament.participants %}
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-truncate" style="max-width: 70%;">{{ participant.name }}</span>
+                                    {% if participant.points is not none %}
+                                        <span class="badge bg-warning">{{ participant.points }} очков</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid gap-2">
+                            {% if tournament.status == 'регистрация' %}
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
+                                <i class="fas fa-user-plus"></i> Участвовать
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Турниры не найдены</h5>
+                    <p class="text-muted">В системе пока нет доступных турниров</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> На главную
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Модальные окна для заявок на участие -->
+{% for tournament in tournaments %}
+{% if tournament.status == 'регистрация' %}
+<div class="modal fade" id="joinModal{{ tournament.id }}" tabindex="-1" aria-labelledby="joinModalLabel{{ tournament.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="joinModalLabel{{ tournament.id }}">
+                    <i class="fas fa-user-plus me-2"></i>Отправить заявку админу турнира
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6 class="text-muted">Турнир: <strong>{{ tournament.name }}</strong></h6>
+                    <p class="text-muted small">Введите ваше имя для подачи заявки на участие в турнире</p>
+                </div>
+                <form id="joinForm{{ tournament.id }}">
+                    <div class="mb-3">
+                        <label for="participantName{{ tournament.id }}" class="form-label">Ваше имя *</label>
+                        <input type="text" class="form-control" id="participantName{{ tournament.id }}" 
+                               name="participant_name" required 
+                               placeholder="Введите ваше имя">
+                    </div>
+                    <input type="hidden" name="tournament_id" value="{{ tournament.id }}">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" onclick="submitJoinRequest({{ tournament.id }})">
+                    <i class="fas fa-paper-plane me-1"></i>Отправить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<style>
+.participants-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.participants-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.participants-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
+}
+
+.participants-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+function submitJoinRequest(tournamentId) {
+    const form = document.getElementById('joinForm' + tournamentId);
+    const formData = new FormData(form);
+    const participantName = formData.get('participant_name').trim();
+    
+    if (!participantName) {
+        alert('Пожалуйста, введите ваше имя');
+        return;
+    }
+    
+    // Получаем CSRF токен
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Показываем индикатор загрузки
+    const submitBtn = event.target;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Отправка...';
+    submitBtn.disabled = true;
+    
+    // Отправляем заявку
+    fetch('/api/join-request', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            tournament_id: tournamentId,
+            participant_name: participantName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Заявка успешно отправлена! Администратор турнира рассмотрит вашу заявку.');
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal' + tournamentId));
+            modal.hide();
+            // Очищаем форму
+            form.reset();
+        } else {
+            alert('Ошибка при отправке заявки: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при отправке заявки. Попробуйте еще раз.');
+    })
+    .finally(() => {
+        // Восстанавливаем кнопку
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

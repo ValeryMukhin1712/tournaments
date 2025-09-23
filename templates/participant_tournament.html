@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Мои турниры - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Мои турниры</h1>
+    
+    {% if tournaments %}
+        <div class="row">
+            {% for tournament in tournaments %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tournament.name }}</h5>
+                        <p class="card-text">
+                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
+                            {% if tournament.start_date %}
+                                <br><small class="text-muted">{{ tournament.start_date.strftime('%d.%m.%Y') }}</small>
+                            {% endif %}
+                        </p>
+                        {% if tournament.description %}
+                            <p class="card-text">{{ tournament.description[:100] }}{% if tournament.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> Просмотр
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Турниры не найдены</h5>
+            <p class="text-muted">Вы пока не участвуете ни в одном турнире.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+

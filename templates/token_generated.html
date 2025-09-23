@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Токен сгенерирован - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Токен успешно сгенерирован!
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Поздравляем, {{ name }}!</strong><br>
+                        Ваш токен для создания турниров готов. Сохраните его в надежном месте.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Ваш токен:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control font-monospace text-center fs-3 fw-bold" id="token" value="{{ token }}" readonly style="font-size: 2rem !important;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToken()">
+                                <i class="fas fa-copy"></i> Копировать
+                            </button>
+                        </div>
+                        <small class="text-muted">Нажмите на кнопку "Копировать" или выделите текст и скопируйте вручную</small>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user me-2"></i>Ваши данные
+                                    </h6>
+                                    <p class="card-text mb-1"><strong>Имя:</strong> {{ name }}</p>
+                                    <p class="card-text mb-0"><strong>Email:</strong> {{ email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-key me-2"></i>Информация о токене
+                                    </h6>
+                                    <p class="card-text mb-1"><strong>Действителен:</strong> 30 дней</p>
+                                    <p class="card-text mb-1"><strong>Создан:</strong> {{ created_at }}</p>
+                                    <p class="card-text mb-0"><strong>Статус:</strong> <span class="text-success">Активен</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Важно!</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Сохраните токен в надежном месте</li>
+                            <li>Не передавайте токен третьим лицам</li>
+                            <li>Токен понадобится для входа в систему как администратор турнира</li>
+                            <li>Если токен будет утерян, обратитесь к администратору системы</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('admin_tournament') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти с токеном
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home me-2"></i>На главную
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Инструкции по использованию -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Как использовать токен?
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Нажмите кнопку "Войти с токеном" выше</li>
+                        <li>Введите ваш email и скопированный токен</li>
+                        <li>После входа вы сможете создавать и управлять турнирами</li>
+                        <li>Используйте токен для входа в систему в любое время</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToken() {
+    const tokenInput = document.getElementById('token');
+    tokenInput.select();
+    tokenInput.setSelectionRange(0, 99999); // Для мобильных устройств
+    
+    try {
+        document.execCommand('copy');
+        
+        // Показываем уведомление об успешном копировании
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+        
+    } catch (err) {
+        alert('Не удалось скопировать токен. Выделите текст и скопируйте вручную.');
+    }
+}
+
+// Автоматически выделяем токен при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('token').select();
+});
+</script>
+{% endblock %}

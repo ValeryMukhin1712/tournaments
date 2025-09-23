@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Присоединиться к турниру{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Присоединиться к турниру</h1>
+
+    {% if tournaments %}
+    <div class="row">
+        {% for tournament in tournaments %}
+        <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                <div class="card-body">
+                        <h5 class="card-title">{{ tournament.name }}</h5>
+                    <p class="card-text">
+                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
+                            {% if tournament.start_date %}
+                                <br><small class="text-muted">{{ tournament.start_date.strftime('%d.%m.%Y') }}</small>
+                            {% endif %}
+                    </p>
+                    {% if tournament.description %}
+                            <p class="card-text">{{ tournament.description[:100] }}{% if tournament.description|length > 100 %}...{% endif %}</p>
+                    {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-user-plus"></i> Присоединиться
+                            </a>
+                            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#tournamentDetailsModal{{ tournament.id }}">
+                                <i class="fas fa-info-circle"></i> Подробнее
+                                    </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Турниры не найдены</h5>
+        <p class="text-muted">Пока нет доступных турниров для участия.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Модальные окна с подробной информацией о турнирах -->
+{% for tournament in tournaments %}
+<div class="modal fade" id="tournamentDetailsModal{{ tournament.id }}" tabindex="-1" aria-labelledby="tournamentDetailsModalLabel{{ tournament.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tournamentDetailsModalLabel{{ tournament.id }}">
+                    <i class="fas fa-trophy me-2"></i>{{ tournament.name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Основная информация</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Вид спорта:</strong> <span class="badge bg-info">{{ tournament.sport_type }}</span></li>
+                            <li><strong>Описание:</strong> {{ tournament.description | default('Не указано', true) }}</li>
+                            {% if tournament.start_date %}
+                                <li><strong>Дата начала:</strong> {{ tournament.start_date.strftime('%d.%m.%Y') }}</li>
+                            {% endif %}
+                            {% if tournament.end_date %}
+                                <li><strong>Дата окончания:</strong> {{ tournament.end_date.strftime('%d.%m.%Y') }}</li>
+                            {% endif %}
+                            <li><strong>Количество кортов:</strong> {{ tournament.court_count }}</li>
+                        </ul>
+                        
+                        <h6 class="text-primary mt-3">Админ турнира</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Имя:</strong> {{ tournament.organizer_name }}</li>
+                            <li><strong>Email:</strong> {{ tournament.organizer_email }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Параметры матчей</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Длительность матча:</strong> {{ tournament.match_duration }} мин</li>
+                            <li><strong>Перерыв между матчами:</strong> {{ tournament.break_duration }} мин</li>
+                            <li><strong>Сетов для победы:</strong> {{ tournament.sets_to_win }}</li>
+                            <li><strong>Очки за победу:</strong> {{ tournament.points_win }}</li>
+                            <li><strong>Очки за ничью:</strong> {{ tournament.points_draw }}</li>
+                            <li><strong>Очки за поражение:</strong> {{ tournament.points_loss }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                {% if tournament.start_time or tournament.end_time %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-primary">Время проведения</h6>
+                        <ul class="list-unstyled">
+                            {% if tournament.start_time %}
+                                <li><strong>Время начала дня:</strong> {{ tournament.start_time.strftime('%H:%M') }}</li>
+                            {% endif %}
+                            {% if tournament.end_time %}
+                                <li><strong>Время окончания дня:</strong> {{ tournament.end_time.strftime('%H:%M') }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-primary">Статистика</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ tournament.participants|length }}</h4>
+                                    <small class="text-muted">Участников</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-info">{{ tournament.matches|length }}</h4>
+                                    <small class="text-muted">Матчей</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h4 class="text-warning">{{ tournament.court_count }}</h4>
+                                    <small class="text-muted">Кортов</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-success">
+                    <i class="fas fa-user-plus me-2"></i>Присоединиться к турниру
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

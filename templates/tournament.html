@@ -1,7 +1,7 @@
 
 {% extends "base.html" %}
 
-{% block title %}Страница 10 - {{ tournament.name }} - Турнирная система v2.1{% endblock %}
+{% block title %}{{ tournament.name }} - Турнирная система v2.1{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -15,7 +15,6 @@
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="text-muted mb-2">Страница 10</h2>
                 <h1 class="mb-1">{{ tournament.name }} <small class="text-muted">v2.1</small></h1>
                 <p class="text-muted mb-0">
                     <i class="fas {{ get_sport_icon(tournament.sport_type) }} me-1"></i>{{ tournament.sport_type }} • 
@@ -32,16 +31,22 @@
             </div>
             <div class="d-flex gap-2">
 
-                     {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
+                     {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
                          <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
+                     </button>
+                     <button class="btn btn-info" onclick="generateSchedule()">
+                         <i class="fas fa-calendar-alt me-2"></i>Составить расписание
                      </button>
                      {% else %}
                      <button class="btn btn-primary" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
                      </button>
+                     <button class="btn btn-info" disabled title="Доступно только создателю турнира и администратору системы">
+                         <i class="fas fa-calendar-alt me-2"></i>Составить расписание
+                     </button>
                      {% endif %}
-                     {% if current_user.role == 'администратор' %}
+                     {% if current_user.role == 'системный администратор' %}
                      {% if has_missing_matches %}
                      <button class="btn btn-info me-2" onclick="createMissingMatches()">
                          <i class="fas fa-plus-circle me-2"></i>Создать недостающие матчи
@@ -118,10 +123,12 @@
                                  <td>{{ participant_stats.points }}</td>
                                  <td>{{ participant_stats.goal_difference }}</td>
                                 <td>
-                                    {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
+                                    {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')" title="Удалить участника">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -347,10 +354,10 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        {% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
+                                        {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
                                         <button class="btn btn-sm btn-outline-primary" 
-                                                onclick="openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', 0, 0)"
-                                                title="Редактировать матч">
+                                                onclick="openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', {{ match.score1 or 0 }}, {{ match.score2 or 0 }})"
+                                                title="Ввести результат матча">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         {% else %}
@@ -464,7 +471,7 @@
 </div>
 
 <!-- Модальное окно добавления участника -->
-{% if current_user.is_authenticated and (current_user.role == 'администратор' or current_user.id == tournament.admin_id) %}
+{% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
 <div class="modal fade" id="addParticipantModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -1798,6 +1805,34 @@ function getCSRFToken() {
     const tokenValue = token ? token.getAttribute('content') : '';
     console.log('CSRF Token:', tokenValue);
     return tokenValue;
+}
+
+// Функция для составления расписания
+function generateSchedule() {
+    if (confirm('Составить расписание для турнира? Это создаст матчи между всеми участниками.')) {
+        const csrfToken = getCSRFToken();
+        
+        fetch(`/api/tournaments/{{ tournament.id }}/generate-schedule`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Расписание успешно составлено!');
+                location.reload(); // Перезагружаем страницу для отображения новых матчей
+            } else {
+                alert('Ошибка при составлении расписания: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Ошибка при составлении расписания. Попробуйте еще раз.');
+        });
+    }
 }
 </script>
 {% endblock %}

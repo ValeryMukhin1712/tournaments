@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}Системная административная панель - Турнирная система v2.1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-cogs"></i> Системная административная панель
+                <small class="text-muted">- Управление всей системой</small>
+            </h1>
+        </div>
+    </div>
+    
+    
+    <!-- Секция турниров -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy"></i> Все турниры в системе
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tournaments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Название</th>
+                                        <th>Вид спорта</th>
+                                        <th>Дата начала</th>
+                                        <th>Участники</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tournament in tournaments %}
+                                    <tr>
+                                        <td>{{ tournament.id }}</td>
+                                        <td>
+                                            <strong>{{ tournament.name }}</strong>
+                                            {% if tournament.description %}
+                                                <br><small class="text-muted">{{ tournament.description[:50] }}{% if tournament.description|length > 50 %}...{% endif %}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
+                                        </td>
+                                        <td>
+                                            {% if tournament.start_date %}
+                                                {{ tournament.start_date.strftime('%d.%m.%Y') }}
+                                            {% else %}
+                                                <span class="text-muted">Не указана</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ tournament.participant_count or 0 }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('tournament_detail', tournament_id=tournament.id) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Просмотр
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteTournament({{ tournament.id }})">
+                                                    <i class="fas fa-trash"></i> Удалить
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Турниры не найдены</h5>
+                            <p class="text-muted">В системе пока нет турниров</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Секция администраторов турниров -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crown text-warning"></i> Администраторы турниров
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tournament_admins %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Email</th>
+                                        <th>Токен</th>
+                                        <th>Количество турниров</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for admin in tournament_admins %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ admin.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <code>{{ admin.email }}</code>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ admin.email }}')" title="Копировать email">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            {% if admin.token %}
+                                                <code>{{ admin.token }}</code>
+                                                <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ admin.token }}')" title="Копировать токен">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">Нет токена</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ admin.tournament_count }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                {% if admin.id != 1 %}
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteTournamentAdmin({{ admin.id }})">
+                                                    <i class="fas fa-trash"></i> Удалить
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-crown fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Администраторы турниров не найдены</h5>
+                            <p class="text-muted">В системе пока нет администраторов турниров</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+function showAlert(message, type) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alert, document.querySelector('.container').firstChild);
+}
+
+function deleteTournament(tournamentId) {
+    if (confirm('Вы уверены, что хотите удалить этот турнир? Это действие нельзя отменить.')) {
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        
+        // Показываем индикатор загрузки
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+        button.disabled = true;
+        
+        fetch(`/api/tournaments/${tournamentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удаляем строку из таблицы
+                button.closest('tr').remove();
+                showAlert('<strong>Успешно!</strong> Турнир удален.', 'success');
+            } else {
+                throw new Error(data.error || 'Ошибка при удалении турнира');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка при удалении турнира: ' + error.message, 'danger');
+            
+            // Восстанавливаем кнопку
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+}
+
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Показываем уведомление об успешном копировании
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>Скопировано: ${text}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        
+        // Автоматически скрываем уведомление через 3 секунды
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }).catch(function(err) {
+        console.error('Ошибка копирования: ', err);
+        alert('Не удалось скопировать в буфер обмена');
+    });
+}
+
+
+function deleteTournamentAdmin(adminId) {
+    console.log('deleteTournamentAdmin вызвана с adminId:', adminId);
+    
+    if (confirm('Вы уверены, что хотите удалить этого администратора турнира? Это действие удалит все его турниры и нельзя будет отменить.')) {
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        
+        console.log('Начинаем удаление администратора:', adminId);
+        
+        // Показываем индикатор загрузки
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+        button.disabled = true;
+        
+        const csrfToken = getCSRFToken();
+        console.log('CSRF токен:', csrfToken);
+        
+        fetch(`/api/admin/tournament-admins/${adminId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            console.log('Ответ сервера:', response.status, response.statusText);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Данные ответа:', data);
+            if (data.success) {
+                // Удаляем строку из таблицы
+                button.closest('tr').remove();
+                showAlert('<strong>Успешно!</strong> Администратор турнира удален.', 'success');
+            } else {
+                throw new Error(data.error || 'Ошибка при удалении администратора турнира');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка при удалении администратора турнира: ' + error.message, 'danger');
+            
+            // Восстанавливаем кнопку
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+}
+</script>
+{% endblock %}
