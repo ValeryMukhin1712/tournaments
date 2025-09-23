@@ -74,14 +74,45 @@ def create_smart_schedule(tournament, participants, Match, db):
         
         while not match_scheduled:
             # Проверяем, свободны ли оба участника в это время
-            p1_free = p1_id not in participant_schedule or temp_time not in participant_schedule[p1_id]
-            p2_free = p2_id not in participant_schedule or temp_time not in participant_schedule[p2_id]
+            # Участник свободен, если он не играет в это время И не играет в течение времени матча
+            p1_free = True
+            p2_free = True
+            
+            if p1_id in participant_schedule:
+                for scheduled_time in participant_schedule[p1_id]:
+                    # Проверяем пересечение времени: если матч начинается в temp_time и длится time_match минут
+                    # то он заканчивается в temp_time + time_match
+                    # Если есть пересечение с уже запланированным матчем, то участник занят
+                    scheduled_end_time = add_minutes_to_time(scheduled_time, time_match)
+                    temp_end_time = add_minutes_to_time(temp_time, time_match)
+                    
+                    # Проверяем пересечение интервалов времени
+                    if (temp_time < scheduled_end_time and temp_end_time > scheduled_time):
+                        p1_free = False
+                        break
+            
+            if p2_id in participant_schedule:
+                for scheduled_time in participant_schedule[p2_id]:
+                    scheduled_end_time = add_minutes_to_time(scheduled_time, time_match)
+                    temp_end_time = add_minutes_to_time(temp_time, time_match)
+                    
+                    if (temp_time < scheduled_end_time and temp_end_time > scheduled_time):
+                        p2_free = False
+                        break
             
             if p1_free and p2_free:
                 # Ищем свободную площадку
                 for court_num in range(1, k + 1):
-                    court_free = (court_num not in court_schedule or 
-                                temp_time not in court_schedule[court_num])
+                    court_free = True
+                    
+                    if court_num in court_schedule:
+                        for scheduled_time in court_schedule[court_num]:
+                            scheduled_end_time = add_minutes_to_time(scheduled_time, time_match)
+                            temp_end_time = add_minutes_to_time(temp_time, time_match)
+                            
+                            if (temp_time < scheduled_end_time and temp_end_time > scheduled_time):
+                                court_free = False
+                                break
                     
                     if court_free:
                         # Найдено свободное время и площадка
