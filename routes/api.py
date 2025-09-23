@@ -23,8 +23,8 @@ def create_smart_schedule(tournament, participants, Match, db):
     # Параметры турнира
     n = len(participants)  # число участников
     k = tournament.court_count or 4  # число площадок
-    time_match = tournament.match_duration or 60  # длительность матча в минутах
-    time_break = tournament.break_duration or 15  # длительность перерыва в минутах
+    time_match = tournament.match_duration or 15  # длительность матча в минутах
+    time_break = tournament.break_duration or 2  # длительность перерыва в минутах
     start_time = tournament.start_time or time(9, 0)
     end_time = tournament.end_time or time(18, 0)
     start_date = tournament.start_date or date.today()
@@ -44,7 +44,7 @@ def create_smart_schedule(tournament, participants, Match, db):
     else:
         R = n - 1
     
-    # Шаг 2: Создание списка всех матчей
+    # Шаг 2: Создание списка всех матчей (каждый с каждым)
     matches_to_schedule = []
     for i in range(n):
         for j in range(i + 1, n):
@@ -54,33 +54,11 @@ def create_smart_schedule(tournament, participants, Match, db):
     random.shuffle(matches_to_schedule)
     
     # Шаг 3: Распределение матчей по раундам
-    rounds = [[] for _ in range(R)]
-    used_participants = set()
-    
-    for match in matches_to_schedule:
-        participant1, participant2 = match
-        
-        # Находим раунд, где оба участника еще не играли
-        best_round = -1
-        for round_idx in range(R):
-            round_participants = set()
-            for existing_match in rounds[round_idx]:
-                round_participants.add(existing_match[0].id)
-                round_participants.add(existing_match[1].id)
-            
-            if (participant1.id not in round_participants and 
-                participant2.id not in round_participants):
-                best_round = round_idx
-                break
-        
-        if best_round != -1:
-            rounds[best_round].append(match)
-        else:
-            # Если не нашли подходящий раунд, добавляем в первый доступный
-            for round_idx in range(R):
-                if len(rounds[round_idx]) < k:  # не больше чем площадок
-                    rounds[round_idx].append(match)
-                    break
+    # Разбиваем все матчи на раунды по количеству площадок
+    rounds = []
+    for i in range(0, len(matches_to_schedule), k):
+        round_matches = matches_to_schedule[i:i + k]
+        rounds.append(round_matches)
     
     # Шаг 4: Расчет времени и создание матчей
     scheduled_matches = []
@@ -95,7 +73,7 @@ def create_smart_schedule(tournament, participants, Match, db):
         matches_in_round = len(round_matches)
         
         # Время раунда: T_round = t_match + (m-1) * t_break
-        # где m = min(k, matches_in_round)
+        # где m = min(k, matches_in_round) - количество матчей, проводимых одновременно
         m = min(k, matches_in_round)
         T_round = time_match + (m - 1) * time_break
         
@@ -150,7 +128,7 @@ def add_minutes_to_time(time_obj, minutes):
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
 
-def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, TournamentAdmin):
+def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):
     """Создает API маршруты приложения"""
     
     # ===== ПОЛЬЗОВАТЕЛИ =====
@@ -314,7 +292,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if 'admin_id' not in session:
             return jsonify({'error': 'Необходима авторизация'}), 401
         
-        admin = TournamentAdmin.query.get(session['admin_id'])
+        # Простая заглушка для админа
+        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
         if not admin or not admin.is_active:
             return jsonify({'error': 'Неверная авторизация'}), 401
         
@@ -398,6 +377,19 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.add(participant)
             db.session.commit()
             
+            # Автоматически создаем расписание после добавления участника
+            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            if len(participants) >= 2:  # Минимум 2 участника для создания расписания
+                # Удаляем существующие матчи
+                Match.query.filter_by(tournament_id=tournament_id).delete()
+                db.session.commit()
+                
+                # Создаем новое расписание
+                matches_created = create_smart_schedule(tournament, participants, Match, db)
+                db.session.commit()
+                
+                logger.info(f"Автоматически создано {matches_created} матчей для турнира {tournament_id}")
+            
             return jsonify({
                 'success': True,
                 'participant': {
@@ -411,6 +403,74 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при добавлении участника: {str(e)}")
             return jsonify({'success': False, 'error': 'Ошибка при добавлении участника'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/participants/<int:participant_id>', methods=['DELETE'])
+    def delete_participant(tournament_id, participant_id):
+        """Удаление участника из турнира"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Ошибка безопасности. Неверный CSRF токен.'}), 400
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        tournament = Tournament.query.get_or_404(tournament_id)
+        participant = Participant.query.filter_by(id=participant_id, tournament_id=tournament_id).first()
+        
+        if not participant:
+            return jsonify({'success': False, 'error': 'Участник не найден'}), 404
+        
+        # Простая заглушка для админа
+        admin_id = session['admin_id']
+        admin_email = session.get('admin_email', '')
+        admin = type('Admin', (), {'id': admin_id, 'email': admin_email, 'is_active': True})()
+        
+        if not admin or not admin.is_active:
+            return jsonify({'success': False, 'error': 'Неверная авторизация'}), 401
+        
+        # Проверяем права (создатель турнира или системный админ)
+        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав для удаления участника'}), 403
+        
+        try:
+            participant_name = participant.name
+            
+            # Удаляем связанные матчи участника
+            Match.query.filter(
+                (Match.participant1_id == participant_id) | 
+                (Match.participant2_id == participant_id)
+            ).delete()
+            
+            # Удаляем участника
+            db.session.delete(participant)
+            db.session.commit()
+            
+            # Автоматически пересчитываем расписание
+            remaining_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            if len(remaining_participants) >= 2:
+                # Удаляем существующие матчи
+                Match.query.filter_by(tournament_id=tournament_id).delete()
+                db.session.commit()
+                
+                # Создаем новое расписание
+                matches_created = create_smart_schedule(tournament, remaining_participants, Match, db)
+                db.session.commit()
+                
+                logger.info(f"Автоматически пересчитано расписание: {matches_created} матчей после удаления участника {participant_name}")
+            
+            logger.info(f"Участник '{participant_name}' (ID: {participant_id}) удален из турнира {tournament_id} админом {admin.email}")
+            return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален.'}), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении участника {participant_id}: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении участника'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>', methods=['DELETE'])
     def delete_tournament(tournament_id):
@@ -431,7 +491,10 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if 'admin_id' not in session:
             return jsonify({'error': 'Необходима авторизация'}), 401
         
-        admin = TournamentAdmin.query.get(session['admin_id'])
+        # Простая заглушка для админа
+        admin_id = session['admin_id']
+        admin_email = session.get('admin_email', '')
+        admin = type('Admin', (), {'id': admin_id, 'email': admin_email, 'is_active': True})()
         if not admin or not admin.is_active:
             return jsonify({'error': 'Неверная авторизация'}), 401
         
@@ -453,7 +516,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             db.session.commit()
             
-            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin.name}")
+            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin.email}")
             return jsonify({
                 'success': True, 
                 'message': f'Турнир "{tournament_name}" успешно удален'
@@ -463,43 +526,6 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при удалении турнира {tournament_id}: {str(e)}")
             return jsonify({'error': 'Ошибка при удалении турнира'}), 500
-
-    @app.route('/api/tournaments/<int:tournament_id>/participants/<int:participant_id>', methods=['DELETE'])
-    @login_required
-    def delete_participant(tournament_id, participant_id):
-        """Удаление участника из турнира"""
-        if current_user.role != 'администратор':
-            return jsonify({'error': 'Недостаточно прав'}), 403
-        
-        try:
-            participant = Participant.query.filter_by(
-                id=participant_id, 
-                tournament_id=tournament_id
-            ).first_or_404()
-            
-            participant_name = participant.name
-            
-            # Удаляем все матчи, в которых участвует этот участник
-            matches_to_delete = Match.query.filter(
-                (Match.participant1_id == participant_id) | 
-                (Match.participant2_id == participant_id)
-            ).all()
-            
-            for match in matches_to_delete:
-                db.session.delete(match)
-            
-            # Удаляем самого участника
-            db.session.delete(participant)
-            db.session.commit()
-            
-            logger.info(f"Участник {participant_name} и {len(matches_to_delete)} связанных матчей удалены из турнира {tournament_id}")
-            
-            return jsonify({'success': True, 'message': 'Участник успешно удален'})
-            
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Ошибка при удалении участника: {str(e)}")
-            return jsonify({'error': 'Ошибка при удалении участника'}), 500
 
     # ===== МАТЧИ (дополнительные маршруты) =====
     
@@ -558,7 +584,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if 'admin_id' not in session:
             return jsonify({'error': 'Необходима авторизация'}), 401
         
-        admin = TournamentAdmin.query.get(session['admin_id'])
+        # Простая заглушка для админа
+        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
         if not admin or not admin.is_active:
             return jsonify({'error': 'Неверная авторизация'}), 401
         
@@ -759,7 +786,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if 'admin_id' not in session:
             return jsonify({'error': 'Необходима авторизация'}), 401
         
-        admin = TournamentAdmin.query.get(session['admin_id'])
+        # Простая заглушка для админа
+        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
         if not admin or not admin.is_active:
             return jsonify({'error': 'Неверная авторизация'}), 401
         
@@ -800,7 +828,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if 'admin_id' not in session:
             return jsonify({'error': 'Необходима авторизация'}), 401
         
-        admin = TournamentAdmin.query.get(session['admin_id'])
+        # Простая заглушка для админа
+        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
         if not admin or not admin.is_active:
             return jsonify({'error': 'Неверная авторизация'}), 401
         
@@ -855,3 +884,699 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при создании отладочного файла: {str(e)}")
             return jsonify({'error': 'Ошибка при создании отладочного файла'}), 500
+
+    # ===== АДМИНИСТРАТИВНЫЕ API МАРШРУТЫ =====
+    
+    @app.route('/api/admin/users', methods=['GET'])
+    def admin_get_users():
+        """Получение списка всех пользователей для администратора"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            users = User.query.all()
+            users_data = []
+            for user in users:
+                users_data.append({
+                    'id': user.id,
+                    'username': user.username,
+                    'role': user.role,
+                    'created_at': user.created_at.isoformat()
+                })
+            
+            return jsonify({'success': True, 'users': users_data})
+        except Exception as e:
+            logger.error(f"Ошибка при получении пользователей: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении пользователей'}), 500
+    
+    @app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
+    def admin_delete_user(user_id):
+        """Удаление пользователя администратором"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            user = User.query.get_or_404(user_id)
+            username = user.username
+            
+            # Удаляем связанные записи участников
+            Participant.query.filter_by(user_id=user_id).delete()
+            
+            # Удаляем пользователя
+            db.session.delete(user)
+            db.session.commit()
+            
+            logger.info(f"Пользователь {username} (ID: {user_id}) удален системным администратором")
+            return jsonify({'success': True, 'message': f'Пользователь {username} успешно удален'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении пользователя {user_id}: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении пользователя'}), 500
+    
+    @app.route('/api/admin/users/batch-delete', methods=['POST'])
+    def admin_batch_delete_users():
+        """Массовое удаление пользователей"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        data = request.get_json()
+        user_ids = data.get('user_ids', [])
+        
+        if not user_ids:
+            return jsonify({'success': False, 'error': 'Не выбраны пользователи для удаления'}), 400
+        
+        try:
+            deleted_count = 0
+            for user_id in user_ids:
+                user = User.query.get(user_id)
+                if user:
+                    # Удаляем связанные записи участников
+                    Participant.query.filter_by(user_id=user_id).delete()
+                    
+                    # Удаляем пользователя
+                    db.session.delete(user)
+                    deleted_count += 1
+            
+            db.session.commit()
+            
+            logger.info(f"Удалено {deleted_count} пользователей системным администратором")
+            return jsonify({'success': True, 'message': f'Удалено {deleted_count} пользователей'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при массовом удалении пользователей: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении пользователей'}), 500
+    
+    @app.route('/api/admin/users/delete-all', methods=['POST'])
+    def admin_delete_all_users():
+        """Удаление всех пользователей"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            # Удаляем всех участников
+            Participant.query.delete()
+            
+            # Удаляем всех пользователей
+            deleted_count = User.query.count()
+            User.query.delete()
+            
+            db.session.commit()
+            
+            logger.info(f"Удалено {deleted_count} пользователей системным администратором")
+            return jsonify({'success': True, 'message': f'Удалено {deleted_count} пользователей'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении всех пользователей: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении всех пользователей'}), 500
+    
+    @app.route('/api/admin/tournaments', methods=['GET'])
+    def admin_get_tournaments():
+        """Получение списка всех турниров для администратора"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            tournaments = Tournament.query.all()
+            tournaments_data = []
+            for tournament in tournaments:
+                participant_count = Participant.query.filter_by(tournament_id=tournament.id).count()
+                tournaments_data.append({
+                    'id': tournament.id,
+                    'name': tournament.name,
+                    'sport_type': tournament.sport_type,
+                    'status': getattr(tournament, 'status', 'активен'),
+                    'participant_count': participant_count,
+                    'created_at': tournament.created_at.isoformat() if tournament.created_at else None
+                })
+            
+            return jsonify({'success': True, 'tournaments': tournaments_data})
+        except Exception as e:
+            logger.error(f"Ошибка при получении турниров: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении турниров'}), 500
+    
+    @app.route('/api/admin/tournaments/batch-delete', methods=['POST'])
+    def admin_batch_delete_tournaments():
+        """Массовое удаление турниров"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        data = request.get_json()
+        tournament_ids = data.get('tournament_ids', [])
+        
+        if not tournament_ids:
+            return jsonify({'success': False, 'error': 'Не выбраны турниры для удаления'}), 400
+        
+        try:
+            deleted_count = 0
+            for tournament_id in tournament_ids:
+                tournament = Tournament.query.get(tournament_id)
+                if tournament:
+                    # Удаляем связанные данные
+                    Match.query.filter_by(tournament_id=tournament_id).delete()
+                    Participant.query.filter_by(tournament_id=tournament_id).delete()
+                    
+                    # Удаляем турнир
+                    db.session.delete(tournament)
+                    deleted_count += 1
+            
+            db.session.commit()
+            
+            logger.info(f"Удалено {deleted_count} турниров системным администратором")
+            return jsonify({'success': True, 'message': f'Удалено {deleted_count} турниров'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при массовом удалении турниров: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении турниров'}), 500
+    
+    @app.route('/api/admin/tournaments/delete-all', methods=['POST'])
+    def admin_delete_all_tournaments():
+        """Удаление всех турниров"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            # Удаляем все связанные данные
+            Match.query.delete()
+            Participant.query.delete()
+            
+            # Удаляем все турниры
+            deleted_count = Tournament.query.count()
+            Tournament.query.delete()
+            
+            db.session.commit()
+            
+            logger.info(f"Удалено {deleted_count} турниров системным администратором")
+            return jsonify({'success': True, 'message': f'Удалено {deleted_count} турниров'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении всех турниров: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении всех турниров'}), 500
+    
+    @app.route('/api/admin/tournaments/<int:tournament_id>', methods=['PUT'])
+    def admin_update_tournament(tournament_id):
+        """Обновление турнира администратором"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_id = session['admin_id']
+        admin_email = session.get('admin_email', '')
+        
+        try:
+            tournament = Tournament.query.get_or_404(tournament_id)
+            
+            # Проверяем права доступа
+            if admin_email != 'admin@system' and tournament.admin_id != admin_id:
+                return jsonify({'success': False, 'error': 'Недостаточно прав для редактирования турнира'}), 403
+            
+            data = request.get_json()
+            
+            # Обновляем поля турнира
+            if 'name' in data:
+                tournament.name = data['name']
+            if 'description' in data:
+                tournament.description = data['description']
+            if 'sport_type' in data:
+                tournament.sport_type = data['sport_type']
+            if 'start_date' in data and data['start_date']:
+                tournament.start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+            if 'max_participants' in data:
+                tournament.max_participants = int(data['max_participants'])
+            if 'court_count' in data:
+                tournament.court_count = int(data['court_count'])
+            if 'match_duration' in data:
+                tournament.match_duration = int(data['match_duration'])
+            if 'break_duration' in data:
+                tournament.break_duration = int(data['break_duration'])
+            if 'sets_to_win' in data:
+                tournament.sets_to_win = int(data['sets_to_win'])
+            if 'points_to_win' in data:
+                tournament.points_to_win = int(data['points_to_win'])
+            if 'points_win' in data:
+                tournament.points_win = int(data['points_win'])
+            if 'points_draw' in data:
+                tournament.points_draw = int(data['points_draw'])
+            if 'points_loss' in data:
+                tournament.points_loss = int(data['points_loss'])
+            if 'start_time' in data and data['start_time']:
+                tournament.start_time = datetime.strptime(data['start_time'], '%H:%M').time()
+            if 'end_time' in data and data['end_time']:
+                tournament.end_time = datetime.strptime(data['end_time'], '%H:%M').time()
+            
+            # Обновляем время изменения
+            tournament.updated_at = datetime.utcnow()
+            
+            db.session.commit()
+            
+            logger.info(f"Турнир {tournament.name} (ID: {tournament_id}) обновлен администратором {admin_email}")
+            return jsonify({'success': True, 'message': 'Турнир успешно обновлен'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при обновлении турнира {tournament_id}: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при обновлении турнира'}), 500
+    
+    @app.route('/api/admin/tournament-admins', methods=['GET'])
+    def admin_get_tournament_admins():
+        """Получение списка администраторов турниров с их турнирами"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            # Используем уже созданную модель Token из глобального контекста
+            # Token уже импортирован в начале файла
+            
+            # Получаем все турниры с их администраторами
+            tournaments = Tournament.query.all()
+            
+            # Группируем турниры по admin_id
+            admins_dict = {}
+            for tournament in tournaments:
+                admin_id = tournament.admin_id
+                if admin_id not in admins_dict:
+                    # Создаем информацию об администраторе
+                    if admin_id == 1:
+                        # Системный администратор
+                        admins_dict[admin_id] = {
+                            'id': admin_id,
+                            'name': 'Системный администратор',
+                            'email': 'admin@system',
+                            'tournaments': []
+                        }
+                    else:
+                        # Обычный администратор - показываем базовую информацию
+                        admins_dict[admin_id] = {
+                            'id': admin_id,
+                            'name': f'Администратор #{admin_id}',
+                            'email': f'admin_{admin_id}@system',
+                            'tournaments': []
+                        }
+                
+                # Добавляем турнир к администратору
+                admins_dict[admin_id]['tournaments'].append({
+                    'id': tournament.id,
+                    'name': tournament.name,
+                    'sport_type': getattr(tournament, 'sport_type', 'Не указан'),
+                    'created_at': tournament.created_at.isoformat() if tournament.created_at else None
+                })
+            
+            # Преобразуем в список
+            admins = list(admins_dict.values())
+            
+            return jsonify({'success': True, 'admins': admins})
+        except Exception as e:
+            logger.error(f"Ошибка при получении администраторов турниров: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении администраторов турниров'}), 500
+    
+    @app.route('/api/admin/tournament-participants', methods=['GET'])
+    def admin_get_tournament_participants():
+        """Получение списка участников турниров с их турнирами"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            # Получаем всех участников с их турнирами
+            participants = Participant.query.all()
+            
+            # Группируем участников по имени
+            participants_dict = {}
+            for participant in participants:
+                name = participant.name
+                if name not in participants_dict:
+                    participants_dict[name] = {
+                        'id': participant.id,
+                        'name': participant.name,
+                        'is_team': participant.is_team,
+                        'tournaments': []
+                    }
+                
+                # Получаем информацию о турнире
+                tournament = Tournament.query.get(participant.tournament_id)
+                if tournament:
+                    participants_dict[name]['tournaments'].append({
+                        'id': tournament.id,
+                        'name': tournament.name,
+                        'sport_type': getattr(tournament, 'sport_type', 'Не указан'),
+                        'registered_at': participant.registered_at.isoformat() if participant.registered_at else None
+                    })
+            
+            # Преобразуем в список
+            participants_list = list(participants_dict.values())
+            
+            return jsonify({'success': True, 'participants': participants_list})
+        except Exception as e:
+            logger.error(f"Ошибка при получении участников турниров: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении участников турниров'}), 500
+    
+    @app.route('/api/admin/stats', methods=['GET'])
+    def admin_get_stats():
+        """Получение статистики системы"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            stats = {
+                'total_tournaments': Tournament.query.count(),
+                'total_users': User.query.count(),
+                'total_participants': Participant.query.count(),
+                'total_matches': Match.query.count(),
+                'active_tournaments': Tournament.query.filter_by(status='активен').count() if hasattr(Tournament, 'status') else Tournament.query.count(),
+                'completed_matches': Match.query.filter_by(status='завершен').count()
+            }
+            
+            return jsonify({'success': True, 'stats': stats})
+        except Exception as e:
+            logger.error(f"Ошибка при получении статистики: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении статистики'}), 500
+    
+    @app.route('/api/admin/tournament-admins/<int:admin_id>', methods=['DELETE'])
+    def admin_delete_tournament_admin(admin_id):
+        """Удаление администратора турнира"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        # Нельзя удалить системного администратора
+        if admin_id == 1:
+            return jsonify({'success': False, 'error': 'Нельзя удалить системного администратора'}), 400
+        
+        try:
+            # Получаем все турниры этого администратора
+            tournaments = Tournament.query.filter_by(admin_id=admin_id).all()
+            logger.info(f"Найдено турниров для удаления: {len(tournaments)}")
+            
+            # Удаляем все турниры этого администратора
+            for tournament in tournaments:
+                logger.info(f"Удаляем турнир: {tournament.name} (ID: {tournament.id})")
+                
+                # Удаляем всех участников турнира
+                participants_deleted = Participant.query.filter_by(tournament_id=tournament.id).delete()
+                logger.info(f"Удалено участников: {participants_deleted}")
+                
+                # Удаляем все матчи турнира
+                matches_deleted = Match.query.filter_by(tournament_id=tournament.id).delete()
+                logger.info(f"Удалено матчей: {matches_deleted}")
+                
+                # Удаляем сам турнир
+                db.session.delete(tournament)
+                logger.info(f"Турнир {tournament.name} помечен для удаления")
+            
+            # Удаляем токены этого администратора
+            tokens_deleted = Token.query.filter_by(email=f'admin_{admin_id}@system').delete()
+            logger.info(f"Удалено токенов по email admin_{admin_id}@system: {tokens_deleted}")
+            
+            # Ищем и удаляем токены по email (если есть другие способы связи)
+            all_tokens = Token.query.all()
+            additional_tokens_deleted = 0
+            for token in all_tokens:
+                import hashlib
+                if int(hashlib.md5(token.email.encode('utf-8')).hexdigest(), 16) % 1000000 == admin_id:
+                    db.session.delete(token)
+                    additional_tokens_deleted += 1
+            logger.info(f"Удалено дополнительных токенов: {additional_tokens_deleted}")
+            
+            # Сохраняем изменения
+            db.session.commit()
+            logger.info(f"Изменения сохранены в базу данных")
+            
+            logger.info(f"Администратор турнира {admin_id} удален. Удалено турниров: {len(tournaments)}")
+            
+            return jsonify({
+                'success': True, 
+                'message': f'Администратор турнира удален. Удалено турниров: {len(tournaments)}'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении администратора турнира {admin_id}: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении администратора турнира'}), 500
+
+    @app.route('/api/join-request', methods=['POST'])
+    def join_request():
+        """API для отправки заявки на участие в турнире"""
+        try:
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.headers.get('X-CSRFToken'))
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            data = request.get_json()
+            tournament_id = data.get('tournament_id')
+            participant_name = data.get('participant_name', '').strip()
+            
+            if not tournament_id or not participant_name:
+                return jsonify({'success': False, 'error': 'Необходимо указать ID турнира и имя участника'}), 400
+            
+            # Проверяем существование турнира
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Проверяем, что турнир принимает заявки
+            if tournament.status != 'регистрация':
+                return jsonify({'success': False, 'error': 'Турнир не принимает заявки на участие'}), 400
+            
+            # Проверяем, не участвует ли уже участник в турнире
+            existing_participant = Participant.query.filter_by(
+                tournament_id=tournament_id, 
+                name=participant_name
+            ).first()
+            
+            if existing_participant:
+                return jsonify({'success': False, 'error': 'Вы уже участвуете в этом турнире'}), 400
+            
+            # Создаем заявку (пока просто добавляем участника)
+            # В будущем здесь можно добавить систему уведомлений для администратора
+            new_participant = Participant(
+                tournament_id=tournament_id,
+                name=participant_name,
+                points=0
+            )
+            
+            db.session.add(new_participant)
+            db.session.commit()
+            
+            logger.info(f"Участник {participant_name} подал заявку на турнир {tournament.name} (ID: {tournament_id})")
+            
+            # Отправляем email администратору турнира
+            try:
+                # Находим email администратора турнира
+                admin_email = None
+                if tournament.admin_id == 1:
+                    # Системный администратор
+                    admin_email = 'admin@system'
+                else:
+                    # Ищем токен администратора
+                    admin_token = Token.query.filter_by(email=f'admin_{tournament.admin_id}@system').first()
+                    if not admin_token:
+                        # Ищем по admin_id в email
+                        all_tokens = Token.query.all()
+                        for token in all_tokens:
+                            import hashlib
+                            if int(hashlib.md5(token.email.encode('utf-8')).hexdigest(), 16) % 1000000 == tournament.admin_id:
+                                admin_token = token
+                                break
+                    
+                    if admin_token:
+                        admin_email = admin_token.email
+                
+                if admin_email and admin_email != 'admin@system':
+                    # Импортируем функцию отправки email
+                    from app import send_email
+                    
+                    subject = f"Новая заявка на участие в турнире '{tournament.name}'"
+                    body = f"{participant_name} добавить в турнир {tournament.name}"
+                    
+                    if send_email(admin_email, subject, body):
+                        logger.info(f"Email уведомление отправлено администратору {admin_email}")
+                    else:
+                        logger.warning(f"Не удалось отправить email администратору {admin_email}")
+                else:
+                    logger.warning(f"Не найден email администратора для турнира {tournament.name}")
+                    
+            except Exception as email_error:
+                logger.error(f"Ошибка при отправке email уведомления: {email_error}")
+                # Не прерываем выполнение, если email не отправился
+            
+            return jsonify({
+                'success': True, 
+                'message': f'Заявка на участие в турнире "{tournament.name}" успешно подана!'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при подаче заявки на участие: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при подаче заявки'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/generate-schedule', methods=['POST'])
+    def generate_schedule(tournament_id):
+        """API для составления расписания турнира"""
+        try:
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.headers.get('X-CSRFToken'))
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Получаем участников турнира
+            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            if len(participants) < 2:
+                return jsonify({'success': False, 'error': 'Для составления расписания нужно минимум 2 участника'}), 400
+            
+            # Удаляем существующие матчи
+            existing_matches = Match.query.filter_by(tournament_id=tournament_id).all()
+            for match in existing_matches:
+                db.session.delete(match)
+            
+            # Создаем новое расписание
+            matches_created = create_smart_schedule(tournament, participants, Match, db)
+            
+            if matches_created > 0:
+                db.session.commit()
+                logger.info(f"Расписание составлено для турнира {tournament.name}: создано {matches_created} матчей")
+                return jsonify({
+                    'success': True, 
+                    'message': f'Расписание успешно составлено! Создано {matches_created} матчей.'
+                })
+            else:
+                return jsonify({'success': False, 'error': 'Не удалось создать расписание'}), 500
+                
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при составлении расписания: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при составлении расписания'}), 500
