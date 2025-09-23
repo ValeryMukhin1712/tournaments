@@ -14,46 +14,50 @@
     </div>
     
     <!-- Статистика турниров -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Всего турниров</h5>
-                    <h3 class="text-primary">{{ tournaments|length }}</h3>
+    <div class="row mb-4 g-2 g-md-3">
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body p-2 p-md-3">
+                    <h6 class="card-title d-none d-md-block">Всего турниров</h6>
+                    <h6 class="card-title d-md-none">Всего</h6>
+                    <h4 class="text-primary mb-0">{{ tournaments|length }}</h4>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Активных турниров</h5>
-                    <h3 class="text-success">{{ tournaments|selectattr('status', 'equalto', 'активен')|list|length }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body p-2 p-md-3">
+                    <h6 class="card-title d-none d-md-block">Активных турниров</h6>
+                    <h6 class="card-title d-md-none">Активных</h6>
+                    <h4 class="text-success mb-0">{{ tournaments|selectattr('status', 'equalto', 'активен')|list|length }}</h4>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Завершенных турниров</h5>
-                    <h3 class="text-info">{{ tournaments|selectattr('status', 'equalto', 'завершен')|list|length }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body p-2 p-md-3">
+                    <h6 class="card-title d-none d-md-block">Завершенных турниров</h6>
+                    <h6 class="card-title d-md-none">Завершенных</h6>
+                    <h4 class="text-info mb-0">{{ tournaments|selectattr('status', 'equalto', 'завершен')|list|length }}</h4>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Регистрация</h5>
-                    <h3 class="text-warning">{{ tournaments|selectattr('status', 'equalto', 'регистрация')|list|length }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body p-2 p-md-3">
+                    <h6 class="card-title d-none d-md-block">Регистрация</h6>
+                    <h6 class="card-title d-md-none">Регистрация</h6>
+                    <h4 class="text-warning mb-0">{{ tournaments|selectattr('status', 'equalto', 'регистрация')|list|length }}</h4>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Список турниров -->
-    <div class="row">
+    <div class="row g-3">
         {% if tournaments %}
             {% for tournament in tournaments %}
-            <div class="col-md-6 col-lg-4 mb-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">{{ tournament.name }}</h5>
@@ -115,11 +119,11 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer p-2 p-md-3">
                         <div class="d-grid gap-2">
                             {% if tournament.status == 'регистрация' %}
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
-                                <i class="fas fa-user-plus"></i> Участвовать
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
+                                <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Участвовать</span><span class="d-sm-none">Войти</span>
                             </button>
                             {% endif %}
                         </div>

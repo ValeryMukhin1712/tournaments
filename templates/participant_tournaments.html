@@ -7,8 +7,8 @@
     <div class="row">
         <div class="col-12">
             <!-- Заголовок -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4">
+                <div class="mb-3 mb-sm-0">
                     <h1 class="h3 mb-1">
                         <i class="fas fa-user-check text-primary me-2"></i>
                         Мои турниры
@@ -16,7 +16,7 @@
                     <p class="text-muted mb-0">Добро пожаловать, <strong>{{ participant_name }}</strong>!</p>
                 </div>
                 <div>
-                    <a href="{{ url_for('participant_logout') }}" class="btn btn-outline-secondary">
+                    <a href="{{ url_for('participant_logout') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-sign-out-alt me-1"></i>Выйти
                     </a>
                 </div>
@@ -24,9 +24,9 @@
 
 
             <!-- Список турниров -->
-            <div class="row">
+            <div class="row g-3">
                 {% for item in tournaments %}
-                <div class="col-lg-6 mb-4">
+                <div class="col-12 col-lg-6">
                     <div class="card h-100 {% if item.is_participant %}border-success{% else %}border-light{% endif %}">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">

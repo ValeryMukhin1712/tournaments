@@ -6,22 +6,29 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-6">
-            <div class="text-center mb-5 position-relative">
+            <div class="text-center mb-4 mb-md-5 position-relative">
                 <h1 class="display-4 mb-3">
-                    <i class="fas fa-trophy text-primary me-3"></i>
-                    Турнирная система
+                    <i class="fas fa-trophy text-primary me-2 me-md-3"></i>
+                    <span class="d-block d-md-inline">Турнирная система</span>
                 </h1>
                 <p class="lead text-muted">Выберите вашу роль для продолжения</p>
                 
                 <!-- Кнопка админа в правом верхнем углу -->
-                <div class="position-absolute" style="top: 0; right: 0;">
+                <div class="position-absolute d-none d-md-block" style="top: 0; right: 0;">
                     <button class="btn btn-outline-secondary btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
                         <i class="fas fa-user-shield me-1"></i>admin
                     </button>
                 </div>
+                
+                <!-- Кнопка админа для мобильных устройств -->
+                <div class="d-md-none mb-3">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
+                        <i class="fas fa-user-shield me-1"></i>Вход администратора
+                    </button>
+                </div>
             </div>
             
-            <div class="row g-4">
+            <div class="row g-3 g-md-4">
                 <!-- 1. Создание нового турнира -->
                 <div class="col-md-6">
                     <div class="card h-100 border-0 shadow-sm d-flex">
@@ -33,8 +40,8 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Получите токен для создания и управления турниром. После получения токена используйте кнопку "Войти как админ турнира".
                             </p>
-                            <a href="{{ url_for('request_token') }}" class="btn btn-success btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-key me-2"></i>Получить токен
+                            <a href="{{ url_for('request_token') }}" class="btn btn-success btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 48px;">
+                                <i class="fas fa-key me-2"></i><span class="d-none d-sm-inline">Получить токен</span><span class="d-sm-none">Токен</span>
                             </a>
                         </div>
                     </div>
@@ -51,8 +58,8 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Войдите с помощью email и токена для управления своими турнирами.
                             </p>
-                            <a href="{{ url_for('admin_tournament') }}" class="btn btn-warning btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-sign-in-alt me-2"></i>Войти
+                            <a href="{{ url_for('admin_tournament') }}" class="btn btn-warning btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 48px;">
+                                <i class="fas fa-sign-in-alt me-2"></i><span class="d-none d-sm-inline">Войти как админ турнира</span><span class="d-sm-none">Войти админ</span>
                             </a>
                         </div>
                     </div>
@@ -69,8 +76,8 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Введите ваше имя для просмотра турниров, в которых вы участвуете.
                             </p>
-                            <button onclick="showParticipantLogin()" class="btn btn-primary btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-user me-2"></i>Войти
+                            <button onclick="showParticipantLogin()" class="btn btn-primary btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 48px;">
+                                <i class="fas fa-user me-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Участник</span>
                             </button>
                         </div>
                     </div>
@@ -87,8 +94,8 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Посмотрите все доступные турниры без входа в систему.
                             </p>
-                            <a href="{{ url_for('tournaments_list') }}" class="btn btn-info btn-lg mt-auto" style="height: 48px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-eye me-2"></i>Смотреть турниры
+                            <a href="{{ url_for('tournaments_list') }}" class="btn btn-info btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 48px;">
+                                <i class="fas fa-eye me-2"></i><span class="d-none d-sm-inline">Смотреть турниры</span><span class="d-sm-none">Турниры</span>
                             </a>
                         </div>
                     </div>

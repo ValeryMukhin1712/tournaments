@@ -13,11 +13,11 @@
             </ol>
         </nav>
         
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="mb-1">{{ tournament.name }} <small class="text-muted">v2.1</small></h1>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <div class="mb-3 mb-md-0">
+                <h1 class="mb-1">{{ tournament.name }} <small class="text-muted d-none d-sm-inline">v2.1</small></h1>
                 <p class="text-muted mb-0">
-                    <i class="fas {{ get_sport_icon(tournament.sport_type) }} me-1"></i>{{ tournament.sport_type }} • 
+                    <i class="fas fa-trophy me-1"></i>{{ tournament.sport_type }} • 
                     <i class="fas fa-calendar me-1"></i>
                     {% if tournament.start_date %}
                         {{ tournament.start_date.strftime('%d.%m.%Y') }}
@@ -29,21 +29,21 @@
                     {% endif %}
                 </p>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-column flex-sm-row gap-2">
 
                      {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
-                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
-                         <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
+                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                         <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
                      </button>
-                     <button class="btn btn-info" onclick="generateSchedule()">
-                         <i class="fas fa-calendar-alt me-2"></i>Составить расписание
+                     <button class="btn btn-info btn-sm" onclick="generateSchedule()">
+                         <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
                      </button>
                      {% else %}
-                     <button class="btn btn-primary" disabled title="Доступно только создателю турнира и администратору системы">
-                         <i class="fas fa-user-plus me-2"></i>Добавить участника в турнир
+                     <button class="btn btn-primary btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
+                         <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
                      </button>
-                     <button class="btn btn-info" disabled title="Доступно только создателю турнира и администратору системы">
-                         <i class="fas fa-calendar-alt me-2"></i>Составить расписание
+                     <button class="btn btn-info btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
+                         <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
                      </button>
                      {% endif %}
                      {% if current_user.role == 'системный администратор' %}
@@ -76,28 +76,33 @@
                     <table class="table table-hover" id="statisticsTable">
                                                  <thead>
                              <tr>
-                                 <th class="sortable" data-column="position">
+                                 <th class="sortable d-none d-sm-table-cell" data-column="position">
                                      Место <i class="fas fa-sort ms-1"></i>
+                                 </th>
+                                 <th class="sortable d-table-cell d-sm-none" data-column="position">
+                                     № <i class="fas fa-sort ms-1"></i>
                                  </th>
                                  <th class="sortable" data-column="name">
                                      Участник <i class="fas fa-sort ms-1"></i>
                                  </th>
-                                 <th class="sortable" data-column="games">
+                                 <th class="sortable d-none d-md-table-cell" data-column="games">
                                      Игр <i class="fas fa-sort ms-1"></i>
                                  </th>
-                                 <th class="sortable" data-column="wins">
+                                 <th class="sortable d-none d-lg-table-cell" data-column="wins">
                                      Побед <i class="fas fa-sort ms-1"></i>
                                  </th>
-                                 <th class="sortable" data-column="draws">
+                                 {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
+                                 <th class="sortable d-none d-lg-table-cell" data-column="draws">
                                      Ничьих <i class="fas fa-sort ms-1"></i>
                                  </th>
-                                 <th class="sortable" data-column="losses">
+                                 {% endif %}
+                                 <th class="sortable d-none d-lg-table-cell" data-column="losses">
                                      Поражений <i class="fas fa-sort ms-1"></i>
                                  </th>
                                 <th class="sortable" data-column="points">
-                                    Очки<br><small>в турнире</small> <i class="fas fa-sort ms-1"></i>
+                                    Очки<br><small class="d-none d-sm-inline">в турнире</small> <i class="fas fa-sort ms-1"></i>
                                 </th>
-                                <th class="sortable" data-column="goal_difference">
+                                <th class="sortable d-none d-md-table-cell" data-column="goal_difference">
                                     Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
                                 </th>
                                  <th>Действия</th>
@@ -109,19 +114,25 @@
                             {% set participant_stats = p1_data.stats %}
                             {% set participant_position = p1_data.position %}
                             <tr>
-                                <td>{{ participant_position }}</td>
+                                <td class="d-none d-sm-table-cell">{{ participant_position }}</td>
+                                <td class="d-table-cell d-sm-none">{{ participant_position }}</td>
                                 <td>
                                     <strong>{{ participant.name }}</strong>
                                     {% if participant.is_team %}
                                         <span class="badge bg-info ms-2">Команда</span>
                                     {% endif %}
+                                    <div class="d-sm-none mt-1">
+                                        <small class="text-muted">Очки: {{ participant_stats.points }}</small>
+                                    </div>
                                 </td>
-                                                                 <td>{{ participant_stats.games }}</td>
-                                 <td>{{ participant_stats.wins }}</td>
-                                 <td>{{ participant_stats.draws }}</td>
-                                 <td>{{ participant_stats.losses }}</td>
-                                 <td>{{ participant_stats.points }}</td>
-                                 <td>{{ participant_stats.goal_difference }}</td>
+                                <td class="d-none d-md-table-cell">{{ participant_stats.games }}</td>
+                                <td class="d-none d-lg-table-cell">{{ participant_stats.wins }}</td>
+                                {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
+                                <td class="d-none d-lg-table-cell">{{ participant_stats.draws }}</td>
+                                {% endif %}
+                                <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
+                                <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
+                                <td class="d-none d-md-table-cell">{{ participant_stats.goal_difference }}</td>
                                 <td>
                                     {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')" title="Удалить участника">
@@ -197,13 +208,7 @@
                                                  title="Нажмите для редактирования результата">
                                                 <span class="badge bg-warning text-dark mb-1" style="background-color: #ffc107 !important;">{{ cell_data.value }}</span>
                                                 {% if cell_data.sets_details %}
-                                                <small class="text-muted" style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;">{{ cell_data.sets_details }}</small>
-                                                {% endif %}
-                                                {% if cell_data.match_time %}
-                                                    <small class="text-primary fw-bold">{{ cell_data.match_time }}</small>
-                                                {% endif %}
-                                                {% if cell_data.court_number %}
-                                                    <small class="text-secondary">Корт {{ cell_data.court_number }}</small>
+                                                <small class="text-muted">{{ cell_data.sets_details }}</small>
                                                 {% endif %}
                                             </div>
                                         {% elif cell_data.type == 'upcoming' %}
@@ -283,12 +288,12 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 60px;">№</th>
-                                    <th style="width: 100px;">Время</th>
-                                    <th style="width: 80px;">Площадка</th>
+                                    <th class="d-none d-sm-table-cell" style="width: 60px;">№</th>
+                                    <th class="d-none d-md-table-cell" style="width: 100px;">Время</th>
+                                    <th class="d-none d-lg-table-cell" style="width: 80px;">Площадка</th>
                                     <th>Участники</th>
-                                    <th style="width: 100px;">Счет</th>
-                                    <th style="width: 120px;">Статус</th>
+                                    <th class="d-none d-sm-table-cell" style="width: 100px;">Счет</th>
+                                    <th class="d-none d-md-table-cell" style="width: 120px;">Статус</th>
                                     <th style="width: 80px;">Действия</th>
                                 </tr>
                             </thead>
@@ -338,7 +343,7 @@
                                                 <span class="badge bg-warning text-dark">{{ match.score }}</span>
                                             {% endif %}
                                             {% if match.sets_details %}
-                                            <br><small class="text-muted" {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
+                                            <br><small class="text-muted">{{ match.sets_details }}</small>
                                             {% endif %}
                                         {% else %}
                                             <span class="text-muted">—</span>

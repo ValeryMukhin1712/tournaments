@@ -997,13 +997,14 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 
                 # Формируем детали сетов (без номеров сетов) - только для завершенных и в процессе
                 sets_details = None
+                points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
                 if match.status in ['завершен', 'в процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
                     sets_list = []
-                    if match.set1_score1 is not None and match.set1_score2 is not None:
+                    if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
-                    if match.set2_score1 is not None and match.set2_score2 is not None:
+                    if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                         sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
-                    if match.set3_score1 is not None and match.set3_score2 is not None:
+                    if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                         sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                     if sets_list:
                         sets_details = ", ".join(sets_list)
@@ -1046,9 +1047,31 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'wins': 0,
                 'losses': 0,
                 'draws': 0,
-                'points': 0,
+                'points': participant.points or 0,
                 'goal_difference': 0
             }
+            
+            # Подсчитываем реальную статистику участника
+            for match in matches:
+                if match.status == 'завершен':
+                    if match.participant1_id == participant.id:
+                        participant_stats['games'] += 1
+                        if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                            if match.sets_won_1 > match.sets_won_2:
+                                participant_stats['wins'] += 1
+                            elif match.sets_won_1 < match.sets_won_2:
+                                participant_stats['losses'] += 1
+                            else:
+                                participant_stats['draws'] += 1
+                    elif match.participant2_id == participant.id:
+                        participant_stats['games'] += 1
+                        if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                            if match.sets_won_1 < match.sets_won_2:
+                                participant_stats['wins'] += 1
+                            elif match.sets_won_1 > match.sets_won_2:
+                                participant_stats['losses'] += 1
+                            else:
+                                participant_stats['draws'] += 1
             
             participants_with_stats.append({
                 'participant': participant,
@@ -1083,19 +1106,20 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             
                             # Формируем детали сетов (без номеров)
                             sets_details = None
+                            points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
                             if match.set1_score1 is not None and match.set1_score2 is not None:
                                 sets_list = []
-                                if match.set1_score1 is not None and match.set1_score2 is not None:
+                                if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                                     if match.participant1_id == participant.id:
                                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
                                     else:
                                         sets_list.append(f"{match.set1_score2}:{match.set1_score1}")
-                                if match.set2_score1 is not None and match.set2_score2 is not None:
+                                if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                                     if match.participant1_id == participant.id:
                                         sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
                                     else:
                                         sets_list.append(f"{match.set2_score2}:{match.set2_score1}")
-                                if match.set3_score1 is not None and match.set3_score2 is not None:
+                                if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                                     if match.participant1_id == participant.id:
                                         sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                                     else:
@@ -1107,8 +1131,6 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 'type': 'result',
                                 'value': score,
                                 'match_id': match.id,
-                                'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
-                                'court_number': match.court_number,
                                 'is_winner': is_winner,
                                 'sets_details': sets_details
                             }
@@ -1123,19 +1145,20 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 
                                 # Формируем детали сетов (без номеров)
                                 sets_details = None
+                                points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
                                 if match.set1_score1 is not None and match.set1_score2 is not None:
                                     sets_list = []
-                                    if match.set1_score1 is not None and match.set1_score2 is not None:
+                                    if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                                         if match.participant1_id == participant.id:
                                             sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
                                         else:
                                             sets_list.append(f"{match.set1_score2}:{match.set1_score1}")
-                                    if match.set2_score1 is not None and match.set2_score2 is not None:
+                                    if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                                         if match.participant1_id == participant.id:
                                             sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
                                         else:
                                             sets_list.append(f"{match.set2_score2}:{match.set2_score1}")
-                                    if match.set3_score1 is not None and match.set3_score2 is not None:
+                                    if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                                         if match.participant1_id == participant.id:
                                             sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                                         else:
@@ -1147,8 +1170,6 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'type': 'in_progress',
                                     'value': score,
                                     'match_id': match.id,
-                                    'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
-                                    'court_number': match.court_number,
                                     'sets_details': sets_details
                                 }
                             else:
@@ -1156,9 +1177,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 chessboard[participant.id][other_participant.id] = {
                                     'type': 'in_progress',
                                     'value': 'В процессе',
-                                    'match_id': match.id,
-                                    'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
-                                    'court_number': match.court_number
+                                    'match_id': match.id
                                 }
                         else:
                             # Матч запланирован
@@ -1179,6 +1198,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             'value': '',
                             'match_id': None
                         }
+        
+        # Сортируем участников по очкам (убывание) только для статистики
+        participants_with_stats.sort(key=lambda x: x['stats']['points'], reverse=True)
+        
+        # Обновляем позиции после сортировки только для статистики
+        for i, participant_data in enumerate(participants_with_stats):
+            participant_data['position'] = i + 1
         
         return render_template('tournament.html', 
                              tournament=tournament, 

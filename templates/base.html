@@ -77,6 +77,150 @@
         .form-control, .form-select {
             height: 2.5rem;
         }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .form-control, .form-select {
+                height: 2.25rem;
+                font-size: 0.875rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            .nav-buttons {
+                right: 10px;
+                gap: 8px;
+            }
+            
+            .nav-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .dropdown-menu {
+                font-size: 0.875rem;
+            }
+            
+            .alert {
+                font-size: 0.875rem;
+                padding: 0.75rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .card-text {
+                font-size: 0.875rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem 0.25rem;
+                vertical-align: middle;
+            }
+            
+            .btn-group .btn {
+                padding: 0.375rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .badge {
+                font-size: 0.75rem;
+            }
+            
+            .text-muted {
+                font-size: 0.8rem;
+            }
+            
+            .h1, .h2, .h3, .h4, .h5, .h6 {
+                font-size: 1.25rem;
+            }
+            
+            .h2 {
+                font-size: 1.5rem;
+            }
+            
+            .h1 {
+                font-size: 1.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+            
+            .nav-buttons {
+                right: 5px;
+            }
+            
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+            
+            .table th, .table td {
+                padding: 0.25rem 0.125rem;
+                font-size: 0.75rem;
+            }
+            
+            .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .card-body {
+                padding: 0.75rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.25rem;
+            }
+            
+            .navbar-brand {
+                font-size: 0.9rem;
+            }
+            
+            .navbar-brand i {
+                font-size: 0.8rem;
+            }
+        }
+        
         /* Стили для кнопок навигации */
         .nav-buttons {
             position: fixed;
