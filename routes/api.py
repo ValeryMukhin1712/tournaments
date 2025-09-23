@@ -488,31 +488,22 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         try:
             participant_name = participant.name
             
-            # Удаляем связанные матчи участника
-            Match.query.filter(
+            # Удаляем только матчи с участием удаляемого участника
+            matches_to_delete = Match.query.filter(
                 (Match.participant1_id == participant_id) | 
                 (Match.participant2_id == participant_id)
-            ).delete()
+            ).all()
+            
+            for match in matches_to_delete:
+                db.session.delete(match)
             
             # Удаляем участника
             db.session.delete(participant)
             db.session.commit()
             
-            # Автоматически пересчитываем расписание
-            remaining_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-            if len(remaining_participants) >= 2:
-                # Удаляем существующие матчи
-                Match.query.filter_by(tournament_id=tournament_id).delete()
-                db.session.commit()
-                
-                # Создаем новое расписание
-                matches_created = create_smart_schedule(tournament, remaining_participants, Match, db)
-                db.session.commit()
-                
-                logger.info(f"Автоматически пересчитано расписание: {matches_created} матчей после удаления участника {participant_name}")
-            
+            logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Удалено {len(matches_to_delete)} матчей с его участием. Результаты других матчей сохранены.")
             logger.info(f"Участник '{participant_name}' (ID: {participant_id}) удален из турнира {tournament_id} админом {admin.email}")
-            return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален.'}), 200
+            return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален. Результаты матчей других участников сохранены.'}), 200
             
         except Exception as e:
             db.session.rollback()
@@ -577,14 +568,36 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     # ===== МАТЧИ (дополнительные маршруты) =====
     
     @app.route('/api/matches', methods=['POST'])
-    @login_required
     def create_match():
-        """Создание нового матча"""
+        """Создание нового матча с результатами"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
+        # Проверяем CSRF токен
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except Exception as e:
+            logger.warning(f"CSRF validation failed: {e}")
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        # Простая заглушка для админа
+        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
+        if not admin or not admin.is_active:
+            return jsonify({'success': False, 'error': 'Неверная авторизация'}), 401
+        
         data = request.get_json()
+        logger.info(f"Получены данные для создания матча: {data}")
+        
         if not data or not data.get('tournament_id'):
-            return jsonify({'error': 'Необходим ID турнира'}), 400
+            logger.error("Отсутствует tournament_id в данных")
+            return jsonify({'success': False, 'error': 'Необходим ID турнира'}), 400
         
         try:
+            # Создаем базовый матч
             match = Match(
                 tournament_id=data['tournament_id'],
                 participant1_id=data.get('participant1_id'),
@@ -595,24 +608,61 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 match_number=data.get('match_number'),
                 status=data.get('status', 'запланирован')
             )
+            
+            # Если есть данные сетов, заполняем их
+            if data.get('sets'):
+                sets_data = data['sets']
+                logger.info(f"Обрабатываем данные сетов: {sets_data}")
+                
+                # Заполняем сеты
+                for set_data in sets_data:
+                    set_number = set_data.get('set_number')
+                    score1 = set_data.get('score1', 0)
+                    score2 = set_data.get('score2', 0)
+                    
+                    logger.info(f"Сет {set_number}: {score1}:{score2}")
+                    
+                    if set_number == 1:
+                        match.set1_score1 = score1
+                        match.set1_score2 = score2
+                    elif set_number == 2:
+                        match.set2_score1 = score1
+                        match.set2_score2 = score2
+                    elif set_number == 3:
+                        match.set3_score1 = score1
+                        match.set3_score2 = score2
+                
+                # Устанавливаем общий результат
+                if data.get('sets_won_1') is not None and data.get('sets_won_2') is not None:
+                    match.sets_won_1 = data['sets_won_1']
+                    match.sets_won_2 = data['sets_won_2']
+                    
+                    # Определяем статус матча
+                    if match.sets_won_1 > match.sets_won_2 or match.sets_won_2 > match.sets_won_1:
+                        match.status = 'завершен'
+                    else:
+                        match.status = 'играют'
+            
             db.session.add(match)
             db.session.commit()
             
-            logger.info(f"Создан матч {match.id} в турнире {data['tournament_id']}")
+            logger.info(f"Создан матч {match.id} в турнире {data['tournament_id']} с результатами")
             return jsonify({
+                'success': True,
                 'message': 'Матч успешно создан',
                 'match': {
                     'id': match.id,
                     'tournament_id': match.tournament_id,
                     'participant1_id': match.participant1_id,
-                    'participant2_id': match.participant2_id
+                    'participant2_id': match.participant2_id,
+                    'status': match.status
                 }
             }), 201
             
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при создании матча: {str(e)}")
-            return jsonify({'error': 'Ошибка при создании матча'}), 500
+            return jsonify({'success': False, 'error': f'Ошибка при создании матча: {str(e)}'}), 500
 
     @app.route('/api/matches/<int:match_id>', methods=['PUT'])
     def update_match(match_id):
@@ -759,11 +809,11 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                             # Начисляем очки за результат матча
                             if match.winner_id == participant1.id:
                                 # Участник 1 победил
-                                participant1.points += (tournament.points_win or 3)
+                                participant1.points += (tournament.points_win or 1)
                                 participant2.points += (tournament.points_loss or 0)
                             elif match.winner_id == participant2.id:
                                 # Участник 2 победил
-                                participant2.points += (tournament.points_win or 3)
+                                participant2.points += (tournament.points_win or 1)
                                 participant1.points += (tournament.points_loss or 0)
                             else:
                                 # Ничья
@@ -1793,3 +1843,58 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при экспорте турнира: {e}")
             return jsonify({'success': False, 'error': f'Ошибка при экспорте турнира: {str(e)}'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/add-late-participant', methods=['POST'])
+    def add_late_participant(tournament_id):
+        """Добавление опоздавшего участника в турнир без пересчета расписания"""
+        try:
+            # Проверяем CSRF токен
+            from flask_wtf.csrf import validate_csrf
+            try:
+                validate_csrf(request.headers.get('X-CSRFToken'))
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем данные из запроса
+            data = request.get_json()
+            name = data.get('name', '').strip()
+            
+            if not name:
+                return jsonify({'success': False, 'error': 'Имя участника обязательно'}), 400
+            
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Проверяем, не существует ли уже участник с таким именем
+            existing_participant = Participant.query.filter_by(
+                tournament_id=tournament_id, 
+                name=name
+            ).first()
+            
+            if existing_participant:
+                return jsonify({'success': False, 'error': 'Участник с таким именем уже существует в турнире'}), 400
+            
+            # Создаем нового участника
+            participant = Participant(
+                tournament_id=tournament_id,
+                name=name,
+                points=0
+            )
+            
+            db.session.add(participant)
+            db.session.commit()
+            
+            logger.info(f"Опоздавший участник '{name}' добавлен в турнир {tournament_id} без пересчета расписания")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Участник "{name}" добавлен в турнир. Расписание и результаты матчей сохранены.'
+            })
+                
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при добавлении опоздавшего участника: {e}")
+            return jsonify({'success': False, 'error': f'Ошибка при добавлении участника: {str(e)}'}), 500

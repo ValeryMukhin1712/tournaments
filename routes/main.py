@@ -1032,6 +1032,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 x['global_number']
             ))
         
+        # Определяем время создания первого матча для определения опоздавших участников
+        first_match_time = None
+        if matches:
+            first_match = min(matches, key=lambda m: m.created_at if hasattr(m, 'created_at') else datetime.min)
+            first_match_time = first_match.created_at if hasattr(first_match, 'created_at') else None
+        
         # Создаем простые данные для участников
         for i, participant in enumerate(participants):
             participant_data = {
@@ -1047,7 +1053,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'wins': 0,
                 'losses': 0,
                 'draws': 0,
-                'points': participant.points or 0,
+                'points': 0,  # Будем пересчитывать на основе побед
                 'goal_difference': 0
             }
             
@@ -1059,30 +1065,43 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 > match.sets_won_2:
                                 participant_stats['wins'] += 1
+                                participant_stats['points'] += (tournament.points_win or 1)  # очки за победу из настроек турнира
                             elif match.sets_won_1 < match.sets_won_2:
                                 participant_stats['losses'] += 1
+                                participant_stats['points'] += (tournament.points_loss or 0)  # очки за поражение из настроек турнира
                             else:
                                 participant_stats['draws'] += 1
+                                participant_stats['points'] += (tournament.points_draw or 1)  # очки за ничью из настроек турнира
                     elif match.participant2_id == participant.id:
                         participant_stats['games'] += 1
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 < match.sets_won_2:
                                 participant_stats['wins'] += 1
+                                participant_stats['points'] += (tournament.points_win or 1)  # очки за победу из настроек турнира
                             elif match.sets_won_1 > match.sets_won_2:
                                 participant_stats['losses'] += 1
+                                participant_stats['points'] += (tournament.points_loss or 0)  # очки за поражение из настроек турнира
                             else:
                                 participant_stats['draws'] += 1
+                                participant_stats['points'] += (tournament.points_draw or 1)  # очки за ничью из настроек турнира
+            
+            # Определяем, является ли участник опоздавшим
+            is_late_participant = False
+            if first_match_time and participant.registered_at:
+                is_late_participant = participant.registered_at > first_match_time
             
             participants_with_stats.append({
                 'participant': participant,
                 'stats': participant_stats,
-                'position': i + 1
+                'position': i + 1,
+                'is_late_participant': is_late_participant
             })
             
             participants_with_stats_chessboard.append({
                 'participant': participant,
                 'stats': participant_stats,
-                'position': i + 1
+                'position': i + 1,
+                'is_late_participant': is_late_participant
             })
             
             # Создаем шахматку с данными матчей
@@ -1099,10 +1118,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             # Матч завершен - показываем результат (счет сетов)
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
-                                is_winner = match.winner_id == participant.id
+                                is_winner = match.sets_won_1 > match.sets_won_2
                             else:
                                 score = f"{match.sets_won_2}:{match.sets_won_1}"
-                                is_winner = match.winner_id == participant.id
+                                is_winner = match.sets_won_2 > match.sets_won_1
                             
                             # Формируем детали сетов (без номеров)
                             sets_details = None
@@ -1205,6 +1224,17 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Обновляем позиции после сортировки только для статистики
         for i, participant_data in enumerate(participants_with_stats):
             participant_data['position'] = i + 1
+        
+        # Также обновляем позиции в турнирной таблице (шахматке)
+        # Создаем словарь для быстрого поиска позиций по ID участника
+        position_by_id = {}
+        for participant_data in participants_with_stats:
+            position_by_id[participant_data['participant'].id] = participant_data['position']
+        
+        # Обновляем позиции в participants_with_stats_chessboard
+        for participant_data in participants_with_stats_chessboard:
+            participant_id = participant_data['participant'].id
+            participant_data['position'] = position_by_id.get(participant_id, len(participants))
         
         return render_template('tournament.html', 
                              tournament=tournament, 
@@ -1366,20 +1396,28 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             # Подсчитываем статистику участника
             wins = 0
             losses = 0
-            points = participant.points or 0
+            points = 0  # Будем пересчитывать на основе побед
             
             for match in matches:
                 if match.status == 'завершен':
                     if match.participant1_id == participant.id:
                         if match.sets_won_1 and match.sets_won_2 and match.sets_won_1 > match.sets_won_2:
                             wins += 1
+                            points += 3  # 3 очка за победу
                         elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 < match.sets_won_2:
                             losses += 1
+                            points += 0  # 0 очков за поражение
+                        elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 == match.sets_won_2:
+                            points += 1  # 1 очко за ничью
                     elif match.participant2_id == participant.id:
                         if match.sets_won_1 and match.sets_won_2 and match.sets_won_1 < match.sets_won_2:
                             wins += 1
+                            points += 3  # 3 очка за победу
                         elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 > match.sets_won_2:
                             losses += 1
+                            points += 0  # 0 очков за поражение
+                        elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 == match.sets_won_2:
+                            points += 1  # 1 очко за ничью
             
             participants_with_stats.append({
                 'participant': participant,
@@ -1391,6 +1429,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         # Сортируем участников по очкам (убывание)
         participants_with_stats.sort(key=lambda x: x['points'], reverse=True)
+        
+        # Определяем время создания первого матча для определения опоздавших участников
+        first_match_time = None
+        if matches:
+            first_match = min(matches, key=lambda m: m.created_at if hasattr(m, 'created_at') else datetime.min)
+            first_match_time = first_match.created_at if hasattr(first_match, 'created_at') else None
         
         # Создаем данные для турнирной таблицы (шахматки)
         participants_with_stats_chessboard = []
@@ -1405,10 +1449,16 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'games': participant_data['wins'] + participant_data['losses']
             }
             
+            # Определяем, является ли участник опоздавшим
+            is_late_participant = False
+            if first_match_time and participant.registered_at:
+                is_late_participant = participant.registered_at > first_match_time
+            
             participants_with_stats_chessboard.append({
                 'participant': participant,
                 'stats': participant_stats,
-                'position': i + 1
+                'position': i + 1,
+                'is_late_participant': is_late_participant
             })
             
             # Создаем шахматку с данными матчей
