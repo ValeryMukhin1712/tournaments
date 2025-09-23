@@ -3,6 +3,28 @@
 {% block title %}Главная - Турнирная система{% endblock %}
 
 {% block content %}
+<style>
+.clickable-card {
+    transition: all 0.3s ease;
+    border: 3px solid #dee2e6 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.clickable-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2) !important;
+    border-color: #007bff !important;
+}
+
+.clickable-card:hover .card-title {
+    color: #007bff !important;
+}
+
+.clickable-card:hover .fas {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+</style>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-6">
@@ -34,7 +56,7 @@
             <div class="row g-3 g-md-4">
                 <!-- 1. Создание нового турнира -->
                 <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm d-flex">
+                    <div class="card h-100 d-flex clickable-card" onclick="window.location.href='{{ url_for('request_token') }}'" style="cursor: pointer;">
                         <div class="card-body text-center p-4 d-flex flex-column">
                             <div class="mb-3">
                                 <i class="fas fa-plus-circle fa-3x text-success"></i>
@@ -43,16 +65,16 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Получите токен для создания и управления турниром. После получения токена используйте кнопку "Войти как админ турнира".
                             </p>
-                            <a href="{{ url_for('request_token') }}" class="btn btn-success btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
+                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
                                 <i class="fas fa-key me-2"></i><span class="d-none d-sm-inline">Получить токен</span><span class="d-sm-none">Токен</span>
-                            </a>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 2. Вход как админ турнира -->
                 <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm d-flex">
+                    <div class="card h-100 d-flex clickable-card" onclick="window.location.href='{{ url_for('admin_tournament') }}'" style="cursor: pointer;">
                         <div class="card-body text-center p-4 d-flex flex-column">
                             <div class="mb-3">
                                 <i class="fas fa-crown fa-3x text-warning"></i>
@@ -61,16 +83,16 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Войдите с помощью email и токена для управления своими турнирами.
                             </p>
-                            <a href="{{ url_for('admin_tournament') }}" class="btn btn-warning btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
+                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
                                 <i class="fas fa-sign-in-alt me-2"></i><span class="d-none d-sm-inline">Войти как админ турнира</span><span class="d-sm-none">Войти админ</span>
-                            </a>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 3. Вход как участник турнира -->
                 <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm d-flex">
+                    <div class="card h-100 d-flex clickable-card" onclick="showParticipantLogin()" style="cursor: pointer;">
                         <div class="card-body text-center p-4 d-flex flex-column">
                             <div class="mb-3">
                                 <i class="fas fa-user-check fa-3x text-primary"></i>
@@ -79,16 +101,16 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Введите ваше имя для просмотра турниров, в которых вы участвуете.
                             </p>
-                            <button onclick="showParticipantLogin()" class="btn btn-primary btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
+                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
                                 <i class="fas fa-user me-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Участник</span>
-                            </button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 4. Просмотр всех турниров -->
                 <div class="col-md-6">
-                    <div class="card h-100 border-0 shadow-sm d-flex">
+                    <div class="card h-100 d-flex clickable-card" onclick="window.location.href='{{ url_for('tournaments_list') }}'" style="cursor: pointer;">
                         <div class="card-body text-center p-4 d-flex flex-column">
                             <div class="mb-3">
                                 <i class="fas fa-list fa-3x text-info"></i>
@@ -97,9 +119,9 @@
                             <p class="card-text text-muted flex-grow-1">
                                 Посмотрите все доступные турниры без входа в систему.
                             </p>
-                            <a href="{{ url_for('tournaments_list') }}" class="btn btn-info btn-lg mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
+                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
                                 <i class="fas fa-eye me-2"></i><span class="d-none d-sm-inline">Смотреть турниры</span><span class="d-sm-none">Турниры</span>
-                            </a>
+                            </div>
                         </div>
                     </div>
                 </div>
