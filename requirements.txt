@@ -8,5 +8,5 @@ python-dotenv==1.0.0
 email-validator==2.0.0
 Werkzeug==2.3.7
 gunicorn==21.2.0
-psycopg2==2.9.7
+# psycopg2==2.9.7  # Удалено для Railway - используем SQLite
 openpyxl==3.1.2
