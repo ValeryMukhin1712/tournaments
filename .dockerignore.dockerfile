@@ -114,3 +114,9 @@ tat*
 status
 hell*
 er.py
+
+# Railway specific
+.railway/
+nixpacks.toml
+railway.json
+requirements-minimal.txt
