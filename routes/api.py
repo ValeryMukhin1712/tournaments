@@ -53,70 +53,86 @@ def create_smart_schedule(tournament, participants, Match, db):
     # Перемешиваем матчи для случайности
     random.shuffle(matches_to_schedule)
     
-    # Шаг 3: Распределение матчей по раундам
-    # Разбиваем все матчи на раунды по количеству площадок
-    rounds = []
-    for i in range(0, len(matches_to_schedule), k):
-        round_matches = matches_to_schedule[i:i + k]
-        rounds.append(round_matches)
-    
-    # Шаг 4: Расчет времени и создание матчей
+    # Шаг 3: Умное распределение матчей с проверкой конфликтов
     scheduled_matches = []
     match_number = 1
     current_date = start_date
+    current_time = start_time
     
-    for round_idx, round_matches in enumerate(rounds):
-        if not round_matches:
-            continue
+    # Словарь для отслеживания занятости участников по времени
+    participant_schedule = {}  # {participant_id: {time: court_number}}
+    court_schedule = {}  # {court_number: {time: participant_ids}}
+    
+    for match in matches_to_schedule:
+        participant1, participant2 = match
+        p1_id, p2_id = participant1.id, participant2.id
+        
+        # Ищем свободное время для обоих участников
+        match_scheduled = False
+        temp_time = current_time
+        temp_date = current_date
+        
+        while not match_scheduled:
+            # Проверяем, свободны ли оба участника в это время
+            p1_free = p1_id not in participant_schedule or temp_time not in participant_schedule[p1_id]
+            p2_free = p2_id not in participant_schedule or temp_time not in participant_schedule[p2_id]
             
-        # Количество матчей в раунде
-        matches_in_round = len(round_matches)
-        
-        # Время раунда: T_round = t_match + (m-1) * t_break
-        # где m = min(k, matches_in_round) - количество матчей, проводимых одновременно
-        m = min(k, matches_in_round)
-        T_round = time_match + (m - 1) * time_break
-        
-        # Время начала раунда: start_time_for_r = (r - 1) * T_round
-        round_start_minutes = round_idx * T_round
-        round_start_time = add_minutes_to_time(start_time, round_start_minutes)
-        
-        # Проверяем, не выходим ли за пределы рабочего дня
-        round_end_time = add_minutes_to_time(round_start_time, T_round)
-        
-        # Если раунд не помещается в текущий день, переходим на следующий
-        if round_end_time > end_time:
-            current_date += timedelta(days=1)
-            round_start_time = start_time
-            round_end_time = add_minutes_to_time(round_start_time, T_round)
-        
-        # Распределяем матчи по площадкам
-        for match_idx, (participant1, participant2) in enumerate(round_matches):
-            court_number = (match_idx % k) + 1
-            
-            # Время начала матча в раунде
-            if match_idx < m:
-                # Матчи, которые начинаются одновременно
-                match_start_time = round_start_time
+            if p1_free and p2_free:
+                # Ищем свободную площадку
+                for court_num in range(1, k + 1):
+                    court_free = (court_num not in court_schedule or 
+                                temp_time not in court_schedule[court_num])
+                    
+                    if court_free:
+                        # Найдено свободное время и площадка
+                        match_start_time = temp_time
+                        
+                        # Создаем матч
+                        match_obj = Match(
+                            tournament_id=tournament.id,
+                            participant1_id=p1_id,
+                            participant2_id=p2_id,
+                            status='запланирован',
+                            match_date=temp_date,
+                            match_time=match_start_time,
+                            court_number=court_num,
+                            match_number=match_number
+                        )
+                        db.session.add(match_obj)
+                        scheduled_matches.append(match_obj)
+                        match_number += 1
+                        
+                        # Обновляем расписания
+                        if p1_id not in participant_schedule:
+                            participant_schedule[p1_id] = {}
+                        if p2_id not in participant_schedule:
+                            participant_schedule[p2_id] = {}
+                        if court_num not in court_schedule:
+                            court_schedule[court_num] = {}
+                        
+                        participant_schedule[p1_id][temp_time] = court_num
+                        participant_schedule[p2_id][temp_time] = court_num
+                        court_schedule[court_num][temp_time] = {p1_id, p2_id}
+                        
+                        match_scheduled = True
+                        break
+                
+                if not match_scheduled:
+                    # Нет свободных площадок в это время, переходим к следующему времени
+                    temp_time = add_minutes_to_time(temp_time, time_match + time_break)
+                    
+                    # Проверяем, не выходим ли за пределы рабочего дня
+                    if temp_time > end_time:
+                        temp_date += timedelta(days=1)
+                        temp_time = start_time
             else:
-                # Матчи, которые начинаются после завершения предыдущих
-                match_start_time = add_minutes_to_time(round_start_time, 
-                                                     time_match + (match_idx - m) * (time_match + time_break))
-            
-            # Создаем матч
-            match = Match(
-                tournament_id=tournament.id,
-                participant1_id=participant1.id,
-                participant2_id=participant2.id,
-                status='запланирован',
-                match_date=current_date,
-                match_time=match_start_time,
-                court_number=court_number,
-                match_number=match_number
-            )
-            db.session.add(match)
-            scheduled_matches.append(match)
-            match_number += 1
+                # Один из участников занят, переходим к следующему времени
+                temp_time = add_minutes_to_time(temp_time, time_match + time_break)
+                
+                # Проверяем, не выходим ли за пределы рабочего дня
+                if temp_time > end_time:
+                    temp_date += timedelta(days=1)
+                    temp_time = start_time
     
     return len(scheduled_matches)
 
