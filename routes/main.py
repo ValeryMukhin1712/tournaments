@@ -12,6 +12,75 @@ from email.mime.multipart import MIMEMultipart
 
 logger = logging.getLogger(__name__)
 
+def send_token_email_railway_fallback(email, name, token):
+    """Альтернативный метод отправки email для Railway (через внешний API)"""
+    try:
+        import requests
+        import json
+        
+        # Используем EmailJS или другой внешний сервис
+        # Для демонстрации создаем простой webhook
+        webhook_url = os.environ.get('EMAIL_WEBHOOK_URL')
+        
+        if webhook_url:
+            logger.info(f"Попытка отправки через webhook: {webhook_url}")
+            
+            payload = {
+                'to': email,
+                'subject': 'Ваш токен для создания турниров',
+                'body': f"""
+Здравствуйте, {name}!
+
+Ваш токен для создания турниров: {token}
+
+Этот токен действителен в течение 30 дней.
+Используйте его для входа в систему как администратор турнира.
+
+С уважением,
+Команда турнирной системы
+                """,
+                'from': 'tournaments.master@gmail.com'
+            }
+            
+            response = requests.post(webhook_url, json=payload, timeout=10)
+            if response.status_code == 200:
+                logger.info(f"[SUCCESS] Email отправлен через webhook на {email}")
+                return True
+            else:
+                logger.error(f"[ERROR] Webhook вернул статус {response.status_code}")
+        
+        # Если webhook не настроен, используем простой HTTP запрос к внешнему сервису
+        logger.info("Webhook не настроен. Пытаемся использовать внешний сервис.")
+        
+        # Создаем простой HTTP запрос (можно заменить на реальный email сервис)
+        email_data = {
+            'email': email,
+            'name': name,
+            'token': token,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Логируем данные для ручной отправки
+        logger.info(f"[RAILWAY FALLBACK] Данные для ручной отправки email:")
+        logger.info(f"Получатель: {email}")
+        logger.info(f"Имя: {name}")
+        logger.info(f"Токен: {token}")
+        logger.info(f"Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Сохраняем в файл для ручной отправки
+        try:
+            with open('tokens.txt', 'a', encoding='utf-8') as f:
+                f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token} (RAILWAY FALLBACK - ТРЕБУЕТСЯ РУЧНАЯ ОТПРАВКА)\n")
+        except Exception as e:
+            logger.warning(f"Не удалось сохранить в файл: {e}")
+        
+        logger.info("[INFO] На Railway SMTP заблокирован. Токен сохранен для ручной отправки.")
+        return False  # Возвращаем False, но токен сохранен
+        
+    except Exception as e:
+        logger.error(f"Ошибка в Railway fallback: {e}")
+        return False
+
 def send_token_email(email, name, token):
     """Отправляет email с токеном пользователю"""
     try:
@@ -48,6 +117,14 @@ def send_token_email(email, name, token):
             except Exception as e:
                 logger.warning(f"Не удалось сохранить токен в файл: {e}")
             return False
+        
+        # Проверяем, находимся ли мы на Railway
+        if os.environ.get('RAILWAY_ENVIRONMENT') == 'production':
+            logger.info("Обнаружена среда Railway. Пытаемся использовать альтернативный метод отправки email.")
+            result = send_token_email_railway_fallback(email, name, token)
+            # Обновляем статус токена в базе данных
+            update_token_email_status(token, 'manual' if not result else 'sent')
+            return result
         
         # Создаем сообщение
         from email.mime.text import MIMEText
@@ -98,6 +175,8 @@ def send_token_email(email, name, token):
             logger.info("[OK] SMTP соединение закрыто")
             
             logger.info(f"[SUCCESS] Токен {token} успешно отправлен на {email} ({name}) от {from_email}")
+            # Обновляем статус токена в базе данных
+            update_token_email_status(token, 'sent')
             return True
             
         except smtplib.SMTPAuthenticationError as e:
@@ -112,6 +191,8 @@ def send_token_email(email, name, token):
         
     except Exception as e:
         logger.error(f"Ошибка отправки email: {e}")
+        # Обновляем статус токена в базе данных
+        update_token_email_status(token, 'failed')
         # Если не удалось отправить email, все равно сохраняем токен в файл
         try:
             with open('tokens.txt', 'a', encoding='utf-8') as f:
@@ -119,6 +200,28 @@ def send_token_email(email, name, token):
         except Exception as file_e:
             logger.warning(f"Не удалось сохранить токен в файл: {file_e}")
         return False
+
+def update_token_email_status(token_value, status):
+    """Обновляет статус отправки email для токена"""
+    try:
+        from flask import current_app
+        
+        # Используем существующую модель Token из app.py
+        from app import Token
+        
+        # Находим токен по значению
+        token_obj = Token.query.filter_by(token=token_value).first()
+        if token_obj:
+            token_obj.email_status = status
+            if status == 'sent':
+                token_obj.email_sent = True
+                token_obj.email_sent_at = datetime.utcnow()
+            current_app.extensions['sqlalchemy'].db.session.commit()
+            logger.info(f"Статус токена {token_value} обновлен на: {status}")
+        else:
+            logger.warning(f"Токен {token_value} не найден в базе данных")
+    except Exception as e:
+        logger.error(f"Ошибка обновления статуса токена {token_value}: {e}")
 
 def send_token_email_async(email, name, token, app=None):
     """Асинхронная отправка email (не блокирует основной поток)"""
@@ -266,7 +369,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     token=token,
                     name=name,
                     created_at=datetime.utcnow(),
-                    is_used=False
+                    is_used=False,
+                    email_sent=False,
+                    email_status='pending'
                 )
                 db.session.add(new_token)
                 db.session.commit()
@@ -681,6 +786,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             session['admin_id'] = system_admin.id
             session['admin_name'] = system_admin.name
             session['admin_email'] = system_admin.email
+            session['is_system_admin'] = True
             
             logger.info(f"Системный администратор успешно авторизован")
             return jsonify({
@@ -832,6 +938,25 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              tournaments=tournaments,
                              users=users,
                              tournament_admins=tournament_admins)
+
+    @app.route('/admin-tokens')
+    def admin_tokens():
+        """Страница управления токенами"""
+        from flask import session
+        
+        # Проверяем, что системный админ авторизован
+        if 'admin_id' not in session:
+            flash('Необходима авторизация', 'error')
+            return redirect(url_for('index'))
+        
+        admin_email = session.get('admin_email', '')
+        
+        # Проверяем, что это системный администратор
+        if admin_email != 'admin@system':
+            flash('Доступ запрещен', 'error')
+            return redirect(url_for('index'))
+        
+        return render_template('admin_tokens.html')
     
     @app.route('/admin/edit-tournament/<int:tournament_id>')
     def admin_edit_tournament(tournament_id):

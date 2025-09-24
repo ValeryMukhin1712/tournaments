@@ -6,10 +6,17 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-cogs"></i> Системная административная панель
-                <small class="text-muted">- Управление всей системой</small>
-            </h1>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">
+                    <i class="fas fa-cogs"></i> Системная административная панель
+                    <small class="text-muted">- Управление всей системой</small>
+                </h1>
+                <div class="btn-group">
+                    <a href="{{ url_for('admin_tokens') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-key me-1"></i>Управление токенами
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     

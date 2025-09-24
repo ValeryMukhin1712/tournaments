@@ -17,6 +17,9 @@ def create_token_model(db):
         created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
         is_used = Column(Boolean, default=False, nullable=False)
         used_at = Column(DateTime, nullable=True)
+        email_sent = Column(Boolean, default=False, nullable=False)
+        email_sent_at = Column(DateTime, nullable=True)
+        email_status = Column(String(50), default='pending', nullable=False)  # pending, sent, failed, manual
         
         def __repr__(self):
             return f'<Token {self.token} for {self.email}>'

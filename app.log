@@ -6476,3 +6476,444 @@ with app.app_context(). See the documentation for more information.
 2025-09-24 16:39:04,748 - INFO -  * Debugger PIN: 119-940-355
 2025-09-24 16:39:30,891 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
 2025-09-24 16:39:31,004 - INFO -  * Restarting with stat
+2025-09-24 16:39:31,960 - INFO - База данных инициализирована успешно
+2025-09-24 16:39:32,495 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 16:39:32,496 - INFO - Запуск приложения на порту 5000
+2025-09-24 16:39:32,496 - INFO - Переменная окружения PORT: None
+2025-09-24 16:39:32,496 - INFO - Режим отладки: production
+2025-09-24 16:39:32,511 - WARNING -  * Debugger is active!
+2025-09-24 16:39:32,516 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:08:16,192 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:08:16,292 - INFO -  * Restarting with stat
+2025-09-24 17:08:17,258 - INFO - База данных инициализирована успешно
+2025-09-24 17:08:17,782 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:08:17,782 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:08:17,783 - INFO - Переменная окружения PORT: None
+2025-09-24 17:08:17,783 - INFO - Режим отладки: production
+2025-09-24 17:08:17,800 - WARNING -  * Debugger is active!
+2025-09-24 17:08:17,805 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:08:25,972 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:08:26,068 - INFO -  * Restarting with stat
+2025-09-24 17:08:27,035 - INFO - База данных инициализирована успешно
+2025-09-24 17:08:27,565 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:08:27,566 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:08:27,566 - INFO - Переменная окружения PORT: None
+2025-09-24 17:08:27,567 - INFO - Режим отладки: production
+2025-09-24 17:08:27,585 - WARNING -  * Debugger is active!
+2025-09-24 17:08:27,588 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:08:59,169 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:08:59,299 - INFO -  * Restarting with stat
+2025-09-24 17:09:00,315 - INFO - База данных инициализирована успешно
+2025-09-24 17:09:00,819 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:09:00,819 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:09:00,820 - INFO - Переменная окружения PORT: None
+2025-09-24 17:09:00,820 - INFO - Режим отладки: production
+2025-09-24 17:09:00,835 - WARNING -  * Debugger is active!
+2025-09-24 17:09:00,840 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:20:54,597 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\models\\token.py', reloading
+2025-09-24 17:20:54,698 - INFO -  * Restarting with stat
+2025-09-24 17:20:55,635 - INFO - База данных инициализирована успешно
+2025-09-24 17:20:56,177 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:20:56,178 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:20:56,178 - INFO - Переменная окружения PORT: None
+2025-09-24 17:20:56,179 - INFO - Режим отладки: production
+2025-09-24 17:20:56,196 - WARNING -  * Debugger is active!
+2025-09-24 17:20:56,201 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:21:04,312 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:21:04,395 - INFO -  * Restarting with stat
+2025-09-24 17:21:05,330 - INFO - База данных инициализирована успешно
+2025-09-24 17:21:05,847 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:21:05,847 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:21:05,847 - INFO - Переменная окружения PORT: None
+2025-09-24 17:21:05,847 - INFO - Режим отладки: production
+2025-09-24 17:21:05,862 - WARNING -  * Debugger is active!
+2025-09-24 17:21:05,866 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:21:10,307 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:21:10,402 - INFO -  * Restarting with stat
+2025-09-24 17:21:11,410 - INFO - База данных инициализирована успешно
+2025-09-24 17:21:11,895 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:21:11,895 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:21:11,895 - INFO - Переменная окружения PORT: None
+2025-09-24 17:21:11,895 - INFO - Режим отладки: production
+2025-09-24 17:21:11,914 - WARNING -  * Debugger is active!
+2025-09-24 17:21:11,918 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:21:58,679 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:21:58,815 - INFO -  * Restarting with stat
+2025-09-24 17:21:59,765 - INFO - База данных инициализирована успешно
+2025-09-24 17:22:00,269 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:22:00,270 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:22:00,270 - INFO - Переменная окружения PORT: None
+2025-09-24 17:22:00,270 - INFO - Режим отладки: production
+2025-09-24 17:22:00,288 - WARNING -  * Debugger is active!
+2025-09-24 17:22:00,293 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:22:18,622 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:22:18,715 - INFO -  * Restarting with stat
+2025-09-24 17:22:19,690 - INFO - База данных инициализирована успешно
+2025-09-24 17:22:20,193 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:22:20,194 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:22:20,194 - INFO - Переменная окружения PORT: None
+2025-09-24 17:22:20,194 - INFO - Режим отладки: production
+2025-09-24 17:22:20,209 - WARNING -  * Debugger is active!
+2025-09-24 17:22:20,214 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:22:43,229 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 17:22:43,328 - INFO -  * Restarting with stat
+2025-09-24 17:22:44,250 - INFO - База данных инициализирована успешно
+2025-09-24 17:22:44,761 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:22:44,761 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:22:44,761 - INFO - Переменная окружения PORT: None
+2025-09-24 17:22:44,762 - INFO - Режим отладки: production
+2025-09-24 17:22:44,779 - WARNING -  * Debugger is active!
+2025-09-24 17:22:44,782 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:23:44,961 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:23:45,065 - INFO -  * Restarting with stat
+2025-09-24 17:23:46,115 - INFO - База данных инициализирована успешно
+2025-09-24 17:23:46,634 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:23:46,634 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:23:46,635 - INFO - Переменная окружения PORT: None
+2025-09-24 17:23:46,635 - INFO - Режим отладки: production
+2025-09-24 17:23:46,653 - WARNING -  * Debugger is active!
+2025-09-24 17:23:46,658 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:24:30,768 - INFO - База данных инициализирована успешно
+2025-09-24 17:24:31,409 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:24:31,409 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:24:31,410 - INFO - Переменная окружения PORT: None
+2025-09-24 17:24:31,410 - INFO - Режим отладки: production
+2025-09-24 17:24:31,444 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-24 17:24:31,444 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-24 17:24:31,447 - INFO -  * Restarting with stat
+2025-09-24 17:24:32,491 - INFO - База данных инициализирована успешно
+2025-09-24 17:24:33,079 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:24:33,079 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:24:33,080 - INFO - Переменная окружения PORT: None
+2025-09-24 17:24:33,080 - INFO - Режим отладки: production
+2025-09-24 17:24:33,102 - WARNING -  * Debugger is active!
+2025-09-24 17:24:33,107 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:24:36,050 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 17:24:36,140 - INFO -  * Restarting with stat
+2025-09-24 17:24:36,297 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\migrate_add_token_email_fields.py', reloading
+2025-09-24 17:24:36,397 - INFO -  * Restarting with stat
+2025-09-24 17:24:37,086 - INFO - База данных инициализирована успешно
+2025-09-24 17:24:37,222 - INFO - База данных инициализирована успешно
+2025-09-24 17:24:37,691 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:24:37,691 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:24:37,692 - INFO - Переменная окружения PORT: None
+2025-09-24 17:24:37,692 - INFO - Режим отладки: production
+2025-09-24 17:24:37,715 - WARNING -  * Debugger is active!
+2025-09-24 17:24:37,720 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:24:37,888 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 17:24:37,888 - INFO - Запуск приложения на порту 5000
+2025-09-24 17:24:37,888 - INFO - Переменная окружения PORT: None
+2025-09-24 17:24:37,889 - INFO - Режим отладки: production
+2025-09-24 17:24:37,905 - WARNING -  * Debugger is active!
+2025-09-24 17:24:37,909 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 17:25:38,259 - INFO - 127.0.0.1 - - [24/Sep/2025 17:25:38] "GET / HTTP/1.1" 200 -
+2025-09-24 17:25:39,969 - INFO - 127.0.0.1 - - [24/Sep/2025 17:25:39] "GET / HTTP/1.1" 200 -
+2025-09-24 17:25:44,052 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJx9j0GOwjAMRe_iNaDETUrJikPMPnITh4mmDUyaIkaIu09ABYkNK8vf_9n-V7Ah8_QNJtAw8QrIjzFZHikOYOCPkj-P-3vhyybP8DREDwYbLZunkGjkBXiZyvGHUxUVVslNObwUj9xL7Pp-y0J6QexCILHtsG1pF7RG77wKvqvciXKJLp4oFTscDwf2NtYVJc_8Plw-kJV5nLGZf2eeCpgruMxUKkm1AxSo12K3RvUlldHSIG5a1ehOVPRD8veISxSFt9s_NvdpAQ.aNPyuw.oNNDZgOC6bxnzZYOFkZuV5fHMt8'}
+2025-09-24 17:25:44,058 - INFO - GET запрос на страницу токенов. Текущее количество: 2
+2025-09-24 17:25:44,070 - INFO - 127.0.0.1 - - [24/Sep/2025 17:25:44] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 17:25:44,096 - INFO - 127.0.0.1 - - [24/Sep/2025 17:25:44] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 17:25:55,833 - INFO - 127.0.0.1 - - [24/Sep/2025 17:25:55] "GET / HTTP/1.1" 200 -
+2025-09-24 17:26:01,817 - INFO - Системный администратор успешно авторизован
+2025-09-24 17:26:01,817 - INFO - 127.0.0.1 - - [24/Sep/2025 17:26:01] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 17:26:01,863 - INFO - 127.0.0.1 - - [24/Sep/2025 17:26:01] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 17:26:06,174 - INFO - Найдено турниров для удаления: 1
+2025-09-24 17:26:06,174 - INFO - Удаляем турнир: local (ID: 1)
+2025-09-24 17:26:06,188 - INFO - Удалено участников: 4
+2025-09-24 17:26:06,189 - INFO - Удалено матчей: 3
+2025-09-24 17:26:06,190 - INFO - Турнир local помечен для удаления
+2025-09-24 17:26:06,192 - INFO - Удалено токенов по email admin_23513@system: 0
+2025-09-24 17:26:06,193 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 17:26:06,198 - INFO - Изменения сохранены в базу данных
+2025-09-24 17:26:06,198 - INFO - Администратор турнира 23513 удален. Удалено турниров: 1
+2025-09-24 17:26:06,199 - INFO - 127.0.0.1 - - [24/Sep/2025 17:26:06] "DELETE /api/admin/tournament-admins/23513 HTTP/1.1" 200 -
+2025-09-24 23:03:42,378 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:42] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:03:47,367 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:47] "[32mGET /admin-tokens HTTP/1.1[0m" 302 -
+2025-09-24 23:03:47,376 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:47] "GET / HTTP/1.1" 200 -
+2025-09-24 23:03:54,849 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:03:54,849 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:54] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:03:55,116 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:55] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:03:58,023 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:58] "[32mGET /admin-tokens HTTP/1.1[0m" 302 -
+2025-09-24 23:03:58,327 - INFO - 127.0.0.1 - - [24/Sep/2025 23:03:58] "GET / HTTP/1.1" 200 -
+2025-09-24 23:04:04,893 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:04] "GET / HTTP/1.1" 200 -
+2025-09-24 23:04:10,752 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:04:10,754 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:10] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:04:10,776 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:10] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:04:12,394 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:12] "[32mGET /admin-tokens HTTP/1.1[0m" 302 -
+2025-09-24 23:04:12,712 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:12] "GET / HTTP/1.1" 200 -
+2025-09-24 23:04:25,684 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:04:25,684 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:25] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:04:25,953 - INFO - 127.0.0.1 - - [24/Sep/2025 23:04:25] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:07:26,810 - INFO - 127.0.0.1 - - [24/Sep/2025 23:07:26] "[32mGET /admin-tokens HTTP/1.1[0m" 302 -
+2025-09-24 23:07:26,941 - INFO - 127.0.0.1 - - [24/Sep/2025 23:07:26] "GET / HTTP/1.1" 200 -
+2025-09-24 23:08:12,617 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:08:12,639 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:08:12,769 - INFO -  * Restarting with stat
+2025-09-24 23:08:12,769 - INFO -  * Restarting with stat
+2025-09-24 23:08:14,606 - INFO - База данных инициализирована успешно
+2025-09-24 23:08:15,137 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:08:15,137 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:08:15,137 - INFO - Переменная окружения PORT: None
+2025-09-24 23:08:15,138 - INFO - Режим отладки: production
+2025-09-24 23:08:15,149 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:08:15,149 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:08:15,150 - INFO - Переменная окружения PORT: None
+2025-09-24 23:08:15,150 - INFO - Режим отладки: production
+2025-09-24 23:08:15,178 - WARNING -  * Debugger is active!
+2025-09-24 23:08:15,178 - WARNING -  * Debugger is active!
+2025-09-24 23:08:15,184 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:08:25,862 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:08:25,966 - INFO -  * Restarting with stat
+2025-09-24 23:08:25,975 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:08:26,083 - INFO -  * Restarting with stat
+2025-09-24 23:08:26,963 - INFO - База данных инициализирована успешно
+2025-09-24 23:08:27,001 - INFO - База данных инициализирована успешно
+2025-09-24 23:08:27,528 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:08:27,528 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:08:27,528 - INFO - Переменная окружения PORT: None
+2025-09-24 23:08:27,529 - INFO - Режим отладки: production
+2025-09-24 23:08:27,550 - WARNING -  * Debugger is active!
+2025-09-24 23:08:27,553 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:08:27,578 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:08:27,578 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:08:27,578 - INFO - Переменная окружения PORT: None
+2025-09-24 23:08:27,579 - INFO - Режим отладки: production
+2025-09-24 23:08:27,597 - WARNING -  * Debugger is active!
+2025-09-24 23:08:27,600 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:08:35,683 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:08:35,752 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:08:35,775 - INFO -  * Restarting with stat
+2025-09-24 23:08:35,866 - INFO -  * Restarting with stat
+2025-09-24 23:08:36,935 - INFO - База данных инициализирована успешно
+2025-09-24 23:08:36,940 - INFO - База данных инициализирована успешно
+2025-09-24 23:08:37,567 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:08:37,567 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:08:37,568 - INFO - Переменная окружения PORT: None
+2025-09-24 23:08:37,568 - INFO - Режим отладки: production
+2025-09-24 23:08:37,585 - WARNING -  * Debugger is active!
+2025-09-24 23:08:37,589 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:08:37,589 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:08:37,590 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:08:37,590 - INFO - Переменная окружения PORT: None
+2025-09-24 23:08:37,590 - INFO - Режим отладки: production
+2025-09-24 23:08:37,608 - WARNING -  * Debugger is active!
+2025-09-24 23:08:37,613 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:09:53,130 - INFO - 127.0.0.1 - - [24/Sep/2025 23:09:53] "GET / HTTP/1.1" 200 -
+2025-09-24 23:09:56,514 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:09:56,515 - INFO - 127.0.0.1 - - [24/Sep/2025 23:09:56] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:09:56,555 - INFO - 127.0.0.1 - - [24/Sep/2025 23:09:56] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:10:00,224 - INFO - 127.0.0.1 - - [24/Sep/2025 23:10:00] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:10:00,530 - INFO - 127.0.0.1 - - [24/Sep/2025 23:10:00] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:13:11,213 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:11] "GET / HTTP/1.1" 200 -
+2025-09-24 23:13:16,205 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:13:16,207 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:16] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:13:16,233 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:16] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:13:20,639 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:20] "GET / HTTP/1.1" 200 -
+2025-09-24 23:13:22,141 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUdtuwyAM_ZWJ57UCj6SEp37EHichB0wXrUk7INOqqv8-QpJ20vZyjI8vxzZXZnyg-M60x2OkZ4au7wZDPXZHpmdvHy8xUc_WYOeYFqszYE858W3kEsSEL2pCWd4SClMVtAVd4dvybp6K4QXlryT1SP3bTvJH1SJAM3-fMJ0-aMhTSciUjcHfGQfUClBtuyMuHEey3iPfKahrbHxVgbNOeqdyXRfNvLgpTZlOYcwHOmNIne3OOCRzPB0O5Mz_weUyIrcq6ibQ50gxMX1lNhCmXInZY8Ch2vBmA_JVSF0JDbCt89XUtND6Excc3Fe_nwx9b8OYQ4vARK0aTEu43X4AvwySWg.aNRQ3A.2-X6FmI9Bddbu-xUVQSheOaPBGA'}
+2025-09-24 23:13:22,147 - INFO - GET запрос на страницу токенов. Текущее количество: 1
+2025-09-24 23:13:22,158 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:22] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 23:13:22,455 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:22] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 23:13:29,088 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUdtuwyAM_ZWJ57UCj6SEp37EHichB0wXrUk7INOqqv8-QpJ20vZyjI8vxzZXZnyg-M60x2OkZ4au7wZDPXZHpmdvHy8xUc_WYOeYFqszYE858W3kEsSEL2pCWd4SClMVtAVd4dvybp6K4QXlryT1SP3bTvJH1SJAM3-fMJ0-aMhTSciUjcHfGQfUClBtuyMuHEey3iPfKahrbHxVgbNOeqdyXRfNvLgpTZlOYcwHOmNIne3OOCRzPB0O5Mz_weUyIrcq6ibQ50gxMX1lNhCmXInZY8Ch2vBmA_JVSF0JDbCt89XUtND6Excc3Fe_nwx9b8OYQ4vARK0aTEu43X4AvwySWg.aNRQ3A.2-X6FmI9Bddbu-xUVQSheOaPBGA'}
+2025-09-24 23:13:29,099 - INFO - Текущее количество выданных токенов: 1
+2025-09-24 23:13:29,119 - INFO - Отправка email с токеном 29 на yandvm@yandex.ru для yand
+2025-09-24 23:13:29,120 - INFO - Запуск асинхронной отправки email на yandvm@yandex.ru
+2025-09-24 23:13:29,121 - INFO - Асинхронная отправка email запущена для yandvm@yandex.ru
+2025-09-24 23:13:29,122 - INFO - Результат отправки email: True
+2025-09-24 23:13:29,122 - INFO - [SUCCESS] Email отправлен на yandvm@yandex.ru
+2025-09-24 23:13:29,130 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:29] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 23:13:30,122 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 23:13:30,122 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 23:13:30,122 - INFO - Все переменные окружения MAIL_*: []
+2025-09-24 23:13:30,122 - INFO - RAILWAY_ENVIRONMENT: НЕ УСТАНОВЛЕНО
+2025-09-24 23:13:30,122 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 23:13:30,142 - INFO - Попытка отправки email на yandvm@yandex.ru с токеном 29
+2025-09-24 23:13:30,142 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 23:13:30,142 - INFO - От: tournaments.master@gmail.com, Кому: yandvm@yandex.ru
+2025-09-24 23:13:30,356 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-09-24 23:13:30,649 - INFO - [OK] TLS включен
+2025-09-24 23:13:31,079 - INFO - [OK] Авторизация успешна
+2025-09-24 23:13:32,060 - INFO - [OK] Email отправлен, результат: {}
+2025-09-24 23:13:32,133 - INFO - [OK] SMTP соединение закрыто
+2025-09-24 23:13:32,133 - INFO - [SUCCESS] Токен 29 успешно отправлен на yandvm@yandex.ru (yand) от tournaments.master@gmail.com
+2025-09-24 23:13:32,149 - ERROR - Ошибка обновления статуса токена 29: Table 'tokens' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-09-24 23:13:32,149 - INFO - Асинхронная отправка завершена: True
+2025-09-24 23:13:35,934 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:35] "GET / HTTP/1.1" 200 -
+2025-09-24 23:13:38,882 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:13:38,882 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:38] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:13:38,923 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:38] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:13:41,883 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:41] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:13:42,197 - INFO - 127.0.0.1 - - [24/Sep/2025 23:13:42] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:14:38,820 - INFO - 127.0.0.1 - - [24/Sep/2025 23:14:38] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:14:56,255 - INFO - 127.0.0.1 - - [24/Sep/2025 23:14:56] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:16:38,254 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:16:38,283 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:16:38,385 - INFO -  * Restarting with stat
+2025-09-24 23:16:38,396 - INFO -  * Restarting with stat
+2025-09-24 23:16:39,354 - INFO - База данных инициализирована успешно
+2025-09-24 23:16:39,360 - INFO - База данных инициализирована успешно
+2025-09-24 23:16:39,881 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:16:39,882 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:16:39,882 - INFO - Переменная окружения PORT: None
+2025-09-24 23:16:39,882 - INFO - Режим отладки: production
+2025-09-24 23:16:39,890 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:16:39,891 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:16:39,891 - INFO - Переменная окружения PORT: None
+2025-09-24 23:16:39,892 - INFO - Режим отладки: production
+2025-09-24 23:16:39,902 - WARNING -  * Debugger is active!
+2025-09-24 23:16:39,906 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:16:39,912 - WARNING -  * Debugger is active!
+2025-09-24 23:16:39,917 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:17:25,054 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:17:25,088 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:17:25,165 - INFO -  * Restarting with stat
+2025-09-24 23:17:25,200 - INFO -  * Restarting with stat
+2025-09-24 23:17:26,294 - INFO - База данных инициализирована успешно
+2025-09-24 23:17:26,311 - INFO - База данных инициализирована успешно
+2025-09-24 23:17:26,830 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:17:26,831 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:17:26,831 - INFO - Переменная окружения PORT: None
+2025-09-24 23:17:26,832 - INFO - Режим отладки: production
+2025-09-24 23:17:26,843 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:17:26,844 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:17:26,844 - INFO - Переменная окружения PORT: None
+2025-09-24 23:17:26,844 - INFO - Режим отладки: production
+2025-09-24 23:17:26,850 - WARNING -  * Debugger is active!
+2025-09-24 23:17:26,855 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:17:26,865 - WARNING -  * Debugger is active!
+2025-09-24 23:17:26,869 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:19:23,876 - INFO - 127.0.0.1 - - [24/Sep/2025 23:19:23] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:19:23,914 - INFO - 127.0.0.1 - - [24/Sep/2025 23:19:23] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:19:36,500 - INFO - 127.0.0.1 - - [24/Sep/2025 23:19:36] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:19:36,828 - INFO - 127.0.0.1 - - [24/Sep/2025 23:19:36] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:20:02,644 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:02] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:20:02,684 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:02] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:20:04,468 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:04] "GET / HTTP/1.1" 200 -
+2025-09-24 23:20:06,725 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-24 23:20:06,727 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:06] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-24 23:20:23,376 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:20:23,381 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:23] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:20:23,655 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:23] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:20:23,720 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-24 23:20:23,721 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:23] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-24 23:20:25,369 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:25] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:20:25,418 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-24 23:20:25,419 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:25] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-24 23:20:25,630 - INFO - 127.0.0.1 - - [24/Sep/2025 23:20:25] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:26:54,770 - INFO - 127.0.0.1 - - [24/Sep/2025 23:26:54] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:26:54,808 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-24 23:26:54,808 - INFO - 127.0.0.1 - - [24/Sep/2025 23:26:54] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-24 23:26:55,021 - INFO - 127.0.0.1 - - [24/Sep/2025 23:26:55] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:27:09,405 - INFO - The CSRF token is missing.
+2025-09-24 23:27:09,412 - INFO - 127.0.0.1 - - [24/Sep/2025 23:27:09] "[31m[1mPOST /api/admin/send-token-manually HTTP/1.1[0m" 400 -
+2025-09-24 23:27:23,777 - INFO - The CSRF token is missing.
+2025-09-24 23:27:23,778 - INFO - 127.0.0.1 - - [24/Sep/2025 23:27:23] "[31m[1mPOST /api/admin/send-token-manually HTTP/1.1[0m" 400 -
+2025-09-24 23:28:26,691 - INFO - The CSRF token is missing.
+2025-09-24 23:28:26,691 - INFO - 127.0.0.1 - - [24/Sep/2025 23:28:26] "[31m[1mPOST /api/admin/send-token-manually HTTP/1.1[0m" 400 -
+2025-09-24 23:29:58,292 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:29:58,311 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:29:58,422 - INFO -  * Restarting with stat
+2025-09-24 23:29:58,433 - INFO -  * Restarting with stat
+2025-09-24 23:29:59,445 - INFO - База данных инициализирована успешно
+2025-09-24 23:29:59,446 - INFO - База данных инициализирована успешно
+2025-09-24 23:30:00,008 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:30:00,010 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:30:00,011 - INFO - Переменная окружения PORT: None
+2025-09-24 23:30:00,011 - INFO - Режим отладки: production
+2025-09-24 23:30:00,021 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:30:00,022 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:30:00,023 - INFO - Переменная окружения PORT: None
+2025-09-24 23:30:00,023 - INFO - Режим отладки: production
+2025-09-24 23:30:00,043 - WARNING -  * Debugger is active!
+2025-09-24 23:30:00,049 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:30:00,050 - WARNING -  * Debugger is active!
+2025-09-24 23:30:00,054 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:30:04,439 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:30:04,452 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:30:04,568 - INFO -  * Restarting with stat
+2025-09-24 23:30:04,566 - INFO -  * Restarting with stat
+2025-09-24 23:30:05,557 - INFO - База данных инициализирована успешно
+2025-09-24 23:30:05,558 - INFO - База данных инициализирована успешно
+2025-09-24 23:30:06,121 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:30:06,121 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:30:06,121 - INFO - Переменная окружения PORT: None
+2025-09-24 23:30:06,122 - INFO - Режим отладки: production
+2025-09-24 23:30:06,126 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:30:06,127 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:30:06,128 - INFO - Переменная окружения PORT: None
+2025-09-24 23:30:06,129 - INFO - Режим отладки: production
+2025-09-24 23:30:06,142 - WARNING -  * Debugger is active!
+2025-09-24 23:30:06,147 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:30:06,149 - WARNING -  * Debugger is active!
+2025-09-24 23:30:06,154 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:30:11,804 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:30:11,818 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:30:11,934 - INFO -  * Restarting with stat
+2025-09-24 23:30:11,938 - INFO -  * Restarting with stat
+2025-09-24 23:33:17,986 - INFO - База данных инициализирована успешно
+2025-09-24 23:33:18,604 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:33:18,604 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:33:18,605 - INFO - Переменная окружения PORT: None
+2025-09-24 23:33:18,605 - INFO - Режим отладки: production
+2025-09-24 23:33:18,641 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-24 23:33:18,641 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-24 23:33:18,643 - INFO -  * Restarting with stat
+2025-09-24 23:33:19,642 - INFO - База данных инициализирована успешно
+2025-09-24 23:33:20,212 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:33:20,213 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:33:20,213 - INFO - Переменная окружения PORT: None
+2025-09-24 23:33:20,213 - INFO - Режим отладки: production
+2025-09-24 23:33:20,236 - WARNING -  * Debugger is active!
+2025-09-24 23:33:20,241 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:36:00,407 - INFO - 127.0.0.1 - - [24/Sep/2025 23:36:00] "GET / HTTP/1.1" 200 -
+2025-09-24 23:36:43,165 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:36:43,252 - INFO -  * Restarting with stat
+2025-09-24 23:36:44,367 - INFO - База данных инициализирована успешно
+2025-09-24 23:36:45,015 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:36:45,016 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:36:45,016 - INFO - Переменная окружения PORT: None
+2025-09-24 23:36:45,017 - INFO - Режим отладки: production
+2025-09-24 23:36:45,041 - WARNING -  * Debugger is active!
+2025-09-24 23:36:45,045 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:36:46,896 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:36:46,994 - INFO -  * Restarting with stat
+2025-09-24 23:36:48,030 - INFO - База данных инициализирована успешно
+2025-09-24 23:36:48,788 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:36:48,789 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:36:48,789 - INFO - Переменная окружения PORT: None
+2025-09-24 23:36:48,789 - INFO - Режим отладки: production
+2025-09-24 23:36:48,807 - WARNING -  * Debugger is active!
+2025-09-24 23:36:48,810 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:39:08,924 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:08] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:39:09,013 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:09] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:39:14,248 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:14] "GET / HTTP/1.1" 200 -
+2025-09-24 23:39:18,104 - INFO - Системный администратор успешно авторизован
+2025-09-24 23:39:18,105 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:18] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 23:39:18,506 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:18] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 23:39:20,166 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:20] "GET /admin-tokens HTTP/1.1" 200 -
+2025-09-24 23:39:20,212 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:20] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:39:30,881 - INFO - Ручная отправка токена: {'token_id': '2', 'email': 'yandvm@yandex.ru'}
+2025-09-24 23:39:30,882 - INFO - Ручная отправка токена 29 на yandvm@yandex.ru
+2025-09-24 23:39:30,882 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 23:39:30,892 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 23:39:30,893 - INFO - Все переменные окружения MAIL_*: []
+2025-09-24 23:39:30,894 - INFO - RAILWAY_ENVIRONMENT: НЕ УСТАНОВЛЕНО
+2025-09-24 23:39:30,895 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 23:39:30,897 - INFO - Попытка отправки email на yandvm@yandex.ru с токеном 29
+2025-09-24 23:39:30,898 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 23:39:30,898 - INFO - От: tournaments.master@gmail.com, Кому: yandvm@yandex.ru
+2025-09-24 23:39:31,102 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-09-24 23:39:31,398 - INFO - [OK] TLS включен
+2025-09-24 23:39:31,966 - INFO - [OK] Авторизация успешна
+2025-09-24 23:39:33,179 - INFO - [OK] Email отправлен, результат: {}
+2025-09-24 23:39:34,029 - INFO - [OK] SMTP соединение закрыто
+2025-09-24 23:39:34,029 - INFO - [SUCCESS] Токен 29 успешно отправлен на yandvm@yandex.ru (yand) от tournaments.master@gmail.com
+2025-09-24 23:39:34,194 - INFO - База данных инициализирована успешно
+2025-09-24 23:39:35,951 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:39:35,951 - ERROR - Ошибка обновления статуса токена 29: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-09-24 23:39:35,981 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:35] "POST /api/admin/send-token-manually HTTP/1.1" 200 -
+2025-09-24 23:39:36,002 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:36] "GET /api/admin/tokens HTTP/1.1" 200 -

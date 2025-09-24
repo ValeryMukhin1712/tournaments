@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, date, time
 import logging
+from flask_wtf.csrf import CSRFProtect
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,15 @@ def add_minutes_to_time(time_obj, minutes):
 
 def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):
     """Создает API маршруты приложения"""
+    
+    # Получаем объект CSRF из приложения
+    csrf = app.extensions.get('csrf')
+    if not csrf:
+        # Если CSRF не найден, создаем заглушку
+        class CSRFStub:
+            def exempt(self, f):
+                return f
+        csrf = CSRFStub()
     
     # ===== ПОЛЬЗОВАТЕЛИ =====
     
@@ -1903,3 +1913,97 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             'flask_config': flask_config,
             'message': 'Проверьте переменные окружения на Railway'
         })
+
+    @app.route('/api/admin/tokens', methods=['GET'])
+    def admin_get_tokens():
+        """Получение списка токенов для админ-панели"""
+        try:
+            # Получаем все токены с информацией о статусе отправки
+            tokens = Token.query.order_by(Token.created_at.desc()).all()
+            
+            token_list = []
+            for token in tokens:
+                token_data = {
+                    'id': token.id,
+                    'email': token.email,
+                    'token': token.token,
+                    'name': token.name,
+                    'created_at': token.created_at.strftime('%d.%m.%Y %H:%M'),
+                    'is_used': token.is_used,
+                    'used_at': token.used_at.strftime('%d.%m.%Y %H:%M') if token.used_at else None,
+                    'email_sent': token.email_sent,
+                    'email_sent_at': token.email_sent_at.strftime('%d.%m.%Y %H:%M') if token.email_sent_at else None,
+                    'email_status': token.email_status
+                }
+                token_list.append(token_data)
+            
+            return jsonify({
+                'success': True,
+                'tokens': token_list,
+                'total': len(token_list),
+                'pending': len([t for t in token_list if t['email_status'] == 'pending']),
+                'manual': len([t for t in token_list if t['email_status'] == 'manual']),
+                'sent': len([t for t in token_list if t['email_status'] == 'sent']),
+                'failed': len([t for t in token_list if t['email_status'] == 'failed'])
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении токенов: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении токенов'}), 500
+
+    @app.route('/api/admin/send-token-manually', methods=['POST'])
+    @csrf.exempt  # Исключаем из CSRF защиты для API
+    def admin_send_token_manually():
+        """Ручная отправка токена администратором"""
+        try:
+            data = request.get_json()
+            logger.info(f"Ручная отправка токена: {data}")
+            
+            token_id = data.get('token_id')
+            custom_email = data.get('email')  # Опционально - другой email для отправки
+            
+            if not token_id:
+                return jsonify({'success': False, 'error': 'Не указан ID токена'}), 400
+            
+            # Находим токен
+            token = Token.query.get(token_id)
+            if not token:
+                return jsonify({'success': False, 'error': 'Токен не найден'}), 404
+            
+            # Определяем email для отправки
+            target_email = custom_email or token.email
+            
+            # Импортируем функцию отправки email
+            from routes.main import send_token_email
+            
+            logger.info(f"Ручная отправка токена {token.token} на {target_email}")
+            
+            # Пытаемся отправить email
+            result = send_token_email(target_email, token.name, token.token)
+            
+            if result:
+                # Обновляем статус токена
+                token.email_sent = True
+                token.email_sent_at = datetime.utcnow()
+                token.email_status = 'sent'
+                db.session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Токен {token.token} успешно отправлен на {target_email}'
+                })
+            else:
+                # Обновляем статус как требующий ручной отправки
+                token.email_status = 'manual'
+                db.session.commit()
+                
+                return jsonify({
+                    'success': False,
+                    'message': f'Не удалось отправить токен {token.token} на {target_email}. Требуется ручная отправка.'
+                })
+                
+        except Exception as e:
+            logger.error(f"Ошибка при ручной отправке токена: {e}")
+            logger.error(f"Тип ошибки: {type(e).__name__}")
+            logger.error(f"Детали ошибки: {str(e)}")
+            return jsonify({'success': False, 'error': f'Ошибка при отправке: {str(e)}'}), 500
