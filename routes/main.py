@@ -234,7 +234,6 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             existing_token = Token.query.filter_by(email=email).first()
             if existing_token:
                 # Если токен уже существует, показываем его пользователю
-                flash(f'Пользователь с email {email} уже зарегистрирован. Ваш токен: {existing_token.token}', 'info')
                 return render_template('token_generated.html', 
                                      token=existing_token.token, 
                                      name=existing_token.name, 

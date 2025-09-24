@@ -6163,3 +6163,100 @@ with app.app_context(). See the documentation for more information.
 2025-09-24 12:54:32,732 - INFO -  * Debugger PIN: 119-940-355
 2025-09-24 12:54:49,748 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
 2025-09-24 12:54:49,838 - INFO -  * Restarting with stat
+2025-09-24 12:54:50,886 - INFO - База данных инициализирована успешно
+2025-09-24 12:54:51,484 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:54:51,485 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:54:51,485 - INFO - Переменная окружения PORT: None
+2025-09-24 12:54:51,485 - INFO - Режим отладки: production
+2025-09-24 12:54:51,504 - WARNING -  * Debugger is active!
+2025-09-24 12:54:51,506 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:57:35,401 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUNFqwzAM_JXh57XYqpPafupH7LEQFEtmYU3G7GSslP77bLdpBwNzkk53ltBFdCFyehcu4Cnxq0Aah6njEYeTcLfqkM5p5lGszYGEU2sx4chZeFykBlVwZwrqmmuoTFPRV6TK9zW3LzXIivqPyDyl_7_T8um6D-Ab_9hw_vzgKW-lCuVTDA-GgHsFpu_3LBVJZB8Cyr2BtkUbmgbIkw5ksq9aushfC6dZuIvwkXFm6jBXAiQ0G2k3oN8UON3mt5XK2NZm63q-M070PR5K4J9tXHLrfq9CrTOEs-Z6_QW683bv.aNO-Bg.S-j2MdbOa3gufHFgLkhqHyYdZPA'}
+2025-09-24 12:57:35,425 - INFO - GET запрос на страницу токенов. Текущее количество: 2
+2025-09-24 12:57:35,502 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:35] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:57:42,703 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:42] "GET / HTTP/1.1" 200 -
+2025-09-24 12:57:47,896 - INFO - Системный администратор успешно авторизован
+2025-09-24 12:57:47,898 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:47] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 12:57:48,265 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:48] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 12:57:52,334 - INFO - Найдено турниров для удаления: 0
+2025-09-24 12:57:52,337 - INFO - Удалено токенов по email admin_23513@system: 0
+2025-09-24 12:57:52,339 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 12:57:52,389 - INFO - Изменения сохранены в базу данных
+2025-09-24 12:57:52,390 - INFO - Администратор турнира 23513 удален. Удалено турниров: 0
+2025-09-24 12:57:52,393 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:52] "DELETE /api/admin/tournament-admins/23513 HTTP/1.1" 200 -
+2025-09-24 12:57:56,317 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:56] "GET / HTTP/1.1" 200 -
+2025-09-24 12:57:57,417 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUNFqwzAM_JXh57XYqpPafupH7LEQFEtmYU3G7GSslP77bLdpBwNzkk53ltBFdCFyehcu4Cnxq0Aah6njEYeTcLfqkM5p5lGszYGEU2sx4chZeFykBlVwZwrqmmuoTFPRV6TK9zW3LzXIivqPyDyl_7_T8um6D-Ab_9hw_vzgKW-lCuVTDA-GgHsFpu_3LBVJZB8Cyr2BtkUbmgbIkw5ksq9aushfC6dZuIvwkXFm6jBXAiQ0G2k3oN8UON3mt5XK2NZm63q-M070PR5K4J9tXHLrfq9CrTOEs-Z6_QW683bv.aNPAmw.yPZf35k0CB6uWXWv3JoxaGgddJE'}
+2025-09-24 12:57:57,422 - INFO - GET запрос на страницу токенов. Текущее количество: 1
+2025-09-24 12:57:57,425 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:57] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:57:57,724 - INFO - 127.0.0.1 - - [24/Sep/2025 12:57:57] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:58:01,620 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUNFqwzAM_JXh57XYqpPafupH7LEQFEtmYU3G7GSslP77bLdpBwNzkk53ltBFdCFyehcu4Cnxq0Aah6njEYeTcLfqkM5p5lGszYGEU2sx4chZeFykBlVwZwrqmmuoTFPRV6TK9zW3LzXIivqPyDyl_7_T8um6D-Ab_9hw_vzgKW-lCuVTDA-GgHsFpu_3LBVJZB8Cyr2BtkUbmgbIkw5ksq9aushfC6dZuIvwkXFm6jBXAiQ0G2k3oN8UON3mt5XK2NZm63q-M070PR5K4J9tXHLrfq9CrTOEs-Z6_QW683bv.aNPAmw.yPZf35k0CB6uWXWv3JoxaGgddJE'}
+2025-09-24 12:58:01,625 - INFO - Текущее количество выданных токенов: 1
+2025-09-24 12:58:01,684 - INFO - Отправка email с токеном 94 на yandvm@yandex.ru для yand
+2025-09-24 12:58:01,685 - INFO - Запуск асинхронной отправки email на yandvm@yandex.ru
+2025-09-24 12:58:01,686 - INFO - Асинхронная отправка email запущена для yandvm@yandex.ru
+2025-09-24 12:58:01,687 - INFO - Результат отправки email: True
+2025-09-24 12:58:01,688 - INFO - [SUCCESS] Flash сообщение: Токен отправлен на yandvm@yandex.ru
+2025-09-24 12:58:01,713 - INFO - 127.0.0.1 - - [24/Sep/2025 12:58:01] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 12:58:02,686 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 12:58:02,686 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 12:58:02,686 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 12:58:02,686 - INFO - Попытка отправки email на yandvm@yandex.ru с токеном 94
+2025-09-24 12:58:02,686 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 12:58:02,686 - INFO - От: tournaments.master@gmail.com, Кому: yandvm@yandex.ru
+2025-09-24 12:58:02,879 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-09-24 12:58:03,103 - INFO - [OK] TLS включен
+2025-09-24 12:58:03,554 - INFO - [OK] Авторизация успешна
+2025-09-24 12:58:04,637 - INFO - [OK] Email отправлен, результат: {}
+2025-09-24 12:58:04,709 - INFO - [OK] SMTP соединение закрыто
+2025-09-24 12:58:04,710 - INFO - [SUCCESS] Токен 94 успешно отправлен на yandvm@yandex.ru (yand) от tournaments.master@gmail.com
+2025-09-24 12:58:04,711 - INFO - Асинхронная отправка завершена: True
+2025-09-24 13:41:57,844 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81oBhRQ49SN2rBQ52GjRSqZBMq2q-u8D2rSTdnn2e_azLV9YHxLld-YCnDK9MsA4Tj1FGE_M3dghn_NMka3FEZkTK5kgUmk8LlxJUXFnKqqWK9kU3dA3xKYPLbcvLfCG6k-Tebb-H6f403VfQDf9ceH8-UFTuUpUyecUHgpKGoQ0w7AnLpAD-RCA743sOrBBa4keVUBTfM3SJ_paKM_MXZhPBDNhD4UxyaXecLuR6k1Ip43jYtsZxTtbrOv7zjDhdzzUQD_btJTS_V9VWncwZ9X1-gu5j3bl.aNPAqQ.JI6KzWOheoaxrNxQozKSKPeLeUI'}
+2025-09-24 13:41:57,865 - INFO - 127.0.0.1 - - [24/Sep/2025 13:41:57] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 13:42:09,140 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:09] "GET / HTTP/1.1" 200 -
+2025-09-24 13:42:15,078 - INFO - Системный администратор успешно авторизован
+2025-09-24 13:42:15,079 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:15] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 13:42:15,127 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:15] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 13:42:18,745 - INFO - Найдено турниров для удаления: 0
+2025-09-24 13:42:18,747 - INFO - Удалено токенов по email admin_23513@system: 0
+2025-09-24 13:42:18,749 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 13:42:18,796 - INFO - Изменения сохранены в базу данных
+2025-09-24 13:42:18,796 - INFO - Администратор турнира 23513 удален. Удалено турниров: 0
+2025-09-24 13:42:18,798 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:18] "DELETE /api/admin/tournament-admins/23513 HTTP/1.1" 200 -
+2025-09-24 13:42:20,268 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:20] "GET / HTTP/1.1" 200 -
+2025-09-24 13:42:21,050 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81oBhRQ49SN2rBQ52GjRSqZBMq2q-u8D2rSTdnn2e_azLV9YHxLld-YCnDK9MsA4Tj1FGE_M3dghn_NMka3FEZkTK5kgUmk8LlxJUXFnKqqWK9kU3dA3xKYPLbcvLfCG6k-Tebb-H6f403VfQDf9ceH8-UFTuUpUyecUHgpKGoQ0w7AnLpAD-RCA743sOrBBa4keVUBTfM3SJ_paKM_MXZhPBDNhD4UxyaXecLuR6k1Ip43jYtsZxTtbrOv7zjDhdzzUQD_btJTS_V9VWncwZ9X1-gu5j3bl.aNPLBw.Hoe-bJ9LyKOtOQsWR4MCgmaIWFw'}
+2025-09-24 13:42:21,058 - INFO - GET запрос на страницу токенов. Текущее количество: 1
+2025-09-24 13:42:21,061 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:21] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 13:42:21,121 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:21] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 13:42:27,036 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81oBhRQ49SN2rBQ52GjRSqZBMq2q-u8D2rSTdnn2e_azLV9YHxLld-YCnDK9MsA4Tj1FGE_M3dghn_NMka3FEZkTK5kgUmk8LlxJUXFnKqqWK9kU3dA3xKYPLbcvLfCG6k-Tebb-H6f403VfQDf9ceH8-UFTuUpUyecUHgpKGoQ0w7AnLpAD-RCA743sOrBBa4keVUBTfM3SJ_paKM_MXZhPBDNhD4UxyaXecLuR6k1Ip43jYtsZxTtbrOv7zjDhdzzUQD_btJTS_V9VWncwZ9X1-gu5j3bl.aNPLBw.Hoe-bJ9LyKOtOQsWR4MCgmaIWFw'}
+2025-09-24 13:42:27,048 - INFO - Текущее количество выданных токенов: 1
+2025-09-24 13:42:27,100 - INFO - Отправка email с токеном 16 на yandvm@yandex.ru для yand
+2025-09-24 13:42:27,101 - INFO - Запуск асинхронной отправки email на yandvm@yandex.ru
+2025-09-24 13:42:27,102 - INFO - Асинхронная отправка email запущена для yandvm@yandex.ru
+2025-09-24 13:42:27,103 - INFO - Результат отправки email: True
+2025-09-24 13:42:27,103 - INFO - [SUCCESS] Flash сообщение: Токен отправлен на yandvm@yandex.ru
+2025-09-24 13:42:27,106 - INFO - 127.0.0.1 - - [24/Sep/2025 13:42:27] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 13:42:28,103 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 13:42:28,107 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 13:42:28,108 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 13:42:28,110 - INFO - Попытка отправки email на yandvm@yandex.ru с токеном 16
+2025-09-24 13:42:28,111 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 13:42:28,113 - INFO - От: tournaments.master@gmail.com, Кому: yandvm@yandex.ru
+2025-09-24 13:42:28,294 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-09-24 13:42:28,513 - INFO - [OK] TLS включен
+2025-09-24 13:42:28,972 - INFO - [OK] Авторизация успешна
+2025-09-24 13:42:29,862 - INFO - [OK] Email отправлен, результат: {}
+2025-09-24 13:42:29,946 - INFO - [OK] SMTP соединение закрыто
+2025-09-24 13:42:29,952 - INFO - [SUCCESS] Токен 16 успешно отправлен на yandvm@yandex.ru (yand) от tournaments.master@gmail.com
+2025-09-24 13:42:29,953 - INFO - Асинхронная отправка завершена: True
+2025-09-24 13:51:01,699 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81oZFxLCqR-xY6WIgNGilVSDpFpV9d8HtGkn7fLs9-xnW76y3kdKn0x7c0z0zowL49RTMOOR6Tvbp0uaKbC1ODqm-UomEyg3HhYQyAvuVEFRc4FVkRVtRVf1oebdWw1QUfxpUq_W_-MEvFyPBXTXnxfOpy-a8lW8SDZF_1Qc0sBRDUNLwB0Yst4baBU2jem8lOisE96p7KuWPtL3Qmlm-spsJDOT601mDAHlBroNig--0wI1tlsOIGSTrev7LmZy57AvgX62ccmlx7-KtO7I32xut1-173bQ.aNPLEw.I6_2QwYk2l3TfxS_Ukad23M7F7A'}
+2025-09-24 13:51:01,723 - INFO - 127.0.0.1 - - [24/Sep/2025 13:51:01] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 13:53:55,326 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 13:53:55,449 - INFO -  * Restarting with stat
+2025-09-24 13:53:56,660 - INFO - База данных инициализирована успешно
+2025-09-24 13:53:57,337 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 13:53:57,338 - INFO - Запуск приложения на порту 5000
+2025-09-24 13:53:57,338 - INFO - Переменная окружения PORT: None
+2025-09-24 13:53:57,339 - INFO - Режим отладки: production
+2025-09-24 13:53:57,374 - WARNING -  * Debugger is active!
+2025-09-24 13:53:57,379 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 13:54:01,891 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 13:54:01,990 - INFO -  * Restarting with stat
