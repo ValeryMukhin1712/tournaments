@@ -173,8 +173,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             # Проверяем уникальность email
             existing_token = Token.query.filter_by(email=email).first()
             if existing_token:
-                flash('Пользователь с таким email уже зарегистрирован. Используйте другой email или обратитесь к администратору.', 'error')
-                return render_template('request_token.html')
+                # Если токен уже существует, показываем его пользователю
+                flash(f'Пользователь с email {email} уже зарегистрирован. Ваш токен: {existing_token.token}', 'info')
+                return render_template('token_generated.html', 
+                                     token=existing_token.token, 
+                                     name=existing_token.name, 
+                                     email=existing_token.email,
+                                     created_at=existing_token.created_at.strftime('%d.%m.%Y %H:%M'))
             
             # Генерируем целочисленный токен в диапазоне 10-99
             import random
