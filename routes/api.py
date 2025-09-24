@@ -2013,6 +2013,10 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     def send_email_external():
         """Отправка email через внешний сервис (для Railway)"""
         try:
+            import os
+            import requests
+            from datetime import datetime
+            
             data = request.get_json()
             email = data.get('email')
             name = data.get('name')
@@ -2022,12 +2026,15 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 return jsonify({'success': False, 'error': 'Не указаны все необходимые параметры'}), 400
             
             # Попробуем использовать EmailJS
-            import requests
-            
             emailjs_url = "https://api.emailjs.com/api/v1.0/email/send"
             emailjs_service_id = os.environ.get('EMAILJS_SERVICE_ID')
             emailjs_template_id = os.environ.get('EMAILJS_TEMPLATE_ID')
             emailjs_user_id = os.environ.get('EMAILJS_USER_ID')
+            
+            logger.info(f"Проверка настроек EmailJS:")
+            logger.info(f"EMAILJS_SERVICE_ID: {emailjs_service_id}")
+            logger.info(f"EMAILJS_TEMPLATE_ID: {emailjs_template_id}")
+            logger.info(f"EMAILJS_USER_ID: {emailjs_user_id}")
             
             if emailjs_service_id and emailjs_template_id and emailjs_user_id:
                 logger.info(f"Попытка отправки через EmailJS на {email}")
@@ -2044,7 +2051,12 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     }
                 }
                 
+                logger.info(f"Отправка запроса на EmailJS: {emailjs_url}")
+                logger.info(f"Payload: {payload}")
+                
                 response = requests.post(emailjs_url, json=payload, timeout=10)
+                logger.info(f"Ответ EmailJS: статус {response.status_code}, текст: {response.text}")
+                
                 if response.status_code == 200:
                     logger.info(f"[SUCCESS] Email отправлен через EmailJS на {email}")
                     return jsonify({
@@ -2055,13 +2067,59 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     logger.error(f"[ERROR] EmailJS вернул статус {response.status_code}")
                     return jsonify({
                         'success': False,
-                        'error': f'Внешний сервис вернул ошибку: {response.status_code}'
+                        'error': f'Внешний сервис вернул ошибку: {response.status_code} - {response.text}'
                     })
             else:
-                logger.warning("EmailJS не настроен")
+                logger.warning("EmailJS не настроен - отсутствуют переменные окружения")
+                
+                # Попробуем использовать простой webhook
+                webhook_url = os.environ.get('EMAIL_WEBHOOK_URL')
+                if webhook_url:
+                    logger.info(f"Попытка отправки через webhook: {webhook_url}")
+                    
+                    payload = {
+                        'to': email,
+                        'subject': 'Ваш токен для создания турниров',
+                        'body': f"""
+Здравствуйте, {name}!
+
+Ваш токен для создания турниров: {token}
+
+Этот токен действителен в течение 30 дней.
+Используйте его для входа в систему как администратор турнира.
+
+С уважением,
+Команда турнирной системы
+                        """,
+                        'from': 'tournaments.master@gmail.com'
+                    }
+                    
+                    try:
+                        response = requests.post(webhook_url, json=payload, timeout=10)
+                        if response.status_code == 200:
+                            logger.info(f"[SUCCESS] Email отправлен через webhook на {email}")
+                            return jsonify({
+                                'success': True,
+                                'message': f'Email успешно отправлен на {email} через webhook'
+                            })
+                        else:
+                            logger.error(f"[ERROR] Webhook вернул статус {response.status_code}")
+                    except Exception as webhook_error:
+                        logger.error(f"[ERROR] Ошибка webhook: {webhook_error}")
+                
+                # Если ничего не работает, сохраняем для ручной отправки
+                logger.info("Все внешние сервисы недоступны. Сохраняем для ручной отправки.")
+                
+                # Сохраняем в файл для ручной отправки
+                try:
+                    with open('tokens.txt', 'a', encoding='utf-8') as f:
+                        f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token} (RAILWAY EXTERNAL API - ТРЕБУЕТСЯ РУЧНАЯ ОТПРАВКА)\n")
+                except Exception as file_error:
+                    logger.warning(f"Не удалось сохранить в файл: {file_error}")
+                
                 return jsonify({
                     'success': False,
-                    'error': 'Внешний email сервис не настроен'
+                    'error': 'Внешний email сервис не настроен. Токен сохранен для ручной отправки. Добавьте переменные EMAILJS_* или EMAIL_WEBHOOK_URL на Railway'
                 })
                 
         except Exception as e:
