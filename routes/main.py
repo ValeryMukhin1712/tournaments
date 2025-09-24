@@ -65,7 +65,7 @@ def send_token_email(email, name, token):
         server.starttls()
         server.login(smtp_username, smtp_password)
         text = msg.as_string()
-        server.sendmail(from_email, email, text)
+        server.sendmail(from_email, email, text.encode('utf-8'))
         server.quit()
         
         logger.info(f"Токен {token} отправлен на {email} ({name}) от {from_email}")
@@ -197,11 +197,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     else:
                         flash('Токен сгенерирован, но email не настроен. Сохраните токен вручную.', 'warning')
                 except Exception as e:
-                    app.logger.error(f'Ошибка отправки email: {e}')
+                    logger.error(f'Ошибка отправки email: {e}')
                     flash('Токен сгенерирован, но не удалось отправить email. Сохраните токен вручную.', 'warning')
                     
             except Exception as e:
-                app.logger.error(f'Ошибка сохранения токена в БД: {e}')
+                logger.error(f'Ошибка сохранения токена в БД: {e}')
                 flash('Ошибка при создании токена. Попробуйте еще раз.', 'error')
                 return render_template('request_token.html')
             
