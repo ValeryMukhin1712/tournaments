@@ -129,33 +129,33 @@ def create_smart_schedule(tournament, participants, Match, db):
                             court_number=court_num,
                 match_number=match_number
             )
-                        db.session.add(match_obj)
-                        scheduled_matches.append(match_obj)
+            db.session.add(match_obj)
+            scheduled_matches.append(match_obj)
             match_number += 1
-                        
-                        # Обновляем расписания
-                        if p1_id not in participant_schedule:
-                            participant_schedule[p1_id] = {}
-                        if p2_id not in participant_schedule:
-                            participant_schedule[p2_id] = {}
-                        if court_num not in court_schedule:
-                            court_schedule[court_num] = {}
-                        
-                        participant_schedule[p1_id][temp_time] = court_num
-                        participant_schedule[p2_id][temp_time] = court_num
-                        court_schedule[court_num][temp_time] = {p1_id, p2_id}
-                        
-                        match_scheduled = True
-                        break
-                
-                if not match_scheduled:
-                    # Нет свободных площадок в это время, переходим к следующему времени
-                    temp_time = add_minutes_to_time(temp_time, time_match + time_break)
-                    
-                    # Проверяем, не выходим ли за пределы рабочего дня
-                    if temp_time > end_time:
-                        temp_date += timedelta(days=1)
-                        temp_time = start_time
+            
+            # Обновляем расписания
+            if p1_id not in participant_schedule:
+                participant_schedule[p1_id] = {}
+            if p2_id not in participant_schedule:
+                participant_schedule[p2_id] = {}
+            if court_num not in court_schedule:
+                court_schedule[court_num] = {}
+            
+            participant_schedule[p1_id][temp_time] = court_num
+            participant_schedule[p2_id][temp_time] = court_num
+            court_schedule[court_num][temp_time] = {p1_id, p2_id}
+            
+            match_scheduled = True
+            break
+            
+        if not match_scheduled:
+            # Нет свободных площадок в это время, переходим к следующему времени
+            temp_time = add_minutes_to_time(temp_time, time_match + time_break)
+            
+            # Проверяем, не выходим ли за пределы рабочего дня
+            if temp_time > end_time:
+                temp_date += timedelta(days=1)
+                temp_time = start_time
             else:
                 # Один из участников занят, переходим к следующему времени
                 temp_time = add_minutes_to_time(temp_time, time_match + time_break)
