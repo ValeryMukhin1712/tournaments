@@ -1886,3 +1886,51 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при добавлении опоздавшего участника: {e}")
             return jsonify({'success': False, 'error': f'Ошибка при добавлении участника: {str(e)}'}), 500
+
+    # ===== ОТЛАДОЧНЫЕ API МАРШРУТЫ =====
+    
+    @app.route('/api/debug/tokens', methods=['GET'])
+    def debug_get_tokens():
+        """Получение списка выданных токенов для отладки"""
+        try:
+            # Читаем токены из файла tokens.txt
+            tokens = []
+            try:
+                with open('tokens.txt', 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    for line in lines:
+                        line = line.strip()
+                        if line and ' - ' in line:
+                            parts = line.split(' - ')
+                            if len(parts) >= 4:
+                                timestamp = parts[0]
+                                email = parts[1]
+                                name = parts[2]
+                                token_part = parts[3].replace('Токен: ', '')
+                                
+                                # Проверяем, был ли отправлен email
+                                email_sent = 'EMAIL НЕ ОТПРАВЛЕН' not in line
+                                
+                                tokens.append({
+                                    'timestamp': timestamp,
+                                    'email': email,
+                                    'name': name,
+                                    'token': token_part,
+                                    'email_sent': email_sent
+                                })
+            except FileNotFoundError:
+                logger.info("Файл tokens.txt не найден")
+            except Exception as e:
+                logger.error(f"Ошибка чтения файла tokens.txt: {e}")
+            
+            # Сортируем по времени (новые сверху)
+            tokens.sort(key=lambda x: x['timestamp'], reverse=True)
+            
+            return jsonify({
+                'success': True,
+                'tokens': tokens
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении отладочных токенов: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении токенов'}), 500
