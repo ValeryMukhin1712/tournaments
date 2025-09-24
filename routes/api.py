@@ -117,21 +117,21 @@ def create_smart_schedule(tournament, participants, Match, db):
                     if court_free:
                         # Найдено свободное время и площадка
                         match_start_time = temp_time
-                        
-                        # Создаем матч
+            
+            # Создаем матч
                         match_obj = Match(
-                            tournament_id=tournament.id,
+                tournament_id=tournament.id,
                             participant1_id=p1_id,
                             participant2_id=p2_id,
-                            status='запланирован',
+                status='запланирован',
                             match_date=temp_date,
-                            match_time=match_start_time,
+                match_time=match_start_time,
                             court_number=court_num,
-                            match_number=match_number
-                        )
+                match_number=match_number
+            )
                         db.session.add(match_obj)
                         scheduled_matches.append(match_obj)
-                        match_number += 1
+            match_number += 1
                         
                         # Обновляем расписания
                         if p1_id not in participant_schedule:

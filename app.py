@@ -133,4 +133,8 @@ def not_found_error(error):
 init_db()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    logger.info(f"Запуск приложения на порту {port}")
+    logger.info(f"Переменная окружения PORT: {os.environ.get('PORT')}")
+    logger.info(f"Режим отладки: {os.environ.get('FLASK_ENV', 'production')}")
+    app.run(debug=True, host='0.0.0.0', port=port)

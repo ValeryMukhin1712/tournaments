@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
+<div class="row">
+    <div class="col-12">
             <!-- Заголовок -->
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4">
                 <div class="mb-3 mb-sm-0">
@@ -37,23 +37,23 @@
                                 <div class="col-md-6">
                                     <p><strong>Спорт:</strong> {{ tournament.sport_type or 'Теннис' }}</p>
                                     <p><strong>Дата начала:</strong> 
-                                        {% if tournament.start_date %}
-                                            {{ tournament.start_date.strftime('%d.%m.%Y') }}
-                                        {% else %}
+                    {% if tournament.start_date %}
+                        {{ tournament.start_date.strftime('%d.%m.%Y') }}
+                    {% else %}
                                             Не указана
-                                        {% endif %}
-                                    </p>
-                                </div>
+                    {% endif %}
+                </p>
+            </div>
                                 <div class="col-md-6">
                                     <p><strong>Участников:</strong> {{ participants|length }}</p>
-                                </div>
-                            </div>
-                            {% if tournament.description %}
+            </div>
+        </div>
+        {% if tournament.description %}
                             <div class="mt-3">
                                 <strong>Описание:</strong>
                                 <p class="mt-1">{{ tournament.description }}</p>
-                            </div>
-                            {% endif %}
+        </div>
+        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -63,26 +63,26 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
+            <div class="card-header">
+                <h5 class="mb-0">
                                 <i class="fas fa-users me-2"></i>
                                 Участники турнира
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            {% if participants %}
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Место</th>
-                                            <th>Участник</th>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if participants %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Место</th>
+                                    <th>Участник</th>
                                             <th>Победы</th>
                                             <th>Поражения</th>
-                                            <th>Очки</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                    <th>Очки</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                         {% for item in participants %}
                                         <tr class="{% if item.is_current_participant %}table-success{% endif %}">
                                             <td>
@@ -104,59 +104,59 @@
                                             <td><span class="badge bg-success">{{ item.wins }}</span></td>
                                             <td><span class="badge bg-danger">{{ item.losses }}</span></td>
                                             <td><strong>{{ item.points }}</strong></td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
                             <div class="text-center py-4">
                                 <i class="fas fa-users fa-3x text-muted mb-3"></i>
                                 <p class="text-muted">В турнире пока нет участников</p>
                             </div>
-                            {% endif %}
+                {% endif %}
                         </div>
                     </div>
-                </div>
             </div>
+        </div>
 
-            <!-- Расписание матчей -->
+        <!-- Расписание матчей -->
             {% if schedule_display %}
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
+            <div class="card-header">
+                <h5 class="mb-0">
                                 <i class="fas fa-calendar-alt me-2"></i>
                                 Расписание матчей
-                            </h5>
-                        </div>
-                        <div class="card-body">
+                </h5>
+            </div>
+            <div class="card-body">
                             {% if schedule_display %}
-                                <div class="table-responsive">
+                    <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead class="table-light">
-                                            <tr>
+                                <tr>
                                                 <th style="width: 60px;">№</th>
                                                 <th style="width: 100px;">Время</th>
                                                 <th style="width: 80px;">Площадка</th>
-                                                <th>Участники</th>
+                                    <th>Участники</th>
                                                 <th style="width: 100px;">Счет</th>
                                                 <th style="width: 120px;">Статус</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
+                                </tr>
+                            </thead>
+                            <tbody>
                                             {% for date_str, day_data in schedule_display.items() %}
                                             <tr class="table-info">
                                                 <td colspan="6" class="fw-bold text-center py-2">
                                                     <i class="fas fa-calendar-day me-2"></i>{{ day_data.date_display }}
-                                                </td>
+                                    </td>
                                             </tr>
                                             {% for match in day_data.matches %}
                                             <tr {% if match.is_participant_match %}class="table-primary"{% endif %}>
                                                 <td class="text-center">
                                                     <span class="badge bg-primary">{{ match.global_number or loop.index }}</span>
-                                                </td>
+                                    </td>
                                                 <td class="fw-bold text-primary">{{ match.time }}</td>
                                                 <td class="text-center">
                                                     {% if match.court and match.court > 0 %}
@@ -174,32 +174,32 @@
                                                         <span class="badge bg-{{ court_color }}">
                                                             Пл. {{ match.court }}
                                                         </span>
-                                                    {% else %}
+                                        {% else %}
                                                         <span class="text-muted">—</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
+                                        {% endif %}
+                                    </td>
+                                    <td>
                                                     <strong>{{ match.participant1 }}</strong> vs <strong>{{ match.participant2 }}</strong>
                                                     {% if match.is_participant_match %}
                                                         <span class="badge bg-primary ms-2">Ваш матч</span>
-                                                    {% endif %}
-                                                </td>
+                                        {% endif %}
+                                    </td>
                                                 <td class="text-center">
                                                     {% if match.score and match.status != 'запланирован' %}
-                                                        {% if match.status == 'завершен' %}
+                                        {% if match.status == 'завершен' %}
                                                             <span class="badge bg-success text-white">{{ match.score }}</span>
                                                         {% elif match.status in ['в процессе', 'играют'] %}
                                                             <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
-                                                        {% else %}
+                                        {% else %}
                                                             <span class="badge bg-warning text-dark">{{ match.score }}</span>
                                                         {% endif %}
                                                         {% if match.sets_details %}
                                                         <br><small class="text-muted" {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
-                                                        {% endif %}
-                                                    {% else %}
+                                        {% endif %}
+                                        {% else %}
                                                         <span class="text-muted">—</span>
-                                                    {% endif %}
-                                                </td>
+                                        {% endif %}
+                                    </td>
                                                 <td class="text-center">
                                                     <span class="badge 
                                                         {% if match.status == 'завершен' %}bg-success
@@ -209,20 +209,20 @@
                                                         {{ match.status }}
                                                     </span>
                                                 </td>
-                                            </tr>
+                                </tr>
+                                {% endfor %}
                                             {% endfor %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
                                 <div class="text-center py-4">
                                     <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
                                     <p class="text-muted">Расписание матчей пока не составлено</p>
                                 </div>
-                            {% endif %}
-                        </div>
-                    </div>
+                {% endif %}
+            </div>
+        </div>
                 </div>
             </div>
             {% endif %}
@@ -233,21 +233,21 @@
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0"><i class="fas fa-table me-2"></i>Турнирная таблица</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
                                 <table class="table table-bordered table-sm">
-                                    <thead>
-                                        <tr>
+                        <thead>
+                            <tr>
                                             <th class="bg-light">Участник</th>
                                             <th class="text-center bg-light">Очки</th>
                                             <th class="text-center bg-light">Место</th>
-                                            {% for participant in participants %}
+                                {% for participant in participants %}
                                             <th class="text-center bg-light">{{ participant.participant.name[:15] }}{% if participant.participant.name|length > 15 %}...{% endif %}</th>
-                                            {% endfor %}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
                                         {% for p1_data in participants_with_stats_chessboard %}
                                         {% set p1 = p1_data.participant %}
                                         {% set p1_stats = p1_data.stats %}
@@ -267,7 +267,7 @@
                                                         <div class="d-flex flex-column align-items-center">
                                                             {% if cell_data.is_winner %}
                                                                 <span class="badge bg-success text-white mb-1">{{ cell_data.value }}</span>
-                                                            {% else %}
+                                    {% else %}
                                                                 <span class="badge bg-danger text-white mb-1">{{ cell_data.value }}</span>
                                                             {% endif %}
                                                             {% if cell_data.sets_details %}
@@ -279,7 +279,7 @@
                                                             <span class="badge bg-warning text-dark mb-1" style="background-color: #ffc107 !important;">{{ cell_data.value }}</span>
                                                             {% if cell_data.sets_details %}
                                                             <small class="text-muted">{{ cell_data.sets_details }}</small>
-                                                            {% endif %}
+                                        {% endif %}
                                                         </div>
                                                     {% elif cell_data.type == 'upcoming' %}
                                                         {% set court_colors = {
@@ -310,7 +310,7 @@
                                                                     <small class="d-block text-dark fw-bold text-center" style="font-size: 0.6rem; background-color: rgba(255, 255, 255, 0.95); padding: 1px 3px; border-radius: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                                                         {% if cell_data.time %}
                                                                             {{ cell_data.time.strftime('%H:%M') }}
-                                                                        {% else %}
+                                                    {% else %}
                                                                             Время не указано
                                                                         {% endif %}
                                                                     </small>
@@ -320,16 +320,16 @@
                                                     {% elif cell_data.type == 'empty' %}
                                                         <span class="text-muted">—</span>
                                                     {% endif %}
-                                                {% endif %}
-                                            </td>
-                                            {% endfor %}
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                                            {% endif %}
+                                        </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
                 </div>
             </div>
         </div>
