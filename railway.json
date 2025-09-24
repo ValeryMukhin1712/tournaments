@@ -3,11 +3,11 @@
   "build": {
     "builder": "NIXPACKS"
   },
-  "deploy": {
-    "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 60 app:app",
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 60,
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
-  }
+        "deploy": {
+            "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --keep-alive 2 app:app",
+            "healthcheckPath": "/",
+            "healthcheckTimeout": 120,
+            "restartPolicyType": "ON_FAILURE",
+            "restartPolicyMaxRetries": 3
+        }
 }

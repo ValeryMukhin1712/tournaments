@@ -78,8 +78,9 @@ def send_token_email(email, name, token):
         logger.info(f"От: {from_email}, Кому: {email}")
         
         try:
-            server = smtplib.SMTP(smtp_server, smtp_port)
-            logger.info("✓ SMTP подключение установлено")
+            # Устанавливаем таймаут для SMTP подключения
+            server = smtplib.SMTP(smtp_server, smtp_port, timeout=30)
+            logger.info("✓ SMTP подключение установлено (таймаут 30 сек)")
             
             server.starttls()
             logger.info("✓ TLS включен")
@@ -116,6 +117,27 @@ def send_token_email(email, name, token):
         except Exception as file_e:
             logger.warning(f"Не удалось сохранить токен в файл: {file_e}")
         return False
+
+def send_token_email_async(email, name, token):
+    """Асинхронная отправка email (не блокирует основной поток)"""
+    import threading
+    import time
+    
+    def send_email_thread():
+        try:
+            logger.info(f"Запуск асинхронной отправки email на {email}")
+            time.sleep(1)  # Небольшая задержка
+            result = send_token_email(email, name, token)
+            logger.info(f"Асинхронная отправка завершена: {result}")
+        except Exception as e:
+            logger.error(f"Ошибка асинхронной отправки: {e}")
+    
+    # Запускаем в отдельном потоке
+    thread = threading.Thread(target=send_email_thread)
+    thread.daemon = True
+    thread.start()
+    logger.info(f"Асинхронная отправка email запущена для {email}")
+    return True  # Возвращаем True сразу, не ждем завершения
 
 def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):
     """Создает основные маршруты приложения"""
@@ -242,7 +264,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 # Отправляем email с токеном
                 logger.info(f"Отправка email с токеном {token} на {email} для {name}")
                 try:
-                    email_sent = send_token_email(email, name, token)
+                    email_sent = send_token_email_async(email, name, token)
                     logger.info(f"Результат отправки email: {email_sent}")
                     if email_sent:
                         flash('Токен отправлен на ваш email!', 'success')
