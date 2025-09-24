@@ -19,10 +19,16 @@ from models import create_models
 from routes import register_routes
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+# Используем фиксированный SECRET_KEY для Railway или генерируем новый для локальной разработки
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'tournament-system-secret-key-2024'
 # Database configuration - используем SQLite для всех окружений
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Настройки сессий для Railway
+app.config['SESSION_COOKIE_SECURE'] = False  # Для HTTP (Railway может не иметь HTTPS)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Настройки email
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
