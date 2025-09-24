@@ -1934,3 +1934,26 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при получении отладочных токенов: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при получении токенов'}), 500
+
+    @app.route('/api/debug/test-email', methods=['POST'])
+    def debug_test_email():
+        """Тестирование отправки email для отладки"""
+        try:
+            data = request.get_json()
+            test_email = data.get('email', 'test@example.com')
+            
+            # Импортируем функцию отправки email
+            from routes.main import send_token_email
+            
+            logger.info(f"Тестирование отправки email на {test_email}")
+            result = send_token_email(test_email, 'Тестовый пользователь', '99')
+            
+            return jsonify({
+                'success': True,
+                'email_sent': result,
+                'message': 'Email отправлен успешно' if result else 'Ошибка отправки email'
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка тестирования email: {e}")
+            return jsonify({'success': False, 'error': f'Ошибка тестирования: {str(e)}'}), 500

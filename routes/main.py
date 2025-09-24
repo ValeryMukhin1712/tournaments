@@ -24,14 +24,20 @@ def send_token_email(email, name, token):
         
         # Получаем настройки email из конфигурации Flask
         from flask import current_app
+        import os
         
-        smtp_server = current_app.config.get('MAIL_SERVER', 'smtp.gmail.com')
-        smtp_port = current_app.config.get('MAIL_PORT', 587)
-        smtp_username = current_app.config.get('MAIL_USERNAME')
-        smtp_password = current_app.config.get('MAIL_PASSWORD')
-        from_email = current_app.config.get('MAIL_DEFAULT_SENDER', smtp_username)
+        # Проверяем переменные окружения (для Railway)
+        smtp_server = os.environ.get('MAIL_SERVER') or current_app.config.get('MAIL_SERVER', 'smtp.gmail.com')
+        smtp_port = int(os.environ.get('MAIL_PORT', current_app.config.get('MAIL_PORT', 587)))
+        smtp_username = os.environ.get('MAIL_USERNAME') or current_app.config.get('MAIL_USERNAME')
+        smtp_password = os.environ.get('MAIL_PASSWORD') or current_app.config.get('MAIL_PASSWORD')
+        from_email = os.environ.get('MAIL_DEFAULT_SENDER') or current_app.config.get('MAIL_DEFAULT_SENDER', smtp_username)
+        
+        logger.info(f"Email настройки: server={smtp_server}, port={smtp_port}, username={smtp_username}")
+        logger.info(f"Переменные окружения: MAIL_SERVER={os.environ.get('MAIL_SERVER')}, MAIL_USERNAME={os.environ.get('MAIL_USERNAME')}")
         
         # Проверяем, настроены ли email настройки
+        logger.info(f"Проверка email настроек: username={smtp_username}, password={'***' if smtp_password else 'НЕТ'}")
         if not smtp_username or not smtp_password:
             logger.warning("Email настройки не настроены. Токен сохранен в файл, но email не отправлен.")
             try:
@@ -69,16 +75,37 @@ def send_token_email(email, name, token):
         import smtplib
         logger.info(f"Попытка отправки email на {email} с токеном {token}")
         logger.info(f"SMTP настройки: {smtp_server}:{smtp_port}, пользователь: {smtp_username}")
+        logger.info(f"От: {from_email}, Кому: {email}")
         
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_username, smtp_password)
-        text = msg.as_string()
-        server.sendmail(from_email, email, text.encode('utf-8'))
-        server.quit()
-        
-        logger.info(f"✅ Токен {token} успешно отправлен на {email} ({name}) от {from_email}")
-        return True
+        try:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            logger.info("✓ SMTP подключение установлено")
+            
+            server.starttls()
+            logger.info("✓ TLS включен")
+            
+            server.login(smtp_username, smtp_password)
+            logger.info("✓ Авторизация успешна")
+            
+            text = msg.as_string()
+            result = server.sendmail(from_email, email, text.encode('utf-8'))
+            logger.info(f"✓ Email отправлен, результат: {result}")
+            
+            server.quit()
+            logger.info("✓ SMTP соединение закрыто")
+            
+            logger.info(f"✅ Токен {token} успешно отправлен на {email} ({name}) от {from_email}")
+            return True
+            
+        except smtplib.SMTPAuthenticationError as e:
+            logger.error(f"❌ Ошибка авторизации SMTP: {e}")
+            raise
+        except smtplib.SMTPRecipientsRefused as e:
+            logger.error(f"❌ Получатель отклонен: {e}")
+            raise
+        except smtplib.SMTPException as e:
+            logger.error(f"❌ Ошибка SMTP: {e}")
+            raise
         
     except Exception as e:
         logger.error(f"Ошибка отправки email: {e}")
