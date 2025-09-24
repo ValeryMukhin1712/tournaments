@@ -11,11 +11,7 @@ logger = logging.getLogger(__name__)
 
 def create_smart_schedule(tournament, participants, Match, db):
     """
-    Создает расписание матчей по раундам согласно новому алгоритму:
-    1. Определение количества матчей и раундов
-    2. Распределение матчей по раундам и площадкам
-    3. Расчет времени каждого раунда
-    4. Итоговая схема времени
+    Создает расписание матчей для кругового турнира (каждый с каждым)
     """
     from datetime import date, time, timedelta
     import random
@@ -32,138 +28,55 @@ def create_smart_schedule(tournament, participants, Match, db):
     if n < 2:
         return 0
     
-    # Шаг 1: Определение количества матчей и раундов
-    # Общее число матчей: M = n(n-1)/2
-    total_matches = n * (n - 1) // 2
+    logger.info(f"Создание расписания для {n} участников: {[p.name for p in participants]}")
     
-    # Число раундов: R = n-1 (для четного числа участников)
-    # Если нечетное, добавляем фиктивного участника
-    is_odd = n % 2 == 1
-    if is_odd:
-        R = n  # для нечетного числа участников
-    else:
-        R = n - 1
-    
-    # Шаг 2: Создание списка всех матчей (каждый с каждым)
+    # Создаем все матчи для кругового турнира (каждый с каждым)
     matches_to_schedule = []
     for i in range(n):
         for j in range(i + 1, n):
             matches_to_schedule.append((participants[i], participants[j]))
     
-    # Перемешиваем матчи для случайности
-    random.shuffle(matches_to_schedule)
+    logger.info(f"Всего матчей для создания: {len(matches_to_schedule)}")
     
-    # Шаг 3: Умное распределение матчей с проверкой конфликтов
+    # Простое распределение матчей по времени и площадкам
     scheduled_matches = []
     match_number = 1
-    current_date = start_date
     current_time = start_time
+    current_date = start_date
     
     # Словарь для отслеживания занятости участников по времени
     participant_schedule = {}  # {participant_id: {time: court_number}}
     court_schedule = {}  # {court_number: {time: participant_ids}}
     
+    # Простое создание всех матчей без сложной логики планирования
     for match in matches_to_schedule:
         participant1, participant2 = match
         p1_id, p2_id = participant1.id, participant2.id
         
-        # Ищем свободное время для обоих участников
-        match_scheduled = False
-        temp_time = current_time
-        temp_date = current_date
+        logger.info(f"Создание матча: {participant1.name} vs {participant2.name}")
         
-        while not match_scheduled:
-            # Проверяем, свободны ли оба участника в это время
-            # Участник свободен, если он не играет в это время И не играет в течение времени матча
-            p1_free = True
-            p2_free = True
-            
-            if p1_id in participant_schedule:
-                for scheduled_time in participant_schedule[p1_id]:
-                    # Проверяем пересечение времени: если матч начинается в temp_time и длится time_match минут
-                    # то он заканчивается в temp_time + time_match
-                    # Если есть пересечение с уже запланированным матчем, то участник занят
-                    scheduled_end_time = add_minutes_to_time(scheduled_time, time_match)
-                    temp_end_time = add_minutes_to_time(temp_time, time_match)
-                    
-                    # Проверяем пересечение интервалов времени
-                    if (temp_time < scheduled_end_time and temp_end_time > scheduled_time):
-                        p1_free = False
-                        break
-            
-            if p2_id in participant_schedule:
-                for scheduled_time in participant_schedule[p2_id]:
-                    scheduled_end_time = add_minutes_to_time(scheduled_time, time_match)
-                    temp_end_time = add_minutes_to_time(temp_time, time_match)
-                    
-                    if (temp_time < scheduled_end_time and temp_end_time > scheduled_time):
-                        p2_free = False
-                        break
-            
-            if p1_free and p2_free:
-                # Ищем свободную площадку
-                for court_num in range(1, k + 1):
-                    court_free = True
-                    
-                    if court_num in court_schedule:
-                        for scheduled_time in court_schedule[court_num]:
-                            scheduled_end_time = add_minutes_to_time(scheduled_time, time_match)
-                            temp_end_time = add_minutes_to_time(temp_time, time_match)
-                            
-                            if (temp_time < scheduled_end_time and temp_end_time > scheduled_time):
-                                court_free = False
-                                break
-                    
-                    if court_free:
-                        # Найдено свободное время и площадка
-                        match_start_time = temp_time
-            
-            # Создаем матч
-                        match_obj = Match(
-                tournament_id=tournament.id,
-                            participant1_id=p1_id,
-                            participant2_id=p2_id,
-                status='запланирован',
-                            match_date=temp_date,
-                match_time=match_start_time,
-                            court_number=court_num,
-                match_number=match_number
-            )
-            db.session.add(match_obj)
-            scheduled_matches.append(match_obj)
-            match_number += 1
-            
-            # Обновляем расписания
-            if p1_id not in participant_schedule:
-                participant_schedule[p1_id] = {}
-            if p2_id not in participant_schedule:
-                participant_schedule[p2_id] = {}
-            if court_num not in court_schedule:
-                court_schedule[court_num] = {}
-            
-            participant_schedule[p1_id][temp_time] = court_num
-            participant_schedule[p2_id][temp_time] = court_num
-            court_schedule[court_num][temp_time] = {p1_id, p2_id}
-            
-            match_scheduled = True
-            break
-            
-        if not match_scheduled:
-            # Нет свободных площадок в это время, переходим к следующему времени
-            temp_time = add_minutes_to_time(temp_time, time_match + time_break)
-            
-            # Проверяем, не выходим ли за пределы рабочего дня
-            if temp_time > end_time:
-                temp_date += timedelta(days=1)
-                temp_time = start_time
-            else:
-                # Один из участников занят, переходим к следующему времени
-                temp_time = add_minutes_to_time(temp_time, time_match + time_break)
-                
-                # Проверяем, не выходим ли за пределы рабочего дня
-                if temp_time > end_time:
-                    temp_date += timedelta(days=1)
-                    temp_time = start_time
+        # Создаем матч
+        match_obj = Match(
+            tournament_id=tournament.id,
+            participant1_id=p1_id,
+            participant2_id=p2_id,
+            status='запланирован',
+            match_date=current_date,
+            match_time=current_time,
+            court_number=1,  # Пока все на одной площадке
+            match_number=match_number
+        )
+        db.session.add(match_obj)
+        scheduled_matches.append(match_obj)
+        match_number += 1
+        
+        # Переходим к следующему времени
+        current_time = add_minutes_to_time(current_time, time_match + time_break)
+        
+        # Если время выходит за пределы рабочего дня, переходим на следующий день
+        if current_time > end_time:
+            current_date += timedelta(days=1)
+            current_time = start_time
     
     return len(scheduled_matches)
 
