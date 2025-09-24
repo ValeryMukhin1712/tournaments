@@ -165,6 +165,13 @@ function adminLogin() {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- Отладочная информация -->
+                    <div class="alert alert-info mb-3">
+                        <h6><i class="fas fa-bug me-2"></i>Отладочная информация</h6>
+                        <p class="mb-1"><strong>Логин:</strong> <code>admin</code></p>
+                        <p class="mb-0"><strong>Пароль:</strong> <code>adm444</code></p>
+                    </div>
+                    
                     <form id="adminLoginForm">
                         <div class="mb-3">
                             <label for="adminUsername" class="form-label">Логин</label>
@@ -172,7 +179,12 @@ function adminLogin() {
                         </div>
                         <div class="mb-3">
                             <label for="adminPassword" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="adminPassword" placeholder="Введите пароль">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="adminPassword" placeholder="Введите пароль" value="adm444">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleAdminPassword">
+                                    <i class="fas fa-eye" id="toggleAdminIcon"></i>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -347,6 +359,41 @@ function performParticipantLogin() {
         alert('Ошибка входа: ' + error.message);
     });
 }
+
+// Функция для переключения видимости пароля в модальном окне
+function toggleAdminPasswordVisibility() {
+    const passwordField = document.getElementById('adminPassword');
+    const toggleIcon = document.getElementById('toggleAdminIcon');
+    
+    if (passwordField && toggleIcon) {
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+}
+
+// Добавляем обработчик после создания модального окна
+document.addEventListener('DOMContentLoaded', function() {
+    // Переопределяем функцию adminLogin для добавления обработчика
+    const originalAdminLogin = window.adminLogin;
+    window.adminLogin = function() {
+        originalAdminLogin();
+        
+        // Добавляем обработчик после показа модального окна
+        setTimeout(() => {
+            const toggleBtn = document.getElementById('toggleAdminPassword');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleAdminPasswordVisibility);
+            }
+        }, 100);
+    };
+});
 </script>
 
 {% endblock %}
