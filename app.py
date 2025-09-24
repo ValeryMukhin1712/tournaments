@@ -82,16 +82,44 @@ def load_user(user_id):
 # Функция инициализации базы данных
 def init_db():
     with app.app_context():
-        db.create_all()
-        
-        # Создание администратора по умолчанию
-        admin = User.query.filter_by(username='admin').first()
-        if not admin:
-            admin = User(username='admin', password_hash=generate_password_hash('admin123'), role='администратор')
-            db.session.add(admin)
-            db.session.commit()
-            print("Администратор создан: admin/admin123")
+        try:
+            # Создаем все таблицы
+            db.create_all()
+            logger.info("База данных инициализирована успешно")
+            
+            # Создание администратора по умолчанию
+            admin = User.query.filter_by(username='admin').first()
+            if not admin:
+                admin = User(username='admin', password_hash=generate_password_hash('admin123'), role='администратор')
+                db.session.add(admin)
+                db.session.commit()
+                logger.info("Администратор создан: admin/admin123")
+                
+        except Exception as e:
+            logger.error(f"Ошибка инициализации базы данных: {e}")
+            # На Railway может не быть прав на запись, попробуем альтернативный путь
+            try:
+                import tempfile
+                temp_db_path = os.path.join(tempfile.gettempdir(), 'tournament.db')
+                app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{temp_db_path}'
+                db.create_all()
+                logger.info(f"База данных создана в временной папке: {temp_db_path}")
+            except Exception as e2:
+                logger.error(f"Критическая ошибка создания базы данных: {e2}")
+
+# Обработчик ошибок для отладки
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal Server Error: {error}")
+    return "Internal Server Error", 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    logger.error(f"Not Found Error: {error}")
+    return "Not Found", 404
+
+# Инициализация базы данных при импорте (для Railway)
+init_db()
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -13,3 +13,8 @@
 2025-09-22 22:49:26 - yandvm@yandex.ru - yand - Токен: 27
 2025-09-23 05:48:29 - 9162246585@rambler.ru - 916 - Токен: 28
 2025-09-23 06:00:41 - andvm@rambler.ru - andvm - Токен: 79
+2025-09-24 05:57:10 - andvm@rambler.ru - andvm - Токен: 13
+2025-09-24 05:57:11 - andvm@rambler.ru - andvm - Токен: 13 (EMAIL НЕ ОТПРАВЛЕН: 'ascii' codec can't encode characters in position 401-412: ordinal not in range(128))
+2025-09-24 05:57:35 - test@example.com - Test User - Токен: 99
+2025-09-24 05:57:36 - test@example.com - Test User - Токен: 99 (EMAIL НЕ ОТПРАВЛЕН: 'ascii' codec can't encode characters in position 401-412: ordinal not in range(128))
+2025-09-24 05:58:08 - test@example.com - Test User - Токен: 99

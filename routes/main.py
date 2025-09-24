@@ -16,8 +16,11 @@ def send_token_email(email, name, token):
     """Отправляет email с токеном пользователю"""
     try:
         # Сохраняем токен в файл для логирования
-        with open('tokens.txt', 'a', encoding='utf-8') as f:
-            f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token}\n")
+        try:
+            with open('tokens.txt', 'a', encoding='utf-8') as f:
+                f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token}\n")
+        except Exception as e:
+            logger.warning(f"Не удалось сохранить токен в файл: {e}")
         
         # Получаем настройки email из конфигурации Flask
         from flask import current_app
@@ -31,8 +34,11 @@ def send_token_email(email, name, token):
         # Проверяем, настроены ли email настройки
         if not smtp_username or not smtp_password:
             logger.warning("Email настройки не настроены. Токен сохранен в файл, но email не отправлен.")
-            with open('tokens.txt', 'a', encoding='utf-8') as f:
-                f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token} (EMAIL НЕ НАСТРОЕН)\n")
+            try:
+                with open('tokens.txt', 'a', encoding='utf-8') as f:
+                    f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token} (EMAIL НЕ НАСТРОЕН)\n")
+            except Exception as e:
+                logger.warning(f"Не удалось сохранить токен в файл: {e}")
             return False
         
         # Создаем сообщение
@@ -77,8 +83,8 @@ def send_token_email(email, name, token):
         try:
             with open('tokens.txt', 'a', encoding='utf-8') as f:
                 f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {email} - {name} - Токен: {token} (EMAIL НЕ ОТПРАВЛЕН: {str(e)})\n")
-        except:
-            pass
+        except Exception as file_e:
+            logger.warning(f"Не удалось сохранить токен в файл: {file_e}")
         return False
 
 def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):

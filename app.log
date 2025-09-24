@@ -5623,3 +5623,139 @@
 2025-09-23 23:39:57,889 - INFO -  * Restarting with stat
 2025-09-23 23:39:58,998 - WARNING -  * Debugger is active!
 2025-09-23 23:39:59,000 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 00:08:34,623 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-24 00:08:34,623 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-24 00:08:34,627 - INFO -  * Restarting with stat
+2025-09-24 00:08:36,071 - WARNING -  * Debugger is active!
+2025-09-24 00:08:36,072 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 00:08:40,022 - INFO - 127.0.0.1 - - [24/Sep/2025 00:08:40] "GET / HTTP/1.1" 200 -
+2025-09-24 00:08:45,917 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-24 00:08:45,918 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-24 00:08:45,920 - INFO -  * Restarting with stat
+2025-09-24 00:08:47,141 - WARNING -  * Debugger is active!
+2025-09-24 00:08:47,146 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 00:09:07,473 - INFO - 127.0.0.1 - - [24/Sep/2025 00:09:07] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 00:09:12,032 - INFO - Попытка входа: email=yandvm@yandex.ru, token=10
+2025-09-24 00:09:12,036 - INFO - Поиск токена: email=yandvm@yandex.ru, token=10, найден=True
+2025-09-24 00:09:12,037 - INFO - Токен найден: id=4, created_at=2025-09-22 11:41:54.555091
+2025-09-24 00:09:12,054 - INFO - Время последнего использования токена обновлено
+2025-09-24 00:09:12,055 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-24 00:09:12,067 - INFO - 127.0.0.1 - - [24/Sep/2025 00:09:12] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-24 00:09:12,371 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 2
+2025-09-24 00:09:12,379 - INFO - Все турниры в системе:
+2025-09-24 00:09:12,381 - INFO -   Турнир "916 a" (ID: 5) - admin_id: 223976
+2025-09-24 00:09:12,381 - INFO -   Турнир "yand 4" (ID: 7) - admin_id: 23513
+2025-09-24 00:09:12,383 - INFO -   Турнир "yand 1" (ID: 8) - admin_id: 23513
+2025-09-24 00:09:12,437 - INFO - 127.0.0.1 - - [24/Sep/2025 00:09:12] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-24 05:54:56,718 - INFO - Матч 45: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=1
+2025-09-24 05:54:56,719 - INFO - Матч 45: статус 'завершен' попадает в условие
+2025-09-24 05:54:56,719 - INFO - Матч 45: итоговый счет=2:0
+2025-09-24 05:54:56,720 - INFO - Матч 47: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,721 - INFO - Матч 47: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,722 - INFO - Матч 47: итоговый счет=None
+2025-09-24 05:54:56,723 - INFO - Матч 46: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,724 - INFO - Матч 46: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,725 - INFO - Матч 46: итоговый счет=None
+2025-09-24 05:54:56,725 - INFO - Матч 51: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,726 - INFO - Матч 51: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,727 - INFO - Матч 51: итоговый счет=None
+2025-09-24 05:54:56,727 - INFO - Матч 48: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,728 - INFO - Матч 48: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,728 - INFO - Матч 48: итоговый счет=None
+2025-09-24 05:54:56,729 - INFO - Матч 49: статус='завершен', sets_won_1=1, sets_won_2=2, set1_score1=11, set1_score2=13
+2025-09-24 05:54:56,730 - INFO - Матч 49: статус 'завершен' попадает в условие
+2025-09-24 05:54:56,730 - INFO - Матч 49: итоговый счет=1:2
+2025-09-24 05:54:56,730 - INFO - Матч 50: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,731 - INFO - Матч 50: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,731 - INFO - Матч 50: итоговый счет=None
+2025-09-24 05:54:56,732 - INFO - Матч 52: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,732 - INFO - Матч 52: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,732 - INFO - Матч 52: итоговый счет=None
+2025-09-24 05:54:56,733 - INFO - Матч 53: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,733 - INFO - Матч 53: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,733 - INFO - Матч 53: итоговый счет=None
+2025-09-24 05:54:56,734 - INFO - Матч 54: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 05:54:56,734 - INFO - Матч 54: статус 'запланирован' НЕ попадает в условие
+2025-09-24 05:54:56,735 - INFO - Матч 54: итоговый счет=None
+2025-09-24 05:54:56,828 - INFO - 127.0.0.1 - - [24/Sep/2025 05:54:56] "GET /tournament/7 HTTP/1.1" 200 -
+2025-09-24 05:55:51,213 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 05:55:51,339 - INFO -  * Restarting with stat
+2025-09-24 05:55:52,602 - WARNING -  * Debugger is active!
+2025-09-24 05:55:52,604 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 05:55:57,900 - INFO - 127.0.0.1 - - [24/Sep/2025 05:55:57] "GET / HTTP/1.1" 200 -
+2025-09-24 05:56:03,914 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.195:5000
+2025-09-24 05:56:03,915 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-24 05:56:03,917 - INFO -  * Restarting with stat
+2025-09-24 05:56:05,097 - WARNING -  * Debugger is active!
+2025-09-24 05:56:05,104 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 05:56:42,629 - INFO - Системный администратор успешно авторизован
+2025-09-24 05:56:42,632 - INFO - 127.0.0.1 - - [24/Sep/2025 05:56:42] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 05:56:42,786 - INFO - 127.0.0.1 - - [24/Sep/2025 05:56:42] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 05:56:54,295 - INFO - Найдено турниров для удаления: 0
+2025-09-24 05:56:54,297 - INFO - Удалено токенов по email admin_121518@system: 0
+2025-09-24 05:56:54,299 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 05:56:54,348 - INFO - Изменения сохранены в базу данных
+2025-09-24 05:56:54,348 - INFO - Администратор турнира 121518 удален. Удалено турниров: 0
+2025-09-24 05:56:54,349 - INFO - 127.0.0.1 - - [24/Sep/2025 05:56:54] "DELETE /api/admin/tournament-admins/121518 HTTP/1.1" 200 -
+2025-09-24 05:56:57,482 - INFO - 127.0.0.1 - - [24/Sep/2025 05:56:57] "GET / HTTP/1.1" 200 -
+2025-09-24 05:56:59,328 - INFO - 127.0.0.1 - - [24/Sep/2025 05:56:59] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 05:57:11,798 - ERROR - Ошибка отправки email: 'ascii' codec can't encode characters in position 401-412: ordinal not in range(128)
+2025-09-24 05:57:11,892 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:11] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 05:57:17,564 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:17] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 05:57:36,067 - ERROR - Ошибка отправки email: 'ascii' codec can't encode characters in position 401-412: ordinal not in range(128)
+2025-09-24 05:57:41,540 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:41] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 05:57:43,124 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 05:57:43,219 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 05:57:43,225 - INFO -  * Restarting with stat
+2025-09-24 05:57:43,344 - INFO -  * Restarting with stat
+2025-09-24 05:57:44,404 - WARNING -  * Debugger is active!
+2025-09-24 05:57:44,409 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 05:57:44,452 - WARNING -  * Debugger is active!
+2025-09-24 05:57:44,457 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 05:57:46,858 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:46] "GET / HTTP/1.1" 200 -
+2025-09-24 05:57:48,827 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:48] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 05:57:53,928 - INFO - Попытка входа: email=yandvm@yandex.ru, token=10
+2025-09-24 05:57:53,931 - INFO - Поиск токена: email=yandvm@yandex.ru, token=10, найден=True
+2025-09-24 05:57:53,932 - INFO - Токен найден: id=4, created_at=2025-09-22 11:41:54.555091
+2025-09-24 05:57:53,944 - INFO - Время последнего использования токена обновлено
+2025-09-24 05:57:53,949 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-24 05:57:53,962 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:53] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-24 05:57:54,220 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 2
+2025-09-24 05:57:54,224 - INFO - Все турниры в системе:
+2025-09-24 05:57:54,225 - INFO -   Турнир "916 a" (ID: 5) - admin_id: 223976
+2025-09-24 05:57:54,225 - INFO -   Турнир "yand 4" (ID: 7) - admin_id: 23513
+2025-09-24 05:57:54,225 - INFO -   Турнир "yand 1" (ID: 8) - admin_id: 23513
+2025-09-24 05:57:54,281 - INFO - 127.0.0.1 - - [24/Sep/2025 05:57:54] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-24 05:58:11,058 - INFO - Токен 99 отправлен на test@example.com (Test User) от tournaments.master@gmail.com
+2025-09-24 05:59:16,530 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 05:59:16,532 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 05:59:16,671 - INFO -  * Restarting with stat
+2025-09-24 05:59:16,687 - INFO -  * Restarting with stat
+2025-09-24 05:59:17,789 - WARNING -  * Debugger is active!
+2025-09-24 05:59:17,792 - WARNING -  * Debugger is active!
+2025-09-24 05:59:17,794 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 05:59:17,797 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 06:04:51,911 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 06:04:52,032 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 06:04:52,116 - INFO -  * Restarting with stat
+2025-09-24 06:04:52,239 - INFO -  * Restarting with stat
+2025-09-24 06:04:53,392 - INFO - База данных инициализирована успешно
+2025-09-24 06:04:53,394 - INFO - База данных инициализирована успешно
+2025-09-24 06:04:53,423 - WARNING -  * Debugger is active!
+2025-09-24 06:04:53,425 - WARNING -  * Debugger is active!
+2025-09-24 06:04:53,429 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 06:04:53,430 - INFO -  * Debugger PIN: 122-170-761
+2025-09-24 06:04:56,681 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 06:04:56,716 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 06:04:56,803 - INFO -  * Restarting with stat
+2025-09-24 06:04:56,870 - INFO -  * Restarting with stat
+2025-09-24 06:05:56,937 - INFO - База данных инициализирована успешно
