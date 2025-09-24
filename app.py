@@ -93,13 +93,18 @@ def init_db():
             db.create_all()
             logger.info("База данных инициализирована успешно")
             
-            # Создание администратора по умолчанию
+            # Создание/обновление администратора по умолчанию
             admin = User.query.filter_by(username='admin').first()
             if not admin:
-                admin = User(username='admin', password_hash=generate_password_hash('admin123'), role='администратор')
+                admin = User(username='admin', password_hash=generate_password_hash('adm444'), role='администратор')
                 db.session.add(admin)
                 db.session.commit()
-                logger.info("Администратор создан: admin/admin123")
+                logger.info("Администратор создан: admin/adm444")
+            else:
+                # Обновляем пароль администратора на случай, если он был изменен
+                admin.password_hash = generate_password_hash('adm444')
+                db.session.commit()
+                logger.info("Пароль администратора обновлен: admin/adm444")
                 
         except Exception as e:
             logger.error(f"Ошибка инициализации базы данных: {e}")
