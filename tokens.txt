@@ -34,3 +34,5 @@ with app.app_context(). See the documentation for more information.)
 2025-09-24 12:44:47 - test@example.com - Тестовый пользователь - Токен: 88
 2025-09-24 12:58:02 - yandvm@yandex.ru - yand - Токен: 94
 2025-09-24 13:42:28 - yandvm@yandex.ru - yand - Токен: 16
+2025-09-24 14:45:26 - yandvm@yandex.ru - yand - Токен: 90
+2025-09-24 14:51:23 - yandvm@yandex.ru - yand - Токен: 42

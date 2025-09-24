@@ -283,15 +283,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     email_sent = send_token_email_async(email, name, token, app)
                     logger.info(f"Результат отправки email: {email_sent}")
                     if email_sent:
-                        flash('Токен отправлен на ваш email!', 'success')
-                        logger.info(f"[SUCCESS] Flash сообщение: Токен отправлен на {email}")
+                        logger.info(f"[SUCCESS] Email отправлен на {email}")
                     else:
-                        flash('Токен сгенерирован, но email не настроен. Сохраните токен вручную.', 'warning')
-                        logger.warning(f"[WARNING] Flash сообщение: Email не настроен для {email}")
+                        logger.warning(f"[WARNING] Email не настроен для {email}")
                 except Exception as e:
                     logger.error(f'Ошибка отправки email: {e}')
-                    flash('Токен сгенерирован, но не удалось отправить email. Сохраните токен вручную.', 'warning')
-                    logger.warning(f"[WARNING] Flash сообщение: Ошибка отправки email для {email}")
+                    logger.warning(f"[WARNING] Ошибка отправки email для {email}")
                     
             except Exception as e:
                 logger.error(f'Ошибка сохранения токена в БД: {e}')
