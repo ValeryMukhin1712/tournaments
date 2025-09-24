@@ -5860,3 +5860,306 @@
 2025-09-24 12:24:10,683 - INFO - Режим отладки: production
 2025-09-24 12:24:10,724 - WARNING -  * Debugger is active!
 2025-09-24 12:24:10,726 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:28:50,651 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:28:50,652 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:28:50,652 - INFO - Матч 2: итоговый счет=None
+2025-09-24 12:28:50,747 - INFO - 127.0.0.1 - - [24/Sep/2025 12:28:50] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-24 12:29:05,183 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:05,184 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:05,184 - INFO - Матч 2: итоговый счет=None
+2025-09-24 12:29:05,189 - INFO - 127.0.0.1 - - [24/Sep/2025 12:29:05] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-24 12:29:10,774 - INFO - Создание расписания для 4 участников: ['1', '2', '3', '4']
+2025-09-24 12:29:10,775 - INFO - Всего матчей для создания: 6
+2025-09-24 12:29:10,776 - INFO - Создание матча: 1 vs 2
+2025-09-24 12:29:10,777 - INFO - Создание матча: 1 vs 3
+2025-09-24 12:29:10,778 - INFO - Создание матча: 1 vs 4
+2025-09-24 12:29:10,779 - INFO - Создание матча: 2 vs 3
+2025-09-24 12:29:10,781 - INFO - Создание матча: 2 vs 4
+2025-09-24 12:29:10,782 - INFO - Создание матча: 3 vs 4
+2025-09-24 12:29:10,841 - INFO - Расписание составлено для турнира local: создано 6 матчей
+2025-09-24 12:29:10,846 - INFO - 127.0.0.1 - - [24/Sep/2025 12:29:10] "POST /api/tournaments/6/generate-schedule HTTP/1.1" 200 -
+2025-09-24 12:29:12,925 - INFO - Матч 3: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:12,925 - INFO - Матч 3: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:12,925 - INFO - Матч 3: итоговый счет=None
+2025-09-24 12:29:12,926 - INFO - Матч 4: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:12,926 - INFO - Матч 4: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:12,927 - INFO - Матч 4: итоговый счет=None
+2025-09-24 12:29:12,927 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:12,927 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:12,928 - INFO - Матч 5: итоговый счет=None
+2025-09-24 12:29:12,928 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:12,929 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:12,929 - INFO - Матч 6: итоговый счет=None
+2025-09-24 12:29:12,929 - INFO - Матч 7: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:12,930 - INFO - Матч 7: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:12,930 - INFO - Матч 7: итоговый счет=None
+2025-09-24 12:29:12,930 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 12:29:12,931 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-09-24 12:29:12,931 - INFO - Матч 8: итоговый счет=None
+2025-09-24 12:29:12,934 - INFO - 127.0.0.1 - - [24/Sep/2025 12:29:12] "GET /tournament/6 HTTP/1.1" 200 -
+2025-09-24 12:30:04,968 - INFO - 127.0.0.1 - - [24/Sep/2025 12:30:04] "GET / HTTP/1.1" 200 -
+2025-09-24 12:30:08,554 - INFO - Системный администратор успешно авторизован
+2025-09-24 12:30:08,557 - INFO - 127.0.0.1 - - [24/Sep/2025 12:30:08] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 12:30:08,957 - INFO - 127.0.0.1 - - [24/Sep/2025 12:30:08] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 12:30:35,147 - INFO - Найдено турниров для удаления: 0
+2025-09-24 12:30:35,151 - INFO - Удалено токенов по email admin_121518@system: 0
+2025-09-24 12:30:35,152 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 12:30:35,181 - INFO - Изменения сохранены в базу данных
+2025-09-24 12:30:35,181 - INFO - Администратор турнира 121518 удален. Удалено турниров: 0
+2025-09-24 12:30:35,182 - INFO - 127.0.0.1 - - [24/Sep/2025 12:30:35] "DELETE /api/admin/tournament-admins/121518 HTTP/1.1" 200 -
+2025-09-24 12:33:05,562 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:33:05,701 - INFO -  * Restarting with stat
+2025-09-24 12:33:07,025 - INFO - База данных инициализирована успешно
+2025-09-24 12:33:07,675 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:33:07,676 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:33:07,676 - INFO - Переменная окружения PORT: None
+2025-09-24 12:33:07,677 - INFO - Режим отладки: production
+2025-09-24 12:33:07,714 - WARNING -  * Debugger is active!
+2025-09-24 12:33:07,717 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:33:20,720 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:33:20,839 - INFO -  * Restarting with stat
+2025-09-24 12:33:22,101 - INFO - База данных инициализирована успешно
+2025-09-24 12:33:22,729 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:33:22,729 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:33:22,730 - INFO - Переменная окружения PORT: None
+2025-09-24 12:33:22,730 - INFO - Режим отладки: production
+2025-09-24 12:33:22,758 - WARNING -  * Debugger is active!
+2025-09-24 12:33:22,763 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:34:34,207 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:34:34,321 - INFO -  * Restarting with stat
+2025-09-24 12:34:35,529 - INFO - База данных инициализирована успешно
+2025-09-24 12:34:36,154 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:34:36,154 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:34:36,155 - INFO - Переменная окружения PORT: None
+2025-09-24 12:34:36,155 - INFO - Режим отладки: production
+2025-09-24 12:34:36,173 - WARNING -  * Debugger is active!
+2025-09-24 12:34:36,177 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:35:04,014 - INFO - 127.0.0.1 - - [24/Sep/2025 12:35:04] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 12:35:07,952 - INFO - 127.0.0.1 - - [24/Sep/2025 12:35:07] "GET / HTTP/1.1" 200 -
+2025-09-24 12:35:09,143 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxljsEOgjAMhl_F9OxhmwMGJx_EhGxrF4kME4YHY3x3WREw8fKt_fZ36wvaMFK6QhNsn-gIFmM3tBRt10OzdOf0TBNFWC87hEauzWAjzcHLQ2glM08mU3OtFZuC6ZnI3nFdH_gQTP0TMnv0_zkt9qnvB7T4bcPpfqNh3kpm5dMYNoOKnFTGuYqERGHJh2BFZVRZ2joUhUKPOqCB9wchT1S8.aNO6IA.3n3wASx3Hj6nNWH5cn2vQ22APsY'}
+2025-09-24 12:35:09,151 - INFO - GET запрос на страницу токенов. Текущее количество: 4
+2025-09-24 12:35:09,173 - INFO - 127.0.0.1 - - [24/Sep/2025 12:35:09] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:35:09,486 - INFO - 127.0.0.1 - - [24/Sep/2025 12:35:09] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:35:39,922 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '138', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxljsEOgjAMhl_F9OxhmwMGJx_EhGxrF4kME4YHY3x3WREw8fKt_fZ36wvaMFK6QhNsn-gIFmM3tBRt10OzdOf0TBNFWC87hEauzWAjzcHLQ2glM08mU3OtFZuC6ZnI3nFdH_gQTP0TMnv0_zkt9qnvB7T4bcPpfqNh3kpm5dMYNoOKnFTGuYqERGHJh2BFZVRZ2joUhUKPOqCB9wchT1S8.aNO6IA.3n3wASx3Hj6nNWH5cn2vQ22APsY'}
+2025-09-24 12:35:39,930 - INFO - Текущее количество выданных токенов: 4
+2025-09-24 12:35:39,938 - INFO - Достигнут лимит токенов (2). Отказываем в выдаче нового токена.
+2025-09-24 12:35:39,945 - INFO - 127.0.0.1 - - [24/Sep/2025 12:35:39] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 12:35:40,008 - INFO - 127.0.0.1 - - [24/Sep/2025 12:35:40] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:36:31,117 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:31] "GET / HTTP/1.1" 200 -
+2025-09-24 12:36:34,676 - INFO - Системный администратор успешно авторизован
+2025-09-24 12:36:34,676 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:34] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 12:36:34,722 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:34] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 12:36:38,458 - INFO - Найдено турниров для удаления: 1
+2025-09-24 12:36:38,458 - INFO - Удаляем турнир: local (ID: 6)
+2025-09-24 12:36:38,463 - INFO - Удалено участников: 4
+2025-09-24 12:36:38,466 - INFO - Удалено матчей: 6
+2025-09-24 12:36:38,467 - INFO - Турнир local помечен для удаления
+2025-09-24 12:36:38,471 - INFO - Удалено токенов по email admin_23513@system: 0
+2025-09-24 12:36:38,472 - INFO - Удалено дополнительных токенов: 3
+2025-09-24 12:36:38,479 - INFO - Изменения сохранены в базу данных
+2025-09-24 12:36:38,480 - INFO - Администратор турнира 23513 удален. Удалено турниров: 1
+2025-09-24 12:36:38,481 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:38] "DELETE /api/admin/tournament-admins/23513 HTTP/1.1" 200 -
+2025-09-24 12:36:41,517 - INFO - Найдено турниров для удаления: 1
+2025-09-24 12:36:41,517 - INFO - Удаляем турнир: 916 a (ID: 5)
+2025-09-24 12:36:41,517 - INFO - Удалено участников: 0
+2025-09-24 12:36:41,517 - INFO - Удалено матчей: 0
+2025-09-24 12:36:41,517 - INFO - Турнир 916 a помечен для удаления
+2025-09-24 12:36:41,567 - INFO - Удалено токенов по email admin_223976@system: 0
+2025-09-24 12:36:41,571 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 12:36:41,589 - INFO - Изменения сохранены в базу данных
+2025-09-24 12:36:41,589 - INFO - Администратор турнира 223976 удален. Удалено турниров: 1
+2025-09-24 12:36:41,593 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:41] "DELETE /api/admin/tournament-admins/223976 HTTP/1.1" 200 -
+2025-09-24 12:36:47,602 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:47] "GET / HTTP/1.1" 200 -
+2025-09-24 12:36:48,616 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxljsEOgjAMhl_F9OxhmwMGJx_EhGxrF4kME4YHY3x3WREw8fKt_fZ36wvaMFK6QhNsn-gIFmM3tBRt10OzdOf0TBNFWC87hEauzWAjzcHLQ2glM08mU3OtFZuC6ZnI3nFdH_gQTP0TMnv0_zkt9qnvB7T4bcPpfqNh3kpm5dMYNoOKnFTGuYqERGHJh2BFZVRZ2joUhUKPOqCB9wchT1S8.aNO7og.nBZSNjTVJ4vdQJXvVnfVWYqPvoM'}
+2025-09-24 12:36:48,624 - INFO - GET запрос на страницу токенов. Текущее количество: 0
+2025-09-24 12:36:48,627 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:48] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:36:48,932 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:48] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:36:52,764 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '138', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxljsEOgjAMhl_F9OxhmwMGJx_EhGxrF4kME4YHY3x3WREw8fKt_fZ36wvaMFK6QhNsn-gIFmM3tBRt10OzdOf0TBNFWC87hEauzWAjzcHLQ2glM08mU3OtFZuC6ZnI3nFdH_gQTP0TMnv0_zkt9qnvB7T4bcPpfqNh3kpm5dMYNoOKnFTGuYqERGHJh2BFZVRZ2joUhUKPOqCB9wchT1S8.aNO7og.nBZSNjTVJ4vdQJXvVnfVWYqPvoM'}
+2025-09-24 12:36:52,782 - INFO - Текущее количество выданных токенов: 0
+2025-09-24 12:36:52,798 - INFO - Отправка email с токеном 95 на andvm@rambler.ru для andvm
+2025-09-24 12:36:52,798 - INFO - Запуск асинхронной отправки email на andvm@rambler.ru
+2025-09-24 12:36:52,798 - INFO - Асинхронная отправка email запущена для andvm@rambler.ru
+2025-09-24 12:36:52,798 - INFO - Результат отправки email: True
+2025-09-24 12:36:53,067 - INFO - 127.0.0.1 - - [24/Sep/2025 12:36:53] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 12:36:53,802 - ERROR - Ошибка отправки email: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-09-24 12:36:53,802 - INFO - Асинхронная отправка завершена: False
+2025-09-24 12:37:13,766 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:13] "GET / HTTP/1.1" 200 -
+2025-09-24 12:37:16,149 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMtqwzAQ_JWy5yZIG8mWdcpH9FgweqyoqeVQyS6UkH-vrMROoZfRzsyOdtkr9CFR_gAdzJjpFYyPw9RTNMMI-s7O-SfPFGEzBw-ab2QykUrj-8IE8hVPakVRa4FVkRVdRV91W-vupT6sovjTpJ6t_78T7Jl6DKC7vm84Xz5pKlvxVXI5hV3xSJajsrYlxj0z5EIwrFXYNKYLUqJ3XgSvSq5G-kRfC-UZ9BVcIjOT701hgAzlgXUHFG8c9anREo9tp5qWl-h-vsl_x3My0Y6Ujmkp1uNe1dmGgO7k7fYLLyB3Og.aNO7tQ.QbtWjWRKrs-W7B7dQLEjHLQUyXE'}
+2025-09-24 12:37:16,156 - INFO - GET запрос на страницу токенов. Текущее количество: 1
+2025-09-24 12:37:16,158 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:16] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:37:16,222 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:16] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:37:34,715 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '139', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMtqwzAQ_JWy5yZIG8mWdcpH9FgweqyoqeVQyS6UkH-vrMROoZfRzsyOdtkr9CFR_gAdzJjpFYyPw9RTNMMI-s7O-SfPFGEzBw-ab2QykUrj-8IE8hVPakVRa4FVkRVdRV91W-vupT6sovjTpJ6t_78T7Jl6DKC7vm84Xz5pKlvxVXI5hV3xSJajsrYlxj0z5EIwrFXYNKYLUqJ3XgSvSq5G-kRfC-UZ9BVcIjOT701hgAzlgXUHFG8c9anREo9tp5qWl-h-vsl_x3My0Y6Ujmkp1uNe1dmGgO7k7fYLLyB3Og.aNO7tQ.QbtWjWRKrs-W7B7dQLEjHLQUyXE'}
+2025-09-24 12:37:34,727 - INFO - Текущее количество выданных токенов: 1
+2025-09-24 12:37:34,781 - INFO - Отправка email с токеном 83 на yandvm@yandex.ru для yand 1
+2025-09-24 12:37:34,781 - INFO - Запуск асинхронной отправки email на yandvm@yandex.ru
+2025-09-24 12:37:34,781 - INFO - Асинхронная отправка email запущена для yandvm@yandex.ru
+2025-09-24 12:37:34,785 - INFO - Результат отправки email: True
+2025-09-24 12:37:34,805 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:34] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 12:37:35,785 - ERROR - Ошибка отправки email: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-09-24 12:37:35,785 - INFO - Асинхронная отправка завершена: False
+2025-09-24 12:37:38,532 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZXK57UCAg3h1I_YsVJEsNGilUyDZGpV9d8HtGkn7fLs9-xnW75C7yOlDzDenhK9gcUwTj0FO57A3NkhXdJMAdbiiGD4SiYbKDceFyYFL9jogrLmUlRFVXQVsepDzbtNDayi_NOkX63_x0n2cj0W0F1_Xjh_fdKUr-JFcin6p4KCBi70MLTEODJLznvLWi32e9t5pQQ6lB519lVLH-l7oTSDuYKLZGfC3mYGggm1Zd1WyHcuTNOaRu5azVUns3V938VO-BMOJdB5F5dcevyrSBu-bgGjm9vtF6SWdzg.aNO73g.88C2NeR9nLhQJ2G-IM0l6avW3Ks'}
+2025-09-24 12:37:38,537 - INFO - GET запрос на страницу токенов. Текущее количество: 2
+2025-09-24 12:37:38,539 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:38] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:37:51,347 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '141', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZXK57UCAg3h1I_YsVJEsNGilUyDZGpV9d8HtGkn7fLs9-xnW75C7yOlDzDenhK9gcUwTj0FO57A3NkhXdJMAdbiiGD4SiYbKDceFyYFL9jogrLmUlRFVXQVsepDzbtNDayi_NOkX63_x0n2cj0W0F1_Xjh_fdKUr-JFcin6p4KCBi70MLTEODJLznvLWi32e9t5pQQ6lB519lVLH-l7oTSDuYKLZGfC3mYGggm1Zd1WyHcuTNOaRu5azVUns3V938VO-BMOJdB5F5dcevyrSBu-bgGjm9vtF6SWdzg.aNO73g.88C2NeR9nLhQJ2G-IM0l6avW3Ks'}
+2025-09-24 12:37:51,351 - INFO - Текущее количество выданных токенов: 2
+2025-09-24 12:37:51,352 - INFO - Достигнут лимит токенов (2). Отказываем в выдаче нового токена.
+2025-09-24 12:37:51,354 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:51] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 12:37:51,664 - INFO - 127.0.0.1 - - [24/Sep/2025 12:37:51] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:43:39,784 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:43:39,904 - INFO -  * Restarting with stat
+2025-09-24 12:43:41,073 - INFO - База данных инициализирована успешно
+2025-09-24 12:43:41,654 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:43:41,655 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:43:41,656 - INFO - Переменная окружения PORT: None
+2025-09-24 12:43:41,656 - INFO - Режим отладки: production
+2025-09-24 12:43:41,696 - WARNING -  * Debugger is active!
+2025-09-24 12:43:41,700 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:43:52,074 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 12:43:52,209 - INFO -  * Restarting with stat
+2025-09-24 12:43:53,368 - INFO - База данных инициализирована успешно
+2025-09-24 12:43:54,010 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:43:54,011 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:43:54,012 - INFO - Переменная окружения PORT: None
+2025-09-24 12:43:54,012 - INFO - Режим отладки: production
+2025-09-24 12:43:54,053 - WARNING -  * Debugger is active!
+2025-09-24 12:43:54,059 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:43:56,088 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 12:43:56,261 - INFO -  * Restarting with stat
+2025-09-24 12:43:57,412 - INFO - База данных инициализирована успешно
+2025-09-24 12:43:58,043 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:43:58,044 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:43:58,045 - INFO - Переменная окружения PORT: None
+2025-09-24 12:43:58,046 - INFO - Режим отладки: production
+2025-09-24 12:43:58,084 - WARNING -  * Debugger is active!
+2025-09-24 12:43:58,090 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:44:01,425 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\app.py', reloading
+2025-09-24 12:44:01,532 - INFO -  * Restarting with stat
+2025-09-24 12:44:02,694 - INFO - База данных инициализирована успешно
+2025-09-24 12:44:03,323 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:44:03,324 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:44:03,325 - INFO - Переменная окружения PORT: None
+2025-09-24 12:44:03,326 - INFO - Режим отладки: production
+2025-09-24 12:44:03,357 - WARNING -  * Debugger is active!
+2025-09-24 12:44:03,365 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:44:13,624 - INFO - База данных инициализирована успешно
+2025-09-24 12:44:14,224 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:44:14,225 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 12:44:14,225 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 12:44:14,226 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 12:44:14,226 - INFO - Попытка отправки email на test@example.com с токеном 99
+2025-09-24 12:44:14,226 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 12:44:14,227 - INFO - От: tournaments.master@gmail.com, Кому: test@example.com
+2025-09-24 12:44:22,977 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:44:23,101 - INFO -  * Restarting with stat
+2025-09-24 12:44:24,196 - INFO - База данных инициализирована успешно
+2025-09-24 12:44:24,794 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:44:24,795 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:44:24,796 - INFO - Переменная окружения PORT: None
+2025-09-24 12:44:24,796 - INFO - Режим отладки: production
+2025-09-24 12:44:24,833 - WARNING -  * Debugger is active!
+2025-09-24 12:44:24,841 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:44:29,692 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:44:29,807 - INFO -  * Restarting with stat
+2025-09-24 12:44:31,041 - INFO - База данных инициализирована успешно
+2025-09-24 12:44:31,656 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:44:31,658 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:44:31,659 - INFO - Переменная окружения PORT: None
+2025-09-24 12:44:31,659 - INFO - Режим отладки: production
+2025-09-24 12:44:31,701 - WARNING -  * Debugger is active!
+2025-09-24 12:44:31,708 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:44:46,551 - INFO - База данных инициализирована успешно
+2025-09-24 12:44:47,189 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:44:47,190 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 12:44:47,191 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 12:44:47,191 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 12:44:47,191 - INFO - Попытка отправки email на test@example.com с токеном 88
+2025-09-24 12:44:47,192 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 12:44:47,192 - INFO - От: tournaments.master@gmail.com, Кому: test@example.com
+2025-09-24 12:44:47,355 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-09-24 12:44:47,586 - INFO - [OK] TLS включен
+2025-09-24 12:44:48,067 - INFO - [OK] Авторизация успешна
+2025-09-24 12:44:49,199 - INFO - [OK] Email отправлен, результат: {}
+2025-09-24 12:44:49,280 - INFO - [OK] SMTP соединение закрыто
+2025-09-24 12:44:49,281 - INFO - [SUCCESS] Токен 88 успешно отправлен на test@example.com (Тестовый пользователь) от tournaments.master@gmail.com
+2025-09-24 12:45:46,729 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:45:46,845 - INFO -  * Restarting with stat
+2025-09-24 12:45:48,069 - INFO - База данных инициализирована успешно
+2025-09-24 12:45:48,660 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:45:48,660 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:45:48,661 - INFO - Переменная окружения PORT: None
+2025-09-24 12:45:48,661 - INFO - Режим отладки: production
+2025-09-24 12:45:48,681 - WARNING -  * Debugger is active!
+2025-09-24 12:45:48,687 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:46:06,391 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:06] "GET / HTTP/1.1" 200 -
+2025-09-24 12:46:09,783 - INFO - Системный администратор успешно авторизован
+2025-09-24 12:46:09,783 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:09] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 12:46:09,842 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:09] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 12:46:13,080 - INFO - Найдено турниров для удаления: 0
+2025-09-24 12:46:13,081 - INFO - Удалено токенов по email admin_23513@system: 0
+2025-09-24 12:46:13,083 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 12:46:13,107 - INFO - Изменения сохранены в базу данных
+2025-09-24 12:46:13,107 - INFO - Администратор турнира 23513 удален. Удалено турниров: 0
+2025-09-24 12:46:13,109 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:13] "DELETE /api/admin/tournament-admins/23513 HTTP/1.1" 200 -
+2025-09-24 12:46:19,784 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:19] "GET / HTTP/1.1" 200 -
+2025-09-24 12:46:21,140 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZXK57UCAg3h1I_YsVJEsNGilUyDZGpV9d8HtGkn7fLs9-xnW75C7yOlDzDenhK9gcUwTj0FO57A3NkhXdJMAdbiiGD4SiYbKDceFyYFL9jogrLmUlRFVXQVsepDzbtNDayi_NOkX63_x0n2cj0W0F1_Xjh_fdKUr-JFcin6p4KCBi70MLTEODJLznvLWi32e9t5pQQ6lB519lVLH-l7oTSDuYKLZGfC3mYGggm1Zd1WyHcuTNOaRu5azVUns3V938VO-BMOJdB5F5dcevyrSBu-bgGjm9vtF6SWdzg.aNO94Q.E9vSJdd6ouXVFboPH4JElygJMFA'}
+2025-09-24 12:46:21,154 - INFO - GET запрос на страницу токенов. Текущее количество: 1
+2025-09-24 12:46:21,173 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:21] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 12:46:21,262 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:21] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 12:46:45,954 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZXK57UCAg3h1I_YsVJEsNGilUyDZGpV9d8HtGkn7fLs9-xnW75C7yOlDzDenhK9gcUwTj0FO57A3NkhXdJMAdbiiGD4SiYbKDceFyYFL9jogrLmUlRFVXQVsepDzbtNDayi_NOkX63_x0n2cj0W0F1_Xjh_fdKUr-JFcin6p4KCBi70MLTEODJLznvLWi32e9t5pQQ6lB519lVLH-l7oTSDuYKLZGfC3mYGggm1Zd1WyHcuTNOaRu5azVUns3V938VO-BMOJdB5F5dcevyrSBu-bgGjm9vtF6SWdzg.aNO94Q.E9vSJdd6ouXVFboPH4JElygJMFA'}
+2025-09-24 12:46:45,963 - INFO - Текущее количество выданных токенов: 1
+2025-09-24 12:46:46,018 - INFO - Отправка email с токеном 98 на yandvm@yandex.ru для yand
+2025-09-24 12:46:46,019 - INFO - Запуск асинхронной отправки email на yandvm@yandex.ru
+2025-09-24 12:46:46,019 - INFO - Асинхронная отправка email запущена для yandvm@yandex.ru
+2025-09-24 12:46:46,019 - INFO - Результат отправки email: True
+2025-09-24 12:46:46,075 - INFO - 127.0.0.1 - - [24/Sep/2025 12:46:46] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 12:46:47,022 - ERROR - Ошибка асинхронной отправки: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-09-24 12:54:19,806 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:54:19,950 - INFO -  * Restarting with stat
+2025-09-24 12:54:21,070 - INFO - База данных инициализирована успешно
+2025-09-24 12:54:21,685 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:54:21,686 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:54:21,687 - INFO - Переменная окружения PORT: None
+2025-09-24 12:54:21,688 - INFO - Режим отладки: production
+2025-09-24 12:54:21,723 - WARNING -  * Debugger is active!
+2025-09-24 12:54:21,726 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:54:23,721 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:54:23,825 - INFO -  * Restarting with stat
+2025-09-24 12:54:24,936 - INFO - База данных инициализирована успешно
+2025-09-24 12:54:25,678 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:54:25,680 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:54:25,680 - INFO - Переменная окружения PORT: None
+2025-09-24 12:54:25,681 - INFO - Режим отладки: production
+2025-09-24 12:54:25,714 - WARNING -  * Debugger is active!
+2025-09-24 12:54:25,719 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:54:26,438 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:54:26,536 - INFO -  * Restarting with stat
+2025-09-24 12:54:27,803 - INFO - База данных инициализирована успешно
+2025-09-24 12:54:28,467 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:54:28,468 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:54:28,469 - INFO - Переменная окружения PORT: None
+2025-09-24 12:54:28,470 - INFO - Режим отладки: production
+2025-09-24 12:54:28,507 - WARNING -  * Debugger is active!
+2025-09-24 12:54:28,513 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:54:30,565 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:54:30,681 - INFO -  * Restarting with stat
+2025-09-24 12:54:31,775 - INFO - База данных инициализирована успешно
+2025-09-24 12:54:32,654 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 12:54:32,655 - INFO - Запуск приложения на порту 5000
+2025-09-24 12:54:32,656 - INFO - Переменная окружения PORT: None
+2025-09-24 12:54:32,657 - INFO - Режим отладки: production
+2025-09-24 12:54:32,714 - WARNING -  * Debugger is active!
+2025-09-24 12:54:32,732 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 12:54:49,748 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 12:54:49,838 - INFO -  * Restarting with stat

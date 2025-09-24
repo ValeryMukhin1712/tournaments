@@ -80,32 +80,32 @@ def send_token_email(email, name, token):
         try:
             # Устанавливаем таймаут для SMTP подключения
             server = smtplib.SMTP(smtp_server, smtp_port, timeout=30)
-            logger.info("✓ SMTP подключение установлено (таймаут 30 сек)")
+            logger.info("[OK] SMTP подключение установлено (таймаут 30 сек)")
             
             server.starttls()
-            logger.info("✓ TLS включен")
+            logger.info("[OK] TLS включен")
             
             server.login(smtp_username, smtp_password)
-            logger.info("✓ Авторизация успешна")
+            logger.info("[OK] Авторизация успешна")
             
             text = msg.as_string()
             result = server.sendmail(from_email, email, text.encode('utf-8'))
-            logger.info(f"✓ Email отправлен, результат: {result}")
+            logger.info(f"[OK] Email отправлен, результат: {result}")
             
             server.quit()
-            logger.info("✓ SMTP соединение закрыто")
+            logger.info("[OK] SMTP соединение закрыто")
             
-            logger.info(f"✅ Токен {token} успешно отправлен на {email} ({name}) от {from_email}")
+            logger.info(f"[SUCCESS] Токен {token} успешно отправлен на {email} ({name}) от {from_email}")
             return True
             
         except smtplib.SMTPAuthenticationError as e:
-            logger.error(f"❌ Ошибка авторизации SMTP: {e}")
+            logger.error(f"[ERROR] Ошибка авторизации SMTP: {e}")
             raise
         except smtplib.SMTPRecipientsRefused as e:
-            logger.error(f"❌ Получатель отклонен: {e}")
+            logger.error(f"[ERROR] Получатель отклонен: {e}")
             raise
         except smtplib.SMTPException as e:
-            logger.error(f"❌ Ошибка SMTP: {e}")
+            logger.error(f"[ERROR] Ошибка SMTP: {e}")
             raise
         
     except Exception as e:
@@ -118,7 +118,7 @@ def send_token_email(email, name, token):
             logger.warning(f"Не удалось сохранить токен в файл: {file_e}")
         return False
 
-def send_token_email_async(email, name, token):
+def send_token_email_async(email, name, token, app=None):
     """Асинхронная отправка email (не блокирует основной поток)"""
     import threading
     import time
@@ -127,8 +127,16 @@ def send_token_email_async(email, name, token):
         try:
             logger.info(f"Запуск асинхронной отправки email на {email}")
             time.sleep(1)  # Небольшая задержка
-            result = send_token_email(email, name, token)
-            logger.info(f"Асинхронная отправка завершена: {result}")
+            
+            # Создаем контекст приложения для асинхронного потока
+            if app:
+                with app.app_context():
+                    result = send_token_email(email, name, token)
+                    logger.info(f"Асинхронная отправка завершена: {result}")
+            else:
+                # Если приложение не передано, отправляем синхронно
+                result = send_token_email(email, name, token)
+                logger.info(f"Синхронная отправка завершена: {result}")
         except Exception as e:
             logger.error(f"Ошибка асинхронной отправки: {e}")
     
@@ -233,6 +241,15 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                      email=existing_token.email,
                                      created_at=existing_token.created_at.strftime('%d.%m.%Y %H:%M'))
             
+            # ОТЛАДКА: Проверяем количество уже выданных токенов
+            total_tokens = Token.query.count()
+            logger.info(f"Текущее количество выданных токенов: {total_tokens}")
+            
+            if total_tokens >= 2:
+                logger.info("Достигнут лимит токенов (2). Отказываем в выдаче нового токена.")
+                flash('Свободных токенов пока нет', 'warning')
+                return render_template('request_token.html')
+            
             # Генерируем целочисленный токен в диапазоне 10-99
             import random
             token = random.randint(10, 99)
@@ -264,18 +281,18 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 # Отправляем email с токеном
                 logger.info(f"Отправка email с токеном {token} на {email} для {name}")
                 try:
-                    email_sent = send_token_email_async(email, name, token)
+                    email_sent = send_token_email_async(email, name, token, app)
                     logger.info(f"Результат отправки email: {email_sent}")
                     if email_sent:
                         flash('Токен отправлен на ваш email!', 'success')
-                        logger.info(f"✅ Flash сообщение: Токен отправлен на {email}")
+                        logger.info(f"[SUCCESS] Flash сообщение: Токен отправлен на {email}")
                     else:
                         flash('Токен сгенерирован, но email не настроен. Сохраните токен вручную.', 'warning')
-                        logger.warning(f"⚠️ Flash сообщение: Email не настроен для {email}")
+                        logger.warning(f"[WARNING] Flash сообщение: Email не настроен для {email}")
                 except Exception as e:
                     logger.error(f'Ошибка отправки email: {e}')
                     flash('Токен сгенерирован, но не удалось отправить email. Сохраните токен вручную.', 'warning')
-                    logger.warning(f"⚠️ Flash сообщение: Ошибка отправки email для {email}")
+                    logger.warning(f"[WARNING] Flash сообщение: Ошибка отправки email для {email}")
                     
             except Exception as e:
                 logger.error(f'Ошибка сохранения токена в БД: {e}')
@@ -289,7 +306,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                  email=email,
                                  created_at=datetime.now().strftime('%d.%m.%Y %H:%M'))
         
-        return render_template('request_token.html')
+        # Для GET запроса показываем информацию о количестве токенов
+        total_tokens = Token.query.count()
+        logger.info(f"GET запрос на страницу токенов. Текущее количество: {total_tokens}")
+        
+        return render_template('request_token.html', 
+                             total_tokens=total_tokens,
+                             max_tokens=2)
     
     @app.route('/create-tournament', methods=['GET', 'POST'])
     def create_tournament_form():
