@@ -67,6 +67,9 @@ def send_token_email(email, name, token):
         
         # Отправляем email
         import smtplib
+        logger.info(f"Попытка отправки email на {email} с токеном {token}")
+        logger.info(f"SMTP настройки: {smtp_server}:{smtp_port}, пользователь: {smtp_username}")
+        
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(smtp_username, smtp_password)
@@ -74,7 +77,7 @@ def send_token_email(email, name, token):
         server.sendmail(from_email, email, text.encode('utf-8'))
         server.quit()
         
-        logger.info(f"Токен {token} отправлен на {email} ({name}) от {from_email}")
+        logger.info(f"✅ Токен {token} успешно отправлен на {email} ({name}) от {from_email}")
         return True
         
     except Exception as e:
@@ -210,15 +213,20 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 }
                 
                 # Отправляем email с токеном
+                logger.info(f"Отправка email с токеном {token} на {email} для {name}")
                 try:
                     email_sent = send_token_email(email, name, token)
+                    logger.info(f"Результат отправки email: {email_sent}")
                     if email_sent:
                         flash('Токен отправлен на ваш email!', 'success')
+                        logger.info(f"✅ Flash сообщение: Токен отправлен на {email}")
                     else:
                         flash('Токен сгенерирован, но email не настроен. Сохраните токен вручную.', 'warning')
+                        logger.warning(f"⚠️ Flash сообщение: Email не настроен для {email}")
                 except Exception as e:
                     logger.error(f'Ошибка отправки email: {e}')
                     flash('Токен сгенерирован, но не удалось отправить email. Сохраните токен вручную.', 'warning')
+                    logger.warning(f"⚠️ Flash сообщение: Ошибка отправки email для {email}")
                     
             except Exception as e:
                 logger.error(f'Ошибка сохранения токена в БД: {e}')
