@@ -35,6 +35,8 @@ def send_token_email(email, name, token):
         
         logger.info(f"Email настройки: server={smtp_server}, port={smtp_port}, username={smtp_username}")
         logger.info(f"Переменные окружения: MAIL_SERVER={os.environ.get('MAIL_SERVER')}, MAIL_USERNAME={os.environ.get('MAIL_USERNAME')}")
+        logger.info(f"Все переменные окружения MAIL_*: {[(k, v) for k, v in os.environ.items() if k.startswith('MAIL_')]}")
+        logger.info(f"RAILWAY_ENVIRONMENT: {os.environ.get('RAILWAY_ENVIRONMENT', 'НЕ УСТАНОВЛЕНО')}")
         
         # Проверяем, настроены ли email настройки
         logger.info(f"Проверка email настроек: username={smtp_username}, password={'***' if smtp_password else 'НЕТ'}")

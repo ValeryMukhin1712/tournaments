@@ -6323,3 +6323,156 @@ with app.app_context(). See the documentation for more information.
 2025-09-24 14:47:51,484 - INFO - Режим отладки: production
 2025-09-24 14:47:51,518 - WARNING -  * Debugger is active!
 2025-09-24 14:47:51,524 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 14:51:02,529 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81qBCw1w6kfsWClywGjRSqZBMq2q-u8D2rSTdnn2e_azLV9YHxLld2YDnjK9MvRxnHqKOJ6YvbFDPueZIluLo2dWrGTCSKXxuHAJouJOV5Qtl9AU1dA19E0fWm5eWuAN5Z8m_Wz9P07yp-u-gG7648L584OmcpWoksspPBQPNAjQw9ARF54juRCQdxr2ezRBKfDOy-B18TVLn-hroTwze2EuEc7keyyMAQe14WYD8k1IK5UFteVgOqmKdX3fGSf_HQ810M82LaV0_1eV1h3MGn69_gK5FXbf.aNPZ1Q.zsyEHSs2O7V5lDn87pwazGPFj1Q'}
+2025-09-24 14:51:02,569 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:02] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 14:51:08,267 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:08] "GET / HTTP/1.1" 200 -
+2025-09-24 14:51:10,751 - INFO - Системный администратор успешно авторизован
+2025-09-24 14:51:10,756 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:10] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-24 14:51:11,124 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:11] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-24 14:51:14,494 - INFO - Найдено турниров для удаления: 0
+2025-09-24 14:51:14,497 - INFO - Удалено токенов по email admin_23513@system: 0
+2025-09-24 14:51:14,498 - INFO - Удалено дополнительных токенов: 1
+2025-09-24 14:51:14,546 - INFO - Изменения сохранены в базу данных
+2025-09-24 14:51:14,546 - INFO - Администратор турнира 23513 удален. Удалено турниров: 0
+2025-09-24 14:51:14,546 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:14] "DELETE /api/admin/tournament-admins/23513 HTTP/1.1" 200 -
+2025-09-24 14:51:16,396 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:16] "GET / HTTP/1.1" 200 -
+2025-09-24 14:51:17,346 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81qBCw1w6kfsWClywGjRSqZBMq2q-u8D2rSTdnn2e_azLV9YHxLld2YDnjK9MvRxnHqKOJ6YvbFDPueZIluLo2dWrGTCSKXxuHAJouJOV5Qtl9AU1dA19E0fWm5eWuAN5Z8m_Wz9P07yp-u-gG7648L584OmcpWoksspPBQPNAjQw9ARF54juRCQdxr2ezRBKfDOy-B18TVLn-hroTwze2EuEc7keyyMAQe14WYD8k1IK5UFteVgOqmKdX3fGSf_HQ810M82LaV0_1eV1h3MGn69_gK5FXbf.aNPbLg._SPD1Ltkd3D9K9YDZp3_XWu_toQ'}
+2025-09-24 14:51:17,358 - INFO - GET запрос на страницу токенов. Текущее количество: 1
+2025-09-24 14:51:17,371 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:17] "GET /request-token HTTP/1.1" 200 -
+2025-09-24 14:51:17,654 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:17] "GET /api/debug/tokens HTTP/1.1" 200 -
+2025-09-24 14:51:22,568 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '137', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxlUMFuwyAM_ZWJ81qBCw1w6kfsWClywGjRSqZBMq2q-u8D2rSTdnn2e_azLV9YHxLld2YDnjK9MvRxnHqKOJ6YvbFDPueZIluLo2dWrGTCSKXxuHAJouJOV5Qtl9AU1dA19E0fWm5eWuAN5Z8m_Wz9P07yp-u-gG7648L584OmcpWoksspPBQPNAjQw9ARF54juRCQdxr2ezRBKfDOy-B18TVLn-hroTwze2EuEc7keyyMAQe14WYD8k1IK5UFteVgOqmKdX3fGSf_HQ810M82LaV0_1eV1h3MGn69_gK5FXbf.aNPbLg._SPD1Ltkd3D9K9YDZp3_XWu_toQ'}
+2025-09-24 14:51:22,582 - INFO - Текущее количество выданных токенов: 1
+2025-09-24 14:51:22,643 - INFO - Отправка email с токеном 42 на yandvm@yandex.ru для yand
+2025-09-24 14:51:22,644 - INFO - Запуск асинхронной отправки email на yandvm@yandex.ru
+2025-09-24 14:51:22,644 - INFO - Асинхронная отправка email запущена для yandvm@yandex.ru
+2025-09-24 14:51:22,644 - INFO - Результат отправки email: True
+2025-09-24 14:51:22,644 - INFO - [SUCCESS] Email отправлен на yandvm@yandex.ru
+2025-09-24 14:51:22,650 - INFO - 127.0.0.1 - - [24/Sep/2025 14:51:22] "POST /request-token HTTP/1.1" 200 -
+2025-09-24 14:51:23,647 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-09-24 14:51:23,649 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-09-24 14:51:23,649 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-09-24 14:51:23,649 - INFO - Попытка отправки email на yandvm@yandex.ru с токеном 42
+2025-09-24 14:51:23,649 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-09-24 14:51:23,649 - INFO - От: tournaments.master@gmail.com, Кому: yandvm@yandex.ru
+2025-09-24 14:51:23,962 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-09-24 14:51:24,424 - INFO - [OK] TLS включен
+2025-09-24 14:51:24,899 - INFO - [OK] Авторизация успешна
+2025-09-24 14:51:25,736 - INFO - [OK] Email отправлен, результат: {}
+2025-09-24 14:51:25,815 - INFO - [OK] SMTP соединение закрыто
+2025-09-24 14:51:25,815 - INFO - [SUCCESS] Токен 42 успешно отправлен на yandvm@yandex.ru (yand) от tournaments.master@gmail.com
+2025-09-24 14:51:25,815 - INFO - Асинхронная отправка завершена: True
+2025-09-24 16:26:53,283 - INFO - 127.0.0.1 - - [24/Sep/2025 16:26:53] "GET / HTTP/1.1" 200 -
+2025-09-24 16:27:03,710 - INFO - Участник 1 вошел в систему
+2025-09-24 16:27:03,712 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:03] "[32mPOST /participant-login HTTP/1.1[0m" 302 -
+2025-09-24 16:27:03,752 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:03] "GET /participant-tournaments HTTP/1.1" 200 -
+2025-09-24 16:27:04,099 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:04] "GET /participant-tournaments HTTP/1.1" 200 -
+2025-09-24 16:27:06,812 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:06] "GET / HTTP/1.1" 200 -
+2025-09-24 16:27:08,358 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:08] "GET /tournaments HTTP/1.1" 200 -
+2025-09-24 16:27:10,574 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:10] "GET / HTTP/1.1" 200 -
+2025-09-24 16:27:11,564 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:11] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 16:27:15,733 - INFO - Попытка входа: email=yandvm@yandex.ru, token=10
+2025-09-24 16:27:15,735 - INFO - Поиск токена: email=yandvm@yandex.ru, token=10, найден=False
+2025-09-24 16:27:15,737 - WARNING - Токен не найден: email=yandvm@yandex.ru, token=10
+2025-09-24 16:27:15,737 - WARNING - Токены с таким email: [(42, False)]
+2025-09-24 16:27:15,739 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:15] "POST /admin-tournament HTTP/1.1" 200 -
+2025-09-24 16:27:17,268 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:17] "GET / HTTP/1.1" 200 -
+2025-09-24 16:27:30,059 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:30] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 16:27:36,770 - INFO - Попытка входа: email=yandvm@yandex.ru, token=42
+2025-09-24 16:27:36,772 - INFO - Поиск токена: email=yandvm@yandex.ru, token=42, найден=True
+2025-09-24 16:27:36,772 - INFO - Токен найден: id=2, created_at=2025-09-24 11:51:22.591543
+2025-09-24 16:27:36,778 - INFO - Время последнего использования токена обновлено
+2025-09-24 16:27:36,778 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-24 16:27:36,784 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:36] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-24 16:27:36,790 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 0
+2025-09-24 16:27:36,791 - INFO - Все турниры в системе:
+2025-09-24 16:27:36,805 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:36] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-24 16:27:39,398 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:39] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-09-24 16:27:44,706 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:44] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-09-24 16:27:44,712 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 1
+2025-09-24 16:27:44,713 - INFO - Все турниры в системе:
+2025-09-24 16:27:44,713 - INFO -   Турнир "local" (ID: 1) - admin_id: 23513
+2025-09-24 16:27:44,718 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:44] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-24 16:27:47,757 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:47] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-24 16:27:52,122 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:52] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-24 16:27:52,140 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:52] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-24 16:27:56,912 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-09-24 16:27:56,912 - INFO - Всего матчей для создания: 1
+2025-09-24 16:27:56,912 - INFO - Создание матча: 1 vs 2
+2025-09-24 16:27:56,919 - INFO - Автоматически создано 1 матчей для турнира 1
+2025-09-24 16:27:56,921 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:56] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-24 16:27:57,237 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:27:57,237 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:27:57,237 - INFO - Матч 1: итоговый счет=None
+2025-09-24 16:27:57,237 - INFO - 127.0.0.1 - - [24/Sep/2025 16:27:57] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-24 16:28:01,784 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-09-24 16:28:01,784 - INFO - Всего матчей для создания: 3
+2025-09-24 16:28:01,784 - INFO - Создание матча: 1 vs 2
+2025-09-24 16:28:01,784 - INFO - Создание матча: 1 vs 3
+2025-09-24 16:28:01,784 - INFO - Создание матча: 2 vs 3
+2025-09-24 16:28:01,795 - INFO - Автоматически создано 3 матчей для турнира 1
+2025-09-24 16:28:01,800 - INFO - 127.0.0.1 - - [24/Sep/2025 16:28:01] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-09-24 16:28:01,814 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:28:01,814 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:28:01,815 - INFO - Матч 1: итоговый счет=None
+2025-09-24 16:28:01,815 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:28:01,815 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:28:01,816 - INFO - Матч 2: итоговый счет=None
+2025-09-24 16:28:01,817 - INFO - Матч 3: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:28:01,817 - INFO - Матч 3: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:28:01,817 - INFO - Матч 3: итоговый счет=None
+2025-09-24 16:28:01,822 - INFO - 127.0.0.1 - - [24/Sep/2025 16:28:01] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-24 16:28:09,225 - INFO - 127.0.0.1 - - [24/Sep/2025 16:28:09] "GET / HTTP/1.1" 200 -
+2025-09-24 16:28:10,958 - INFO - 127.0.0.1 - - [24/Sep/2025 16:28:10] "GET /tournaments HTTP/1.1" 200 -
+2025-09-24 16:28:26,816 - INFO - Участник 4 подал заявку на турнир local (ID: 1)
+2025-09-24 16:28:26,879 - INFO - База данных инициализирована успешно
+2025-09-24 16:28:27,800 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 16:28:27,800 - ERROR - Ошибка при отправке email уведомления: cannot import name 'send_email' from 'app' (C:\Cursor\Tournaments_v.0 — 2025_09_14_1\app.py)
+2025-09-24 16:28:27,801 - INFO - 127.0.0.1 - - [24/Sep/2025 16:28:27] "POST /api/join-request HTTP/1.1" 200 -
+2025-09-24 16:28:36,803 - INFO - 127.0.0.1 - - [24/Sep/2025 16:28:36] "GET / HTTP/1.1" 200 -
+2025-09-24 16:29:12,767 - INFO - Участник 1 вошел в систему
+2025-09-24 16:29:12,767 - INFO - 127.0.0.1 - - [24/Sep/2025 16:29:12] "[32mPOST /participant-login HTTP/1.1[0m" 302 -
+2025-09-24 16:29:12,786 - INFO - 127.0.0.1 - - [24/Sep/2025 16:29:12] "GET /participant-tournaments HTTP/1.1" 200 -
+2025-09-24 16:29:13,132 - INFO - 127.0.0.1 - - [24/Sep/2025 16:29:13] "GET /participant-tournaments HTTP/1.1" 200 -
+2025-09-24 16:29:15,196 - INFO - 127.0.0.1 - - [24/Sep/2025 16:29:15] "GET /tournament-view/1 HTTP/1.1" 200 -
+2025-09-24 16:31:33,078 - INFO - 127.0.0.1 - - [24/Sep/2025 16:31:33] "GET / HTTP/1.1" 200 -
+2025-09-24 16:31:34,102 - INFO - 127.0.0.1 - - [24/Sep/2025 16:31:34] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-24 16:31:39,060 - INFO - Попытка входа: email=yandvm@yandex.ru, token=42
+2025-09-24 16:31:39,061 - INFO - Поиск токена: email=yandvm@yandex.ru, token=42, найден=True
+2025-09-24 16:31:39,061 - INFO - Токен найден: id=2, created_at=2025-09-24 11:51:22.591543
+2025-09-24 16:31:39,066 - INFO - Время последнего использования токена обновлено
+2025-09-24 16:31:39,066 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-24 16:31:39,070 - INFO - 127.0.0.1 - - [24/Sep/2025 16:31:39] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-24 16:31:39,380 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 1
+2025-09-24 16:31:39,383 - INFO - Все турниры в системе:
+2025-09-24 16:31:39,384 - INFO -   Турнир "local" (ID: 1) - admin_id: 23513
+2025-09-24 16:31:39,394 - INFO - 127.0.0.1 - - [24/Sep/2025 16:31:39] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-24 16:31:42,033 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:31:42,035 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:31:42,037 - INFO - Матч 1: итоговый счет=None
+2025-09-24 16:31:42,038 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:31:42,040 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:31:42,041 - INFO - Матч 2: итоговый счет=None
+2025-09-24 16:31:42,043 - INFO - Матч 3: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-24 16:31:42,044 - INFO - Матч 3: статус 'запланирован' НЕ попадает в условие
+2025-09-24 16:31:42,045 - INFO - Матч 3: итоговый счет=None
+2025-09-24 16:31:42,059 - INFO - 127.0.0.1 - - [24/Sep/2025 16:31:42] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-24 16:37:33,775 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 16:37:33,922 - INFO -  * Restarting with stat
+2025-09-24 16:37:34,939 - INFO - База данных инициализирована успешно
+2025-09-24 16:37:35,474 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 16:37:35,474 - INFO - Запуск приложения на порту 5000
+2025-09-24 16:37:35,474 - INFO - Переменная окружения PORT: None
+2025-09-24 16:37:35,475 - INFO - Режим отладки: production
+2025-09-24 16:37:35,492 - WARNING -  * Debugger is active!
+2025-09-24 16:37:35,496 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 16:39:03,058 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 16:39:03,184 - INFO -  * Restarting with stat
+2025-09-24 16:39:04,126 - INFO - База данных инициализирована успешно
+2025-09-24 16:39:04,726 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 16:39:04,727 - INFO - Запуск приложения на порту 5000
+2025-09-24 16:39:04,727 - INFO - Переменная окружения PORT: None
+2025-09-24 16:39:04,727 - INFO - Режим отладки: production
+2025-09-24 16:39:04,744 - WARNING -  * Debugger is active!
+2025-09-24 16:39:04,748 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 16:39:30,891 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 16:39:31,004 - INFO -  * Restarting with stat

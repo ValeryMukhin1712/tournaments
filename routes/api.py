@@ -1870,3 +1870,36 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка тестирования email: {e}")
             return jsonify({'success': False, 'error': f'Ошибка тестирования: {str(e)}'}), 500
+
+    @app.route('/api/debug/email-config', methods=['GET'])
+    def debug_email_config():
+        """Диагностика настроек email для Railway"""
+        import os
+        from flask import current_app
+        
+        # Получаем настройки из переменных окружения
+        env_config = {
+            'MAIL_SERVER': os.environ.get('MAIL_SERVER'),
+            'MAIL_PORT': os.environ.get('MAIL_PORT'),
+            'MAIL_USERNAME': os.environ.get('MAIL_USERNAME'),
+            'MAIL_PASSWORD': '***' if os.environ.get('MAIL_PASSWORD') else None,
+            'MAIL_DEFAULT_SENDER': os.environ.get('MAIL_DEFAULT_SENDER'),
+            'FLASK_ENV': os.environ.get('FLASK_ENV'),
+            'RAILWAY_ENVIRONMENT': os.environ.get('RAILWAY_ENVIRONMENT'),
+        }
+        
+        # Получаем настройки из конфигурации Flask
+        flask_config = {
+            'MAIL_SERVER': current_app.config.get('MAIL_SERVER'),
+            'MAIL_PORT': current_app.config.get('MAIL_PORT'),
+            'MAIL_USERNAME': current_app.config.get('MAIL_USERNAME'),
+            'MAIL_PASSWORD': '***' if current_app.config.get('MAIL_PASSWORD') else None,
+            'MAIL_DEFAULT_SENDER': current_app.config.get('MAIL_DEFAULT_SENDER'),
+        }
+        
+        return jsonify({
+            'success': True,
+            'environment_variables': env_config,
+            'flask_config': flask_config,
+            'message': 'Проверьте переменные окружения на Railway'
+        })
