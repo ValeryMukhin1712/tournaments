@@ -52,13 +52,36 @@ def send_token_email_railway_fallback(email, name, token):
         # Если webhook не настроен, используем простой HTTP запрос к внешнему сервису
         logger.info("Webhook не настроен. Пытаемся использовать внешний сервис.")
         
-        # Создаем простой HTTP запрос (можно заменить на реальный email сервис)
-        email_data = {
-            'email': email,
-            'name': name,
-            'token': token,
-            'timestamp': datetime.now().isoformat()
-        }
+        # Попробуем использовать EmailJS (бесплатный сервис)
+        emailjs_url = "https://api.emailjs.com/api/v1.0/email/send"
+        emailjs_service_id = os.environ.get('EMAILJS_SERVICE_ID')
+        emailjs_template_id = os.environ.get('EMAILJS_TEMPLATE_ID')
+        emailjs_user_id = os.environ.get('EMAILJS_USER_ID')
+        
+        if emailjs_service_id and emailjs_template_id and emailjs_user_id:
+            logger.info("Попытка отправки через EmailJS")
+            
+            payload = {
+                'service_id': emailjs_service_id,
+                'template_id': emailjs_template_id,
+                'user_id': emailjs_user_id,
+                'template_params': {
+                    'to_email': email,
+                    'to_name': name,
+                    'token': token,
+                    'from_name': 'Турнирная система'
+                }
+            }
+            
+            response = requests.post(emailjs_url, json=payload, timeout=10)
+            if response.status_code == 200:
+                logger.info(f"[SUCCESS] Email отправлен через EmailJS на {email}")
+                return True
+            else:
+                logger.error(f"[ERROR] EmailJS вернул статус {response.status_code}")
+        
+        # Если все внешние сервисы недоступны, сохраняем для ручной отправки
+        logger.info("[RAILWAY FALLBACK] Все внешние сервисы недоступны. Сохраняем для ручной отправки.")
         
         # Логируем данные для ручной отправки
         logger.info(f"[RAILWAY FALLBACK] Данные для ручной отправки email:")

@@ -2007,3 +2007,63 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"Тип ошибки: {type(e).__name__}")
             logger.error(f"Детали ошибки: {str(e)}")
             return jsonify({'success': False, 'error': f'Ошибка при отправке: {str(e)}'}), 500
+
+    @app.route('/api/admin/send-email-external', methods=['POST'])
+    @csrf.exempt  # Исключаем из CSRF защиты для API
+    def send_email_external():
+        """Отправка email через внешний сервис (для Railway)"""
+        try:
+            data = request.get_json()
+            email = data.get('email')
+            name = data.get('name')
+            token = data.get('token')
+            
+            if not all([email, name, token]):
+                return jsonify({'success': False, 'error': 'Не указаны все необходимые параметры'}), 400
+            
+            # Попробуем использовать EmailJS
+            import requests
+            
+            emailjs_url = "https://api.emailjs.com/api/v1.0/email/send"
+            emailjs_service_id = os.environ.get('EMAILJS_SERVICE_ID')
+            emailjs_template_id = os.environ.get('EMAILJS_TEMPLATE_ID')
+            emailjs_user_id = os.environ.get('EMAILJS_USER_ID')
+            
+            if emailjs_service_id and emailjs_template_id and emailjs_user_id:
+                logger.info(f"Попытка отправки через EmailJS на {email}")
+                
+                payload = {
+                    'service_id': emailjs_service_id,
+                    'template_id': emailjs_template_id,
+                    'user_id': emailjs_user_id,
+                    'template_params': {
+                        'to_email': email,
+                        'to_name': name,
+                        'token': token,
+                        'from_name': 'Турнирная система'
+                    }
+                }
+                
+                response = requests.post(emailjs_url, json=payload, timeout=10)
+                if response.status_code == 200:
+                    logger.info(f"[SUCCESS] Email отправлен через EmailJS на {email}")
+                    return jsonify({
+                        'success': True,
+                        'message': f'Email успешно отправлен на {email} через внешний сервис'
+                    })
+                else:
+                    logger.error(f"[ERROR] EmailJS вернул статус {response.status_code}")
+                    return jsonify({
+                        'success': False,
+                        'error': f'Внешний сервис вернул ошибку: {response.status_code}'
+                    })
+            else:
+                logger.warning("EmailJS не настроен")
+                return jsonify({
+                    'success': False,
+                    'error': 'Внешний email сервис не настроен'
+                })
+                
+        except Exception as e:
+            logger.error(f"Ошибка при отправке через внешний сервис: {e}")
+            return jsonify({'success': False, 'error': f'Ошибка при отправке: {str(e)}'}), 500

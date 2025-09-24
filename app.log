@@ -6917,3 +6917,21 @@ with app.app_context(). See the documentation for more information.
 2025-09-24 23:39:35,951 - ERROR - Ошибка обновления статуса токена 29: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
 2025-09-24 23:39:35,981 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:35] "POST /api/admin/send-token-manually HTTP/1.1" 200 -
 2025-09-24 23:39:36,002 - INFO - 127.0.0.1 - - [24/Sep/2025 23:39:36] "GET /api/admin/tokens HTTP/1.1" 200 -
+2025-09-24 23:56:57,047 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\main.py', reloading
+2025-09-24 23:56:57,165 - INFO -  * Restarting with stat
+2025-09-24 23:56:58,319 - INFO - База данных инициализирована успешно
+2025-09-24 23:56:58,978 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:56:58,978 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:56:58,979 - INFO - Переменная окружения PORT: None
+2025-09-24 23:56:58,979 - INFO - Режим отладки: production
+2025-09-24 23:56:59,000 - WARNING -  * Debugger is active!
+2025-09-24 23:56:59,008 - INFO -  * Debugger PIN: 119-940-355
+2025-09-24 23:57:03,906 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.0 — 2025_09_14_1\\routes\\api.py', reloading
+2025-09-24 23:57:04,009 - INFO -  * Restarting with stat
+2025-09-24 23:57:05,075 - INFO - База данных инициализирована успешно
+2025-09-24 23:57:05,780 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-24 23:57:05,781 - INFO - Запуск приложения на порту 5000
+2025-09-24 23:57:05,783 - INFO - Переменная окружения PORT: None
+2025-09-24 23:57:05,784 - INFO - Режим отладки: production
+2025-09-24 23:57:05,844 - WARNING -  * Debugger is active!
+2025-09-24 23:57:05,861 - INFO -  * Debugger PIN: 119-940-355

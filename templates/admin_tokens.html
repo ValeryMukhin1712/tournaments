@@ -348,7 +348,9 @@ function sendTokenManually() {
             bootstrap.Modal.getInstance(document.getElementById('sendTokenModal')).hide();
             loadTokens(); // Обновляем список
         } else {
-            showAlert(data.message || data.error, 'danger');
+            // Если обычная отправка не удалась, пробуем внешний сервис
+            console.log('Обычная отправка не удалась, пробуем внешний сервис...');
+            tryExternalEmailService(tokenId, email);
         }
     })
     .catch(error => {
@@ -358,6 +360,47 @@ function sendTokenManually() {
     .finally(() => {
         button.innerHTML = originalText;
         button.disabled = false;
+    });
+}
+
+// Попытка отправки через внешний сервис
+function tryExternalEmailService(tokenId, email) {
+    console.log('Попытка отправки через внешний сервис...');
+    
+    const token = tokensData.find(t => t.id == tokenId);
+    if (!token) {
+        showAlert('Токен не найден', 'danger');
+        return;
+    }
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    fetch('/api/admin/send-email-external', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken || ''
+        },
+        body: JSON.stringify({
+            email: email,
+            name: token.name,
+            token: token.token
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Ответ внешнего сервиса:', data);
+        if (data.success) {
+            showAlert(data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('sendTokenModal')).hide();
+            loadTokens(); // Обновляем список
+        } else {
+            showAlert(`Внешний сервис: ${data.error || data.message}`, 'warning');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка внешнего сервиса:', error);
+        showAlert('Внешний сервис недоступен. Токен сохранен для ручной отправки.', 'warning');
     });
 }
 
