@@ -4,6 +4,13 @@
 {% block title %}{{ tournament.name }} - Турнирная система v2.1{% endblock %}
 
 {% block content %}
+<style>
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+</style>
 <div class="row">
     <div class="col-12">
         <nav aria-label="breadcrumb">
@@ -130,9 +137,6 @@
                                 <td class="d-table-cell d-sm-none">{{ participant_position }}</td>
                                 <td>
                                     <strong>{{ participant.name }}</strong>
-                                    {% if p1_data.is_late_participant %}
-                                        <span class="badge bg-warning text-dark ms-2">Опоздавший ({{ participant_stats.points }} очков)</span>
-                                    {% endif %}
                                     {% if participant.is_team %}
                                         <span class="badge bg-info ms-2">Команда</span>
                                     {% endif %}
@@ -186,9 +190,6 @@
                                 {% set participant = participant_data.participant %}
                                 <th class="text-center {% if participant_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %}">
                                     {{ participant.name[:15] }}{% if participant.name|length > 15 %}...{% endif %}
-                                    {% if participant_data.is_late_participant %}
-                                    <br><small class="text-muted">(опоздавший, {{ participant_data.stats.points }} очков)</small>
-                                    {% endif %}
                                 </th>
                                 {% endfor %}
                             </tr>
@@ -201,9 +202,6 @@
                             <tr>
                                 <td class="{% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold">
                                     {{ p1.name[:15] }}{% if p1.name|length > 15 %}...{% endif %}
-                                    {% if p1_data.is_late_participant %}
-                                    <br><small class="text-muted">(опоздавший, {{ p1_stats.points }} очков)</small>
-                                    {% endif %}
                                 </td>
                                 <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-primary">{{ p1_stats.points }}</td>
                                 <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-success">{{ p1_position }}</td>
@@ -249,12 +247,13 @@
                                                   7: 'dark',
                                                   8: 'light'
                                               } %}
+                                              {% set is_next_match = cell_data.get('is_next_match', False) %}
                                               {% set court_color = court_colors.get(cell_data.court, 'secondary') %}
                                               
-                                              <div class="text-center position-relative" 
+                                              <div class="text-center position-relative {% if is_next_match %}border border-warning border-3 rounded bg-warning bg-opacity-10{% endif %}" 
                                                    onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
-                                                   style="cursor: pointer;" 
-                                                   title="Нажмите для редактирования результата">
+                                                   style="cursor: pointer; {% if is_next_match %}animation: pulse 2s infinite;{% endif %}" 
+                                                   title="{% if is_next_match %}Ближайший матч! {% endif %}Нажмите для редактирования результата">
                                                   <!-- Основной контейнер с цветом площадки -->
                                                   <div class="{% if cell_data.is_next %}border border-warning border-1 rounded p-1 bg-warning bg-opacity-15 shadow-sm{% elif cell_data.is_second %}border border-success border-1 rounded p-1 bg-success bg-opacity-15 shadow-sm{% else %}border border-{{ court_color }} border-1 rounded p-1 bg-{{ court_color }} bg-opacity-10{% endif %}" style="height: 70px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                                                       <!-- Верхняя часть -->
@@ -360,7 +359,14 @@
                                     <td class="text-center">
                                         {% if match.score and match.status != 'запланирован' %}
                                             {% if match.status == 'завершен' %}
-                                                <span class="badge bg-success text-white">{{ match.score }}</span>
+                                                {% set score_parts = match.score.split(':') %}
+                                                {% set score1 = score_parts[0]|int %}
+                                                {% set score2 = score_parts[1]|int %}
+                                                {% if score1 > score2 %}
+                                                    <span class="badge bg-success text-white">{{ match.score }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger text-white">{{ match.score }}</span>
+                                                {% endif %}
                                             {% elif match.status in ['в процессе', 'играют'] %}
                                                 <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
                                             {% else %}
@@ -880,6 +886,7 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                 } else {
                     console.log('Нет существующих результатов, используем значения по умолчанию');
                     // Иначе используем значения по умолчанию для всех сетов
+                    const defaultScore = {{ tournament.points_to_win }};
                     document.getElementById('set1Score1').value = defaultScore;
                     document.getElementById('set1Score2').value = defaultScore;
                     document.getElementById('set2Score1').value = defaultScore;
@@ -904,6 +911,20 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
     
     // Сбрасываем флаг предложения сохранения для нового матча
     resetMatchCompletionPrompt();
+    
+    // Принудительно разблокируем все поля при открытии модального окна
+    setTimeout(() => {
+        for (let i = 1; i <= 3; i++) {
+            const score1Input = document.getElementById(`set${i}Score1`);
+            const score2Input = document.getElementById(`set${i}Score2`);
+            if (score1Input && score2Input) {
+                score1Input.readOnly = false;
+                score2Input.readOnly = false;
+                score1Input.classList.remove('bg-light');
+                score2Input.classList.remove('bg-light');
+            }
+        }
+    }, 100);
     
     new bootstrap.Modal(document.getElementById('matchResultModal')).show();
 }
@@ -1184,6 +1205,63 @@ function addSelectedUsers() {
             location.reload();
         }
     });
+}
+
+// Функция для проверки осмысленности счета
+function isMeaningfulScore(score1, score2, pointsToWin) {
+    // Осмысленный счет: только если оба участника набрали очки для победы
+    // И НЕ считаем осмысленным счет, если оба значения равны pointsToWin (значение по умолчанию)
+    // И НЕ считаем осмысленным счет, если одно из значений равно 0 (начальное состояние)
+    // И НЕ считаем осмысленным счет 0:0 (начальное состояние)
+    return (score1 >= pointsToWin && score2 >= pointsToWin && 
+            !(score1 === pointsToWin && score2 === pointsToWin) &&
+            !(score1 === 0 || score2 === 0) &&
+            !(score1 === 0 && score2 === 0));
+}
+
+// Функция для блокировки редактирования предыдущих сетов
+function updateSetEditability() {
+    const pointsToWin = {{ tournament.points_to_win }};
+    console.log('updateSetEditability вызвана, pointsToWin:', pointsToWin);
+    
+    for (let i = 1; i <= 3; i++) {
+        const score1Input = document.getElementById(`set${i}Score1`);
+        const score2Input = document.getElementById(`set${i}Score2`);
+        
+        if (score1Input && score2Input) {
+            const score1 = parseInt(score1Input.value) || 0;
+            const score2 = parseInt(score2Input.value) || 0;
+            
+            console.log(`Сет ${i}: score1=${score1}, score2=${score2}`);
+            
+            // Проверяем, есть ли осмысленный счет в следующем сете
+            let hasNextMeaningfulScore = false;
+            if (i < 3) {
+                const nextScore1 = parseInt(document.getElementById(`set${i+1}Score1`).value) || 0;
+                const nextScore2 = parseInt(document.getElementById(`set${i+1}Score2`).value) || 0;
+                hasNextMeaningfulScore = isMeaningfulScore(nextScore1, nextScore2, pointsToWin);
+                console.log(`Следующий сет ${i+1}: score1=${nextScore1}, score2=${nextScore2}, isMeaningful=${hasNextMeaningfulScore}`);
+            }
+            
+            // Блокируем редактирование, если есть осмысленный счет в следующем сете
+            // НО НЕ блокируем, если текущий сет имеет значения по умолчанию
+            const isCurrentSetDefault = (score1 === pointsToWin && score2 === pointsToWin);
+            
+            if (hasNextMeaningfulScore && !isCurrentSetDefault) {
+                console.log(`Блокируем сет ${i} (есть осмысленный счет в следующем сете)`);
+                score1Input.readOnly = true;
+                score2Input.readOnly = true;
+                score1Input.classList.add('bg-light');
+                score2Input.classList.add('bg-light');
+            } else {
+                console.log(`Разблокируем сет ${i} (нет блокировки или значения по умолчанию)`);
+                score1Input.readOnly = false;
+                score2Input.readOnly = false;
+                score1Input.classList.remove('bg-light');
+                score2Input.classList.remove('bg-light');
+            }
+        }
+    }
 }
 
 // Обработка формы результата матча
@@ -1616,6 +1694,21 @@ function resetSetsForm() {
     
     // Добавляем обработчики событий для полей сетов
     addSetEventListeners();
+    
+    // Принудительно разблокируем все поля при сбросе формы
+    for (let i = 1; i <= 3; i++) {
+        const score1Input = document.getElementById(`set${i}Score1`);
+        const score2Input = document.getElementById(`set${i}Score2`);
+        if (score1Input && score2Input) {
+            score1Input.readOnly = false;
+            score2Input.readOnly = false;
+            score1Input.classList.remove('bg-light');
+            score2Input.classList.remove('bg-light');
+        }
+    }
+    
+    // Обновляем блокировку редактирования при загрузке
+    updateSetEditability();
 }
 
 
@@ -1654,11 +1747,13 @@ function addSetEventListeners() {
         validateSetScore(1);
         checkSetCompletion(1);
         updateSetsWon(); // Обновляем статус 3-го сета
+        updateSetEditability(); // Обновляем блокировку редактирования
     });
     document.getElementById('set1Score2').addEventListener('input', function() {
         validateSetScore(1);
         checkSetCompletion(1);
         updateSetsWon(); // Обновляем статус 3-го сета
+        updateSetEditability(); // Обновляем блокировку редактирования
     });
     
     // Обработчики для сета 2
@@ -1666,11 +1761,13 @@ function addSetEventListeners() {
         validateSetScore(2);
         checkSetCompletion(2);
         updateSetsWon(); // Обновляем статус 3-го сета
+        updateSetEditability(); // Обновляем блокировку редактирования
     });
     document.getElementById('set2Score2').addEventListener('input', function() {
         validateSetScore(2);
         checkSetCompletion(2);
         updateSetsWon(); // Обновляем статус 3-го сета
+        updateSetEditability(); // Обновляем блокировку редактирования
     });
     
     // Обработчики для сета 3

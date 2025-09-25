@@ -59,70 +59,9 @@
                 </div>
             </div>
 
-            <!-- Таблица участников -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                                <i class="fas fa-users me-2"></i>
-                                Участники турнира
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if participants %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Место</th>
-                                    <th>Участник</th>
-                                            <th>Победы</th>
-                                            <th>Поражения</th>
-                                    <th>Очки</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                        {% for item in participants %}
-                                        <tr class="{% if item.is_current_participant %}table-success{% endif %}">
-                                            <td>
-                                                <strong>{{ loop.index }}</strong>
-                                                {% if loop.index == 1 %}
-                                                    <i class="fas fa-crown text-warning ms-1"></i>
-                                                {% elif loop.index == 2 %}
-                                                    <i class="fas fa-medal text-secondary ms-1"></i>
-                                                {% elif loop.index == 3 %}
-                                                    <i class="fas fa-award text-warning ms-1"></i>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <strong>{{ item.participant.name }}</strong>
-                                                {% if item.is_current_participant %}
-                                                    <span class="badge bg-success ms-2">Вы</span>
-                                                {% endif %}
-                                            </td>
-                                            <td><span class="badge bg-success">{{ item.wins }}</span></td>
-                                            <td><span class="badge bg-danger">{{ item.losses }}</span></td>
-                                            <td><strong>{{ item.points }}</strong></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                            <div class="text-center py-4">
-                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">В турнире пока нет участников</p>
-                            </div>
-                {% endif %}
-                        </div>
-                    </div>
-            </div>
-        </div>
-
-        <!-- Расписание матчей -->
+            <!-- Расписание матчей -->
             {% if schedule_display %}
-            <div class="row">
+            <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
             <div class="card-header">
@@ -187,7 +126,14 @@
                                                 <td class="text-center">
                                                     {% if match.score and match.status != 'запланирован' %}
                                         {% if match.status == 'завершен' %}
-                                                            <span class="badge bg-success text-white">{{ match.score }}</span>
+                                                            {% set score_parts = match.score.split(':') %}
+                                                            {% set score1 = score_parts[0]|int %}
+                                                            {% set score2 = score_parts[1]|int %}
+                                                            {% if score1 > score2 %}
+                                                                <span class="badge bg-success text-white">{{ match.score }}</span>
+                                                            {% else %}
+                                                                <span class="badge bg-danger text-white">{{ match.score }}</span>
+                                                            {% endif %}
                                                         {% elif match.status in ['в процессе', 'играют'] %}
                                                             <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
                                         {% else %}
@@ -226,6 +172,68 @@
                 </div>
             </div>
             {% endif %}
+
+            <!-- Таблица участников -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                                <i class="fas fa-users me-2"></i>
+                                Участники турнира
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if participants %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Место</th>
+                                    <th>Участник</th>
+                                            <th>Победы</th>
+                                            <th>Поражения</th>
+                                    <th>Очки</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                        {% for item in participants %}
+                                        <tr class="{% if item.is_current_participant %}table-success{% endif %}">
+                                            <td>
+                                                <strong>{{ loop.index }}</strong>
+                                                {% if loop.index == 1 %}
+                                                    <i class="fas fa-crown text-warning ms-1"></i>
+                                                {% elif loop.index == 2 %}
+                                                    <i class="fas fa-medal text-secondary ms-1"></i>
+                                                {% elif loop.index == 3 %}
+                                                    <i class="fas fa-award text-warning ms-1"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <strong>{{ item.participant.name }}</strong>
+                                                {% if item.is_current_participant %}
+                                                    <span class="badge bg-success ms-2">Вы</span>
+                                                {% endif %}
+                                            </td>
+                                            <td><span class="badge bg-success">{{ item.wins }}</span></td>
+                                            <td><span class="badge bg-danger">{{ item.losses }}</span></td>
+                                            <td><strong>{{ item.points }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">В турнире пока нет участников</p>
+                            </div>
+                {% endif %}
+                        </div>
+                    </div>
+            </div>
+        </div>
+
 
             <!-- Турнирная таблица -->
             <div class="row mt-4">

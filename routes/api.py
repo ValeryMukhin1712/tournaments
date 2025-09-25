@@ -10,9 +10,10 @@ from flask_wtf.csrf import CSRFProtect
 
 logger = logging.getLogger(__name__)
 
-def create_smart_schedule(tournament, participants, Match, db):
+def create_smart_schedule(tournament, participants, Match, db, preserve_results=True):
     """
-    Создает расписание матчей для кругового турнира (каждый с каждым)
+    Создает расписание матчей для кругового турнира по правильному алгоритму
+    с возможностью сохранения результатов существующих матчей
     """
     from datetime import date, time, timedelta
     import random
@@ -31,45 +32,129 @@ def create_smart_schedule(tournament, participants, Match, db):
     
     logger.info(f"Создание расписания для {n} участников: {[p.name for p in participants]}")
     
-    # Создаем все матчи для кругового турнира (каждый с каждым)
-    matches_to_schedule = []
-    for i in range(n):
-        for j in range(i + 1, n):
-            matches_to_schedule.append((participants[i], participants[j]))
+    # Сохраняем результаты существующих матчей, если нужно
+    existing_results = {}
+    if preserve_results:
+        existing_matches = Match.query.filter_by(tournament_id=tournament.id).all()
+        for match in existing_matches:
+            if match.status in ['завершен', 'в процессе', 'играют']:
+                key = tuple(sorted([match.participant1_id, match.participant2_id]))
+                existing_results[key] = {
+                    'status': match.status,
+                    'sets_won_1': match.sets_won_1,
+                    'sets_won_2': match.sets_won_2,
+                    'set1_score1': match.set1_score1,
+                    'set1_score2': match.set1_score2,
+                    'set2_score1': match.set2_score1,
+                    'set2_score2': match.set2_score2,
+                    'set3_score1': match.set3_score1,
+                    'set3_score2': match.set3_score2,
+                    'winner_id': match.winner_id,
+                    'score1': match.score1,
+                    'score2': match.score2
+                }
+        logger.info(f"Сохранено {len(existing_results)} результатов существующих матчей")
     
-    logger.info(f"Всего матчей для создания: {len(matches_to_schedule)}")
+    # Создаем круговое расписание по правильному алгоритму
+    rounds = create_round_robin_schedule(participants)
     
-    # Простое распределение матчей по времени и площадкам
+    logger.info(f"Создано {len(rounds)} туров")
+    for i, round_matches in enumerate(rounds, 1):
+        logger.info(f"Тур {i}: {[f'{m[0].name} vs {m[1].name}' for m in round_matches]}")
+    
+    # Распределяем матчи по времени и площадкам
     scheduled_matches = []
     match_number = 1
     current_time = start_time
     current_date = start_date
     
-    # Словарь для отслеживания занятости участников по времени
-    participant_schedule = {}  # {participant_id: {time: court_number}}
-    court_schedule = {}  # {court_number: {time: participant_ids}}
+    # Сначала размещаем завершенные матчи в начале расписания
+    completed_matches = []
+    pending_matches = []
     
-    # Простое создание всех матчей без сложной логики планирования
-    for match in matches_to_schedule:
+    for round_num, round_matches in enumerate(rounds, 1):
+        for match in round_matches:
+            participant1, participant2 = match
+            key = tuple(sorted([participant1.id, participant2.id]))
+            
+            if key in existing_results:
+                completed_matches.append((match, existing_results[key]))
+            else:
+                pending_matches.append(match)
+    
+    # Размещаем завершенные матчи в начале
+    for match, result_data in completed_matches:
         participant1, participant2 = match
         p1_id, p2_id = participant1.id, participant2.id
         
-        logger.info(f"Создание матча: {participant1.name} vs {participant2.name}")
+        logger.info(f"Восстановление матча: {participant1.name} vs {participant2.name}")
         
-        # Создаем матч
+        # Создаем матч с сохраненными результатами
         match_obj = Match(
             tournament_id=tournament.id,
             participant1_id=p1_id,
             participant2_id=p2_id,
-            status='запланирован',
+            status=result_data['status'],
             match_date=current_date,
             match_time=current_time,
-            court_number=1,  # Пока все на одной площадке
-            match_number=match_number
+            court_number=1,  # Завершенные матчи на первой площадке
+            match_number=match_number,
+            sets_won_1=result_data['sets_won_1'],
+            sets_won_2=result_data['sets_won_2'],
+            set1_score1=result_data['set1_score1'],
+            set1_score2=result_data['set1_score2'],
+            set2_score1=result_data['set2_score1'],
+            set2_score2=result_data['set2_score2'],
+            set3_score1=result_data['set3_score1'],
+            set3_score2=result_data['set3_score2'],
+            winner_id=result_data['winner_id'],
+            score1=result_data['score1'],
+            score2=result_data['score2']
         )
         db.session.add(match_obj)
         scheduled_matches.append(match_obj)
         match_number += 1
+        
+        # Переходим к следующему времени
+        current_time = add_minutes_to_time(current_time, time_match + time_break)
+        if current_time > end_time:
+            current_date += timedelta(days=1)
+            current_time = start_time
+    
+    # Теперь размещаем оставшиеся матчи
+    rounds_remaining = []
+    for round_num, round_matches in enumerate(rounds, 1):
+        remaining_in_round = [match for match in round_matches if match not in [m[0] for m in completed_matches]]
+        if remaining_in_round:
+            rounds_remaining.append(remaining_in_round)
+    
+    for round_num, round_matches in enumerate(rounds_remaining, 1):
+        logger.info(f"Тур {round_num}: {len(round_matches)} матчей")
+        
+        # Распределяем матчи тура по площадкам
+        court_assignments = distribute_matches_to_courts(round_matches, k)
+        
+        for court_num, court_matches in court_assignments.items():
+            for match in court_matches:
+                participant1, participant2 = match
+                p1_id, p2_id = participant1.id, participant2.id
+                
+                logger.info(f"Создание матча: {participant1.name} vs {participant2.name} (площадка {court_num})")
+                
+                # Создаем матч
+                match_obj = Match(
+                    tournament_id=tournament.id,
+                    participant1_id=p1_id,
+                    participant2_id=p2_id,
+                    status='запланирован',
+                    match_date=current_date,
+                    match_time=current_time,
+                    court_number=court_num,
+                    match_number=match_number
+                )
+                db.session.add(match_obj)
+                scheduled_matches.append(match_obj)
+                match_number += 1
         
         # Переходим к следующему времени
         current_time = add_minutes_to_time(current_time, time_match + time_break)
@@ -80,6 +165,65 @@ def create_smart_schedule(tournament, participants, Match, db):
             current_time = start_time
     
     return len(scheduled_matches)
+
+
+def create_round_robin_schedule(participants):
+    """
+    Создает круговое расписание по правильному алгоритму
+    """
+    n = len(participants)
+    if n < 2:
+        return []
+    
+    # Если нечетное количество участников, добавляем "bye" (пустую команду)
+    if n % 2 == 1:
+        bye_participant = type('ByeParticipant', (), {'id': -1, 'name': 'BYE'})()
+        participants = participants + [bye_participant]
+        n += 1
+    
+    # Создаем список участников
+    players = list(range(n))
+    rounds = []
+    
+    # Количество туров = n - 1
+    for round_num in range(n - 1):
+        round_matches = []
+        
+        # Создаем пары для текущего тура
+        for i in range(n // 2):
+            # Первая пара: первый участник с последним
+            if i == 0:
+                player1 = players[0]
+                player2 = players[n - 1]
+            else:
+                # Остальные пары по круговому принципу
+                player1 = players[i]
+                player2 = players[n - 1 - i]
+            
+            # Пропускаем матчи с "bye"
+            if players[player1] != -1 and players[player2] != -1:
+                round_matches.append((participants[player1], participants[player2]))
+        
+        rounds.append(round_matches)
+        
+        # Сдвигаем участников для следующего тура (кроме первого)
+        # Последний участник становится вторым, остальные сдвигаются
+        players = [players[0]] + [players[-1]] + players[1:-1]
+    
+    return rounds
+
+
+def distribute_matches_to_courts(round_matches, num_courts):
+    """
+    Распределяет матчи тура по площадкам
+    """
+    court_assignments = {i: [] for i in range(1, num_courts + 1)}
+    
+    for i, match in enumerate(round_matches):
+        court_num = (i % num_courts) + 1
+        court_assignments[court_num].append(match)
+    
+    return court_assignments
 
 
 def add_minutes_to_time(time_obj, minutes):

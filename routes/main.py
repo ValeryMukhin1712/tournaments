@@ -1367,6 +1367,24 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             
             # Создаем шахматку с данными матчей
             chessboard[participant.id] = {}
+            
+            # Определяем ближайшие матчи для выделения
+            upcoming_matches = []
+            for match in matches:
+                if match.status == 'запланирован' and match.match_date and match.match_time:
+                    upcoming_matches.append({
+                        'match_id': match.id,
+                        'date': match.match_date,
+                        'time': match.match_time,
+                        'participant1_id': match.participant1_id,
+                        'participant2_id': match.participant2_id
+                    })
+            
+            # Сортируем по времени и берем ближайшие 3 матча
+            upcoming_matches.sort(key=lambda x: (x['date'], x['time']))
+            next_matches = upcoming_matches[:3] if upcoming_matches else []
+            next_match_ids = {m['match_id'] for m in next_matches}
+            
             for other_participant in participants:
                 if participant.id != other_participant.id:
                     # Ищем матч между этими участниками
@@ -1461,6 +1479,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 }
                         else:
                             # Матч запланирован
+                            is_next_match = match.id in next_match_ids
                             chessboard[participant.id][other_participant.id] = {
                                 'type': 'upcoming',
                                 'value': 'vs',
@@ -1469,7 +1488,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 'court_number': match.court_number,
                                 'date': match.match_date,
                                 'time': match.match_time,
-                                'court': match.court_number
+                                'court': match.court_number,
+                                'is_next_match': is_next_match
                             }
                     else:
                         # Матч не найден
@@ -1662,23 +1682,25 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             for match in matches:
                 if match.status == 'завершен':
                     if match.participant1_id == participant.id:
-                        if match.sets_won_1 and match.sets_won_2 and match.sets_won_1 > match.sets_won_2:
-                            wins += 1
-                            points += 3  # 3 очка за победу
-                        elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 < match.sets_won_2:
-                            losses += 1
-                            points += 0  # 0 очков за поражение
-                        elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 == match.sets_won_2:
-                            points += 1  # 1 очко за ничью
+                        if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                            if match.sets_won_1 > match.sets_won_2:
+                                wins += 1
+                                points += 3  # 3 очка за победу
+                            elif match.sets_won_1 < match.sets_won_2:
+                                losses += 1
+                                points += 0  # 0 очков за поражение
+                            else:
+                                points += 1  # 1 очко за ничью
                     elif match.participant2_id == participant.id:
-                        if match.sets_won_1 and match.sets_won_2 and match.sets_won_1 < match.sets_won_2:
-                            wins += 1
-                            points += 3  # 3 очка за победу
-                        elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 > match.sets_won_2:
-                            losses += 1
-                            points += 0  # 0 очков за поражение
-                        elif match.sets_won_1 and match.sets_won_2 and match.sets_won_1 == match.sets_won_2:
-                            points += 1  # 1 очко за ничью
+                        if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                            if match.sets_won_1 < match.sets_won_2:
+                                wins += 1
+                                points += 3  # 3 очка за победу
+                            elif match.sets_won_1 > match.sets_won_2:
+                                losses += 1
+                                points += 0  # 0 очков за поражение
+                            else:
+                                points += 1  # 1 очко за ничью
             
             participants_with_stats.append({
                 'participant': participant,
@@ -1700,6 +1722,25 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Создаем данные для турнирной таблицы (шахматки)
         participants_with_stats_chessboard = []
         chessboard = {}
+        
+        # Определяем ближайшие матчи для выделения
+        upcoming_matches = []
+        for match in matches:
+            if match.status == 'запланирован' and match.match_date and match.match_time:
+                upcoming_matches.append({
+                    'match_id': match.id,
+                    'date': match.match_date,
+                    'time': match.match_time,
+                    'participant1_id': match.participant1_id,
+                    'participant2_id': match.participant2_id
+                })
+        
+        # Сортируем по времени и берем ближайшие 3 матча
+        upcoming_matches.sort(key=lambda x: (x['date'], x['time']))
+        next_matches = upcoming_matches[:3] if upcoming_matches else []
+        next_match_ids = {m['match_id'] for m in next_matches}
+        
+        logger.info(f"Ближайшие матчи для выделения: {[m['match_id'] for m in next_matches]}")
         
         for i, participant_data in enumerate(participants_with_stats):
             participant = participant_data['participant']
@@ -1733,7 +1774,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status == 'завершен':
+                        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Определяем победителя и счет
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
@@ -1818,6 +1859,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 }
                         else:
                             # Матч запланирован
+                            is_next_match = match.id in next_match_ids
                             chessboard[participant.id][other_participant.id] = {
                                 'type': 'upcoming',
                                 'value': 'vs',
@@ -1825,7 +1867,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
                                 'court_number': match.court_number,
                                 'time': match.match_time,
-                                'court': match.court_number
+                                'court': match.court_number,
+                                'is_next_match': is_next_match
                             }
                     else:
                         # Матч не найден
