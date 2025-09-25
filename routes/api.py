@@ -1858,12 +1858,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"Ошибка при получении отладочных токенов: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при получении токенов'}), 500
 
-    @app.route('/api/debug/test-email', methods=['POST'])
+    @app.route('/api/debug/test-email', methods=['GET', 'POST'])
+    @csrf.exempt
     def debug_test_email():
         """Тестирование отправки email для отладки"""
         try:
-            data = request.get_json()
-            test_email = data.get('email', 'test@example.com')
+            if request.method == 'GET':
+                test_email = request.args.get('email', 'test@example.com')
+            else:
+                data = request.get_json()
+                test_email = data.get('email', 'test@example.com')
             
             # Импортируем функцию отправки email
             from routes.main import send_token_email
