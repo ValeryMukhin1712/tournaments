@@ -30,6 +30,11 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'noreply@tournament-system.com'
+    
+    # Настройки EmailJS (для Railway)
+    EMAILJS_SERVICE_ID = os.environ.get('EMAILJS_SERVICE_ID')
+    EMAILJS_TEMPLATE_ID = os.environ.get('EMAILJS_TEMPLATE_ID')
+    EMAILJS_USER_ID = os.environ.get('EMAILJS_USER_ID')
 
 class DevelopmentConfig(Config):
     """Конфигурация для разработки"""

@@ -17,6 +17,7 @@ def send_token_email_railway_fallback(email, name, token):
     try:
         import requests
         import json
+        import os
         
         # Используем EmailJS или другой внешний сервис
         # Для демонстрации создаем простой webhook
@@ -73,7 +74,15 @@ def send_token_email_railway_fallback(email, name, token):
                 }
             }
             
-            response = requests.post(emailjs_url, json=payload, timeout=10)
+            # Добавляем заголовки для имитации браузера
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Origin': 'https://dashboard.emailjs.com',
+                'Referer': 'https://dashboard.emailjs.com/'
+            }
+            
+            response = requests.post(emailjs_url, json=payload, headers=headers, timeout=10)
             if response.status_code == 200:
                 logger.info(f"[SUCCESS] Email отправлен через EmailJS на {email}")
                 return True

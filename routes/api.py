@@ -2058,7 +2058,15 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 logger.info(f"Отправка запроса на EmailJS: {emailjs_url}")
                 logger.info(f"Payload: {payload}")
                 
-                response = requests.post(emailjs_url, json=payload, timeout=10)
+                # Добавляем заголовки для имитации браузера
+                headers = {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Origin': 'https://dashboard.emailjs.com',
+                    'Referer': 'https://dashboard.emailjs.com/'
+                }
+                
+                response = requests.post(emailjs_url, json=payload, headers=headers, timeout=10)
                 logger.info(f"Ответ EmailJS: статус {response.status_code}, текст: {response.text}")
                 
                 if response.status_code == 200:
