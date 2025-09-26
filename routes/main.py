@@ -1333,6 +1333,19 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             else:
                                 participant_stats['draws'] += 1
                                 participant_stats['points'] += (tournament.points_draw or 1)  # очки за ничью из настроек турнира
+                            
+                            # Рассчитываем разницу очков в сетах для участника 1
+                            if hasattr(match, 'set1_score1') and hasattr(match, 'set1_score2') and match.set1_score1 is not None and match.set1_score2 is not None:
+                                participant_stats['goal_difference'] += match.set1_score1 - match.set1_score2
+                            if hasattr(match, 'set2_score1') and hasattr(match, 'set2_score2') and match.set2_score1 is not None and match.set2_score2 is not None:
+                                participant_stats['goal_difference'] += match.set2_score1 - match.set2_score2
+                            if hasattr(match, 'set3_score1') and hasattr(match, 'set3_score2') and match.set3_score1 is not None and match.set3_score2 is not None:
+                                participant_stats['goal_difference'] += match.set3_score1 - match.set3_score2
+                            if hasattr(match, 'set4_score1') and hasattr(match, 'set4_score2') and match.set4_score1 is not None and match.set4_score2 is not None:
+                                participant_stats['goal_difference'] += match.set4_score1 - match.set4_score2
+                            if hasattr(match, 'set5_score1') and hasattr(match, 'set5_score2') and match.set5_score1 is not None and match.set5_score2 is not None:
+                                participant_stats['goal_difference'] += match.set5_score1 - match.set5_score2
+                                
                     elif match.participant2_id == participant.id:
                         participant_stats['games'] += 1
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -1345,6 +1358,18 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             else:
                                 participant_stats['draws'] += 1
                                 participant_stats['points'] += (tournament.points_draw or 1)  # очки за ничью из настроек турнира
+                            
+                            # Рассчитываем разницу очков в сетах для участника 2
+                            if hasattr(match, 'set1_score1') and hasattr(match, 'set1_score2') and match.set1_score1 is not None and match.set1_score2 is not None:
+                                participant_stats['goal_difference'] += match.set1_score2 - match.set1_score1
+                            if hasattr(match, 'set2_score1') and hasattr(match, 'set2_score2') and match.set2_score1 is not None and match.set2_score2 is not None:
+                                participant_stats['goal_difference'] += match.set2_score2 - match.set2_score1
+                            if hasattr(match, 'set3_score1') and hasattr(match, 'set3_score2') and match.set3_score1 is not None and match.set3_score2 is not None:
+                                participant_stats['goal_difference'] += match.set3_score2 - match.set3_score1
+                            if hasattr(match, 'set4_score1') and hasattr(match, 'set4_score2') and match.set4_score1 is not None and match.set4_score2 is not None:
+                                participant_stats['goal_difference'] += match.set4_score2 - match.set4_score1
+                            if hasattr(match, 'set5_score1') and hasattr(match, 'set5_score2') and match.set5_score1 is not None and match.set5_score2 is not None:
+                                participant_stats['goal_difference'] += match.set5_score2 - match.set5_score1
             
             # Определяем, является ли участник опоздавшим
             is_late_participant = False
