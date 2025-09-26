@@ -1289,15 +1289,58 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Проверяем, можно ли ввести такой счет
                     if (score1 > pointsToWin || score2 > pointsToWin) {
-                        if (difference > 2) {
-                            // Если разница > 2, то сет должен быть завершен
-                            // Нельзя вводить счет больше pointsToWin с разницей > 2
-                            const maxScore = Math.max(score1, score2);
-                            const minScore = Math.min(score1, score2);
-                            const correctMaxScore = minScore + 2;
-                            
-                            alert(`Неверный счет! Если разница ${difference} > 2, то сет должен быть завершен. Исправлено на ${correctMaxScore}:${minScore}`);
-                            return;
+                        const maxScore = Math.max(score1, score2);
+                        const minScore = Math.min(score1, score2);
+                        
+                        // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
+                        if (minScore >= pointsToWin) {
+                            if (difference !== 2) {
+                                // Автоматически исправляем счет - делаем разницу ровно 2
+                                const correctMaxScore = minScore + 2;
+                                const correctMinScore = minScore;
+                                
+                                alert(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно "очков для победы" (${pointsToWin}), то разница должна быть ровно 2 очка. Исправлено на ${correctMaxScore}:${correctMinScore}`);
+                                
+                                // Обновляем значения в форме
+                                if (score1 > score2) {
+                                    document.getElementById(`set${i}Score1`).value = correctMaxScore;
+                                    document.getElementById(`set${i}Score2`).value = correctMinScore;
+                                } else {
+                                    document.getElementById(`set${i}Score1`).value = correctMinScore;
+                                    document.getElementById(`set${i}Score2`).value = correctMaxScore;
+                                }
+                                
+                                // Обновляем переменные для дальнейшей обработки
+                                score1 = parseInt(document.getElementById(`set${i}Score1`).value);
+                                score2 = parseInt(document.getElementById(`set${i}Score2`).value);
+                                
+                                // Пересчитываем разницу после исправления
+                                difference = Math.abs(score1 - score2);
+                            }
+                        } else {
+                            // Если у проигравшего очков меньше "очков для победы", то максимальный счет должен быть равен "очков для победы"
+                            if (maxScore > pointsToWin) {
+                                const correctMaxScore = pointsToWin;
+                                const correctMinScore = minScore;
+                                
+                                alert(`Неверный счет! Если у проигравшего (${minScore}) очков меньше "очков для победы" (${pointsToWin}), то максимальный счет победителя должен быть ${pointsToWin}. Исправлено на ${correctMaxScore}:${correctMinScore}`);
+                                
+                                // Обновляем значения в форме
+                                if (score1 > score2) {
+                                    document.getElementById(`set${i}Score1`).value = correctMaxScore;
+                                    document.getElementById(`set${i}Score2`).value = correctMinScore;
+                                } else {
+                                    document.getElementById(`set${i}Score1`).value = correctMinScore;
+                                    document.getElementById(`set${i}Score2`).value = correctMaxScore;
+                                }
+                                
+                                // Обновляем переменные для дальнейшей обработки
+                                score1 = parseInt(document.getElementById(`set${i}Score1`).value);
+                                score2 = parseInt(document.getElementById(`set${i}Score2`).value);
+                                
+                                // Пересчитываем разницу после исправления
+                                difference = Math.abs(score1 - score2);
+                            }
                         }
                     }
                     
@@ -1722,20 +1765,31 @@ function validateSetScore(setNumber) {
         
         // Проверяем валидность счета
         if (score1 > pointsToWin || score2 > pointsToWin) {
-            if (difference > 2) {
-                // Если разница > 2, то сет должен быть завершен
-                // Нельзя вводить счет больше pointsToWin с разницей > 2
-                const maxScore = Math.max(score1, score2);
-                const minScore = Math.min(score1, score2);
-                const correctMaxScore = minScore + 2;
-                
-                if (score1 > score2) {
-                    document.getElementById(`set${setNumber}Score1`).value = correctMaxScore;
-                } else {
-                    document.getElementById(`set${setNumber}Score2`).value = correctMaxScore;
+            const maxScore = Math.max(score1, score2);
+            const minScore = Math.min(score1, score2);
+            
+            // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
+            if (minScore >= pointsToWin) {
+                if (difference !== 2) {
+                    alert(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно "очков для победы" (${pointsToWin}), то разница должна быть ровно 2 очка.`);
+                    return;
                 }
-                
-                alert(`Неверный счет! Если разница ${difference} > 2, то сет должен быть завершен. Исправлено на ${correctMaxScore}:${minScore}`);
+            } else {
+                // Если у проигравшего очков меньше "очков для победы", то максимальный счет должен быть равен "очков для победы"
+                if (maxScore > pointsToWin) {
+                    const correctMaxScore = pointsToWin;
+                    const correctMinScore = minScore;
+                    
+                    if (score1 > score2) {
+                        document.getElementById(`set${setNumber}Score1`).value = correctMaxScore;
+                        document.getElementById(`set${setNumber}Score2`).value = correctMinScore;
+                    } else {
+                        document.getElementById(`set${setNumber}Score1`).value = correctMinScore;
+                        document.getElementById(`set${setNumber}Score2`).value = correctMaxScore;
+                    }
+                    
+                    alert(`Неверный счет! Если у проигравшего (${minScore}) очков меньше "очков для победы" (${pointsToWin}), то максимальный счет победителя должен быть ${pointsToWin}. Исправлено на ${correctMaxScore}:${correctMinScore}`);
+                }
             }
         }
     }
@@ -1744,13 +1798,11 @@ function validateSetScore(setNumber) {
 function addSetEventListeners() {
     // Обработчики для сета 1
     document.getElementById('set1Score1').addEventListener('input', function() {
-        validateSetScore(1);
         checkSetCompletion(1);
         updateSetsWon(); // Обновляем статус 3-го сета
         updateSetEditability(); // Обновляем блокировку редактирования
     });
     document.getElementById('set1Score2').addEventListener('input', function() {
-        validateSetScore(1);
         checkSetCompletion(1);
         updateSetsWon(); // Обновляем статус 3-го сета
         updateSetEditability(); // Обновляем блокировку редактирования
@@ -1758,13 +1810,11 @@ function addSetEventListeners() {
     
     // Обработчики для сета 2
     document.getElementById('set2Score1').addEventListener('input', function() {
-        validateSetScore(2);
         checkSetCompletion(2);
         updateSetsWon(); // Обновляем статус 3-го сета
         updateSetEditability(); // Обновляем блокировку редактирования
     });
     document.getElementById('set2Score2').addEventListener('input', function() {
-        validateSetScore(2);
         checkSetCompletion(2);
         updateSetsWon(); // Обновляем статус 3-го сета
         updateSetEditability(); // Обновляем блокировку редактирования
@@ -1772,11 +1822,9 @@ function addSetEventListeners() {
     
     // Обработчики для сета 3
     document.getElementById('set3Score1').addEventListener('input', function() {
-        validateSetScore(3);
         checkSetCompletion(3);
     });
     document.getElementById('set3Score2').addEventListener('input', function() {
-        validateSetScore(3);
         checkSetCompletion(3);
     });
 }
@@ -1841,11 +1889,21 @@ function updateSetsWon() {
                 
                 // Проверяем валидность счета
                 if (score1 > pointsToWin || score2 > pointsToWin) {
-                    if (difference > 2) {
-                        // Если разница > 2, то сет должен быть завершен
-                        // Нельзя вводить счет больше pointsToWin с разницей > 2
-                        console.warn(`Неверный счет! Если разница ${difference} > 2, то сет должен быть завершен.`);
-                        return;
+                    const maxScore = Math.max(score1, score2);
+                    const minScore = Math.min(score1, score2);
+                    
+                    // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
+                    if (minScore >= pointsToWin) {
+                        if (difference !== 2) {
+                            console.warn(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно "очков для победы" (${pointsToWin}), то разница должна быть ровно 2 очка.`);
+                            return;
+                        }
+                    } else {
+                        // Если у проигравшего очков меньше "очков для победы", то максимальный счет должен быть равен "очков для победы"
+                        if (maxScore > pointsToWin) {
+                            console.warn(`Неверный счет! Если у проигравшего (${minScore}) очков меньше "очков для победы" (${pointsToWin}), то максимальный счет победителя должен быть ${pointsToWin}.`);
+                            return;
+                        }
                     }
                 }
                 

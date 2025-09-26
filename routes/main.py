@@ -1704,22 +1704,22 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 > match.sets_won_2:
                                 wins += 1
-                                points += 3  # 3 очка за победу
+                                points += (tournament.points_win or 1)  # очки за победу из настроек турнира
                             elif match.sets_won_1 < match.sets_won_2:
                                 losses += 1
-                                points += 0  # 0 очков за поражение
+                                points += (tournament.points_loss or 0)  # очки за поражение из настроек турнира
                             else:
-                                points += 1  # 1 очко за ничью
+                                points += (tournament.points_draw or 1)  # очки за ничью из настроек турнира
                     elif match.participant2_id == participant.id:
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 < match.sets_won_2:
                                 wins += 1
-                                points += 3  # 3 очка за победу
+                                points += (tournament.points_win or 1)  # очки за победу из настроек турнира
                             elif match.sets_won_1 > match.sets_won_2:
                                 losses += 1
-                                points += 0  # 0 очков за поражение
+                                points += (tournament.points_loss or 0)  # очки за поражение из настроек турнира
                             else:
-                                points += 1  # 1 очко за ничью
+                                points += (tournament.points_draw or 1)  # очки за ничью из настроек турнира
             
             participants_with_stats.append({
                 'participant': participant,
