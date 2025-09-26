@@ -34,7 +34,7 @@
                                 <th class="d-table-cell d-md-none">Турнир</th>
                                 <th class="d-none d-lg-table-cell">Вид спорта</th>
                                 <th class="d-none d-md-table-cell">Дата начала</th>
-                                <th class="d-none d-sm-table-cell">Участники</th>
+                                <th class="d-none d-sm-table-cell">Участники / Заявки</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
@@ -65,7 +65,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="d-none d-sm-table-cell">
-                                    <span class="badge bg-primary">{{ tournament.participant_count or 0 }}</span>
+                                    <span class="badge bg-info">{{ tournament.participant_count or 0 }}/{{ tournament.waiting_count or 0 }}</span>
                                 </td>
                                 <td>
                                     <div class="btn-group-vertical btn-group-sm d-md-none" role="group">

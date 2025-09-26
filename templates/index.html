@@ -4,144 +4,293 @@
 
 {% block content %}
 <style>
-.clickable-card {
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.hero-title {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    border: 3px solid #dee2e6 !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
 }
 
-.clickable-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2) !important;
-    border-color: #007bff !important;
-}
-
-.clickable-card:hover .card-title {
-    color: #007bff !important;
-}
-
-.clickable-card:hover .fas {
-    transform: scale(1.1);
+.card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
     transition: transform 0.3s ease;
 }
+
+.card-modern:hover::before {
+    transform: scaleX(1);
+}
+
+.card-modern:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.icon-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.btn-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 25px;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+/* Пульсирующая анимация для основных кнопок */
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Последовательное пульсирование с задержкой */
+.pulse-delay-1 {
+    animation-delay: 0s;
+}
+
+.pulse-delay-2 {
+    animation-delay: 0.5s;
+}
+
+.pulse-delay-3 {
+    animation-delay: 1s;
+}
+
+.pulse-delay-4 {
+    animation-delay: 1.5s;
+}
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-circle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.floating-circle:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.floating-circle:nth-child(3) {
+    width: 40px;
+    height: 40px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Адаптивные размеры для мобильных устройств */
+@media (max-width: 576px) {
+    .main-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .card-modern {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (min-width: 576px) {
+    .fa-sm-3x {
+        font-size: 3em !important;
+    }
+    .fs-sm-5 {
+        font-size: 1.25rem !important;
+    }
+}
 </style>
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-6">
-            <div class="text-center mb-4 mb-md-5 position-relative">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div class="flex-grow-1">
-                        <h1 class="display-4 mb-0">
-                            <i class="fas fa-trophy text-primary me-2 me-md-3"></i>
-                            <span class="d-block d-md-inline">Турнирная система</span>
-                        </h1>
-                    </div>
-                    <!-- Кнопка админа в правом верхнем углу -->
-                    <div class="d-none d-md-block ms-3">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
-                            <i class="fas fa-user-shield me-1"></i>admin
-                        </button>
-                    </div>
-                </div>
-                <p class="lead text-muted">Выберите вашу роль для продолжения</p>
-                
-                <!-- Кнопка админа для мобильных устройств -->
-                <div class="d-md-none mb-3">
-                    <button class="btn btn-outline-secondary btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
-                        <i class="fas fa-user-shield me-1"></i>Вход администратора
-                    </button>
-                </div>
-            </div>
+<div class="floating-elements">
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+</div>
+
+<div class="container">
+    <div class="main-container">
+        <div class="text-center mb-5">
+            <h1 class="hero-title display-4">
+                <i class="fas fa-trophy me-3"></i>
+                Турнирная система
+            </h1>
+            <p class="lead text-muted">Выберите вашу роль для продолжения</p>
             
-            <div class="row g-3 g-md-4">
-                <!-- 1. Создание нового турнира -->
-                <div class="col-md-6">
-                    <div class="card h-100 d-flex clickable-card" onclick="window.location.href='{{ url_for('request_token') }}'" style="cursor: pointer;">
-                        <div class="card-body text-center p-4 d-flex flex-column">
-                            <div class="mb-3">
-                                <i class="fas fa-plus-circle fa-3x text-success"></i>
-                            </div>
-                            <h4 class="card-title">Хочу создать новый турнир и стать его админом</h4>
-                            <p class="card-text text-muted flex-grow-1">
-                                Получите токен для создания и управления турниром. После получения токена используйте кнопку "Войти как админ турнира".
-                            </p>
-                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
-                                <i class="fas fa-key me-2"></i><span class="d-none d-sm-inline">Получить токен</span><span class="d-sm-none">Токен</span>
-                            </div>
+            <button class="btn btn-gradient btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
+                <i class="fas fa-user-shield me-2"></i>Вход администратора
+            </button>
+        </div>
+        
+        <div class="row g-3">
+            <!-- 1. Создание нового турнира -->
+            <div class="col-sm-6">
+                <div class="card card-modern h-100 pulse-animation pulse-delay-1" onclick="window.location.href='{{ url_for('request_token') }}'">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-plus-circle fa-3x icon-gradient"></i>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- 2. Вход как админ турнира -->
-                <div class="col-md-6">
-                    <div class="card h-100 d-flex clickable-card" onclick="window.location.href='{{ url_for('admin_tournament') }}'" style="cursor: pointer;">
-                        <div class="card-body text-center p-4 d-flex flex-column">
-                            <div class="mb-3">
-                                <i class="fas fa-crown fa-3x text-warning"></i>
-                            </div>
-                            <h4 class="card-title">Войти как админ турнира</h4>
-                            <p class="card-text text-muted flex-grow-1">
-                                Войдите с помощью email и токена для управления своими турнирами.
-                            </p>
-                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
-                                <i class="fas fa-sign-in-alt me-2"></i><span class="d-none d-sm-inline">Войти как админ турнира</span><span class="d-sm-none">Войти админ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 3. Вход как участник турнира -->
-                <div class="col-md-6">
-                    <div class="card h-100 d-flex clickable-card" onclick="showParticipantLogin()" style="cursor: pointer;">
-                        <div class="card-body text-center p-4 d-flex flex-column">
-                            <div class="mb-3">
-                                <i class="fas fa-user-check fa-3x text-primary"></i>
-                            </div>
-                            <h4 class="card-title">Войти как участник турнира</h4>
-                            <p class="card-text text-muted flex-grow-1">
-                                Введите ваше имя для просмотра турниров, в которых вы участвуете.
-                            </p>
-                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
-                                <i class="fas fa-user me-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Участник</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 4. Просмотр всех турниров -->
-                <div class="col-md-6">
-                    <div class="card h-100 d-flex clickable-card" onclick="window.location.href='{{ url_for('tournaments_list') }}'" style="cursor: pointer;">
-                        <div class="card-body text-center p-4 d-flex flex-column">
-                            <div class="mb-3">
-                                <i class="fas fa-list fa-3x text-info"></i>
-                            </div>
-                            <h4 class="card-title">Просмотр всех турниров</h4>
-                            <p class="card-text text-muted flex-grow-1">
-                                Посмотрите все доступные турниры без входа в систему.
-                            </p>
-                            <div class="mt-auto d-flex align-items-center justify-content-center" style="height: 52px; font-size: 0.9rem;">
-                                <i class="fas fa-eye me-2"></i><span class="d-none d-sm-inline">Смотреть турниры</span><span class="d-sm-none">Турниры</span>
-                            </div>
+                        <h4 class="card-title">Создать турнир</h4>
+                        <p class="card-text text-muted small d-none d-sm-block">
+                            Получите токен для создания и управления турниром
+                        </p>
+                        <div class="mt-3 d-flex align-items-center justify-content-center" style="height: 40px; font-size: 0.9rem;">
+                            <i class="fas fa-key me-2"></i><span class="d-none d-sm-inline">Получить токен</span><span class="d-sm-none">Токен</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Дополнительная информация -->
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="card bg-light border-0">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">
-                                <i class="fas fa-info-circle me-2"></i>
-                                О системе
-                            </h5>
-                            <p class="card-text mb-0">
-                                Турнирная система поддерживает различные виды спорта: настольный теннис, 
-                                бадминтон, волейбол и другие. Создавайте турниры, регистрируйте участников 
-                                и следите за результатами в режиме реального времени.
-                            </p>
+            <!-- 2. Вход как админ турнира -->
+            <div class="col-sm-6">
+                <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="window.location.href='{{ url_for('admin_tournament') }}'">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-crown fa-3x icon-gradient"></i>
                         </div>
+                        <h4 class="card-title">Админ турнира</h4>
+                        <p class="card-text text-muted small d-none d-sm-block">
+                            Войдите с помощью email и токена
+                        </p>
+                        <div class="mt-3 d-flex align-items-center justify-content-center" style="height: 40px; font-size: 0.9rem;">
+                            <i class="fas fa-sign-in-alt me-2"></i><span class="d-none d-sm-inline">Войти как админ</span><span class="d-sm-none">Войти админ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3. Вход как участник турнира -->
+            <div class="col-sm-6">
+                <div class="card card-modern h-100 pulse-animation pulse-delay-3" onclick="showParticipantLogin()">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-user-check fa-3x icon-gradient"></i>
+                        </div>
+                        <h4 class="card-title">Участник</h4>
+                        <p class="card-text text-muted small d-none d-sm-block">
+                            Введите ваше имя для просмотра турниров
+                        </p>
+                        <div class="mt-3 d-flex align-items-center justify-content-center" style="height: 40px; font-size: 0.9rem;">
+                            <i class="fas fa-user me-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Участник</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 4. Просмотр всех турниров -->
+            <div class="col-sm-6">
+                <div class="card card-modern h-100 pulse-animation pulse-delay-4" onclick="window.location.href='{{ url_for('tournaments_list') }}'">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-list fa-3x icon-gradient"></i>
+                        </div>
+                        <h4 class="card-title">Все турниры</h4>
+                        <p class="card-text text-muted small d-none d-sm-block">
+                            Посмотрите все доступные турниры
+                        </p>
+                        <div class="mt-3 d-flex align-items-center justify-content-center" style="height: 40px; font-size: 0.9rem;">
+                            <i class="fas fa-eye me-2"></i><span class="d-none d-sm-inline">Смотреть турниры</span><span class="d-sm-none">Турниры</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Дополнительная информация -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card card-modern">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle me-2 icon-gradient"></i>
+                            О системе
+                        </h5>
+                        <p class="card-text mb-0">
+                            Турнирная система поддерживает различные виды спорта: настольный теннис, 
+                            бадминтон, волейбол и другие.
+                        </p>
                     </div>
                 </div>
             </div>

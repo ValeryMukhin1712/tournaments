@@ -154,30 +154,41 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="joinModalLabel{{ tournament.id }}">
-                    <i class="fas fa-user-plus me-2"></i>Отправить заявку админу турнира
+                    <i class="fas fa-user-plus me-2"></i>Подать заявку на участие
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success btn-sm" onclick="submitJoinRequest({{ tournament.id }})">
+                        <i class="fas fa-paper-plane me-1"></i>Подать заявку
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
                     <h6 class="text-muted">Турнир: <strong>{{ tournament.name }}</strong></h6>
-                    <p class="text-muted small">Введите ваше имя для подачи заявки на участие в турнире</p>
+                    <p class="text-muted small">Заполните форму для подачи заявки на участие в турнире</p>
                 </div>
                 <form id="joinForm{{ tournament.id }}">
                     <div class="mb-3">
-                        <label for="participantName{{ tournament.id }}" class="form-label">Ваше имя *</label>
+                        <label for="participantName{{ tournament.id }}" class="form-label">Введите ваше имя *</label>
                         <input type="text" class="form-control" id="participantName{{ tournament.id }}" 
                                name="participant_name" required 
                                placeholder="Введите ваше имя">
                     </div>
+                    <div class="mb-3">
+                        <label for="skillLevel{{ tournament.id }}" class="form-label">Оцените ваш уровень *</label>
+                        <select class="form-select" id="skillLevel{{ tournament.id }}" name="skill_level" required>
+                            <option value="">Выберите уровень</option>
+                            <option value="новичок">новичок</option>
+                            <option value="новичок+">новичок+</option>
+                            <option value="любитель" selected>любитель</option>
+                            <option value="любитель+">любитель+</option>
+                            <option value="адвансер">адвансер</option>
+                            <option value="супер адвансер">супер адвансер</option>
+                        </select>
+                    </div>
                     <input type="hidden" name="tournament_id" value="{{ tournament.id }}">
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" onclick="submitJoinRequest({{ tournament.id }})">
-                    <i class="fas fa-paper-plane me-1"></i>Отправить
-                </button>
             </div>
         </div>
     </div>
@@ -219,9 +230,15 @@ function submitJoinRequest(tournamentId) {
     const form = document.getElementById('joinForm' + tournamentId);
     const formData = new FormData(form);
     const participantName = formData.get('participant_name').trim();
+    const skillLevel = formData.get('skill_level');
     
     if (!participantName) {
         alert('Пожалуйста, введите ваше имя');
+        return;
+    }
+    
+    if (!skillLevel) {
+        alert('Пожалуйста, выберите ваш уровень');
         return;
     }
     
@@ -243,25 +260,26 @@ function submitJoinRequest(tournamentId) {
         },
         body: JSON.stringify({
             tournament_id: tournamentId,
-            participant_name: participantName
+            participant_name: participantName,
+            skill_level: skillLevel
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Заявка успешно отправлена! Администратор турнира рассмотрит вашу заявку.');
+            alert('Заявка успешно подана! Вы добавлены в лист ожидания турнира.');
             // Закрываем модальное окно
             const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal' + tournamentId));
             modal.hide();
             // Очищаем форму
             form.reset();
         } else {
-            alert('Ошибка при отправке заявки: ' + (data.error || 'Неизвестная ошибка'));
+            alert('Ошибка при подаче заявки: ' + (data.error || 'Неизвестная ошибка'));
         }
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        alert('Ошибка при отправке заявки. Попробуйте еще раз.');
+        alert('Ошибка при подаче заявки. Попробуйте еще раз.');
     })
     .finally(() => {
         // Восстанавливаем кнопку

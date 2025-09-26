@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вариант 3: Неоморфизм</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #e0e5ec;
+            min-height: 100vh;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .main-container {
+            background: #e0e5ec;
+            border-radius: 30px;
+            margin: 2rem auto;
+            padding: 3rem;
+            box-shadow: 
+                20px 20px 60px #bebebe,
+                -20px -20px 60px #ffffff;
+        }
+        
+        .hero-title {
+            color: #4a5568;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .hero-subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card-neomorphic {
+            background: #e0e5ec;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 
+                8px 8px 16px #bebebe,
+                -8px -8px 16px #ffffff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .card-neomorphic:hover {
+            box-shadow: 
+                12px 12px 24px #bebebe,
+                -12px -12px 24px #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .card-neomorphic:active {
+            box-shadow: 
+                inset 8px 8px 16px #bebebe,
+                inset -8px -8px 16px #ffffff;
+            transform: translateY(0);
+        }
+        
+        .icon-neomorphic {
+            color: #4a5568;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card-title-neomorphic {
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .card-text-neomorphic {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .btn-neomorphic {
+            background: #e0e5ec;
+            border: none;
+            border-radius: 15px;
+            color: #4a5568;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            box-shadow: 
+                4px 4px 8px #bebebe,
+                -4px -4px 8px #ffffff;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-neomorphic:hover {
+            color: #4a5568;
+            box-shadow: 
+                6px 6px 12px #bebebe,
+                -6px -6px 12px #ffffff;
+        }
+        
+        .btn-neomorphic:active {
+            box-shadow: 
+                inset 4px 4px 8px #bebebe,
+                inset -4px -4px 8px #ffffff;
+        }
+        
+        .action-indicator {
+            background: #e0e5ec;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            box-shadow: 
+                inset 2px 2px 4px #bebebe,
+                inset -2px -2px 4px #ffffff;
+            color: #718096;
+            font-size: 0.8rem;
+        }
+        
+        .info-card-neomorphic {
+            background: #e0e5ec;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 
+                8px 8px 16px #bebebe,
+                -8px -8px 16px #ffffff;
+        }
+        
+        .info-title-neomorphic {
+            color: #4a5568;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .info-text-neomorphic {
+            color: #718096;
+        }
+        
+        .trophy-icon {
+            background: #e0e5ec;
+            border-radius: 50%;
+            padding: 1rem;
+            display: inline-block;
+            box-shadow: 
+                8px 8px 16px #bebebe,
+                -8px -8px 16px #ffffff;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 576px) {
+            .main-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-container">
+            <div class="text-center mb-5">
+                <div class="trophy-icon">
+                    <i class="fas fa-trophy fa-2x icon-neomorphic"></i>
+                </div>
+                <h1 class="hero-title display-5">
+                    Турнирная система
+                </h1>
+                <p class="hero-subtitle">Выберите вашу роль для продолжения</p>
+                
+                <button class="btn btn-neomorphic">
+                    <i class="fas fa-user-shield me-2"></i>Вход администратора
+                </button>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <div class="card card-neomorphic h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-plus-circle fa-3x icon-neomorphic"></i>
+                            </div>
+                            <h5 class="card-title-neomorphic">Создать турнир</h5>
+                            <p class="card-text-neomorphic">Получите токен для создания и управления турниром</p>
+                            <div class="action-indicator">
+                                <i class="fas fa-key me-2"></i>
+                                Получить токен
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6">
+                    <div class="card card-neomorphic h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-crown fa-3x icon-neomorphic"></i>
+                            </div>
+                            <h5 class="card-title-neomorphic">Админ турнира</h5>
+                            <p class="card-text-neomorphic">Войдите с помощью email и токена</p>
+                            <div class="action-indicator">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Войти как админ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6">
+                    <div class="card card-neomorphic h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-user-check fa-3x icon-neomorphic"></i>
+                            </div>
+                            <h5 class="card-title-neomorphic">Участник</h5>
+                            <p class="card-text-neomorphic">Введите ваше имя для просмотра турниров</p>
+                            <div class="action-indicator">
+                                <i class="fas fa-user me-2"></i>
+                                Войти как участник
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6">
+                    <div class="card card-neomorphic h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-list fa-3x icon-neomorphic"></i>
+                            </div>
+                            <h5 class="card-title-neomorphic">Все турниры</h5>
+                            <p class="card-text-neomorphic">Посмотрите все доступные турниры</p>
+                            <div class="action-indicator">
+                                <i class="fas fa-eye me-2"></i>
+                                Смотреть турниры
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card info-card-neomorphic">
+                        <div class="card-body text-center">
+                            <h5 class="info-title-neomorphic">
+                                <i class="fas fa-info-circle me-2 icon-neomorphic"></i>
+                                О системе
+                            </h5>
+                            <p class="info-text-neomorphic mb-0">
+                                Турнирная система поддерживает различные виды спорта: настольный теннис, 
+                                бадминтон, волейбол и другие.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

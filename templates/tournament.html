@@ -526,8 +526,8 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
-                            <i class="fas fa-users me-2"></i>Из списка пользователей
+                        <button class="nav-link" id="waiting-tab" data-bs-toggle="tab" data-bs-target="#waiting" type="button" role="tab">
+                            <i class="fas fa-clock me-2"></i>Лист ожидания
                         </button>
                     </li>
                 </ul>
@@ -543,45 +543,41 @@
                         </form>
                     </div>
                     
-                    <!-- Вкладка выбора из списка пользователей -->
-                    <div class="tab-pane fade" id="users" role="tabpanel">
+                    <!-- Вкладка листа ожидания -->
+                    <div class="tab-pane fade" id="waiting" role="tabpanel">
                         <div class="mb-3">
-                            <label for="userSearch" class="form-label">Поиск пользователей</label>
-                            <input type="text" class="form-control" id="userSearch" placeholder="Введите имя пользователя для поиска...">
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="isTeamFromUser">
-                                <label class="form-check-label" for="isTeamFromUser">
-                                    Добавлять как команду
-                                </label>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Лист ожидания:</strong> Здесь отображаются заявки на участие в турнире. Вы можете принять или отклонить заявки.
                             </div>
                         </div>
                         <div class="table-responsive" style="max-height: 300px;">
-                            <table class="table table-hover" id="usersTable">
+                            <table class="table table-hover" id="waitingListTable">
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Выбрать</th>
-                                        <th>Имя пользователя</th>
-                                        <th>Роль</th>
+                                        <th>Имя</th>
+                                        <th>Уровень навыков</th>
+                                        <th>Дата подачи</th>
+                                        <th>Действия</th>
                                     </tr>
                                 </thead>
-                                <tbody id="usersTableBody">
+                                <tbody id="waitingListTableBody">
                                     <!-- Данные будут загружены через JavaScript -->
                                 </tbody>
                             </table>
                         </div>
-                        <div id="noUsersMessage" class="text-center text-muted py-3" style="display: none;">
-                            <i class="fas fa-users fa-2x mb-2"></i>
-                            <p>Пользователи не найдены</p>
+                        <div id="noWaitingListMessage" class="text-center text-muted py-3" style="display: none;">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <p>Лист ожидания пуст</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" id="addSelectedUsersBtn" class="btn btn-success" style="display: none;">
-                    <i class="fas fa-plus me-2"></i>Добавить выбранных
+                <button type="button" id="addSelectedWaitingBtn" class="btn btn-primary" style="display: none;">
+                    <i class="fas fa-check me-2"></i>Принять выбранных
                 </button>
                 <button type="submit" form="addParticipantForm" class="btn btn-primary">Добавить</button>
             </div>
@@ -1003,211 +999,182 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Инициализация функциональности добавления пользователей из списка
-    initializeUserSelection();
+    // Инициализация функциональности листа ожидания
+    initializeWaitingList();
 });
 
-// Функция инициализации выбора пользователей
-function initializeUserSelection() {
-    const usersTab = document.getElementById('users-tab');
-    const userSearch = document.getElementById('userSearch');
-    const addSelectedUsersBtn = document.getElementById('addSelectedUsersBtn');
+
+// Функция инициализации листа ожидания
+function initializeWaitingList() {
+    const waitingTab = document.getElementById('waiting-tab');
+    const addSelectedWaitingBtn = document.getElementById('addSelectedWaitingBtn');
     
-    if (usersTab) {
-        // Загружаем пользователей при переключении на вкладку
-        usersTab.addEventListener('click', function() {
-            loadUsers();
+    if (waitingTab) {
+        // Загружаем лист ожидания при переключении на вкладку
+        waitingTab.addEventListener('click', function() {
+            loadWaitingList();
         });
         
-        // Поиск пользователей
-        if (userSearch) {
-            userSearch.addEventListener('input', function() {
-                filterUsers(this.value);
-            });
-        }
-        
-        // Добавление выбранных пользователей
-        if (addSelectedUsersBtn) {
-            addSelectedUsersBtn.addEventListener('click', function() {
-                addSelectedUsers();
+        // Принятие выбранных заявок
+        if (addSelectedWaitingBtn) {
+            addSelectedWaitingBtn.addEventListener('click', function() {
+                acceptSelectedWaiting();
             });
         }
     }
 }
 
-// Загрузка списка пользователей
-function loadUsers() {
-        fetch('/api/users?tournament_id={{ tournament.id }}', {
-            headers: {
-                'X-CSRFToken': getCSRFToken()
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Ошибка сервера: ' + response.status);
-            }
-        })
-        .then(data => {
-            displayUsers(data);
-        })
-        .catch(error => {
-            console.error('Ошибка при загрузке пользователей:', error);
-            alert('Ошибка при загрузке пользователей: ' + error.message);
-        });
+// Загрузка листа ожидания
+function loadWaitingList() {
+    fetch(`/api/tournaments/{{ tournament.id }}/waiting-list`, {
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayWaitingList(data.waiting_list);
+        } else {
+            console.error('Ошибка загрузки листа ожидания:', data.error);
+            showNoWaitingListMessage();
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        showNoWaitingListMessage();
+    });
 }
 
-// Отображение пользователей в таблице
-function displayUsers(users) {
-    const tbody = document.getElementById('usersTableBody');
-    const noUsersMessage = document.getElementById('noUsersMessage');
+// Отображение листа ожидания
+function displayWaitingList(waitingList) {
+    const tbody = document.getElementById('waitingListTableBody');
+    const noMessage = document.getElementById('noWaitingListMessage');
     
     if (!tbody) return;
     
     tbody.innerHTML = '';
     
-    if (users.length === 0) {
-        noUsersMessage.style.display = 'block';
+    if (waitingList.length === 0) {
+        showNoWaitingListMessage();
         return;
     }
     
-    noUsersMessage.style.display = 'none';
+    noMessage.style.display = 'none';
     
-    users.forEach(user => {
+    waitingList.forEach(entry => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                <input type="checkbox" class="form-check-input user-checkbox" value="${user.id}" data-username="${user.username}">
+                <input type="checkbox" class="form-check-input waiting-checkbox" value="${entry.id}">
             </td>
-            <td>${user.username}</td>
-            <td><span class="badge bg-secondary">${user.role}</span></td>
+            <td>${entry.name}</td>
+            <td>
+                <span class="badge bg-info">${entry.skill_level}</span>
+            </td>
+            <td>${entry.created_at}</td>
+            <td>
+                <button class="btn btn-success btn-sm" onclick="acceptSingleWaiting(${entry.id})" title="Принять заявку">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="rejectSingleWaiting(${entry.id})" title="Отклонить заявку">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
         `;
         tbody.appendChild(row);
     });
     
     // Добавляем обработчики для чекбоксов
-    const checkboxes = tbody.querySelectorAll('.user-checkbox');
+    const checkboxes = document.querySelectorAll('.waiting-checkbox');
     checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateAddButton);
+        checkbox.addEventListener('change', updateWaitingAddButton);
     });
 }
 
-// Фильтрация пользователей
-function filterUsers(searchTerm) {
-    const rows = document.getElementById('usersTableBody').querySelectorAll('tr');
-    const noUsersMessage = document.getElementById('noUsersMessage');
-    let visibleCount = 0;
+// Показать сообщение о пустом листе ожидания
+function showNoWaitingListMessage() {
+    const tbody = document.getElementById('waitingListTableBody');
+    const noMessage = document.getElementById('noWaitingListMessage');
+    const addBtn = document.getElementById('addSelectedWaitingBtn');
     
-    rows.forEach(row => {
-        const username = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-        if (username.includes(searchTerm.toLowerCase())) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    noUsersMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+    if (tbody) tbody.innerHTML = '';
+    if (noMessage) noMessage.style.display = 'block';
+    if (addBtn) addBtn.style.display = 'none';
 }
 
-// Обновление кнопки добавления
-function updateAddButton() {
-    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
-    const addSelectedUsersBtn = document.getElementById('addSelectedUsersBtn');
+// Обновление кнопки принятия заявок
+function updateWaitingAddButton() {
+    const checkboxes = document.querySelectorAll('.waiting-checkbox:checked');
+    const addSelectedWaitingBtn = document.getElementById('addSelectedWaitingBtn');
     
-    if (addSelectedUsersBtn) {
+    if (addSelectedWaitingBtn) {
         if (checkboxes.length > 0) {
-            addSelectedUsersBtn.style.display = 'inline-block';
-            addSelectedUsersBtn.textContent = `Добавить выбранных (${checkboxes.length})`;
+            addSelectedWaitingBtn.style.display = 'inline-block';
+            addSelectedWaitingBtn.innerHTML = `<i class="fas fa-check me-2"></i>Принять выбранных (${checkboxes.length})`;
         } else {
-            addSelectedUsersBtn.style.display = 'none';
+            addSelectedWaitingBtn.style.display = 'none';
         }
     }
 }
 
-// Добавление выбранных пользователей
-function addSelectedUsers() {
-    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
-    const isTeam = document.getElementById('isTeamFromUser').checked;
+// Принятие выбранных заявок
+function acceptSelectedWaiting() {
+    const checkboxes = document.querySelectorAll('.waiting-checkbox:checked');
     
     if (checkboxes.length === 0) {
-        alert('Выберите хотя бы одного пользователя');
+        alert('Выберите хотя бы одну заявку');
         return;
     }
     
-    const selectedUsers = Array.from(checkboxes).map(checkbox => ({
-        id: checkbox.value,
-        username: checkbox.dataset.username
-    }));
+    const waitingIds = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
     
-    // Добавляем пользователей параллельно
-    const promises = selectedUsers.map(user => {
-        const formData = {
-            user_id: user.id,
-            name: user.username,
-            is_team: isTeam
-        };
-        
-        return fetch('/api/tournaments/{{ tournament.id }}/participants', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.json().then(errorData => {
-                    throw new Error(errorData.error || 'Ошибка сервера: ' + response.status);
-                });
-            }
-        })
-        .then(data => {
-            return { success: true, user: user.username };
-        })
-        .catch(error => {
-            console.error(`Ошибка добавления ${user.username}:`, error);
-            return { success: false, user: user.username, error: error.message };
-        });
-    });
+    const addBtn = document.getElementById('addSelectedWaitingBtn');
+    const originalText = addBtn.innerHTML;
+    addBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Принимаем...';
+    addBtn.disabled = true;
     
-    // Ждем завершения всех запросов
-    Promise.all(promises).then(results => {
-        const addedCount = results.filter(r => r.success).length;
-        const errorCount = results.filter(r => !r.success).length;
-        const errors = results.filter(r => !r.success);
-        
-        let message = '';
-        if (addedCount > 0) {
-            message += `Успешно добавлено: ${addedCount} участников. `;
+    fetch(`/api/tournaments/{{ tournament.id }}/accept-waiting`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ waiting_ids: waitingIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            loadWaitingList(); // Перезагружаем лист ожидания
+            location.reload(); // Перезагружаем страницу для обновления списка участников
+        } else {
+            alert('Ошибка при принятии заявок: ' + (data.error || 'Неизвестная ошибка'));
         }
-        if (errorCount > 0) {
-            message += `Ошибок: ${errorCount}. `;
-            // Показываем детали ошибок
-            const duplicateErrors = errors.filter(e => e.error && e.error.includes('уже существует'));
-            const userExistsErrors = errors.filter(e => e.error && e.error.includes('уже участвует'));
-            
-            if (duplicateErrors.length > 0) {
-                message += `Дубликаты: ${duplicateErrors.map(e => e.user).join(', ')}. `;
-            }
-            if (userExistsErrors.length > 0) {
-                message += `Уже в турнире: ${userExistsErrors.map(e => e.user).join(', ')}. `;
-            }
-        }
-        
-        if (message) {
-            alert(message);
-        }
-        
-        if (addedCount > 0) {
-            location.reload();
-        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при принятии заявок. Попробуйте еще раз.');
+    })
+    .finally(() => {
+        addBtn.innerHTML = originalText;
+        addBtn.disabled = false;
     });
+}
+
+// Принятие одной заявки
+function acceptSingleWaiting(waitingId) {
+    if (confirm('Принять эту заявку?')) {
+        acceptSelectedWaiting.call({ value: waitingId });
+    }
+}
+
+// Отклонение одной заявки
+function rejectSingleWaiting(waitingId) {
+    if (confirm('Отклонить эту заявку?')) {
+        // Здесь можно добавить API для отклонения заявки
+        alert('Функция отклонения заявки будет добавлена позже');
+    }
 }
 
 // Функция для проверки осмысленности счета

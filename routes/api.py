@@ -200,8 +200,8 @@ def create_round_robin_schedule(participants):
                 player1 = players[i]
                 player2 = players[n - 1 - i]
             
-            # Пропускаем матчи с "bye"
-            if players[player1] != -1 and players[player2] != -1:
+            # Пропускаем матчи с "bye" (фейковым участником)
+            if participants[player1].id != -1 and participants[player2].id != -1:
                 round_matches.append((participants[player1], participants[player2]))
         
         rounds.append(round_matches)
@@ -233,7 +233,7 @@ def add_minutes_to_time(time_obj, minutes):
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
 
-def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):
+def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList):
     """Создает API маршруты приложения"""
     
     # Получаем объект CSRF из приложения
@@ -486,7 +486,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 tournament_id=tournament_id,
                 name=data['name'],
                 is_team=data.get('is_team', False),
-                user_id=data.get('user_id')
+                user_id=data.get('user_id'),
+                registered_at=tournament.created_at  # Устанавливаем время регистрации как время создания турнира
             )
             db.session.add(participant)
             db.session.commit()
@@ -494,15 +495,11 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Автоматически создаем расписание после добавления участника
             participants = Participant.query.filter_by(tournament_id=tournament_id).all()
             if len(participants) >= 2:  # Минимум 2 участника для создания расписания
-                # Удаляем существующие матчи
-                Match.query.filter_by(tournament_id=tournament_id).delete()
+                # Создаем новое расписание с сохранением результатов
+                matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
                 db.session.commit()
                 
-                # Создаем новое расписание
-                matches_created = create_smart_schedule(tournament, participants, Match, db)
-                db.session.commit()
-                
-                logger.info(f"Автоматически создано {matches_created} матчей для турнира {tournament_id}")
+                logger.info(f"Автоматически создано {matches_created} матчей для турнира {tournament_id} с сохранением результатов")
             
             return jsonify({
                 'success': True,
@@ -1010,17 +1007,14 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'error': 'Недостаточно участников для создания расписания'}), 400
         
         try:
-            # Удаляем существующие матчи
-            Match.query.filter_by(tournament_id=tournament_id).delete()
-            
-            # Создаем умное расписание
-            matches_created = create_smart_schedule(tournament, participants, Match, db)
+            # Создаем умное расписание с сохранением результатов
+            matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
             
             db.session.commit()
             
-            logger.info(f"Создано {matches_created} матчей для турнира {tournament.name}")
+            logger.info(f"Пересоздано расписание для турнира {tournament.name}: {matches_created} матчей")
             return jsonify({
-                'message': f'Расписание создано: {matches_created} матчей',
+                'message': f'Расписание пересоздано с сохранением результатов: {matches_created} матчей',
                 'matches_count': matches_created
             })
         except Exception as e:
@@ -1606,7 +1600,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
 
     @app.route('/api/join-request', methods=['POST'])
     def join_request():
-        """API для отправки заявки на участие в турнире"""
+        """API для подачи заявки на участие в турнире (лист ожидания)"""
         try:
             # Проверяем CSRF токен
             from flask_wtf.csrf import validate_csrf
@@ -1619,9 +1613,10 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             data = request.get_json()
             tournament_id = data.get('tournament_id')
             participant_name = data.get('participant_name', '').strip()
+            skill_level = data.get('skill_level', '').strip()
             
-            if not tournament_id or not participant_name:
-                return jsonify({'success': False, 'error': 'Необходимо указать ID турнира и имя участника'}), 400
+            if not tournament_id or not participant_name or not skill_level:
+                return jsonify({'success': False, 'error': 'Необходимо указать ID турнира, имя участника и уровень навыков'}), 400
             
             # Проверяем существование турнира
             tournament = Tournament.query.get(tournament_id)
@@ -1641,72 +1636,206 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if existing_participant:
                 return jsonify({'success': False, 'error': 'Вы уже участвуете в этом турнире'}), 400
             
-            # Создаем заявку (пока просто добавляем участника)
-            # В будущем здесь можно добавить систему уведомлений для администратора
-            new_participant = Participant(
+            # Проверяем, не подал ли уже участник заявку в лист ожидания
+            existing_waiting = WaitingList.query.filter_by(
+                tournament_id=tournament_id, 
+                name=participant_name,
+                status='ожидает'
+            ).first()
+            
+            if existing_waiting:
+                return jsonify({'success': False, 'error': 'Вы уже подали заявку на участие в этом турнире'}), 400
+            
+            # Создаем заявку в лист ожидания
+            new_waiting_list_entry = WaitingList(
                 tournament_id=tournament_id,
                 name=participant_name,
-                points=0
+                skill_level=skill_level,
+                status='ожидает'
             )
             
-            db.session.add(new_participant)
+            db.session.add(new_waiting_list_entry)
             db.session.commit()
             
-            logger.info(f"Участник {participant_name} подал заявку на турнир {tournament.name} (ID: {tournament_id})")
+            logger.info(f"Участник {participant_name} (уровень: {skill_level}) подал заявку в лист ожидания турнира {tournament.name} (ID: {tournament_id})")
             
-            # Отправляем email администратору турнира
-            try:
-                # Находим email администратора турнира
-                admin_email = None
-                if tournament.admin_id == 1:
-                    # Системный администратор
-                    admin_email = 'admin@system'
-                else:
-                    # Ищем токен администратора
-                    admin_token = Token.query.filter_by(email=f'admin_{tournament.admin_id}@system').first()
-                    if not admin_token:
-                        # Ищем по admin_id в email
-                        all_tokens = Token.query.all()
-                        for token in all_tokens:
-                            import hashlib
-                            if int(hashlib.md5(token.email.encode('utf-8')).hexdigest(), 16) % 1000000 == tournament.admin_id:
-                                admin_token = token
-                                break
-                    
-                    if admin_token:
-                        admin_email = admin_token.email
-                
-                if admin_email and admin_email != 'admin@system':
-                    # Импортируем функцию отправки email
-                    from app import send_email
-                    
-                    subject = f"Новая заявка на участие в турнире '{tournament.name}'"
-                    body = f"{participant_name} добавить в турнир {tournament.name}"
-                    
-                    if send_email(admin_email, subject, body):
-                        logger.info(f"Email уведомление отправлено администратору {admin_email}")
-                    else:
-                        logger.warning(f"Не удалось отправить email администратору {admin_email}")
-                else:
-                    logger.warning(f"Не найден email администратора для турнира {tournament.name}")
-                    
-            except Exception as email_error:
-                logger.error(f"Ошибка при отправке email уведомления: {email_error}")
-                # Не прерываем выполнение, если email не отправился
-            
-            return jsonify({
-                'success': True, 
-                'message': f'Заявка на участие в турнире "{tournament.name}" успешно подана!'
-            })
+            return jsonify({'success': True, 'message': 'Заявка успешно подана в лист ожидания'})
             
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при подаче заявки на участие: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при подаче заявки'}), 500
 
+    @app.route('/api/tournaments/<int:tournament_id>/waiting-list', methods=['GET'])
+    def get_waiting_list(tournament_id):
+        """API для получения листа ожидания турнира"""
+        try:
+            from flask import session
+            
+            # Проверяем права доступа через сессию
+            session_admin_id = session.get('admin_id')
+            if not session_admin_id:
+                return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+            
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Проверяем права доступа к турниру
+            if tournament.admin_id != session_admin_id:
+                return jsonify({'success': False, 'error': 'Недостаточно прав для доступа к этому турниру'}), 403
+            
+            # Получаем лист ожидания
+            waiting_list = WaitingList.query.filter_by(
+                tournament_id=tournament_id,
+                status='ожидает'
+            ).order_by(WaitingList.created_at.asc()).all()
+            
+            # Формируем ответ
+            waiting_list_data = []
+            for entry in waiting_list:
+                created_at_str = 'Не указано'
+                if entry.created_at:
+                    created_at_str = entry.created_at.strftime('%d.%m.%Y %H:%M')
+                
+                waiting_list_data.append({
+                    'id': entry.id,
+                    'name': entry.name,
+                    'skill_level': entry.skill_level,
+                    'created_at': created_at_str
+                })
+            
+            return jsonify({'success': True, 'waiting_list': waiting_list_data})
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении листа ожидания: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении листа ожидания'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/accept-waiting', methods=['POST'])
+    def accept_waiting_list(tournament_id):
+        """API для принятия заявок из листа ожидания"""
+        try:
+            from flask import session
+            
+            # Проверяем права доступа через сессию
+            session_admin_id = session.get('admin_id')
+            if not session_admin_id:
+                return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+            
+            data = request.get_json()
+            waiting_ids = data.get('waiting_ids', [])
+            
+            if not waiting_ids:
+                return jsonify({'success': False, 'error': 'Не выбраны заявки для принятия'}), 400
+            
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Проверяем права доступа к турниру
+            if tournament.admin_id != session_admin_id:
+                return jsonify({'success': False, 'error': 'Недостаточно прав для доступа к этому турниру'}), 403
+            
+            accepted_count = 0
+            for waiting_id in waiting_ids:
+                # Получаем заявку из листа ожидания
+                waiting_entry = WaitingList.query.get(waiting_id)
+                if not waiting_entry or waiting_entry.tournament_id != tournament_id:
+                    continue
+                
+                # Проверяем, не участвует ли уже участник в турнире
+                existing_participant = Participant.query.filter_by(
+                    tournament_id=tournament_id,
+                    name=waiting_entry.name
+                ).first()
+                
+                if existing_participant:
+                    # Помечаем заявку как отклоненную
+                    waiting_entry.status = 'отклонен'
+                    continue
+                
+                # Добавляем участника в турнир
+                new_participant = Participant(
+                    tournament_id=tournament_id,
+                    name=waiting_entry.name,
+                    points=0,
+                    registered_at=tournament.created_at  # Устанавливаем время регистрации как время создания турнира
+                )
+                
+                db.session.add(new_participant)
+                
+                # Помечаем заявку как принятую
+                waiting_entry.status = 'принят'
+                accepted_count += 1
+            
+            db.session.commit()
+            
+            # Создаем матчи для новых участников
+            if accepted_count > 0:
+                # Используем create_smart_schedule для полного пересчета расписания
+                # с сохранением результатов существующих матчей
+                try:
+                    # Получаем всех участников турнира
+                    all_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+                    
+                    # Вызываем create_smart_schedule с правильными параметрами
+                    create_smart_schedule(tournament, all_participants, Match, db, preserve_results=True)
+                    logger.info(f"Расписание пересчитано для {accepted_count} новых участников из листа ожидания")
+                except Exception as e:
+                    logger.error(f"Ошибка при пересчете расписания: {e}")
+                    # Если не удалось пересчитать расписание, создаем матчи вручную
+                    all_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+                    
+                    for waiting_id in waiting_ids:
+                        waiting_entry = WaitingList.query.get(waiting_id)
+                        if not waiting_entry or waiting_entry.tournament_id != tournament_id or waiting_entry.status != 'принят':
+                            continue
+                        
+                        new_participant = Participant.query.filter_by(
+                            tournament_id=tournament_id,
+                            name=waiting_entry.name
+                        ).first()
+                        
+                        if not new_participant:
+                            continue
+                        
+                        for existing_participant in all_participants:
+                            if existing_participant.id != new_participant.id:
+                                existing_match = Match.query.filter_by(
+                                    tournament_id=tournament_id,
+                                    participant1_id=min(new_participant.id, existing_participant.id),
+                                    participant2_id=max(new_participant.id, existing_participant.id)
+                                ).first()
+                                
+                                if not existing_match:
+                                    new_match = Match(
+                                        tournament_id=tournament_id,
+                                        participant1_id=min(new_participant.id, existing_participant.id),
+                                        participant2_id=max(new_participant.id, existing_participant.id),
+                                        court_number=1,
+                                        status='запланирован'
+                                    )
+                                    db.session.add(new_match)
+                    
+                    db.session.commit()
+                    logger.info(f"Созданы матчи для {accepted_count} новых участников из листа ожидания (fallback)")
+            
+            logger.info(f"Принято {accepted_count} заявок из листа ожидания турнира {tournament.name}")
+            
+            return jsonify({
+                'success': True, 
+                'message': f'Принято {accepted_count} заявок из листа ожидания',
+                'accepted_count': accepted_count
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при принятии заявок из листа ожидания: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при принятии заявок'}), 500
     @app.route('/api/tournaments/<int:tournament_id>/generate-schedule', methods=['POST'])
     def generate_schedule(tournament_id):
-        """API для составления расписания турнира"""
         try:
             # Проверяем CSRF токен
             from flask_wtf.csrf import validate_csrf
@@ -1731,8 +1860,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             for match in existing_matches:
                 db.session.delete(match)
             
-            # Создаем новое расписание
-            matches_created = create_smart_schedule(tournament, participants, Match, db)
+            # Создаем новое расписание с сохранением результатов
+            matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
             
             if matches_created > 0:
                 db.session.commit()

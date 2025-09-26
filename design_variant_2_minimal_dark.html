@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вариант 2: Минималистичный темный</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .main-container {
+            background: #1a1a1a;
+            border-radius: 16px;
+            border: 1px solid #333;
+            margin: 2rem auto;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero-title {
+            color: #ffffff;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card-minimal {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-minimal:hover {
+            border-color: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-minimal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #555, transparent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .card-minimal:hover::before {
+            opacity: 1;
+        }
+        
+        .icon-minimal {
+            color: #666;
+            transition: color 0.2s ease;
+        }
+        
+        .card-minimal:hover .icon-minimal {
+            color: #fff;
+        }
+        
+        .card-title-minimal {
+            color: #fff;
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-text-minimal {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .btn-minimal {
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-minimal:hover {
+            background: #444;
+            border-color: #555;
+            color: #fff;
+        }
+        
+        .action-text {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        
+        .info-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+        }
+        
+        .info-title {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .info-text {
+            color: #888;
+        }
+        
+        @media (max-width: 576px) {
+            .main-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-container">
+            <div class="text-center mb-5">
+                <h1 class="hero-title display-5">
+                    <i class="fas fa-trophy me-3" style="color: #666;"></i>
+                    Турнирная система
+                </h1>
+                <p class="hero-subtitle">Выберите вашу роль для продолжения</p>
+                
+                <button class="btn btn-minimal">
+                    <i class="fas fa-user-shield me-2"></i>Вход администратора
+                </button>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <div class="card card-minimal h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-plus-circle fa-2x icon-minimal"></i>
+                            </div>
+                            <h5 class="card-title-minimal">Создать турнир</h5>
+                            <p class="card-text-minimal">Получите токен для создания и управления турниром</p>
+                            <div class="action-text">
+                                <i class="fas fa-key me-1"></i>
+                                Получить токен
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6">
+                    <div class="card card-minimal h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-crown fa-2x icon-minimal"></i>
+                            </div>
+                            <h5 class="card-title-minimal">Админ турнира</h5>
+                            <p class="card-text-minimal">Войдите с помощью email и токена</p>
+                            <div class="action-text">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                Войти как админ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6">
+                    <div class="card card-minimal h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-user-check fa-2x icon-minimal"></i>
+                            </div>
+                            <h5 class="card-title-minimal">Участник</h5>
+                            <p class="card-text-minimal">Введите ваше имя для просмотра турниров</p>
+                            <div class="action-text">
+                                <i class="fas fa-user me-1"></i>
+                                Войти как участник
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6">
+                    <div class="card card-minimal h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-list fa-2x icon-minimal"></i>
+                            </div>
+                            <h5 class="card-title-minimal">Все турниры</h5>
+                            <p class="card-text-minimal">Посмотрите все доступные турниры</p>
+                            <div class="action-text">
+                                <i class="fas fa-eye me-1"></i>
+                                Смотреть турниры
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card info-card">
+                        <div class="card-body text-center">
+                            <h5 class="info-title">
+                                <i class="fas fa-info-circle me-2" style="color: #666;"></i>
+                                О системе
+                            </h5>
+                            <p class="info-text mb-0">
+                                Турнирная система поддерживает различные виды спорта: настольный теннис, 
+                                бадминтон, волейбол и другие.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

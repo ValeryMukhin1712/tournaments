@@ -284,7 +284,7 @@ def send_token_email_async(email, name, token, app=None):
     logger.info(f"Асинхронная отправка email запущена для {email}")
     return True  # Возвращаем True сразу, не ждем завершения
 
-def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token):
+def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList):
     """Создает основные маршруты приложения"""
     
     def check_tournament_access(tournament_id, admin_id=None):
@@ -869,10 +869,17 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             for t in all_tournaments:
                 app.logger.info(f'  Турнир "{t.name}" (ID: {t.id}) - admin_id: {t.admin_id}')
         
-        # Загружаем количество участников для каждого турнира
+        # Загружаем количество участников и заявок в листе ожидания для каждого турнира
         for tournament in tournaments:
             participant_count = Participant.query.filter_by(tournament_id=tournament.id).count()
             tournament.participant_count = participant_count
+            
+            # Добавляем счетчик заявок в листе ожидания
+            waiting_count = WaitingList.query.filter_by(
+                tournament_id=tournament.id, 
+                status='ожидает'
+            ).count()
+            tournament.waiting_count = waiting_count
         
         return render_template('admin_dashboard.html', 
                              admin=admin, 
