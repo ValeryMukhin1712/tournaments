@@ -39,11 +39,14 @@
             <div class="d-flex flex-column flex-sm-row gap-2">
 
                      {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
+                     {% set has_active_matches = matches | selectattr('status', 'in', ['завершен', 'в процессе', 'играют']) | list | length > 0 %}
+                     {% if not has_active_matches %}
                      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
                          <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
                      </button>
+                     {% endif %}
                      <button class="btn btn-info btn-sm" onclick="generateSchedule()">
-                         <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
+                         <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание заново</span><span class="d-sm-none">Расписание</span>
                      </button>
                      <button class="btn btn-success btn-sm" onclick="exportTournament()">
                          <i class="fas fa-download me-1"></i><span class="d-none d-sm-inline">Выгрузка</span><span class="d-sm-none">Выгрузка</span>
