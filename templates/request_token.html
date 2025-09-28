@@ -3,146 +3,229 @@
 {% block title %}Запрос токена - Турнирный Ассистент v2.1{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4">Запрос токена для создания турнира</h1>
-    
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-key me-2"></i>Получите токен для создания турнира
-                    </h5>
-                    {% if total_tokens is defined %}
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Выдано токенов: {{ total_tokens }}/{{ max_tokens }}
-                        {% if total_tokens >= max_tokens %}
-                        <span class="badge bg-warning ms-2">Лимит достигнут</span>
+<style>
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.hero-title {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.card-modern:hover::before {
+    transform: scaleX(1);
+}
+
+.card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.icon-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.btn-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 25px;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.floating-circle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-circle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.floating-circle:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.floating-circle:nth-child(3) {
+    width: 40px;
+    height: 40px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Адаптивные размеры для мобильных устройств */
+@media (max-width: 576px) {
+    .main-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+}
+</style>
+
+<div class="floating-elements">
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+</div>
+
+<div class="container">
+    <div class="main-container">
+        <div class="text-center mb-5">
+            <h1 class="hero-title display-4">
+                <i class="fas fa-key me-3"></i>
+                Получить токен
+            </h1>
+            <p class="lead text-muted">Заполните форму для получения токена доступа</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card card-modern">
+                    <div class="card-body p-4">
+                        <!-- Flash сообщения -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        {% if total_tokens is defined %}
+                        <div class="text-center mb-4">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Выдано токенов: {{ total_tokens }}/{{ max_tokens }}
+                                {% if total_tokens >= max_tokens %}
+                                <span class="badge bg-warning ms-2">Лимит достигнут</span>
+                                {% endif %}
+                            </small>
+                        </div>
                         {% endif %}
-                    </small>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <!-- Flash сообщения -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Что такое токен?</strong><br>
-                        Токен - это уникальный ключ, который позволит вам создавать и управлять турнирами. 
-                        После получения токена вы сможете войти в систему как администратор турнира.
+                        
+                        <form method="POST" action="{{ url_for('request_token') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            
+                            <div class="mb-4">
+                                <label for="name" class="form-label">Ваше имя *</label>
+                                <input type="text" class="form-control" id="name" name="name" required placeholder="Введите ваше имя">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="Введите ваш email">
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Назад
+                                </a>
+                                <button type="submit" class="btn btn-gradient">
+                                    <i class="fas fa-key me-2"></i>Получить токен
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    
-                    <form method="POST" action="{{ url_for('request_token') }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Ваше имя *</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">Назад</a>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-key me-2"></i>Получить токен
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Отладочная информация -->
-            <div class="card mt-4">
-                <div class="card-header bg-warning text-dark">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-bug me-2"></i>Отладочная информация (выданные токены)
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div id="debugTokens">
-                        <p class="text-muted">Здесь будут отображаться выданные токены для отладки...</p>
-                    </div>
-                    <button class="btn btn-sm btn-outline-primary" onclick="loadDebugTokens()">
-                        <i class="fas fa-refresh me-1"></i>Обновить список токенов
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Информация о том, что происходит после запроса -->
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h6 class="card-title">
-                        <i class="fas fa-question-circle me-2"></i>Что происходит после отправки запроса?
-                    </h6>
-                    <ol class="mb-0">
-                        <li>Вы получите уникальный токен для входа в систему</li>
-                        <li>С помощью этого токена вы сможете создавать турниры</li>
-                        <li>Токен будет действителен в течение 30 дней</li>
-                        <li>Сохраните токен в надежном месте - он понадобится для входа</li>
-                    </ol>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-// Функция для загрузки отладочных токенов
-function loadDebugTokens() {
-    const debugDiv = document.getElementById('debugTokens');
-    debugDiv.innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Загрузка токенов...</p>';
-    
-    fetch('/api/debug/tokens')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.tokens && data.tokens.length > 0) {
-                let html = '<div class="table-responsive"><table class="table table-sm table-striped">';
-                html += '<thead><tr><th>Время</th><th>Email</th><th>Имя</th><th>Токен</th><th>Статус</th></tr></thead><tbody>';
-                
-                data.tokens.forEach(token => {
-                    const statusClass = token.email_sent ? 'text-success' : 'text-danger';
-                    const statusText = token.email_sent ? 'Отправлен' : 'Не отправлен';
-                    html += `<tr>
-                        <td><small>${token.timestamp}</small></td>
-                        <td><code>${token.email}</code></td>
-                        <td>${token.name}</td>
-                        <td><code class="text-primary">${token.token}</code></td>
-                        <td><small class="${statusClass}">${statusText}</small></td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table></div>';
-                debugDiv.innerHTML = html;
-            } else {
-                debugDiv.innerHTML = '<p class="text-muted">Токены не найдены или произошла ошибка загрузки.</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки токенов:', error);
-            debugDiv.innerHTML = '<p class="text-danger">Ошибка загрузки токенов. Проверьте консоль для деталей.</p>';
-        });
-}
-
-// Загружаем токены при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    loadDebugTokens();
-});
-</script>
 
 {% endblock %}

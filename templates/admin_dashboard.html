@@ -3,41 +3,261 @@
 {% block title %}Управление турнирами - Турнирный Ассистент v2.1{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-trophy"></i> Управление турнирами
-                <small class="text-muted">- Создание и управление турнирами</small>
+<style>
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.hero-title {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.card-modern:hover::before {
+    transform: scaleX(1);
+}
+
+.card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.icon-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.btn-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 25px;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.btn-outline-primary {
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-danger {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    background: linear-gradient(45deg, #dc3545, #c82333);
+    border-color: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3);
+}
+
+.table-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.table-modern thead th {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table-modern tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-modern tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    transform: scale(1.01);
+}
+
+.table-modern tbody td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.floating-circle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-circle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.floating-circle:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.floating-circle:nth-child(3) {
+    width: 40px;
+    height: 40px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Адаптивные размеры для мобильных устройств */
+@media (max-width: 576px) {
+    .main-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .table-modern {
+        font-size: 0.875rem;
+    }
+    
+    .table-modern thead th,
+    .table-modern tbody td {
+        padding: 0.5rem;
+    }
+}
+</style>
+
+<div class="floating-elements">
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+</div>
+
+<div class="container">
+    <div class="main-container">
+        <div class="text-center mb-5">
+            <h1 class="hero-title display-4">
+                <i class="fas fa-trophy me-3"></i>
+                Управление турнирами
             </h1>
+            <p class="lead text-muted">Создание и управление турнирами</p>
         </div>
-    </div>
-    
-    
-    <!-- Секция турниров -->
-    <div id="tournaments-section" class="section-content">
-    
-    <div class="card">
-        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <h5 class="mb-2 mb-md-0">Список турниров</h5>
-            <a href="{{ url_for('admin_create_tournament') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">Создать турнир</span><span class="d-sm-none">Создать</span>
-            </a>
-        </div>
-        <div class="card-body">
-            {% if tournaments %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th class="d-none d-md-table-cell">Название</th>
-                                <th class="d-table-cell d-md-none">Турнир</th>
-                                <th class="d-none d-lg-table-cell">Вид спорта</th>
-                                <th class="d-none d-md-table-cell">Дата начала</th>
-                                <th class="d-none d-sm-table-cell">Участники / Заявки</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
+        
+        <!-- Секция турниров -->
+        <div id="tournaments-section" class="section-content">
+            <div class="card card-modern">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <h5 class="mb-2 mb-md-0">
+                        <i class="fas fa-list me-2"></i>Список турниров
+                    </h5>
+                    <a href="{{ url_for('admin_create_tournament') }}" class="btn btn-gradient btn-sm">
+                        <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">Создать турнир</span><span class="d-sm-none">Создать</span>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if tournaments %}
+                        <div class="table-responsive">
+                            <table class="table table-modern">
+                                <thead>
+                                    <tr>
+                                        <th class="d-none d-md-table-cell">
+                                            <i class="fas fa-trophy me-2"></i>Название
+                                        </th>
+                                        <th class="d-table-cell d-md-none">
+                                            <i class="fas fa-trophy me-2"></i>Турнир
+                                        </th>
+                                        <th class="d-none d-lg-table-cell">
+                                            <i class="fas fa-running me-2"></i>Вид спорта
+                                        </th>
+                                        <th class="d-none d-md-table-cell">
+                                            <i class="fas fa-calendar me-2"></i>Дата начала
+                                        </th>
+                                        <th class="d-none d-sm-table-cell">
+                                            <i class="fas fa-users me-2"></i>Участники / Заявки
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-cog me-2"></i>Действия
+                                        </th>
+                                    </tr>
+                                </thead>
                         <tbody>
                             {% for tournament in tournaments %}
                             <tr>
@@ -90,16 +310,18 @@
                         </tbody>
                     </table>
                 </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Турниры не найдены</h5>
-                    <p class="text-muted">Создайте свой первый турнир!</p>
-                    <a href="{{ url_for('admin_create_tournament') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Создать турнир
-                    </a>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-trophy fa-3x icon-gradient mb-3"></i>
+                            <h4 class="mb-3">Турниры не найдены</h4>
+                            <p class="text-muted mb-4">Создайте свой первый турнир!</p>
+                            <a href="{{ url_for('admin_create_tournament') }}" class="btn btn-gradient">
+                                <i class="fas fa-plus me-2"></i>Создать турнир
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>

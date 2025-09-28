@@ -3,30 +3,245 @@
 {% block title %}Список турниров - Турнирный Ассистент v2.1{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-trophy"></i> Список турниров
-                <small class="text-muted">- Все доступные турниры</small>
+<style>
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.hero-title {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.card-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.card-modern:hover::before {
+    transform: scaleX(1);
+}
+
+.card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.icon-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.btn-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 25px;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.table-modern {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.table-modern thead th {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table-modern tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-modern tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    transform: scale(1.01);
+}
+
+.table-modern tbody td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.participants-badge {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.participants-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.apply-btn {
+    height: 32px;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.apply-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.floating-circle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-circle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.floating-circle:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.floating-circle:nth-child(3) {
+    width: 40px;
+    height: 40px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Адаптивные размеры для мобильных устройств */
+@media (max-width: 576px) {
+    .main-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .table-modern {
+        font-size: 0.875rem;
+    }
+    
+    .table-modern thead th,
+    .table-modern tbody td {
+        padding: 0.5rem;
+    }
+}
+</style>
+
+<div class="floating-elements">
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+    <div class="floating-circle"></div>
+</div>
+
+<div class="container">
+    <div class="main-container">
+        <div class="text-center mb-5">
+            <h1 class="hero-title display-4">
+                <i class="fas fa-trophy me-3"></i>
+                Список турниров
             </h1>
+            <p class="lead text-muted">Все доступные турниры для участия</p>
         </div>
-    </div>
     
     
-    <!-- Список турниров в виде таблицы -->
-    {% if tournaments %}
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th scope="col">Название</th>
-                        <th scope="col">Вид спорта</th>
-                        <th scope="col">Количество участников</th>
-                        <th scope="col">Статус</th>
-                        <th scope="col">Действие</th>
-                    </tr>
-                </thead>
+        <!-- Список турниров в виде таблицы -->
+        {% if tournaments %}
+            <div class="table-responsive">
+                <table class="table table-modern">
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                <i class="fas fa-trophy me-2"></i>Название
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-running me-2"></i>Вид спорта
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-users me-2"></i>Участники
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-flag me-2"></i>Статус
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-cog me-2"></i>Действие
+                            </th>
+                        </tr>
+                    </thead>
                 <tbody>
                     {% for tournament in tournaments %}
                     <tr>
@@ -61,34 +276,39 @@
                                 <span class="badge bg-info">{{ tournament.status }}</span>
                             {% endif %}
                         </td>
-                        <td>
-                            {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
-                            {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
-                            {% if tournament.status == 'регистрация' or has_matches_with_scores or has_matches_with_results or tournament.status == 'активен' %}
-                                <button type="button" class="btn btn-success btn-sm apply-btn" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
-                                    Подать заявку
-                                </button>
-                            {% elif tournament.status == 'завершен' %}
-                                <span class="text-muted">Завершен</span>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
+                            <td>
+                                {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
+                                {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
+                                {% if tournament.status == 'регистрация' or has_matches_with_scores or has_matches_with_results or tournament.status == 'активен' %}
+                                    <button type="button" class="btn btn-gradient btn-sm apply-btn" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
+                                        <i class="fas fa-user-plus me-1"></i>Подать заявку
+                                    </button>
+                                {% elif tournament.status == 'завершен' %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-check-circle me-1"></i>Завершен
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
-            <h5 class="text-muted">Турниры не найдены</h5>
-            <p class="text-muted">В системе пока нет доступных турниров</p>
-            <a href="{{ url_for('index') }}" class="btn btn-primary">
-                <i class="fas fa-home"></i> На главную
-            </a>
-        </div>
-    {% endif %}
+        {% else %}
+            <div class="card card-modern">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-trophy fa-3x icon-gradient mb-3"></i>
+                    <h4 class="mb-3">Турниры не найдены</h4>
+                    <p class="text-muted mb-4">В системе пока нет доступных турниров</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-gradient">
+                        <i class="fas fa-arrow-left me-2"></i>На главную
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <!-- Модальные окна для заявок на участие -->

@@ -1642,10 +1642,20 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Получаем матчи турнира
         matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
         
+        # Дедупликация матчей по уникальным полям (участники + дата + время)
+        seen_matches = set()
+        unique_matches = []
+        for match in matches:
+            match_key = (match.participant1_id, match.participant2_id, match.match_date, match.match_time)
+            if match_key not in seen_matches:
+                seen_matches.add(match_key)
+                unique_matches.append(match)
+        matches = unique_matches
+        
         # Проверяем, участвует ли текущий участник в турнире
         is_participant = any(p.name == participant_name for p in participants)
         
-        # Создаем данные для отображения расписания
+        # Создаем данные для отображения расписания (используем ту же структуру, что и в админке)
         schedule_display = {}
         for match in matches:
             if match.match_date:
@@ -1660,19 +1670,20 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 participant1 = next((p for p in participants if p.id == match.participant1_id), None)
                 participant2 = next((p for p in participants if p.id == match.participant2_id), None)
                 
-                # Формируем счет матча
+                # Формируем счет матча (количество выигранных сетов) - только для завершенных и в процессе
                 score = None
                 if match.status in ['завершен', 'в процессе', 'играют']:
                     if match.sets_won_1 is not None and match.sets_won_2 is not None:
                         score = f"{match.sets_won_1}:{match.sets_won_2}"
                     elif match.set1_score1 is not None and match.set1_score2 is not None:
-                        # Считаем выигранные сеты
+                        # Если нет sets_won, но есть детали сетов, считаем выигранные сеты
                         sets_won_1 = 0
                         sets_won_2 = 0
-                        if match.set1_score1 > match.set1_score2:
-                            sets_won_1 += 1
-                        elif match.set1_score2 > match.set1_score1:
-                            sets_won_2 += 1
+                        if match.set1_score1 is not None and match.set1_score2 is not None:
+                            if match.set1_score1 > match.set1_score2:
+                                sets_won_1 += 1
+                            elif match.set1_score2 > match.set1_score1:
+                                sets_won_2 += 1
                         if match.set2_score1 is not None and match.set2_score2 is not None:
                             if match.set2_score1 > match.set2_score2:
                                 sets_won_1 += 1
@@ -1684,20 +1695,48 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             elif match.set3_score2 > match.set3_score1:
                                 sets_won_2 += 1
                         score = f"{sets_won_1}:{sets_won_2}"
+                    else:
+                        # Для матчей в процессе без данных - показываем "0:0"
+                        if match.status in ['в процессе', 'играют']:
+                            score = "0:0"
                 
-                schedule_display[date_str]['matches'].append({
+                # Формируем детали сетов (без номеров сетов) - только для завершенных и в процессе
+                sets_details = None
+                points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
+                if match.status in ['завершен', 'в процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
+                    sets_list = []
+                    if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
+                        sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                    if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
+                        sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                    if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
+                        sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                    if sets_list:
+                        sets_details = ", ".join(sets_list)
+                
+                match_data = {
                     'id': match.id,
-                    'participant1': participant1.name if participant1 else 'Неизвестно',
-                    'participant2': participant2.name if participant2 else 'Неизвестно',
-                    'time': match.match_time.strftime('%H:%M') if match.match_time else 'Не указано',
+                    'global_number': match.id,  # Используем ID матча вместо match_number для уникальности
+                    'participant1': participant1.name if participant1 else 'Неизвестный участник',
+                    'participant2': participant2.name if participant2 else 'Неизвестный участник',
+                    'time': match.match_time.strftime('%H:%M') if match.match_time else 'Время не указано',
+                    'court': match.court_number or 0,
                     'status': match.status,
                     'score': score,
+                    'score1': match.score1,
+                    'score2': match.score2,
+                    'sets_details': sets_details,
+                    'winner_id': match.winner_id,
                     'is_participant_match': (participant1 and participant1.name == participant_name) or (participant2 and participant2.name == participant_name)
-                })
+                }
+                schedule_display[date_str]['matches'].append(match_data)
         
-        # Сортируем матчи по времени
-        for date_data in schedule_display.values():
-            date_data['matches'].sort(key=lambda x: x['time'])
+        # Сортируем матчи в каждом дне по времени и номеру матча
+        for date_str in schedule_display:
+            schedule_display[date_str]['matches'].sort(key=lambda x: (
+                x['time'] if x['time'] != 'Время не указано' else '23:59',
+                x['global_number']
+            ))
         
         # Создаем статистику участников
         participants_with_stats = []
