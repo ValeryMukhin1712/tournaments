@@ -16346,3 +16346,96 @@ with app.app_context(). See the documentation for more information.
 2025-09-26 23:37:53,511 - INFO - 127.0.0.1 - - [26/Sep/2025 23:37:53] "GET / HTTP/1.1" 200 -
 2025-09-26 23:37:53,593 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 2025-09-26 23:37:53,595 - INFO - 127.0.0.1 - - [26/Sep/2025 23:37:53] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 12:45:43,691 - INFO - База данных инициализирована успешно
+2025-09-28 12:45:44,206 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:45:44,206 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:45:44,207 - INFO - Переменная окружения PORT: None
+2025-09-28 12:45:44,207 - INFO - Режим отладки: production
+2025-09-28 12:45:44,238 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.196:5000
+2025-09-28 12:45:44,238 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-28 12:45:44,241 - INFO -  * Restarting with stat
+2025-09-28 12:45:45,219 - INFO - База данных инициализирована успешно
+2025-09-28 12:45:45,775 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:45:45,775 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:45:45,776 - INFO - Переменная окружения PORT: None
+2025-09-28 12:45:45,776 - INFO - Режим отладки: production
+2025-09-28 12:45:45,796 - WARNING -  * Debugger is active!
+2025-09-28 12:45:45,800 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:46:51,954 - INFO - База данных инициализирована успешно
+2025-09-28 12:46:52,523 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:46:52,523 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:46:52,524 - INFO - Переменная окружения PORT: None
+2025-09-28 12:46:52,526 - INFO - Режим отладки: production
+2025-09-28 12:46:52,563 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.196:5000
+2025-09-28 12:46:52,564 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-28 12:46:52,566 - INFO -  * Restarting with stat
+2025-09-28 12:46:53,604 - INFO - База данных инициализирована успешно
+2025-09-28 12:46:54,147 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:46:54,147 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:46:54,148 - INFO - Переменная окружения PORT: None
+2025-09-28 12:46:54,148 - INFO - Режим отладки: production
+2025-09-28 12:46:54,168 - WARNING -  * Debugger is active!
+2025-09-28 12:46:54,174 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:48:16,599 - INFO - 127.0.0.1 - - [28/Sep/2025 12:48:16] "GET / HTTP/1.1" 200 -
+2025-09-28 12:48:31,053 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 12:48:31,054 - INFO - 127.0.0.1 - - [28/Sep/2025 12:48:31] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 12:55:33,744 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 12:55:33,872 - INFO -  * Restarting with stat
+2025-09-28 12:55:35,262 - INFO - База данных инициализирована успешно
+2025-09-28 12:55:36,821 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:55:36,821 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:55:36,822 - INFO - Переменная окружения PORT: None
+2025-09-28 12:55:36,822 - INFO - Режим отладки: production
+2025-09-28 12:55:36,858 - WARNING -  * Debugger is active!
+2025-09-28 12:55:36,868 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:55:45,560 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-09-28 12:55:45,681 - INFO -  * Restarting with stat
+2025-09-28 12:55:46,798 - INFO - База данных инициализирована успешно
+2025-09-28 12:55:47,361 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:55:47,362 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:55:47,362 - INFO - Переменная окружения PORT: None
+2025-09-28 12:55:47,362 - INFO - Режим отладки: production
+2025-09-28 12:55:47,385 - WARNING -  * Debugger is active!
+2025-09-28 12:55:47,389 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:57:01,972 - INFO - База данных инициализирована успешно
+2025-09-28 12:57:02,608 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:57:02,608 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:57:02,608 - INFO - Переменная окружения PORT: None
+2025-09-28 12:57:02,608 - INFO - Режим отладки: production
+2025-09-28 12:57:02,637 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.30.196:5000
+2025-09-28 12:57:02,638 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-28 12:57:02,641 - INFO -  * Restarting with stat
+2025-09-28 12:57:04,151 - INFO - База данных инициализирована успешно
+2025-09-28 12:57:04,775 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:57:04,775 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:57:04,775 - INFO - Переменная окружения PORT: None
+2025-09-28 12:57:04,776 - INFO - Режим отладки: production
+2025-09-28 12:57:04,800 - WARNING -  * Debugger is active!
+2025-09-28 12:57:04,804 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:57:08,912 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 12:57:09,005 - INFO -  * Restarting with stat
+2025-09-28 12:57:09,464 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 12:57:09,565 - INFO -  * Restarting with stat
+2025-09-28 12:57:10,244 - INFO - База данных инициализирована успешно
+2025-09-28 12:57:10,512 - INFO - База данных инициализирована успешно
+2025-09-28 12:57:10,827 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:57:10,828 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:57:10,829 - INFO - Переменная окружения PORT: None
+2025-09-28 12:57:10,829 - INFO - Режим отладки: production
+2025-09-28 12:57:10,859 - WARNING -  * Debugger is active!
+2025-09-28 12:57:10,864 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:57:11,128 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 12:57:11,128 - INFO - Запуск приложения на порту 5000
+2025-09-28 12:57:11,128 - INFO - Переменная окружения PORT: None
+2025-09-28 12:57:11,128 - INFO - Режим отладки: production
+2025-09-28 12:57:11,145 - WARNING -  * Debugger is active!
+2025-09-28 12:57:11,149 - INFO -  * Debugger PIN: 324-785-477

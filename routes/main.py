@@ -70,7 +70,7 @@ def send_token_email_railway_fallback(email, name, token):
                     'to_email': email,
                     'to_name': name,
                     'token': token,
-                    'from_name': 'Турнирная система'
+                    'from_name': 'Турнирный Ассистент'
                 }
             }
             

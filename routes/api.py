@@ -1998,7 +1998,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
 Дата экспорта: {datetime.now().strftime('%d.%m.%Y %H:%M')}
 
 С уважением,
-Турнирная система
+Турнирный Ассистент
                     '''
                 )
                 
@@ -2328,7 +2328,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                         'to_email': email,
                         'to_name': name,
                         'token': token,
-                        'from_name': 'Турнирная система'
+                        'from_name': 'Турнирный Ассистент'
                     }
                 }
                 
