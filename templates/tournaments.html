@@ -13,142 +13,89 @@
         </div>
     </div>
     
-    <!-- Статистика турниров -->
-    <div class="row mb-4 g-2 g-md-3">
-        <div class="col-6 col-md-3">
-            <div class="card text-center h-100">
-                <div class="card-body p-2 p-md-3">
-                    <h6 class="card-title d-none d-md-block">Всего турниров</h6>
-                    <h6 class="card-title d-md-none">Всего</h6>
-                    <h4 class="text-primary mb-0">{{ tournaments|length }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card text-center h-100">
-                <div class="card-body p-2 p-md-3">
-                    <h6 class="card-title d-none d-md-block">Активных турниров</h6>
-                    <h6 class="card-title d-md-none">Активных</h6>
-                    <h4 class="text-success mb-0">{{ tournaments|selectattr('status', 'equalto', 'активен')|list|length }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card text-center h-100">
-                <div class="card-body p-2 p-md-3">
-                    <h6 class="card-title d-none d-md-block">Завершенных турниров</h6>
-                    <h6 class="card-title d-md-none">Завершенных</h6>
-                    <h4 class="text-info mb-0">{{ tournaments|selectattr('status', 'equalto', 'завершен')|list|length }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card text-center h-100">
-                <div class="card-body p-2 p-md-3">
-                    <h6 class="card-title d-none d-md-block">Регистрация</h6>
-                    <h6 class="card-title d-md-none">Регистрация</h6>
-                    <h4 class="text-warning mb-0">{{ tournaments|selectattr('status', 'equalto', 'регистрация')|list|length }}</h4>
-                </div>
-            </div>
-        </div>
-    </div>
     
-    <!-- Список турниров -->
-    <div class="row g-3">
-        {% if tournaments %}
-            {% for tournament in tournaments %}
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">{{ tournament.name }}</h5>
-                        {% if tournament.status == 'активен' %}
-                            <span class="badge bg-success">{{ tournament.status }}</span>
-                        {% elif tournament.status == 'завершен' %}
-                            <span class="badge bg-secondary">{{ tournament.status }}</span>
-                        {% elif tournament.status == 'регистрация' %}
-                            <span class="badge bg-warning">{{ tournament.status }}</span>
-                        {% else %}
-                            <span class="badge bg-info">{{ tournament.status }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <h6 class="text-muted">Вид спорта</h6>
-                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
-                        </div>
-                        
-                        {% if tournament.description %}
-                        <div class="mb-3">
-                            <h6 class="text-muted">Описание</h6>
-                            <p class="card-text">{{ tournament.description[:100] }}{% if tournament.description|length > 100 %}...{% endif %}</p>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <h6 class="text-muted">Дата начала</h6>
-                                <p class="mb-0">
-                                    {% if tournament.start_date %}
-                                        {{ tournament.start_date.strftime('%d.%m.%Y') }}
-                                    {% else %}
-                                        <span class="text-muted">Не указана</span>
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="col-6">
-                                <h6 class="text-muted">Участники</h6>
-                                <p class="mb-0">
-                                    <span class="badge bg-primary">{{ tournament.participants|length }}</span>
-                                </p>
-                            </div>
-                        </div>
-                        
-                        {% if tournament.participants %}
-                        <div class="mb-3">
-                            <h6 class="text-muted">Список участников</h6>
-                            <div class="participants-list" style="max-height: 100px; overflow-y: auto;">
-                                {% for participant in tournament.participants %}
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="text-truncate" style="max-width: 70%;">{{ participant.name }}</span>
-                                    {% if participant.points is not none %}
-                                        <span class="badge bg-warning">{{ participant.points }} очков</span>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer p-2 p-md-3">
-                        <div class="d-grid gap-2">
-                            {% if tournament.status == 'регистрация' %}
-                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
-                                <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Участвовать</span><span class="d-sm-none">Войти</span>
-                            </button>
+    <!-- Список турниров в виде таблицы -->
+    {% if tournaments %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col">Вид спорта</th>
+                        <th scope="col">Количество участников</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tournament in tournaments %}
+                    <tr>
+                        <td>
+                            <strong>{{ tournament.name }}</strong>
+                            {% if tournament.description %}
+                                <br><small class="text-muted">{{ tournament.description[:50] }}{% if tournament.description|length > 50 %}...{% endif %}</small>
                             {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Турниры не найдены</h5>
-                    <p class="text-muted">В системе пока нет доступных турниров</p>
-                    <a href="{{ url_for('index') }}" class="btn btn-primary">
-                        <i class="fas fa-home"></i> На главную
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-    </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary participants-badge" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#participantsModal{{ tournament.id }}">
+                                игроков {{ tournament.participants|length }}
+                            </span>
+                        </td>
+                        <td>
+                            {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
+                            {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
+                            {% if has_matches_with_scores %}
+                                <span class="badge bg-success">начался</span>
+                            {% elif has_matches_with_results %}
+                                <span class="badge bg-success">Играют</span>
+                            {% elif tournament.status == 'активен' %}
+                                <span class="badge bg-success">Играют</span>
+                            {% elif tournament.status == 'завершен' %}
+                                <span class="badge bg-secondary">Завершен</span>
+                            {% elif tournament.status == 'регистрация' %}
+                                <span class="badge bg-warning">Регистрация</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ tournament.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
+                            {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
+                            {% if tournament.status == 'регистрация' or has_matches_with_scores or has_matches_with_results or tournament.status == 'активен' %}
+                                <button type="button" class="btn btn-success btn-sm apply-btn" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
+                                    Подать заявку
+                                </button>
+                            {% elif tournament.status == 'завершен' %}
+                                <span class="text-muted">Завершен</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Турниры не найдены</h5>
+            <p class="text-muted">В системе пока нет доступных турниров</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> На главную
+            </a>
+        </div>
+    {% endif %}
 </div>
 
 <!-- Модальные окна для заявок на участие -->
 {% for tournament in tournaments %}
-{% if tournament.status == 'регистрация' %}
+{% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
+{% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
+{% if tournament.status == 'регистрация' or has_matches_with_scores or has_matches_with_results or tournament.status == 'активен' %}
 <div class="modal fade" id="joinModal{{ tournament.id }}" tabindex="-1" aria-labelledby="joinModalLabel{{ tournament.id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -196,32 +143,183 @@
 {% endif %}
 {% endfor %}
 
+<!-- Модальные окна для списка участников -->
+{% for tournament in tournaments %}
+<div class="modal fade" id="participantsModal{{ tournament.id }}" tabindex="-1" aria-labelledby="participantsModalLabel{{ tournament.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="participantsModalLabel{{ tournament.id }}">
+                    <i class="fas fa-users me-2"></i>Участники турнира "{{ tournament.name }}"
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                {% if tournament.participants %}
+                    <div class="row">
+                        {% for participant in tournament.participants %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user me-2"></i>{{ participant.name }}
+                                    </h6>
+                                    {% if participant.level %}
+                                        <span class="badge bg-info">{{ participant.level }}</span>
+                                    {% endif %}
+                                    {% if participant.email %}
+                                        <p class="card-text small text-muted mt-2">
+                                            <i class="fas fa-envelope me-1"></i>{{ participant.email }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">В турнире пока нет участников</p>
+                    </div>
+                {% endif %}
+                
+                <!-- Лист ожидания -->
+                {% if tournament.waiting_list %}
+                    <hr class="my-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-clock me-2 text-warning"></i>Лист ожидания
+                        <span class="badge bg-warning ms-2">{{ tournament.waiting_list|length }}</span>
+                    </h6>
+                    <div class="row">
+                        {% for waiting in tournament.waiting_list %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user-clock me-2"></i>{{ waiting.name }}
+                                    </h6>
+                                    {% if waiting.skill_level %}
+                                        <span class="badge bg-warning">{{ waiting.skill_level }}</span>
+                                    {% endif %}
+                                    {% if waiting.created_at %}
+                                        <p class="card-text small text-muted mt-2">
+                                            <i class="fas fa-calendar me-1"></i>{{ waiting.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 <style>
-.participants-list::-webkit-scrollbar {
-    width: 4px;
+/* Стили для таблицы турниров */
+.table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.participants-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 2px;
+/* Стили для кнопки "Подать заявку" */
+.apply-btn {
+    height: 32px;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 0.875rem;
 }
 
-.participants-list::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 2px;
+/* Стили для кликабельного бейджа участников */
+.participants-badge {
+    transition: all 0.3s ease;
 }
 
-.participants-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
+.participants-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.card {
-    transition: transform 0.2s ease-in-out;
+.table {
+    margin-bottom: 0;
 }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.table thead th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+        vertical-align: middle;
+    }
+    
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.4rem 0.2rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+    }
+    
+    /* Скрываем некоторые колонки на очень маленьких экранах */
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        display: none;
+    }
 }
 </style>
 

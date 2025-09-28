@@ -514,7 +514,13 @@ function showParticipantLogin() {
                     <h5 class="modal-title">
                         <i class="fas fa-user-check me-2"></i>Вход участника турнира
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="performParticipantLogin()">
+                            <i class="fas fa-sign-in-alt me-1"></i>Войти
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <form id="participantLoginForm">
@@ -528,12 +534,6 @@ function showParticipantLogin() {
                             Введите ваше имя для просмотра турниров, в которых вы участвуете.
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-primary" onclick="performParticipantLogin()">
-                        <i class="fas fa-sign-in-alt me-2"></i>Войти
-                    </button>
                 </div>
             </div>
         </div>

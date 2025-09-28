@@ -332,9 +332,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     def tournaments_list():
         """Список всех турниров для просмотра"""
         tournaments = Tournament.query.all()
-        # Загружаем участников для каждого турнира
+        # Загружаем участников, матчи и лист ожидания для каждого турнира
         for tournament in tournaments:
             tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
+            tournament.matches = Match.query.filter_by(tournament_id=tournament.id).all()
+            tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id, status='ожидает').all()
         return render_template('tournaments.html', tournaments=tournaments)
     
     @app.route('/request-token', methods=['GET', 'POST'])

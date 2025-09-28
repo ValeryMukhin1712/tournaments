@@ -16439,3 +16439,703 @@ with app.app_context(). See the documentation for more information.
 2025-09-28 12:57:11,128 - INFO - Режим отладки: production
 2025-09-28 12:57:11,145 - WARNING -  * Debugger is active!
 2025-09-28 12:57:11,149 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 12:57:18,496 - INFO - 127.0.0.1 - - [28/Sep/2025 12:57:18] "GET / HTTP/1.1" 200 -
+2025-09-28 12:57:18,532 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 12:57:18,533 - INFO - 127.0.0.1 - - [28/Sep/2025 12:57:18] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:03:52,466 - INFO - 127.0.0.1 - - [28/Sep/2025 13:03:52] "GET / HTTP/1.1" 200 -
+2025-09-28 13:03:52,520 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:03:52,520 - INFO - 127.0.0.1 - - [28/Sep/2025 13:03:52] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:15:43,696 - INFO - 127.0.0.1 - - [28/Sep/2025 13:15:43] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:15:43,729 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:15:43,729 - INFO - 127.0.0.1 - - [28/Sep/2025 13:15:43] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:15:45,529 - INFO - 127.0.0.1 - - [28/Sep/2025 13:15:45] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:15:45,837 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:15:45,838 - INFO - 127.0.0.1 - - [28/Sep/2025 13:15:45] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:21:27,193 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:27] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:21:27,221 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:21:27,223 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:27] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:21:38,806 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:38] "GET / HTTP/1.1" 200 -
+2025-09-28 13:21:39,121 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:21:39,122 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:39] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:21:40,827 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:40] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-28 13:21:40,860 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:21:40,861 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:40] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:21:45,664 - INFO - Попытка входа: email=yandvm@yandex.ru, token=29
+2025-09-28 13:21:45,666 - INFO - Поиск токена: email=yandvm@yandex.ru, token=29, найден=True
+2025-09-28 13:21:45,666 - INFO - Токен найден: id=2, created_at=2025-09-24 20:13:29.104405
+2025-09-28 13:21:45,672 - INFO - Время последнего использования токена обновлено
+2025-09-28 13:21:45,672 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-28 13:21:45,677 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:45] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-28 13:21:45,979 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 3
+2025-09-28 13:21:45,980 - INFO - Все турниры в системе:
+2025-09-28 13:21:45,981 - INFO -   Турнир "local 2" (ID: 2) - admin_id: 23513
+2025-09-28 13:21:45,981 - INFO -   Турнир "бадминтон" (ID: 3) - admin_id: 23513
+2025-09-28 13:21:45,981 - INFO -   Турнир "тест" (ID: 4) - admin_id: 23513
+2025-09-28 13:21:46,003 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:46] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-28 13:21:46,351 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:21:46,352 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:46] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:21:48,649 - INFO - Матч 70: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,649 - INFO - Матч 70: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,650 - INFO - Матч 70: итоговый счет=None
+2025-09-28 13:21:48,650 - INFO - Матч 71: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,651 - INFO - Матч 71: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,651 - INFO - Матч 71: итоговый счет=None
+2025-09-28 13:21:48,652 - INFO - Матч 72: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,652 - INFO - Матч 72: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,652 - INFO - Матч 72: итоговый счет=None
+2025-09-28 13:21:48,653 - INFO - Матч 73: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,653 - INFO - Матч 73: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,654 - INFO - Матч 73: итоговый счет=None
+2025-09-28 13:21:48,654 - INFO - Матч 74: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,655 - INFO - Матч 74: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,658 - INFO - Матч 74: итоговый счет=None
+2025-09-28 13:21:48,659 - INFO - Матч 75: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,659 - INFO - Матч 75: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,660 - INFO - Матч 75: итоговый счет=None
+2025-09-28 13:21:48,661 - INFO - Матч 76: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,663 - INFO - Матч 76: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,663 - INFO - Матч 76: итоговый счет=None
+2025-09-28 13:21:48,664 - INFO - Матч 77: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,664 - INFO - Матч 77: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,665 - INFO - Матч 77: итоговый счет=None
+2025-09-28 13:21:48,666 - INFO - Матч 78: статус='играют', sets_won_1=1, sets_won_2=0, set1_score1=11, set1_score2=7
+2025-09-28 13:21:48,666 - INFO - Матч 78: статус 'играют' попадает в условие
+2025-09-28 13:21:48,666 - INFO - Матч 78: итоговый счет=1:0
+2025-09-28 13:21:48,666 - INFO - Матч 79: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:21:48,667 - INFO - Матч 79: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:21:48,667 - INFO - Матч 79: итоговый счет=None
+2025-09-28 13:21:48,774 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:48] "GET /tournament/2 HTTP/1.1" 200 -
+2025-09-28 13:21:48,943 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:21:48,944 - INFO - 127.0.0.1 - - [28/Sep/2025 13:21:48] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:22:28,181 - INFO - 127.0.0.1 - - [28/Sep/2025 13:22:28] "GET / HTTP/1.1" 200 -
+2025-09-28 13:22:28,233 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:22:28,235 - INFO - 127.0.0.1 - - [28/Sep/2025 13:22:28] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:22:30,026 - INFO - 127.0.0.1 - - [28/Sep/2025 13:22:30] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:22:30,335 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:22:30,336 - INFO - 127.0.0.1 - - [28/Sep/2025 13:22:30] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:33,799 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:33] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:24:33,844 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:33,846 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:33] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:35,340 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:35] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:24:35,648 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:35,649 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:35] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:39,818 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:39] "GET / HTTP/1.1" 200 -
+2025-09-28 13:24:39,861 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:39,862 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:39] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:41,889 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:41] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:24:42,197 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:42,198 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:42] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:50,975 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:50] "GET / HTTP/1.1" 200 -
+2025-09-28 13:24:51,027 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:51,028 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:51] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:51,993 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:51] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-28 13:24:52,317 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:52,318 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:52] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:57,531 - INFO - Попытка входа: email=yandvm@yandex.ru, token=29
+2025-09-28 13:24:57,532 - INFO - Поиск токена: email=yandvm@yandex.ru, token=29, найден=True
+2025-09-28 13:24:57,533 - INFO - Токен найден: id=2, created_at=2025-09-24 20:13:29.104405
+2025-09-28 13:24:57,537 - INFO - Время последнего использования токена обновлено
+2025-09-28 13:24:57,537 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-28 13:24:57,540 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:57] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-28 13:24:57,549 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 3
+2025-09-28 13:24:57,549 - INFO - Все турниры в системе:
+2025-09-28 13:24:57,550 - INFO -   Турнир "local 2" (ID: 2) - admin_id: 23513
+2025-09-28 13:24:57,550 - INFO -   Турнир "бадминтон" (ID: 3) - admin_id: 23513
+2025-09-28 13:24:57,551 - INFO -   Турнир "тест" (ID: 4) - admin_id: 23513
+2025-09-28 13:24:57,558 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:57] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-28 13:24:57,913 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:57,914 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:57] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:24:59,079 - INFO - Матч 70: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,080 - INFO - Матч 70: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,080 - INFO - Матч 70: итоговый счет=None
+2025-09-28 13:24:59,080 - INFO - Матч 71: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,081 - INFO - Матч 71: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,081 - INFO - Матч 71: итоговый счет=None
+2025-09-28 13:24:59,082 - INFO - Матч 72: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,082 - INFO - Матч 72: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,082 - INFO - Матч 72: итоговый счет=None
+2025-09-28 13:24:59,083 - INFO - Матч 73: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,083 - INFO - Матч 73: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,084 - INFO - Матч 73: итоговый счет=None
+2025-09-28 13:24:59,084 - INFO - Матч 74: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,085 - INFO - Матч 74: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,085 - INFO - Матч 74: итоговый счет=None
+2025-09-28 13:24:59,085 - INFO - Матч 75: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,086 - INFO - Матч 75: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,086 - INFO - Матч 75: итоговый счет=None
+2025-09-28 13:24:59,086 - INFO - Матч 76: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,087 - INFO - Матч 76: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,087 - INFO - Матч 76: итоговый счет=None
+2025-09-28 13:24:59,087 - INFO - Матч 77: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,088 - INFO - Матч 77: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,088 - INFO - Матч 77: итоговый счет=None
+2025-09-28 13:24:59,089 - INFO - Матч 78: статус='играют', sets_won_1=1, sets_won_2=0, set1_score1=11, set1_score2=7
+2025-09-28 13:24:59,089 - INFO - Матч 78: статус 'играют' попадает в условие
+2025-09-28 13:24:59,089 - INFO - Матч 78: итоговый счет=1:0
+2025-09-28 13:24:59,090 - INFO - Матч 79: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:24:59,090 - INFO - Матч 79: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:24:59,091 - INFO - Матч 79: итоговый счет=None
+2025-09-28 13:24:59,096 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:59] "GET /tournament/2 HTTP/1.1" 200 -
+2025-09-28 13:24:59,377 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:24:59,378 - INFO - 127.0.0.1 - - [28/Sep/2025 13:24:59] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:26:28,728 - INFO - 127.0.0.1 - - [28/Sep/2025 13:26:28] "GET / HTTP/1.1" 200 -
+2025-09-28 13:26:28,767 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:26:28,769 - INFO - 127.0.0.1 - - [28/Sep/2025 13:26:28] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:26:30,411 - INFO - 127.0.0.1 - - [28/Sep/2025 13:26:30] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:26:30,713 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:26:30,713 - INFO - 127.0.0.1 - - [28/Sep/2025 13:26:30] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:29:49,098 - INFO - 127.0.0.1 - - [28/Sep/2025 13:29:49] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:29:49,193 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:29:49,195 - INFO - 127.0.0.1 - - [28/Sep/2025 13:29:49] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:30:51,283 - INFO - 127.0.0.1 - - [28/Sep/2025 13:30:51] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:30:51,339 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:30:51,345 - INFO - 127.0.0.1 - - [28/Sep/2025 13:30:51] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:30:52,496 - INFO - 127.0.0.1 - - [28/Sep/2025 13:30:52] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:30:52,793 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:30:52,793 - INFO - 127.0.0.1 - - [28/Sep/2025 13:30:52] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:33:45,867 - INFO - 127.0.0.1 - - [28/Sep/2025 13:33:45] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:33:45,911 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:33:45,912 - INFO - 127.0.0.1 - - [28/Sep/2025 13:33:45] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:34:24,645 - INFO - Участник Билл (уровень: любитель) подал заявку в лист ожидания турнира local 2 (ID: 2)
+2025-09-28 13:34:24,646 - INFO - 127.0.0.1 - - [28/Sep/2025 13:34:24] "POST /api/join-request HTTP/1.1" 200 -
+2025-09-28 13:38:41,469 - INFO - 127.0.0.1 - - [28/Sep/2025 13:38:41] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:38:41,512 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:38:41,513 - INFO - 127.0.0.1 - - [28/Sep/2025 13:38:41] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:38:43,780 - INFO - 127.0.0.1 - - [28/Sep/2025 13:38:43] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:38:44,084 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:38:44,085 - INFO - 127.0.0.1 - - [28/Sep/2025 13:38:44] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:39:14,200 - INFO - 127.0.0.1 - - [28/Sep/2025 13:39:14] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:39:14,241 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:39:14,242 - INFO - 127.0.0.1 - - [28/Sep/2025 13:39:14] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:39:16,695 - INFO - 127.0.0.1 - - [28/Sep/2025 13:39:16] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:39:16,991 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:39:16,991 - INFO - 127.0.0.1 - - [28/Sep/2025 13:39:16] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:39:18,406 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:39:18,407 - INFO - 127.0.0.1 - - [28/Sep/2025 13:39:18] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-09-28 13:40:26,068 - INFO - 127.0.0.1 - - [28/Sep/2025 13:40:26] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:40:26,111 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:40:26,112 - INFO - 127.0.0.1 - - [28/Sep/2025 13:40:26] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:41:59,464 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:41:59,501 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:41:59,637 - INFO -  * Restarting with stat
+2025-09-28 13:41:59,664 - INFO -  * Restarting with stat
+2025-09-28 13:42:00,590 - INFO - База данных инициализирована успешно
+2025-09-28 13:42:00,595 - INFO - База данных инициализирована успешно
+2025-09-28 13:42:01,097 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:42:01,098 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:42:01,098 - INFO - Переменная окружения PORT: None
+2025-09-28 13:42:01,098 - INFO - Режим отладки: production
+2025-09-28 13:42:01,106 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:42:01,107 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:42:01,107 - INFO - Переменная окружения PORT: None
+2025-09-28 13:42:01,107 - INFO - Режим отладки: production
+2025-09-28 13:42:01,119 - WARNING -  * Debugger is active!
+2025-09-28 13:42:01,125 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:42:01,130 - WARNING -  * Debugger is active!
+2025-09-28 13:42:01,134 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:42:05,439 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:42:05,504 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:42:05,522 - INFO -  * Restarting with stat
+2025-09-28 13:42:05,597 - INFO -  * Restarting with stat
+2025-09-28 13:42:06,537 - INFO - База данных инициализирована успешно
+2025-09-28 13:42:06,548 - INFO - База данных инициализирована успешно
+2025-09-28 13:42:07,164 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:42:07,165 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:42:07,165 - INFO - Переменная окружения PORT: None
+2025-09-28 13:42:07,165 - INFO - Режим отладки: production
+2025-09-28 13:42:07,177 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:42:07,177 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:42:07,178 - INFO - Переменная окружения PORT: None
+2025-09-28 13:42:07,178 - INFO - Режим отладки: production
+2025-09-28 13:42:07,183 - WARNING -  * Debugger is active!
+2025-09-28 13:42:07,188 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:42:07,210 - WARNING -  * Debugger is active!
+2025-09-28 13:42:07,223 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:43:12,180 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:12] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:43:12,222 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:12,223 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:12] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:21,576 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:21] "GET / HTTP/1.1" 200 -
+2025-09-28 13:43:21,884 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:21,886 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:21] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:23,867 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:23] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-28 13:43:23,919 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:23,919 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:23] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:28,902 - INFO - Попытка входа: email=yandvm@yandex.ru, token=29
+2025-09-28 13:43:28,904 - INFO - Поиск токена: email=yandvm@yandex.ru, token=29, найден=True
+2025-09-28 13:43:28,905 - INFO - Токен найден: id=2, created_at=2025-09-24 20:13:29.104405
+2025-09-28 13:43:28,911 - INFO - Время последнего использования токена обновлено
+2025-09-28 13:43:28,911 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-28 13:43:28,916 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:28] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-28 13:43:29,216 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 3
+2025-09-28 13:43:29,219 - INFO - Все турниры в системе:
+2025-09-28 13:43:29,220 - INFO -   Турнир "local 2" (ID: 2) - admin_id: 23513
+2025-09-28 13:43:29,221 - INFO -   Турнир "бадминтон" (ID: 3) - admin_id: 23513
+2025-09-28 13:43:29,222 - INFO -   Турнир "тест" (ID: 4) - admin_id: 23513
+2025-09-28 13:43:29,281 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:29] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-28 13:43:29,647 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:29,647 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:29] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:34,614 - INFO - Матч 70: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,614 - INFO - Матч 70: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,615 - INFO - Матч 70: итоговый счет=None
+2025-09-28 13:43:34,615 - INFO - Матч 71: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,615 - INFO - Матч 71: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,616 - INFO - Матч 71: итоговый счет=None
+2025-09-28 13:43:34,616 - INFO - Матч 72: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,616 - INFO - Матч 72: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,617 - INFO - Матч 72: итоговый счет=None
+2025-09-28 13:43:34,617 - INFO - Матч 73: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,617 - INFO - Матч 73: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,618 - INFO - Матч 73: итоговый счет=None
+2025-09-28 13:43:34,618 - INFO - Матч 74: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,618 - INFO - Матч 74: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,618 - INFO - Матч 74: итоговый счет=None
+2025-09-28 13:43:34,619 - INFO - Матч 75: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,619 - INFO - Матч 75: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,619 - INFO - Матч 75: итоговый счет=None
+2025-09-28 13:43:34,620 - INFO - Матч 76: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,620 - INFO - Матч 76: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,621 - INFO - Матч 76: итоговый счет=None
+2025-09-28 13:43:34,621 - INFO - Матч 77: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,621 - INFO - Матч 77: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,622 - INFO - Матч 77: итоговый счет=None
+2025-09-28 13:43:34,622 - INFO - Матч 78: статус='играют', sets_won_1=1, sets_won_2=0, set1_score1=11, set1_score2=7
+2025-09-28 13:43:34,622 - INFO - Матч 78: статус 'играют' попадает в условие
+2025-09-28 13:43:34,622 - INFO - Матч 78: итоговый счет=1:0
+2025-09-28 13:43:34,623 - INFO - Матч 79: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:34,623 - INFO - Матч 79: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:34,623 - INFO - Матч 79: итоговый счет=None
+2025-09-28 13:43:34,697 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:34] "GET /tournament/2 HTTP/1.1" 200 -
+2025-09-28 13:43:34,920 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:34,921 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:34] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:45,303 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:45,304 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:45] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:45,575 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:45,577 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:45] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:48,051 - INFO - Матч 34: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,052 - INFO - Матч 34: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,052 - INFO - Матч 34: итоговый счет=None
+2025-09-28 13:43:48,052 - INFO - Матч 35: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,053 - INFO - Матч 35: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,053 - INFO - Матч 35: итоговый счет=None
+2025-09-28 13:43:48,054 - INFO - Матч 36: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,054 - INFO - Матч 36: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,054 - INFO - Матч 36: итоговый счет=None
+2025-09-28 13:43:48,055 - INFO - Матч 49: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=21, set1_score2=3
+2025-09-28 13:43:48,055 - INFO - Матч 49: статус 'завершен' попадает в условие
+2025-09-28 13:43:48,055 - INFO - Матч 49: итоговый счет=2:0
+2025-09-28 13:43:48,056 - INFO - Матч 37: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,057 - INFO - Матч 37: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,057 - INFO - Матч 37: итоговый счет=None
+2025-09-28 13:43:48,057 - INFO - Матч 38: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,058 - INFO - Матч 38: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,059 - INFO - Матч 38: итоговый счет=None
+2025-09-28 13:43:48,059 - INFO - Матч 39: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,059 - INFO - Матч 39: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,060 - INFO - Матч 39: итоговый счет=None
+2025-09-28 13:43:48,060 - INFO - Матч 50: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,061 - INFO - Матч 50: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,061 - INFO - Матч 50: итоговый счет=None
+2025-09-28 13:43:48,061 - INFO - Матч 51: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,062 - INFO - Матч 51: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,062 - INFO - Матч 51: итоговый счет=None
+2025-09-28 13:43:48,063 - INFO - Матч 52: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,063 - INFO - Матч 52: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,064 - INFO - Матч 52: итоговый счет=None
+2025-09-28 13:43:48,064 - INFO - Матч 40: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,065 - INFO - Матч 40: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,065 - INFO - Матч 40: итоговый счет=None
+2025-09-28 13:43:48,065 - INFO - Матч 41: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,066 - INFO - Матч 41: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,066 - INFO - Матч 41: итоговый счет=None
+2025-09-28 13:43:48,066 - INFO - Матч 42: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,067 - INFO - Матч 42: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,067 - INFO - Матч 42: итоговый счет=None
+2025-09-28 13:43:48,068 - INFO - Матч 53: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,068 - INFO - Матч 53: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,068 - INFO - Матч 53: итоговый счет=None
+2025-09-28 13:43:48,069 - INFO - Матч 54: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,069 - INFO - Матч 54: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,070 - INFO - Матч 54: итоговый счет=None
+2025-09-28 13:43:48,071 - INFO - Матч 55: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,071 - INFO - Матч 55: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,072 - INFO - Матч 55: итоговый счет=None
+2025-09-28 13:43:48,073 - INFO - Матч 43: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,073 - INFO - Матч 43: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,074 - INFO - Матч 43: итоговый счет=None
+2025-09-28 13:43:48,074 - INFO - Матч 44: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,074 - INFO - Матч 44: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,075 - INFO - Матч 44: итоговый счет=None
+2025-09-28 13:43:48,075 - INFO - Матч 45: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,075 - INFO - Матч 45: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,076 - INFO - Матч 45: итоговый счет=None
+2025-09-28 13:43:48,076 - INFO - Матч 56: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,076 - INFO - Матч 56: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,077 - INFO - Матч 56: итоговый счет=None
+2025-09-28 13:43:48,077 - INFO - Матч 57: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,077 - INFO - Матч 57: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,078 - INFO - Матч 57: итоговый счет=None
+2025-09-28 13:43:48,078 - INFO - Матч 58: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,078 - INFO - Матч 58: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,078 - INFO - Матч 58: итоговый счет=None
+2025-09-28 13:43:48,079 - INFO - Матч 46: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=21, set1_score2=3
+2025-09-28 13:43:48,079 - INFO - Матч 46: статус 'завершен' попадает в условие
+2025-09-28 13:43:48,079 - INFO - Матч 46: итоговый счет=2:0
+2025-09-28 13:43:48,079 - INFO - Матч 47: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,080 - INFO - Матч 47: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,080 - INFO - Матч 47: итоговый счет=None
+2025-09-28 13:43:48,080 - INFO - Матч 48: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,081 - INFO - Матч 48: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,081 - INFO - Матч 48: итоговый счет=None
+2025-09-28 13:43:48,081 - INFO - Матч 59: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,082 - INFO - Матч 59: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,082 - INFO - Матч 59: итоговый счет=None
+2025-09-28 13:43:48,082 - INFO - Матч 60: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,083 - INFO - Матч 60: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,083 - INFO - Матч 60: итоговый счет=None
+2025-09-28 13:43:48,083 - INFO - Матч 61: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,083 - INFO - Матч 61: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,084 - INFO - Матч 61: итоговый счет=None
+2025-09-28 13:43:48,084 - INFO - Матч 62: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,084 - INFO - Матч 62: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,085 - INFO - Матч 62: итоговый счет=None
+2025-09-28 13:43:48,085 - INFO - Матч 63: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,086 - INFO - Матч 63: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,086 - INFO - Матч 63: итоговый счет=None
+2025-09-28 13:43:48,087 - INFO - Матч 64: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,088 - INFO - Матч 64: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,089 - INFO - Матч 64: итоговый счет=None
+2025-09-28 13:43:48,089 - INFO - Матч 65: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,089 - INFO - Матч 65: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,090 - INFO - Матч 65: итоговый счет=None
+2025-09-28 13:43:48,090 - INFO - Матч 66: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,090 - INFO - Матч 66: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,091 - INFO - Матч 66: итоговый счет=None
+2025-09-28 13:43:48,091 - INFO - Матч 67: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,091 - INFO - Матч 67: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,092 - INFO - Матч 67: итоговый счет=None
+2025-09-28 13:43:48,092 - INFO - Матч 68: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,092 - INFO - Матч 68: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,093 - INFO - Матч 68: итоговый счет=None
+2025-09-28 13:43:48,093 - INFO - Матч 69: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:43:48,093 - INFO - Матч 69: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:43:48,094 - INFO - Матч 69: итоговый счет=None
+2025-09-28 13:43:48,101 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:48] "GET /tournament/3 HTTP/1.1" 200 -
+2025-09-28 13:43:48,347 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:43:48,347 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:48] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:43:59,940 - INFO - Участник '2' удален из турнира 3. Удалено 11 матчей с его участием. Результаты других матчей сохранены.
+2025-09-28 13:43:59,941 - INFO - Участник '2' (ID: 9) удален из турнира 3 админом yandvm@yandex.ru
+2025-09-28 13:43:59,941 - INFO - 127.0.0.1 - - [28/Sep/2025 13:43:59] "DELETE /api/tournaments/3/participants/9 HTTP/1.1" 200 -
+2025-09-28 13:44:01,459 - INFO - Матч 34: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,460 - INFO - Матч 34: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,461 - INFO - Матч 34: итоговый счет=None
+2025-09-28 13:44:01,461 - INFO - Матч 36: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,461 - INFO - Матч 36: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,461 - INFO - Матч 36: итоговый счет=None
+2025-09-28 13:44:01,462 - INFO - Матч 37: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,462 - INFO - Матч 37: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,462 - INFO - Матч 37: итоговый счет=None
+2025-09-28 13:44:01,463 - INFO - Матч 38: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,463 - INFO - Матч 38: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,463 - INFO - Матч 38: итоговый счет=None
+2025-09-28 13:44:01,464 - INFO - Матч 51: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,465 - INFO - Матч 51: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,465 - INFO - Матч 51: итоговый счет=None
+2025-09-28 13:44:01,465 - INFO - Матч 52: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,465 - INFO - Матч 52: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,466 - INFO - Матч 52: итоговый счет=None
+2025-09-28 13:44:01,466 - INFO - Матч 40: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,466 - INFO - Матч 40: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,467 - INFO - Матч 40: итоговый счет=None
+2025-09-28 13:44:01,467 - INFO - Матч 41: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,467 - INFO - Матч 41: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,468 - INFO - Матч 41: итоговый счет=None
+2025-09-28 13:44:01,468 - INFO - Матч 53: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,469 - INFO - Матч 53: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,469 - INFO - Матч 53: итоговый счет=None
+2025-09-28 13:44:01,469 - INFO - Матч 55: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,470 - INFO - Матч 55: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,470 - INFO - Матч 55: итоговый счет=None
+2025-09-28 13:44:01,471 - INFO - Матч 43: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,471 - INFO - Матч 43: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,471 - INFO - Матч 43: итоговый счет=None
+2025-09-28 13:44:01,472 - INFO - Матч 45: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,472 - INFO - Матч 45: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,472 - INFO - Матч 45: итоговый счет=None
+2025-09-28 13:44:01,473 - INFO - Матч 56: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,473 - INFO - Матч 56: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,474 - INFO - Матч 56: итоговый счет=None
+2025-09-28 13:44:01,474 - INFO - Матч 57: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,474 - INFO - Матч 57: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,474 - INFO - Матч 57: итоговый счет=None
+2025-09-28 13:44:01,475 - INFO - Матч 47: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,475 - INFO - Матч 47: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,475 - INFO - Матч 47: итоговый счет=None
+2025-09-28 13:44:01,476 - INFO - Матч 48: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,476 - INFO - Матч 48: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,476 - INFO - Матч 48: итоговый счет=None
+2025-09-28 13:44:01,477 - INFO - Матч 59: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,477 - INFO - Матч 59: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,477 - INFO - Матч 59: итоговый счет=None
+2025-09-28 13:44:01,478 - INFO - Матч 60: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,478 - INFO - Матч 60: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,479 - INFO - Матч 60: итоговый счет=None
+2025-09-28 13:44:01,479 - INFO - Матч 61: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,479 - INFO - Матч 61: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,480 - INFO - Матч 61: итоговый счет=None
+2025-09-28 13:44:01,480 - INFO - Матч 62: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,481 - INFO - Матч 62: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,481 - INFO - Матч 62: итоговый счет=None
+2025-09-28 13:44:01,481 - INFO - Матч 63: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,482 - INFO - Матч 63: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,482 - INFO - Матч 63: итоговый счет=None
+2025-09-28 13:44:01,483 - INFO - Матч 65: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,483 - INFO - Матч 65: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,483 - INFO - Матч 65: итоговый счет=None
+2025-09-28 13:44:01,484 - INFO - Матч 67: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,484 - INFO - Матч 67: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,485 - INFO - Матч 67: итоговый счет=None
+2025-09-28 13:44:01,485 - INFO - Матч 68: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,485 - INFO - Матч 68: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,486 - INFO - Матч 68: итоговый счет=None
+2025-09-28 13:44:01,486 - INFO - Матч 69: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:01,486 - INFO - Матч 69: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:01,487 - INFO - Матч 69: итоговый счет=None
+2025-09-28 13:44:01,492 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:01] "GET /tournament/3 HTTP/1.1" 200 -
+2025-09-28 13:44:01,770 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:01,770 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:01] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:09,082 - INFO - Матч 34: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,083 - INFO - Матч 34: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,083 - INFO - Матч 34: итоговый счет=None
+2025-09-28 13:44:09,083 - INFO - Матч 36: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,084 - INFO - Матч 36: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,084 - INFO - Матч 36: итоговый счет=None
+2025-09-28 13:44:09,085 - INFO - Матч 37: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,085 - INFO - Матч 37: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,085 - INFO - Матч 37: итоговый счет=None
+2025-09-28 13:44:09,086 - INFO - Матч 38: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,086 - INFO - Матч 38: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,087 - INFO - Матч 38: итоговый счет=None
+2025-09-28 13:44:09,087 - INFO - Матч 51: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,087 - INFO - Матч 51: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,088 - INFO - Матч 51: итоговый счет=None
+2025-09-28 13:44:09,088 - INFO - Матч 52: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,088 - INFO - Матч 52: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,089 - INFO - Матч 52: итоговый счет=None
+2025-09-28 13:44:09,089 - INFO - Матч 40: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,090 - INFO - Матч 40: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,090 - INFO - Матч 40: итоговый счет=None
+2025-09-28 13:44:09,090 - INFO - Матч 41: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,091 - INFO - Матч 41: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,091 - INFO - Матч 41: итоговый счет=None
+2025-09-28 13:44:09,092 - INFO - Матч 53: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,093 - INFO - Матч 53: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,093 - INFO - Матч 53: итоговый счет=None
+2025-09-28 13:44:09,094 - INFO - Матч 55: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,095 - INFO - Матч 55: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,095 - INFO - Матч 55: итоговый счет=None
+2025-09-28 13:44:09,096 - INFO - Матч 43: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,096 - INFO - Матч 43: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,097 - INFO - Матч 43: итоговый счет=None
+2025-09-28 13:44:09,097 - INFO - Матч 45: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,097 - INFO - Матч 45: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,098 - INFO - Матч 45: итоговый счет=None
+2025-09-28 13:44:09,098 - INFO - Матч 56: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,099 - INFO - Матч 56: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,099 - INFO - Матч 56: итоговый счет=None
+2025-09-28 13:44:09,099 - INFO - Матч 57: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,100 - INFO - Матч 57: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,100 - INFO - Матч 57: итоговый счет=None
+2025-09-28 13:44:09,101 - INFO - Матч 47: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,101 - INFO - Матч 47: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,101 - INFO - Матч 47: итоговый счет=None
+2025-09-28 13:44:09,102 - INFO - Матч 48: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,102 - INFO - Матч 48: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,103 - INFO - Матч 48: итоговый счет=None
+2025-09-28 13:44:09,103 - INFO - Матч 59: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,103 - INFO - Матч 59: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,104 - INFO - Матч 59: итоговый счет=None
+2025-09-28 13:44:09,104 - INFO - Матч 60: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,105 - INFO - Матч 60: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,105 - INFO - Матч 60: итоговый счет=None
+2025-09-28 13:44:09,106 - INFO - Матч 61: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,106 - INFO - Матч 61: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,107 - INFO - Матч 61: итоговый счет=None
+2025-09-28 13:44:09,107 - INFO - Матч 62: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,108 - INFO - Матч 62: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,109 - INFO - Матч 62: итоговый счет=None
+2025-09-28 13:44:09,110 - INFO - Матч 63: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,110 - INFO - Матч 63: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,111 - INFO - Матч 63: итоговый счет=None
+2025-09-28 13:44:09,111 - INFO - Матч 65: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,111 - INFO - Матч 65: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,112 - INFO - Матч 65: итоговый счет=None
+2025-09-28 13:44:09,112 - INFO - Матч 67: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,113 - INFO - Матч 67: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,113 - INFO - Матч 67: итоговый счет=None
+2025-09-28 13:44:09,114 - INFO - Матч 68: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,114 - INFO - Матч 68: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,114 - INFO - Матч 68: итоговый счет=None
+2025-09-28 13:44:09,115 - INFO - Матч 69: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-28 13:44:09,115 - INFO - Матч 69: статус 'запланирован' НЕ попадает в условие
+2025-09-28 13:44:09,115 - INFO - Матч 69: итоговый счет=None
+2025-09-28 13:44:09,121 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:09] "GET /tournament/3 HTTP/1.1" 200 -
+2025-09-28 13:44:09,168 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:09,168 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:09] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:15,535 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:15] "GET / HTTP/1.1" 200 -
+2025-09-28 13:44:15,850 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:15,851 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:15] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:18,048 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:18] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:44:18,120 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:18,122 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:18] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:20,742 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:20] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:44:20,809 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:20,810 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:20] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:26,234 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:26] "GET / HTTP/1.1" 200 -
+2025-09-28 13:44:26,542 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:26,542 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:26] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:32,366 - INFO - Системный администратор успешно авторизован
+2025-09-28 13:44:32,367 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:32] "POST /admin-system-login HTTP/1.1" 200 -
+2025-09-28 13:44:32,649 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:32] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-09-28 13:44:32,732 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:32,733 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:32] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:36,273 - INFO - Турнир 'тест' (ID: 4) удален админом admin@system
+2025-09-28 13:44:36,275 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:36] "DELETE /api/tournaments/4 HTTP/1.1" 200 -
+2025-09-28 13:44:40,931 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:40] "GET / HTTP/1.1" 200 -
+2025-09-28 13:44:41,238 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:41,239 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:41] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:42,464 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:42] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-28 13:44:42,543 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:42,545 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:42] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:48,114 - INFO - Попытка входа: email=yandvm@yandex.ru, token=29
+2025-09-28 13:44:48,115 - INFO - Поиск токена: email=yandvm@yandex.ru, token=29, найден=True
+2025-09-28 13:44:48,116 - INFO - Токен найден: id=2, created_at=2025-09-24 20:13:29.104405
+2025-09-28 13:44:48,120 - INFO - Время последнего использования токена обновлено
+2025-09-28 13:44:48,120 - INFO - Генерируем admin_id для yandvm@yandex.ru: 23513
+2025-09-28 13:44:48,126 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:48] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-28 13:44:48,426 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 2
+2025-09-28 13:44:48,429 - INFO - Все турниры в системе:
+2025-09-28 13:44:48,430 - INFO -   Турнир "local 2" (ID: 2) - admin_id: 23513
+2025-09-28 13:44:48,431 - INFO -   Турнир "бадминтон" (ID: 3) - admin_id: 23513
+2025-09-28 13:44:48,447 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:48] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-28 13:44:48,826 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:48,827 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:48] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:44:52,362 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:52] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-09-28 13:44:52,682 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:44:52,683 - INFO - 127.0.0.1 - - [28/Sep/2025 13:44:52] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:45:08,657 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:08] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-09-28 13:45:08,665 - INFO - Админ yandvm@yandex.ru (ID: 23513) видит турниры: 3
+2025-09-28 13:45:08,666 - INFO - Все турниры в системе:
+2025-09-28 13:45:08,666 - INFO -   Турнир "local 2" (ID: 2) - admin_id: 23513
+2025-09-28 13:45:08,666 - INFO -   Турнир "бадминтон" (ID: 3) - admin_id: 23513
+2025-09-28 13:45:08,668 - INFO -   Турнир "тест" (ID: 4) - admin_id: 23513
+2025-09-28 13:45:08,671 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:08] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-28 13:45:09,044 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:45:09,045 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:09] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:45:14,710 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:14] "GET / HTTP/1.1" 200 -
+2025-09-28 13:45:15,025 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:45:15,026 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:15] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:45:16,643 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:16] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:45:16,714 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:45:16,716 - INFO - 127.0.0.1 - - [28/Sep/2025 13:45:16] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:50:37,461 - INFO - 127.0.0.1 - - [28/Sep/2025 13:50:37] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:50:37,502 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:50:37,503 - INFO - 127.0.0.1 - - [28/Sep/2025 13:50:37] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:54:54,655 - INFO - 127.0.0.1 - - [28/Sep/2025 13:54:54] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 13:54:54,703 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:54:54,704 - INFO - 127.0.0.1 - - [28/Sep/2025 13:54:54] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:57:37,632 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:57:37,652 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:57:37,758 - INFO -  * Restarting with stat
+2025-09-28 13:57:37,765 - INFO -  * Restarting with stat
+2025-09-28 13:57:38,731 - INFO - База данных инициализирована успешно
+2025-09-28 13:57:38,734 - INFO - База данных инициализирована успешно
+2025-09-28 13:57:39,233 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:57:39,233 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:57:39,233 - INFO - Переменная окружения PORT: None
+2025-09-28 13:57:39,233 - INFO - Режим отладки: production
+2025-09-28 13:57:39,250 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:57:39,250 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:57:39,251 - INFO - Переменная окружения PORT: None
+2025-09-28 13:57:39,251 - INFO - Режим отладки: production
+2025-09-28 13:57:39,252 - WARNING -  * Debugger is active!
+2025-09-28 13:57:39,256 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:57:39,267 - WARNING -  * Debugger is active!
+2025-09-28 13:57:39,271 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:58:00,210 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:58:00,236 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 13:58:00,321 - INFO -  * Restarting with stat
+2025-09-28 13:58:00,351 - INFO -  * Restarting with stat
+2025-09-28 13:58:01,267 - INFO - База данных инициализирована успешно
+2025-09-28 13:58:01,270 - INFO - База данных инициализирована успешно
+2025-09-28 13:58:01,827 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:58:01,827 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:58:01,828 - INFO - Переменная окружения PORT: None
+2025-09-28 13:58:01,828 - INFO - Режим отладки: production
+2025-09-28 13:58:01,838 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 13:58:01,838 - INFO - Запуск приложения на порту 5000
+2025-09-28 13:58:01,838 - INFO - Переменная окружения PORT: None
+2025-09-28 13:58:01,839 - INFO - Режим отладки: production
+2025-09-28 13:58:01,843 - WARNING -  * Debugger is active!
+2025-09-28 13:58:01,847 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:58:01,854 - WARNING -  * Debugger is active!
+2025-09-28 13:58:01,857 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 13:59:53,169 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:53] "[35m[1mGET /tournaments HTTP/1.1[0m" 500 -
+2025-09-28 13:59:53,267 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:53] "GET /tournaments?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-09-28 13:59:53,288 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:53] "GET /tournaments?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-09-28 13:59:53,523 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:53] "GET /tournaments?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2025-09-28 13:59:53,662 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:53] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-28 13:59:53,836 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:59:53,837 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:53] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 13:59:57,177 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:57] "[35m[1mGET /tournaments HTTP/1.1[0m" 500 -
+2025-09-28 13:59:57,206 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:57] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-28 13:59:57,381 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:57] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-28 13:59:57,539 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:57] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-28 13:59:57,712 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:57] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-28 13:59:57,853 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 13:59:57,854 - INFO - 127.0.0.1 - - [28/Sep/2025 13:59:57] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 14:00:11,081 - INFO - 127.0.0.1 - - [28/Sep/2025 14:00:11] "[35m[1mGET /tournaments HTTP/1.1[0m" 500 -
+2025-09-28 14:00:11,107 - INFO - 127.0.0.1 - - [28/Sep/2025 14:00:11] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-09-28 14:00:11,421 - INFO - 127.0.0.1 - - [28/Sep/2025 14:00:11] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-09-28 14:00:11,693 - INFO - 127.0.0.1 - - [28/Sep/2025 14:00:11] "[36mGET /tournaments?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-09-28 14:00:40,207 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 14:00:40,228 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 14:00:40,320 - INFO -  * Restarting with stat
+2025-09-28 14:00:40,339 - INFO -  * Restarting with stat
+2025-09-28 14:00:41,252 - INFO - База данных инициализирована успешно
+2025-09-28 14:00:41,254 - INFO - База данных инициализирована успешно
+2025-09-28 14:00:41,756 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 14:00:41,757 - INFO - Запуск приложения на порту 5000
+2025-09-28 14:00:41,757 - INFO - Переменная окружения PORT: None
+2025-09-28 14:00:41,759 - INFO - Режим отладки: production
+2025-09-28 14:00:41,762 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 14:00:41,763 - INFO - Запуск приложения на порту 5000
+2025-09-28 14:00:41,763 - INFO - Переменная окружения PORT: None
+2025-09-28 14:00:41,763 - INFO - Режим отладки: production
+2025-09-28 14:00:41,779 - WARNING -  * Debugger is active!
+2025-09-28 14:00:41,782 - WARNING -  * Debugger is active!
+2025-09-28 14:00:41,784 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 14:00:41,786 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 14:00:58,826 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 14:00:58,836 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-09-28 14:00:58,935 - INFO -  * Restarting with stat
+2025-09-28 14:00:58,954 - INFO -  * Restarting with stat
+2025-09-28 14:00:59,835 - INFO - База данных инициализирована успешно
+2025-09-28 14:00:59,854 - INFO - База данных инициализирована успешно
+2025-09-28 14:01:00,405 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 14:01:00,405 - INFO - Запуск приложения на порту 5000
+2025-09-28 14:01:00,406 - INFO - Переменная окружения PORT: None
+2025-09-28 14:01:00,406 - INFO - Режим отладки: production
+2025-09-28 14:01:00,423 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-28 14:01:00,424 - INFO - Запуск приложения на порту 5000
+2025-09-28 14:01:00,424 - INFO - Переменная окружения PORT: None
+2025-09-28 14:01:00,424 - INFO - Режим отладки: production
+2025-09-28 14:01:00,425 - WARNING -  * Debugger is active!
+2025-09-28 14:01:00,429 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 14:01:00,442 - WARNING -  * Debugger is active!
+2025-09-28 14:01:00,447 - INFO -  * Debugger PIN: 324-785-477
+2025-09-28 14:01:53,263 - INFO - 127.0.0.1 - - [28/Sep/2025 14:01:53] "GET /tournaments HTTP/1.1" 200 -
+2025-09-28 14:02:53,199 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 14:02:53,199 - INFO - 127.0.0.1 - - [28/Sep/2025 14:02:53] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-09-28 14:03:48,977 - INFO - 127.0.0.1 - - [28/Sep/2025 14:03:48] "GET / HTTP/1.1" 200 -
+2025-09-28 14:03:49,030 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-09-28 14:03:49,031 - INFO - 127.0.0.1 - - [28/Sep/2025 14:03:49] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
