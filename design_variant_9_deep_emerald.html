@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Турнирный Ассистент - Глубокий изумруд</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Основные цвета темы */
+            --primary-color: #00695c;
+            --primary-light: #00897b;
+            --primary-dark: #004d40;
+            --accent-color: #00bfa5;
+            --accent-light: #1de9b6;
+            
+            /* Фоновые цвета */
+            --bg-primary: #e8f5e8;
+            --bg-secondary: #f0fff0;
+            --bg-card: #f1f8e9;
+            --bg-card-hover: #f8fdf8;
+            
+            /* Границы и тени */
+            --border-color: #4db6ac;
+            --shadow-color: rgba(0, 105, 92, 0.1);
+            --shadow-hover: rgba(0, 105, 92, 0.15);
+            --shadow-strong: rgba(0, 105, 92, 0.3);
+            
+            /* Плавающие элементы */
+            --float-color: rgba(0, 105, 92, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .hero-title {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            text-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .card-modern {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-primary));
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow:
+                0 8px 16px var(--shadow-color),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card-modern:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(145deg, var(--bg-card-hover), var(--bg-secondary));
+            box-shadow:
+                0 12px 24px var(--shadow-hover),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-gradient {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px var(--shadow-strong);
+            color: white;
+        }
+
+        /* Последовательное пульсирование - каждая кнопка пульсирует по очереди */
+        .pulse-animation {
+            animation: pulse-sequence 4s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Кнопка 1 - пульсирует в начале цикла (0-4s) */
+        .pulse-delay-1 {
+            animation: pulse-button-1 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Кнопка 2 - пульсирует во второй четверти (4-8s) */
+        .pulse-delay-2 {
+            animation: pulse-button-2 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Кнопка 3 - пульсирует в третьей четверти (12-16s) */
+        .pulse-delay-3 {
+            animation: pulse-button-3 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Кнопка 4 - пульсирует в четвертой четверти (8-12s) */
+        .pulse-delay-4 {
+            animation: pulse-button-4 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Анимация для кнопки 1 (0-4s) - верхняя левая */
+        @keyframes pulse-button-1 {
+            0%, 25% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+            12.5%, 20% {
+                transform: scale(1.08);
+                box-shadow: 
+                    0 15px 30px var(--shadow-hover),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+                    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+            }
+            25%, 100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        /* Анимация для кнопки 2 (4-8s) - верхняя правая */
+        @keyframes pulse-button-2 {
+            0%, 25% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+            37.5%, 45% {
+                transform: scale(1.08);
+                box-shadow: 
+                    0 15px 30px var(--shadow-hover),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+                    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+            }
+            50%, 100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        /* Анимация для кнопки 3 (12-16s) - нижняя левая */
+        @keyframes pulse-button-3 {
+            0%, 75% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+            87.5%, 95% {
+                transform: scale(1.08);
+                box-shadow: 
+                    0 15px 30px var(--shadow-hover),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+                    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        /* Анимация для кнопки 4 (8-12s) - нижняя правая */
+        @keyframes pulse-button-4 {
+            0%, 50% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+            62.5%, 70% {
+                transform: scale(1.08);
+                box-shadow: 
+                    0 15px 30px var(--shadow-hover),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+                    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+            }
+            75%, 100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 16px var(--shadow-color),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--float-color);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-circle:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-circle:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Меню смены темы */
+        .theme-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-selector select {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 5px 10px;
+            background: white;
+            color: var(--primary-color);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-selector select:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .theme-selector select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1);
+        }
+
+        /* Адаптивные размеры для мобильных устройств */
+        @media (max-width: 576px) {
+            .main-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .card-modern {
+                margin-bottom: 1rem;
+            }
+
+            .theme-selector {
+                top: 10px;
+                right: 10px;
+                padding: 8px;
+            }
+
+            .theme-selector select {
+                font-size: 0.9rem;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (min-width: 576px) {
+            .fa-sm-3x {
+                font-size: 3em !important;
+            }
+            .fs-sm-5 {
+                font-size: 1.25rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Меню смены темы -->
+    <div class="theme-selector">
+        <select id="themeSelector" onchange="changeTheme(this.value)">
+            <option value="deep-emerald">Глубокий изумруд</option>
+            <option value="bright-emerald">Яркий изумруд</option>
+            <option value="original-emerald">Оригинальный изумруд</option>
+        </select>
+    </div>
+
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+
+    <div class="container">
+        <div class="main-container">
+            <div class="text-center mb-5">
+                <h1 class="hero-title display-4">
+                    <i class="fas fa-trophy me-3"></i>
+                    Турнирный Ассистент
+                </h1>
+                <p class="lead text-muted">Выберите вашу роль для продолжения</p>
+                
+                <button class="btn btn-gradient btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
+                    <i class="fas fa-user-shield me-2"></i>Вход администратора
+                </button>
+            </div>
+            
+            <div class="row g-4">
+                <!-- 1. Создание нового турнира -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-1" onclick="window.location.href='#'">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <i class="fas fa-plus-circle fa-2x fa-sm-3x icon-gradient"></i>
+                            </div>
+                            <h4 class="card-title card-title-mobile">Создать турнир</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Получите токен для создания и управления турниром
+                            </p>
+                            <div class="mt-2 mt-sm-3 d-flex align-items-center justify-content-center" style="height: 35px; font-size: 0.8rem;">
+                                <i class="fas fa-key me-1 me-sm-2"></i><span class="d-none d-sm-inline">Получить токен</span><span class="d-sm-none">Токен</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 2. Вход как админ турнира -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="window.location.href='#'">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <i class="fas fa-crown fa-2x fa-sm-3x icon-gradient"></i>
+                            </div>
+                            <h4 class="card-title card-title-mobile">Админ турнира</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Войдите с помощью email и токена
+                            </p>
+                            <div class="mt-2 mt-sm-3 d-flex align-items-center justify-content-center" style="height: 35px; font-size: 0.8rem;">
+                                <i class="fas fa-sign-in-alt me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти с токеном</span><span class="d-sm-none">Войти с токеном</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3. Вход как участник турнира -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-3" onclick="showParticipantLogin()">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <i class="fas fa-user-check fa-2x fa-sm-3x icon-gradient"></i>
+                            </div>
+                            <h4 class="card-title card-title-mobile">Ваши турниры</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Ваши турниры
+                            </p>
+                            <div class="mt-2 mt-sm-3 d-flex align-items-center justify-content-center" style="height: 35px; font-size: 0.8rem;">
+                                <i class="fas fa-user me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Ваши турниры</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. Просмотр всех турниров -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-4" onclick="window.location.href='#'">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <i class="fas fa-list fa-2x fa-sm-3x icon-gradient"></i>
+                            </div>
+                            <h4 class="card-title card-title-mobile">Все турниры</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Посмотрите все доступные турниры
+                            </p>
+                            <div class="mt-2 mt-sm-3 d-flex align-items-center justify-content-center" style="height: 35px; font-size: 0.8rem;">
+                                <i class="fas fa-eye me-1 me-sm-2"></i><span class="d-none d-sm-inline">Смотреть турниры</span><span class="d-sm-none">Турниры</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Дополнительная информация -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card card-modern">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">
+                                <i class="fas fa-info-circle me-2 icon-gradient"></i>
+                                О системе
+                            </h5>
+                            <p class="card-text mb-0">
+                                Турнирный Ассистент предназначен для круговых турниров с матчами из 3-х сетов. 
+                                Например: настольного тенниса, бадминтона, волейбола и ...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Определение тем
+        const themes = {
+            'deep-emerald': {
+                '--primary-color': '#00695c',
+                '--primary-light': '#00897b',
+                '--primary-dark': '#004d40',
+                '--accent-color': '#00bfa5',
+                '--accent-light': '#1de9b6',
+                '--bg-primary': '#e8f5e8',
+                '--bg-secondary': '#f0fff0',
+                '--bg-card': '#f1f8e9',
+                '--bg-card-hover': '#f8fdf8',
+                '--border-color': '#4db6ac',
+                '--shadow-color': 'rgba(0, 105, 92, 0.1)',
+                '--shadow-hover': 'rgba(0, 105, 92, 0.15)',
+                '--shadow-strong': 'rgba(0, 105, 92, 0.3)',
+                '--float-color': 'rgba(0, 105, 92, 0.1)'
+            },
+            'bright-emerald': {
+                '--primary-color': '#00e676',
+                '--primary-light': '#1de9b6',
+                '--primary-dark': '#00c853',
+                '--accent-color': '#00bfa5',
+                '--accent-light': '#64ffda',
+                '--bg-primary': '#e8f5e8',
+                '--bg-secondary': '#f1f8e9',
+                '--bg-card': '#f8fdf8',
+                '--bg-card-hover': '#f0fff0',
+                '--border-color': '#69f0ae',
+                '--shadow-color': 'rgba(0, 230, 118, 0.1)',
+                '--shadow-hover': 'rgba(0, 230, 118, 0.15)',
+                '--shadow-strong': 'rgba(0, 230, 118, 0.3)',
+                '--float-color': 'rgba(0, 230, 118, 0.1)'
+            },
+            'original-emerald': {
+                '--primary-color': '#00c851',
+                '--primary-light': '#00e676',
+                '--primary-dark': '#00a041',
+                '--accent-color': '#00bfa5',
+                '--accent-light': '#1de9b6',
+                '--bg-primary': '#e8f5e8',
+                '--bg-secondary': '#f0fff0',
+                '--bg-card': '#f1f8e9',
+                '--bg-card-hover': '#f8fdf8',
+                '--border-color': '#a5d6a7',
+                '--shadow-color': 'rgba(0, 200, 81, 0.1)',
+                '--shadow-hover': 'rgba(0, 200, 81, 0.15)',
+                '--shadow-strong': 'rgba(0, 200, 81, 0.3)',
+                '--float-color': 'rgba(0, 200, 81, 0.1)'
+            }
+        };
+
+        function changeTheme(themeName) {
+            const root = document.documentElement;
+            const theme = themes[themeName];
+            
+            if (theme) {
+                Object.keys(theme).forEach(key => {
+                    root.style.setProperty(key, theme[key]);
+                });
+                
+                // Сохраняем выбранную тему в localStorage
+                localStorage.setItem('selectedTheme', themeName);
+            }
+        }
+
+        // Загружаем сохраненную тему при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'deep-emerald';
+            document.getElementById('themeSelector').value = savedTheme;
+            changeTheme(savedTheme);
+        });
+
+        function adminLogin() {
+            alert('Функция входа администратора');
+        }
+
+        function showParticipantLogin() {
+            alert('Функция входа участника');
+        }
+    </script>
+</body>
+</html>
