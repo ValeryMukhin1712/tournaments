@@ -1507,14 +1507,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         const maxScore = Math.max(score1, score2);
                         const minScore = Math.min(score1, score2);
                         
-                        // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
-                        if (minScore >= pointsToWin) {
+                        // Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
+                        if (minScore >= (pointsToWin - 1)) {
                             if (difference !== 2) {
                                 // Автоматически исправляем счет - делаем разницу ровно 2
                                 const correctMaxScore = minScore + 2;
                                 const correctMinScore = minScore;
                                 
-                                alert(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно "очков для победы" (${pointsToWin}), то разница должна быть ровно 2 очка. Исправлено на ${correctMaxScore}:${correctMinScore}`);
+                                alert(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно (${pointsToWin - 1}), то разница должна быть ровно 2 очка. Исправлено на ${correctMaxScore}:${correctMinScore}`);
                                 
                                 // Обновляем значения в форме
                                 if (score1 > score2) {
@@ -1533,12 +1533,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 difference = Math.abs(score1 - score2);
                             }
                         } else {
-                            // Если у проигравшего очков меньше "очков для победы", то максимальный счет должен быть равен "очков для победы"
+                            // Если у проигравшего очков меньше ("очков для победы" - 1), то максимальный счет должен быть равен "очков для победы"
                             if (maxScore > pointsToWin) {
                                 const correctMaxScore = pointsToWin;
                                 const correctMinScore = minScore;
                                 
-                                alert(`Неверный счет! Если у проигравшего (${minScore}) очков меньше "очков для победы" (${pointsToWin}), то максимальный счет победителя должен быть ${pointsToWin}. Исправлено на ${correctMaxScore}:${correctMinScore}`);
+                                alert(`Неверный счет! Если у проигравшего (${minScore}) очков меньше (${pointsToWin - 1}), то максимальный счет победителя должен быть ${pointsToWin}. Исправлено на ${correctMaxScore}:${correctMinScore}`);
                                 
                                 // Обновляем значения в форме
                                 if (score1 > score2) {

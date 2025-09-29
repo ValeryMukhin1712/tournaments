@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Тест зелёных цветов - Турнирный Ассистент{% endblock %}
+
+{% block content %}
+<style>
+.test-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px var(--shadow-color);
+    margin: 2rem auto;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.hero-title {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px var(--shadow-color);
+    text-align: center;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.color-square {
+    width: 400px;
+    height: 400px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.color-square:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 20px 40px var(--shadow-hover);
+}
+
+.color-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.color-name {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.color-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Основные зелёные цвета */
+.emerald-50 { background: linear-gradient(135deg, #e8f5e8, #f0fff0); }
+.emerald-100 { background: linear-gradient(135deg, #d1f2d1, #e8f5e8); }
+.emerald-200 { background: linear-gradient(135deg, #a5d6a7, #c8e6c9); }
+.emerald-300 { background: linear-gradient(135deg, #81c784, #a5d6a7); }
+.emerald-400 { background: linear-gradient(135deg, #66bb6a, #81c784); }
+.emerald-500 { background: linear-gradient(135deg, #4caf50, #66bb6a); }
+.emerald-600 { background: linear-gradient(135deg, #43a047, #4caf50); }
+.emerald-700 { background: linear-gradient(135deg, #388e3c, #43a047); }
+.emerald-800 { background: linear-gradient(135deg, #2e7d32, #388e3c); }
+.emerald-900 { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+
+/* Дополнительные зелёные оттенки */
+.lime-400 { background: linear-gradient(135deg, #9ccc65, #aed581); }
+.lime-500 { background: linear-gradient(135deg, #8bc34a, #9ccc65); }
+.lime-600 { background: linear-gradient(135deg, #7cb342, #8bc34a); }
+
+.teal-400 { background: linear-gradient(135deg, #26a69a, #4db6ac); }
+.teal-500 { background: linear-gradient(135deg, #009688, #26a69a); }
+.teal-600 { background: linear-gradient(135deg, #00695c, #009688); }
+
+.green-400 { background: linear-gradient(135deg, #66bb6a, #81c784); }
+.green-500 { background: linear-gradient(135deg, #4caf50, #66bb6a); }
+.green-600 { background: linear-gradient(135deg, #43a047, #4caf50); }
+
+/* Специальные зелёные */
+.forest-green { background: linear-gradient(135deg, #2e7d32, #4caf50); }
+.mint-green { background: linear-gradient(135deg, #e0f2f1, #f1f8e9); }
+.olive-green { background: linear-gradient(135deg, #827717, #9e9d24); }
+.sage-green { background: linear-gradient(135deg, #689f38, #8bc34a); }
+.hunter-green { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+.neon-green { background: linear-gradient(135deg, #00e676, #1de9b6); }
+
+/* Переменные темы */
+.primary-color { background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); }
+.accent-color { background: linear-gradient(135deg, var(--accent-color), var(--accent-light)); }
+.bg-primary { background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); }
+.bg-card { background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover)); }
+
+/* Анимация пульсации */
+.pulse-animation {
+    animation: pulse-green 2s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px var(--shadow-color);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 15px 35px var(--shadow-strong);
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .color-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .color-square {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+</style>
+
+<div class="container">
+    <div class="test-container">
+        <h1 class="hero-title display-4">
+            <i class="fas fa-palette me-3"></i>
+            Тест зелёных цветов
+        </h1>
+        
+        <div class="color-grid">
+            <!-- Основные изумрудные оттенки -->
+            <div class="color-square emerald-50">
+                <div class="color-info">
+                    <div class="color-name">Emerald 50</div>
+                    <div class="color-code">#e8f5e8 → #f0fff0</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-100">
+                <div class="color-info">
+                    <div class="color-name">Emerald 100</div>
+                    <div class="color-code">#d1f2d1 → #e8f5e8</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-200">
+                <div class="color-info">
+                    <div class="color-name">Emerald 200</div>
+                    <div class="color-code">#a5d6a7 → #c8e6c9</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-300">
+                <div class="color-info">
+                    <div class="color-name">Emerald 300</div>
+                    <div class="color-code">#81c784 → #a5d6a7</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-400">
+                <div class="color-info">
+                    <div class="color-name">Emerald 400</div>
+                    <div class="color-code">#66bb6a → #81c784</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-500">
+                <div class="color-info">
+                    <div class="color-name">Emerald 500</div>
+                    <div class="color-code">#4caf50 → #66bb6a</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-600">
+                <div class="color-info">
+                    <div class="color-name">Emerald 600</div>
+                    <div class="color-code">#43a047 → #4caf50</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-700">
+                <div class="color-info">
+                    <div class="color-name">Emerald 700</div>
+                    <div class="color-code">#388e3c → #43a047</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-800">
+                <div class="color-info">
+                    <div class="color-name">Emerald 800</div>
+                    <div class="color-code">#2e7d32 → #388e3c</div>
+                </div>
+            </div>
+            
+            <div class="color-square emerald-900">
+                <div class="color-info">
+                    <div class="color-name">Emerald 900</div>
+                    <div class="color-code">#1b5e20 → #2e7d32</div>
+                </div>
+            </div>
+            
+            <!-- Дополнительные зелёные оттенки -->
+            <div class="color-square lime-400">
+                <div class="color-info">
+                    <div class="color-name">Lime 400</div>
+                    <div class="color-code">#9ccc65 → #aed581</div>
+                </div>
+            </div>
+            
+            <div class="color-square lime-500">
+                <div class="color-info">
+                    <div class="color-name">Lime 500</div>
+                    <div class="color-code">#8bc34a → #9ccc65</div>
+                </div>
+            </div>
+            
+            <div class="color-square lime-600">
+                <div class="color-info">
+                    <div class="color-name">Lime 600</div>
+                    <div class="color-code">#7cb342 → #8bc34a</div>
+                </div>
+            </div>
+            
+            <div class="color-square teal-400">
+                <div class="color-info">
+                    <div class="color-name">Teal 400</div>
+                    <div class="color-code">#26a69a → #4db6ac</div>
+                </div>
+            </div>
+            
+            <div class="color-square teal-500">
+                <div class="color-info">
+                    <div class="color-name">Teal 500</div>
+                    <div class="color-code">#009688 → #26a69a</div>
+                </div>
+            </div>
+            
+            <div class="color-square teal-600">
+                <div class="color-info">
+                    <div class="color-name">Teal 600</div>
+                    <div class="color-code">#00695c → #009688</div>
+                </div>
+            </div>
+            
+            <!-- Специальные зелёные -->
+            <div class="color-square forest-green">
+                <div class="color-info">
+                    <div class="color-name">Forest Green</div>
+                    <div class="color-code">#2e7d32 → #4caf50</div>
+                </div>
+            </div>
+            
+            <div class="color-square mint-green">
+                <div class="color-info">
+                    <div class="color-name">Mint Green</div>
+                    <div class="color-code">#e0f2f1 → #f1f8e9</div>
+                </div>
+            </div>
+            
+            <div class="color-square olive-green">
+                <div class="color-info">
+                    <div class="color-name">Olive Green</div>
+                    <div class="color-code">#827717 → #9e9d24</div>
+                </div>
+            </div>
+            
+            <div class="color-square sage-green">
+                <div class="color-info">
+                    <div class="color-name">Sage Green</div>
+                    <div class="color-code">#689f38 → #8bc34a</div>
+                </div>
+            </div>
+            
+            <div class="color-square hunter-green">
+                <div class="color-info">
+                    <div class="color-name">Hunter Green</div>
+                    <div class="color-code">#1b5e20 → #2e7d32</div>
+                </div>
+            </div>
+            
+            <div class="color-square neon-green pulse-animation">
+                <div class="color-info">
+                    <div class="color-name">Neon Green</div>
+                    <div class="color-code">#00e676 → #1de9b6</div>
+                </div>
+            </div>
+            
+            <!-- Переменные темы -->
+            <div class="color-square primary-color">
+                <div class="color-info">
+                    <div class="color-name">Primary Color</div>
+                    <div class="color-code">var(--primary-color) → var(--primary-light)</div>
+                </div>
+            </div>
+            
+            <div class="color-square accent-color">
+                <div class="color-info">
+                    <div class="color-name">Accent Color</div>
+                    <div class="color-code">var(--accent-color) → var(--accent-light)</div>
+                </div>
+            </div>
+            
+            <div class="color-square bg-primary">
+                <div class="color-info">
+                    <div class="color-name">Background Primary</div>
+                    <div class="color-code">var(--bg-primary) → var(--bg-secondary)</div>
+                </div>
+            </div>
+            
+            <div class="color-square bg-card">
+                <div class="color-info">
+                    <div class="color-name">Background Card</div>
+                    <div class="color-code">var(--bg-card) → var(--bg-card-hover)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Вернуться на главную
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Добавляем интерактивность
+document.addEventListener('DOMContentLoaded', function() {
+    const squares = document.querySelectorAll('.color-square');
+    
+    squares.forEach(square => {
+        square.addEventListener('click', function() {
+            // Убираем выделение с других квадратов
+            squares.forEach(s => s.classList.remove('selected'));
+            
+            // Выделяем текущий квадрат
+            this.classList.add('selected');
+            
+            // Копируем код цвета в буфер обмена
+            const colorCode = this.querySelector('.color-code').textContent;
+            navigator.clipboard.writeText(colorCode).then(() => {
+                // Показываем уведомление
+                const notification = document.createElement('div');
+                notification.className = 'alert alert-success position-fixed';
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+                notification.innerHTML = `<i class="fas fa-check me-2"></i>Код цвета скопирован: ${colorCode}`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            });
+        });
+    });
+});
+
+// Добавляем стили для выделения
+const style = document.createElement('style');
+style.textContent = `
+    .color-square.selected {
+        transform: translateY(-15px) scale(1.1);
+        box-shadow: 0 25px 50px var(--shadow-strong);
+        border: 3px solid var(--primary-color);
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+{% endblock %}

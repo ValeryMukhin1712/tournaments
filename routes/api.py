@@ -823,16 +823,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     if score1 > 0 and score2 > 0:
                         difference = abs(score1 - score2)
                         
-                        # Проверяем разницу в 2 очка только если у проигравшего очков больше чем "очков для победы"
+                        # Проверяем разницу в 2 очка только если у проигравшего очков больше или равно ("очков для победы" - 1)
                         loser_score = min(score1, score2)
                         winner_score = max(score1, score2)
                         
-                        # Если у проигравшего очков больше чем "очков для победы", то разница должна быть ровно 2
-                        if loser_score > points_to_win:
+                        # Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
+                        if loser_score >= (points_to_win - 1):
                             if difference != 2:
                                 return jsonify({
                                     'success': False,
-                                    'error': f'Неверный счет в сете {set_number}: {score1}:{score2}. Если у проигравшего ({loser_score}) очков больше чем "очков для победы" ({points_to_win}), то разница должна быть ровно 2 очка.'
+                                    'error': f'Неверный счет в сете {set_number}: {score1}:{score2}. Если у проигравшего ({loser_score}) очков больше или равно ({points_to_win - 1}), то разница должна быть ровно 2 очка.'
                                 }), 400
                         
                         # Если сет помечен как завершенный, проверяем правила победы

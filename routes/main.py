@@ -328,6 +328,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Новая стартовая страница с выбором роли
         return render_template('index.html')
     
+    @app.route('/test-green-colors')
+    def test_green_colors():
+        """Тестовая страница с квадратами зелёных цветов"""
+        return render_template('test_green_colors.html')
+    
     @app.route('/tournaments')
     def tournaments_list():
         """Список всех турниров для просмотра"""

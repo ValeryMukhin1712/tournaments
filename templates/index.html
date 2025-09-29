@@ -528,31 +528,10 @@ body {
     50% { transform: translateY(-20px); }
 }
 
-/* Адаптивные размеры для мобильных устройств */
-@media (max-width: 576px) {
-    .main-container {
-        margin: 1rem;
-        padding: 1rem;
-    }
-    
-    .card-modern {
-        margin-bottom: 1rem;
-    }
-}
-
-@media (min-width: 576px) {
-    .fa-sm-3x {
-        font-size: 3em !important;
-    }
-    .fs-sm-5 {
-        font-size: 1.25rem !important;
-    }
-}
-
-/* Меню смены темы */
+/* Меню смены темы (только для главной страницы) */
 .theme-selector {
     position: fixed;
-    top: 20px;
+    top: 80px;
     right: 20px;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.95);
@@ -584,10 +563,31 @@ body {
     box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1);
 }
 
-/* Адаптивность для мобильных */
+/* Адаптивные размеры для мобильных устройств */
+@media (max-width: 576px) {
+    .main-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .card-modern {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (min-width: 576px) {
+    .fa-sm-3x {
+        font-size: 3em !important;
+    }
+    .fs-sm-5 {
+        font-size: 1.25rem !important;
+    }
+}
+
+/* Адаптивность для theme-selector на мобильных */
 @media (max-width: 576px) {
     .theme-selector {
-        top: 10px;
+        top: 70px;
         right: 10px;
         padding: 8px;
     }
@@ -597,6 +597,7 @@ body {
         padding: 4px 8px;
     }
 }
+
 </style>
 
 
@@ -604,6 +605,15 @@ body {
     <div class="floating-circle"></div>
     <div class="floating-circle"></div>
     <div class="floating-circle"></div>
+</div>
+
+<!-- Меню смены темы (только для главной страницы) -->
+<div class="theme-selector">
+    <select id="themeSelector" onchange="changeTheme(this.value)">
+        <option value="original-emerald">Оригинальный изумруд</option>
+        <option value="deep-emerald">Глубокий изумруд</option>
+        <option value="bright-emerald">Яркий изумруд</option>
+    </select>
 </div>
 
 <div class="container">
@@ -703,10 +713,13 @@ body {
                             <i class="fas fa-info-circle me-2 icon-gradient"></i>
                             О системе
                         </h5>
-                        <p class="card-text mb-0">
+                        <p class="card-text mb-3">
                             Турнирный Ассистент предназначен для круговых турниров с матчами из 3-х сетов. 
                             Например: настольного тенниса, бадминтона, волейбола и ...
                         </p>
+                        <a href="{{ url_for('test_green_colors') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-palette me-2"></i>Тест зелёных цветов
+                        </a>
                     </div>
                 </div>
             </div>
@@ -939,6 +952,14 @@ function toggleAdminPasswordVisibility() {
 
 // Добавляем обработчик после создания модального окна
 document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация темы
+    const savedTheme = localStorage.getItem('selectedTheme') || 'original-emerald';
+    const themeSelector = document.getElementById('themeSelector');
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        changeTheme(savedTheme);
+    }
+    
     // Переопределяем функцию adminLogin для добавления обработчика
     const originalAdminLogin = window.adminLogin;
     window.adminLogin = function() {
@@ -953,6 +974,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     };
 });
+
+// Функция смены темы (только для главной страницы)
+function changeTheme(themeName) {
+    const root = document.documentElement;
+    const theme = themes[themeName];
+    
+    if (theme) {
+        Object.keys(theme).forEach(key => {
+            root.style.setProperty(key, theme[key]);
+        });
+        
+        // Сохраняем выбранную тему в localStorage
+        localStorage.setItem('selectedTheme', themeName);
+    }
+}
 
 </script>
 
