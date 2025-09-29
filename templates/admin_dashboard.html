@@ -273,6 +273,7 @@ body {
                                         <br><small class="text-muted">{{ tournament.description[:30] }}{% if tournament.description|length > 30 %}...{% endif %}</small>
                                     {% endif %}
                                     <br><span class="badge bg-info">{{ tournament.sport_type }}</span>
+                                    <br><span class="badge bg-success">Участники: {{ tournament.participant_count or 0 }}</span>
                                 </td>
                                 <td class="d-none d-lg-table-cell">
                                     <span class="badge bg-info">{{ tournament.sport_type }}</span>

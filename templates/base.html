@@ -315,9 +315,46 @@
                 font-size: 11px;
             }
         }
+        
+        /* Стили для номера страницы (отладка) */
+        .page-number-debug {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(220, 53, 69, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            font-family: 'Courier New', monospace;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .page-number-debug:hover {
+            background-color: rgba(220, 53, 69, 1);
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .page-number-debug {
+                top: 5px;
+                left: 5px;
+                padding: 6px 10px;
+                font-size: 12px;
+                min-width: 35px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Номер страницы для отладки -->
+    <div class="page-number-debug" id="pageNumberDebug">--</div>
+    
     <nav class="navbar navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
@@ -365,16 +402,6 @@
     </nav>
 
     <main class="container mt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
         {% block content %}{% endblock %}
     </main>
@@ -490,6 +517,64 @@
               '• Помощь - эта справка\n\n' +
               'Для получения токена администратора используйте кнопку "Получить токен" на главной странице.');
     }
+    
+    // Функция для определения номера страницы по URL
+    function getPageNumber() {
+        const path = window.location.pathname;
+        const pageMap = {
+            '/': 1,
+            '/index': 1,
+            '/request-token': 2,
+            '/admin-tournament': 3,
+            '/admin-dashboard': 4,
+            '/admin-create-tournament': 5,
+            '/admin-edit-tournament': 6,
+            '/admin-tokens': 7,
+            '/admin-tournament': 8,
+            '/system-admin-dashboard': 9,
+            '/users': 10,
+            '/login': 11,
+            '/tournament': 12,
+            '/tournaments': 13,
+            '/tournaments-list': 14,
+            '/join-tournament': 15,
+            '/participant-tournaments': 16,
+            '/participant-tournament': 17,
+            '/tournament-view': 18,
+            '/my-tournaments-login': 19,
+            '/token-generated': 20
+        };
+        
+        // Проверяем точное совпадение
+        if (pageMap[path]) {
+            return pageMap[path];
+        }
+        
+        // Проверяем частичные совпадения для динамических маршрутов
+        if (path.startsWith('/tournament/') && path !== '/tournament/') {
+            return 12; // Страница турнира
+        }
+        
+        if (path.startsWith('/admin-edit-tournament/')) {
+            return 6; // Редактирование турнира
+        }
+        
+        if (path.startsWith('/admin-tournament/')) {
+            return 8; // Админ турнира
+        }
+        
+        // Если не найдено, возвращаем 0
+        return 0;
+    }
+    
+    // Обновление номера страницы при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        const pageNumber = getPageNumber();
+        const pageNumberElement = document.getElementById('pageNumberDebug');
+        if (pageNumberElement) {
+            pageNumberElement.textContent = pageNumber > 0 ? pageNumber : '?';
+        }
+    });
     </script>
     
     

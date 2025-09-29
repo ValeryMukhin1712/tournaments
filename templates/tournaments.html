@@ -261,7 +261,7 @@ body {
                         </td>
                         <td>
                             {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
-                            {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
+                            {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'ne', None)|list|length > 0 %}
                             {% if has_matches_with_scores %}
                                 <span class="badge bg-success">начался</span>
                             {% elif has_matches_with_results %}
@@ -278,8 +278,8 @@ body {
                         </td>
                             <td>
                                 {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
-                                {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
-                                {% if tournament.status == 'регистрация' or has_matches_with_scores or has_matches_with_results or tournament.status == 'активен' %}
+                                {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'ne', None)|list|length > 0 %}
+                                {% if tournament.status == 'регистрация' and not has_matches_with_scores and not has_matches_with_results %}
                                     <button type="button" class="btn btn-gradient btn-sm apply-btn" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
                                         <i class="fas fa-user-plus me-1"></i>Подать заявку
                                     </button>
@@ -314,8 +314,8 @@ body {
 <!-- Модальные окна для заявок на участие -->
 {% for tournament in tournaments %}
 {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
-{% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'defined')|list|length > 0 %}
-{% if tournament.status == 'регистрация' or has_matches_with_scores or has_matches_with_results or tournament.status == 'активен' %}
+{% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'ne', None)|list|length > 0 %}
+{% if tournament.status == 'регистрация' and not has_matches_with_scores and not has_matches_with_results %}
 <div class="modal fade" id="joinModal{{ tournament.id }}" tabindex="-1" aria-labelledby="joinModalLabel{{ tournament.id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

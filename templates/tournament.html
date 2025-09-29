@@ -232,12 +232,6 @@ body {
 
 <div class="container">
     <div class="main-container">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Турниры</a></li>
-                <li class="breadcrumb-item active">{{ tournament.name }}</li>
-            </ol>
-        </nav>
         
         <div class="text-center mb-5">
             <h1 class="hero-title display-4">
@@ -270,12 +264,11 @@ body {
                      <button class="btn btn-info btn-sm" onclick="generateSchedule()">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание заново</span><span class="d-sm-none">Расписание</span>
                      </button>
-                     <button class="btn btn-success btn-sm" onclick="exportTournament()">
-                         <i class="fas fa-download me-1"></i><span class="d-none d-sm-inline">Выгрузка</span><span class="d-sm-none">Выгрузка</span>
-                     </button>
+                     {% if has_active_matches %}
                      <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addLateParticipantModal">
                          <i class="fas fa-user-clock me-1"></i><span class="d-none d-sm-inline">Добавить опоздавшего участника</span><span class="d-sm-none">Опоздавший</span>
                      </button>
+                     {% endif %}
                      {% else %}
                      <button class="btn btn-primary btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
@@ -283,12 +276,11 @@ body {
                      <button class="btn btn-info btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
                      </button>
-                     <button class="btn btn-success btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
-                         <i class="fas fa-download me-1"></i><span class="d-none d-sm-inline">Выгрузка</span><span class="d-sm-none">Выгрузка</span>
-                     </button>
+                     {% if has_active_matches %}
                      <button class="btn btn-warning btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-clock me-1"></i><span class="d-none d-sm-inline">Добавить опоздавшего участника</span><span class="d-sm-none">Опоздавший</span>
                      </button>
+                     {% endif %}
                      {% endif %}
                      {% if current_user.role == 'системный администратор' %}
                      {% if has_missing_matches %}
@@ -802,10 +794,12 @@ body {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" id="addManualParticipantBtn" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Добавить
+                </button>
                 <button type="button" id="addSelectedWaitingBtn" class="btn btn-primary" style="display: none;">
                     <i class="fas fa-check me-2"></i>Принять выбранных
                 </button>
-                <button type="submit" form="addParticipantForm" class="btn btn-primary">Добавить</button>
             </div>
         </div>
     </div>
@@ -1250,6 +1244,36 @@ function initializeWaitingList() {
     }
 }
 
+// Управление видимостью кнопок в модальном окне добавления участника
+document.addEventListener('DOMContentLoaded', function() {
+    const manualTab = document.getElementById('manual-tab');
+    const waitingTab = document.getElementById('waiting-tab');
+    const addManualBtn = document.getElementById('addManualParticipantBtn');
+    const addWaitingBtn = document.getElementById('addSelectedWaitingBtn');
+    
+    if (manualTab && waitingTab && addManualBtn && addWaitingBtn) {
+        // Обработчик для вкладки "Ручной ввод"
+        manualTab.addEventListener('shown.bs.tab', function() {
+            addManualBtn.style.display = 'inline-block';
+            addWaitingBtn.style.display = 'none';
+        });
+        
+        // Обработчик для вкладки "Лист ожидания"
+        waitingTab.addEventListener('shown.bs.tab', function() {
+            addManualBtn.style.display = 'none';
+            addWaitingBtn.style.display = 'inline-block';
+        });
+        
+        // Обработчик для кнопки "Добавить" (ручной ввод)
+        addManualBtn.addEventListener('click', function() {
+            const addParticipantForm = document.getElementById('addParticipantForm');
+            if (addParticipantForm) {
+                addParticipantForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    }
+});
+
 // Загрузка листа ожидания
 function loadWaitingList() {
     fetch(`/api/tournaments/{{ tournament.id }}/waiting-list`, {
@@ -1300,9 +1324,6 @@ function displayWaitingList(waitingList) {
             </td>
             <td>${entry.created_at}</td>
             <td>
-                <button class="btn btn-success btn-sm" onclick="acceptSingleWaiting(${entry.id})" title="Принять заявку">
-                    <i class="fas fa-check"></i>
-                </button>
                 <button class="btn btn-danger btn-sm" onclick="rejectSingleWaiting(${entry.id})" title="Отклонить заявку">
                     <i class="fas fa-times"></i>
                 </button>

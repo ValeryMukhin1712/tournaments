@@ -1323,7 +1323,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'wins': 0,
                 'losses': 0,
                 'draws': 0,
-                'points': participant.points or 0,  # Используем очки из базы данных
+                'points': 0,  # Будем пересчитывать на основе завершённых матчей
                 'goal_difference': 0
             }
             
@@ -1335,10 +1335,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 > match.sets_won_2:
                                 participant_stats['wins'] += 1
+                                participant_stats['points'] += (tournament.points_win or 1)  # Очки за победу
                             elif match.sets_won_1 < match.sets_won_2:
                                 participant_stats['losses'] += 1
+                                participant_stats['points'] += (tournament.points_loss or 0)  # Очки за поражение
                             else:
                                 participant_stats['draws'] += 1
+                                participant_stats['points'] += (tournament.points_draw or 1)  # Очки за ничью
                             
                             # Рассчитываем разницу очков в сетах для участника 1
                             if hasattr(match, 'set1_score1') and hasattr(match, 'set1_score2') and match.set1_score1 is not None and match.set1_score2 is not None:
@@ -1357,10 +1360,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 < match.sets_won_2:
                                 participant_stats['wins'] += 1
+                                participant_stats['points'] += (tournament.points_win or 1)  # Очки за победу
                             elif match.sets_won_1 > match.sets_won_2:
                                 participant_stats['losses'] += 1
+                                participant_stats['points'] += (tournament.points_loss or 0)  # Очки за поражение
                             else:
                                 participant_stats['draws'] += 1
+                                participant_stats['points'] += (tournament.points_draw or 1)  # Очки за ничью
                             
                             # Рассчитываем разницу очков в сетах для участника 2
                             if hasattr(match, 'set1_score1') and hasattr(match, 'set1_score2') and match.set1_score1 is not None and match.set1_score2 is not None:

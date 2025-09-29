@@ -64,7 +64,7 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
     
     # Распределяем матчи по времени и площадкам
     scheduled_matches = []
-    match_number = 1
+    global_match_number = 1  # Глобальная нумерация матчей
     current_time = start_time
     current_date = start_date
     
@@ -98,7 +98,7 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
             match_date=current_date,
             match_time=current_time,
             court_number=1,  # Завершенные матчи на первой площадке
-            match_number=match_number,
+            match_number=global_match_number,
             sets_won_1=result_data['sets_won_1'],
             sets_won_2=result_data['sets_won_2'],
             set1_score1=result_data['set1_score1'],
@@ -113,7 +113,7 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
         )
         db.session.add(match_obj)
         scheduled_matches.append(match_obj)
-        match_number += 1
+        global_match_number += 1
         
         # Переходим к следующему времени
         current_time = add_minutes_to_time(current_time, time_match + time_break)
@@ -123,8 +123,19 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
     
     # Теперь размещаем оставшиеся матчи
     rounds_remaining = []
+    completed_match_keys = set()
+    for match, _ in completed_matches:
+        participant1, participant2 = match
+        key = tuple(sorted([participant1.id, participant2.id]))
+        completed_match_keys.add(key)
+    
     for round_num, round_matches in enumerate(rounds, 1):
-        remaining_in_round = [match for match in round_matches if match not in [m[0] for m in completed_matches]]
+        remaining_in_round = []
+        for match in round_matches:
+            participant1, participant2 = match
+            key = tuple(sorted([participant1.id, participant2.id]))
+            if key not in completed_match_keys:
+                remaining_in_round.append(match)
         if remaining_in_round:
             rounds_remaining.append(remaining_in_round)
     
@@ -134,6 +145,8 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
         # Распределяем матчи тура по площадкам
         court_assignments = distribute_matches_to_courts(round_matches, k)
         
+        # Создаем матчи для текущего тура
+        round_matches_created = []
         for court_num, court_matches in court_assignments.items():
             for match in court_matches:
                 participant1, participant2 = match
@@ -150,11 +163,19 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
                     match_date=current_date,
                     match_time=current_time,
                     court_number=court_num,
-                    match_number=match_number
+                    match_number=global_match_number
                 )
                 db.session.add(match_obj)
                 scheduled_matches.append(match_obj)
-                match_number += 1
+                round_matches_created.append(match_obj)
+                global_match_number += 1
+        
+        # Сортируем матчи тура по номеру площадки для правильной нумерации
+        round_matches_created.sort(key=lambda m: m.court_number)
+        
+        # Переназначаем номера матчей в туре (используем глобальную нумерацию)
+        for i, match in enumerate(round_matches_created):
+            match.match_number = global_match_number - len(round_matches_created) + i
         
         # Переходим к следующему времени
         current_time = add_minutes_to_time(current_time, time_match + time_break)
