@@ -536,31 +536,92 @@ body {
     z-index: 1000;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
-    padding: 10px;
+    padding: 15px;
     box-shadow: 0 5px 15px var(--shadow-color);
     backdrop-filter: blur(10px);
 }
 
-.theme-selector select {
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
-    padding: 5px 10px;
-    background: white;
-    color: var(--primary-color);
-    font-weight: 500;
+.theme-options {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.theme-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.theme-option input[type="radio"] {
+    display: none;
+}
+
+.theme-option label {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.theme-selector select:hover {
-    border-color: var(--primary-light);
-    box-shadow: 0 2px 8px var(--shadow-color);
+.theme-option label:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.theme-selector select:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1);
+.theme-option input[type="radio"]:checked + label {
+    border-color: white;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 3px var(--primary-color), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.theme-option input[type="radio"]:checked + label::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Цвета для каждой темы */
+.theme-original-emerald label {
+    background: linear-gradient(135deg, #00c851, #00e676);
+}
+
+.theme-deep-emerald label {
+    background: linear-gradient(135deg, #00695c, #00897b);
+}
+
+.theme-bright-emerald label {
+    background: linear-gradient(135deg, #00e676, #1de9b6);
+}
+
+.theme-blue label {
+    background: linear-gradient(135deg, #2196f3, #42a5f5);
+}
+
+.theme-red label {
+    background: linear-gradient(135deg, #f44336, #ef5350);
+}
+
+.theme-purple label {
+    background: linear-gradient(135deg, #9c27b0, #ba68c8);
+}
+
+.theme-gray label {
+    background: linear-gradient(135deg, #607d8b, #90a4ae);
+}
+
+.theme-black label {
+    background: linear-gradient(135deg, #424242, #616161);
 }
 
 /* Адаптивные размеры для мобильных устройств */
@@ -585,16 +646,48 @@ body {
 }
 
 /* Адаптивность для theme-selector на мобильных */
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .theme-selector {
         top: 70px;
         right: 10px;
+        padding: 10px;
+    }
+
+    .theme-options {
+        gap: 6px;
+        flex-wrap: wrap;
+        max-width: 200px;
+    }
+
+    .theme-option label {
+        width: 32px;
+        height: 32px;
+    }
+
+    .theme-option input[type="radio"]:checked + label::after {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .theme-selector {
+        top: 60px;
+        right: 5px;
         padding: 8px;
     }
 
-    .theme-selector select {
-        font-size: 0.9rem;
-        padding: 4px 8px;
+    .theme-options {
+        gap: 4px;
+        max-width: 180px;
+    }
+
+    .theme-option label {
+        width: 28px;
+        height: 28px;
+    }
+
+    .theme-option input[type="radio"]:checked + label::after {
+        font-size: 10px;
     }
 }
 
@@ -609,11 +702,40 @@ body {
 
 <!-- Меню смены темы (только для главной страницы) -->
 <div class="theme-selector">
-    <select id="themeSelector" onchange="changeTheme(this.value)">
-        <option value="original-emerald">Оригинальный изумруд</option>
-        <option value="deep-emerald">Глубокий изумруд</option>
-        <option value="bright-emerald">Яркий изумруд</option>
-    </select>
+    <div class="theme-options">
+        <div class="theme-option theme-original-emerald">
+            <input type="radio" id="theme-original-emerald" name="theme" value="original-emerald" onchange="changeTheme(this.value)">
+            <label for="theme-original-emerald" title="Оригинальный изумруд"></label>
+        </div>
+        <div class="theme-option theme-deep-emerald">
+            <input type="radio" id="theme-deep-emerald" name="theme" value="deep-emerald" onchange="changeTheme(this.value)">
+            <label for="theme-deep-emerald" title="Глубокий изумруд"></label>
+        </div>
+        <div class="theme-option theme-bright-emerald">
+            <input type="radio" id="theme-bright-emerald" name="theme" value="bright-emerald" onchange="changeTheme(this.value)">
+            <label for="theme-bright-emerald" title="Яркий изумруд"></label>
+        </div>
+        <div class="theme-option theme-blue">
+            <input type="radio" id="theme-blue" name="theme" value="blue" onchange="changeTheme(this.value)">
+            <label for="theme-blue" title="Голубой"></label>
+        </div>
+        <div class="theme-option theme-red">
+            <input type="radio" id="theme-red" name="theme" value="red" onchange="changeTheme(this.value)">
+            <label for="theme-red" title="Красный"></label>
+        </div>
+        <div class="theme-option theme-purple">
+            <input type="radio" id="theme-purple" name="theme" value="purple" onchange="changeTheme(this.value)">
+            <label for="theme-purple" title="Фиолетовый"></label>
+        </div>
+        <div class="theme-option theme-gray">
+            <input type="radio" id="theme-gray" name="theme" value="gray" onchange="changeTheme(this.value)">
+            <label for="theme-gray" title="Серый"></label>
+        </div>
+        <div class="theme-option theme-black">
+            <input type="radio" id="theme-black" name="theme" value="black" onchange="changeTheme(this.value)">
+            <label for="theme-black" title="Чёрный"></label>
+        </div>
+    </div>
 </div>
 
 <div class="container">
@@ -954,9 +1076,9 @@ function toggleAdminPasswordVisibility() {
 document.addEventListener('DOMContentLoaded', function() {
     // Инициализация темы
     const savedTheme = localStorage.getItem('selectedTheme') || 'original-emerald';
-    const themeSelector = document.getElementById('themeSelector');
-    if (themeSelector) {
-        themeSelector.value = savedTheme;
+    const themeRadio = document.getElementById(`theme-${savedTheme}`);
+    if (themeRadio) {
+        themeRadio.checked = true;
         changeTheme(savedTheme);
     }
     

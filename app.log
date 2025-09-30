@@ -23759,3 +23759,125 @@ with app.app_context(). See the documentation for more information.
 2025-09-29 20:38:58,619 - INFO -  * Restarting with stat
 2025-09-29 20:38:58,666 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
 2025-09-29 20:38:58,794 - INFO -  * Restarting with stat
+2025-09-29 20:39:00,714 - INFO - База данных инициализирована успешно
+2025-09-29 20:39:00,793 - INFO - База данных инициализирована успешно
+2025-09-29 20:39:01,705 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-29 20:39:01,706 - INFO - Запуск приложения на порту 5000
+2025-09-29 20:39:01,706 - INFO - Переменная окружения PORT: None
+2025-09-29 20:39:01,707 - INFO - Режим отладки: production
+2025-09-29 20:39:01,736 - WARNING -  * Debugger is active!
+2025-09-29 20:39:01,748 - INFO -  * Debugger PIN: 531-880-768
+2025-09-29 20:39:02,107 - INFO - Пароль администратора обновлен: admin/adm444
+2025-09-29 20:39:02,108 - INFO - Запуск приложения на порту 5000
+2025-09-29 20:39:02,108 - INFO - Переменная окружения PORT: None
+2025-09-29 20:39:02,109 - INFO - Режим отладки: production
+2025-09-29 20:39:02,159 - WARNING -  * Debugger is active!
+2025-09-29 20:39:02,167 - INFO -  * Debugger PIN: 531-880-768
+2025-09-29 20:41:45,118 - INFO - 127.0.0.1 - - [29/Sep/2025 20:41:45] "GET / HTTP/1.1" 200 -
+2025-09-29 20:41:46,891 - INFO - 127.0.0.1 - - [29/Sep/2025 20:41:46] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-29 20:41:52,778 - INFO - Попытка входа: email=d@d.d, token=66
+2025-09-29 20:41:52,778 - INFO - Поиск токена: email=d@d.d, token=66, найден=True
+2025-09-29 20:41:52,778 - INFO - Токен найден: id=1, created_at=2025-09-28 19:12:31.740800
+2025-09-29 20:41:52,798 - INFO - Время последнего использования токена обновлено
+2025-09-29 20:41:52,799 - INFO - Генерируем admin_id для d@d.d: 218578
+2025-09-29 20:41:52,811 - INFO - 127.0.0.1 - - [29/Sep/2025 20:41:52] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-29 20:41:53,090 - INFO - Админ d@d.d (ID: 218578) видит турниры: 2
+2025-09-29 20:41:53,090 - INFO - Все турниры в системе:
+2025-09-29 20:41:53,090 - INFO -   Турнир "first" (ID: 1) - admin_id: 218578
+2025-09-29 20:41:53,090 - INFO -   Турнир "второй" (ID: 2) - admin_id: 218578
+2025-09-29 20:41:53,157 - INFO - 127.0.0.1 - - [29/Sep/2025 20:41:53] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-29 20:41:55,572 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-29 20:41:55,572 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-09-29 20:41:55,573 - INFO - Матч 1: итоговый счет=None
+2025-09-29 20:41:55,574 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-29 20:41:55,575 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-29 20:41:55,577 - INFO - Матч 2: итоговый счет=None
+2025-09-29 20:41:55,577 - INFO - Матч 3: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=5
+2025-09-29 20:41:55,577 - INFO - Матч 3: статус 'завершен' попадает в условие
+2025-09-29 20:41:55,577 - INFO - Матч 3: итоговый счет=2:0
+2025-09-29 20:41:55,579 - INFO - Матч 4: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-29 20:41:55,579 - INFO - Матч 4: статус 'запланирован' НЕ попадает в условие
+2025-09-29 20:41:55,579 - INFO - Матч 4: итоговый счет=None
+2025-09-29 20:41:55,579 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-29 20:41:55,579 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-09-29 20:41:55,579 - INFO - Матч 5: итоговый счет=None
+2025-09-29 20:41:55,579 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-29 20:41:55,586 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-09-29 20:41:55,586 - INFO - Матч 6: итоговый счет=None
+2025-09-29 20:41:55,857 - INFO - 127.0.0.1 - - [29/Sep/2025 20:41:55] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-29 20:42:08,277 - INFO - 127.0.0.1 - - [29/Sep/2025 20:42:08] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-09-30 10:34:00,870 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:00] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-09-30 10:34:01,121 - INFO - The CSRF token has expired.
+2025-09-30 10:34:01,121 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:01] "[31m[1mPUT /api/matches/5 HTTP/1.1[0m" 400 -
+2025-09-30 10:34:05,834 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:05,835 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:05,835 - INFO - Матч 1: итоговый счет=None
+2025-09-30 10:34:05,836 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:05,836 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:05,837 - INFO - Матч 2: итоговый счет=None
+2025-09-30 10:34:05,837 - INFO - Матч 3: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=5
+2025-09-30 10:34:05,837 - INFO - Матч 3: статус 'завершен' попадает в условие
+2025-09-30 10:34:05,838 - INFO - Матч 3: итоговый счет=2:0
+2025-09-30 10:34:05,838 - INFO - Матч 4: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:05,839 - INFO - Матч 4: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:05,840 - INFO - Матч 4: итоговый счет=None
+2025-09-30 10:34:05,841 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:05,841 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:05,841 - INFO - Матч 5: итоговый счет=None
+2025-09-30 10:34:05,842 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:05,842 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:05,843 - INFO - Матч 6: итоговый счет=None
+2025-09-30 10:34:05,850 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:05] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-30 10:34:08,039 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:08] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-09-30 10:34:16,083 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:16] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-09-30 10:34:16,348 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:16] "[31m[1mPUT /api/matches/5 HTTP/1.1[0m" 400 -
+2025-09-30 10:34:42,552 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:42] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-09-30 10:34:42,945 - INFO - Начислены очки за матч 5: участник 1 = 5, участник 3 = 0
+2025-09-30 10:34:42,967 - INFO - Матч 5 обновлен
+2025-09-30 10:34:42,969 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:42] "PUT /api/matches/5 HTTP/1.1" 200 -
+2025-09-30 10:34:43,133 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:43,133 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:43,133 - INFO - Матч 1: итоговый счет=None
+2025-09-30 10:34:43,133 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:43,133 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:43,146 - INFO - Матч 2: итоговый счет=None
+2025-09-30 10:34:43,147 - INFO - Матч 3: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=5
+2025-09-30 10:34:43,148 - INFO - Матч 3: статус 'завершен' попадает в условие
+2025-09-30 10:34:43,149 - INFO - Матч 3: итоговый счет=2:0
+2025-09-30 10:34:43,150 - INFO - Матч 4: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:43,150 - INFO - Матч 4: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:43,151 - INFO - Матч 4: итоговый счет=None
+2025-09-30 10:34:43,152 - INFO - Матч 5: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=12, set1_score2=10
+2025-09-30 10:34:43,152 - INFO - Матч 5: статус 'завершен' попадает в условие
+2025-09-30 10:34:43,152 - INFO - Матч 5: итоговый счет=2:0
+2025-09-30 10:34:43,152 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-09-30 10:34:43,152 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-09-30 10:34:43,152 - INFO - Матч 6: итоговый счет=None
+2025-09-30 10:34:43,164 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:43] "GET /tournament/1 HTTP/1.1" 200 -
+2025-09-30 10:34:49,379 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:49] "GET / HTTP/1.1" 200 -
+2025-09-30 10:34:55,641 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJy9UctuwyAQ_JV0z06EMdiGUz6itzZCGNaJ5UdSgw-RlX8vJnEaVT33MsvOsjPLMoOqO-1O6EB-zLDxIYCbjEHnIIHPibCULZhhxHRBRu7MJob6pZxHvJerF57-8CyemUk26Rscbsk_m171YBffQxJePqI7gax15zABbftmUNjrpgMJdm93Fla2sSBpWvKiXJlB9xiuLXLPW_7c4hDIPA-UcWP9ZMqMG0FIxXhZMIua6zoXlUCdGmILjhYLkVdVGfoap9zVeexVFAXpxylMd9Gjb0xz0YNX3fl4RKv-Lj4GS4NUdFcjfk3owo5nMCNqHzp1yIASyrdEbKl4J0JmmWRsxynN-DLFuoZ23-7akD9U49fY3ztm962L1RKkoLfbN8-Gtmg.aNrE4A.Hbfc_YvWvSBuOi0gnDFIuZE5Z0Y'}
+2025-09-30 10:34:55,646 - INFO - GET запрос на страницу токенов. Текущее количество: 2
+2025-09-30 10:34:55,665 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:55] "GET /request-token HTTP/1.1" 200 -
+2025-09-30 10:34:58,280 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:58] "GET / HTTP/1.1" 200 -
+2025-09-30 10:34:59,277 - INFO - 127.0.0.1 - - [30/Sep/2025 10:34:59] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-30 10:35:47,038 - INFO - 127.0.0.1 - - [30/Sep/2025 10:35:47] "GET / HTTP/1.1" 200 -
+2025-09-30 10:35:50,260 - INFO - 127.0.0.1 - - [30/Sep/2025 10:35:50] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-30 10:37:31,557 - INFO - 127.0.0.1 - - [30/Sep/2025 10:37:31] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-30 11:13:28,911 - INFO - 127.0.0.1 - - [30/Sep/2025 11:13:28] "GET / HTTP/1.1" 200 -
+2025-09-30 11:13:38,818 - INFO - 127.0.0.1 - - [30/Sep/2025 11:13:38] "GET /admin-tournament HTTP/1.1" 200 -
+2025-09-30 11:13:51,930 - INFO - Попытка входа: email=d@d.d, token=66
+2025-09-30 11:13:51,932 - INFO - Поиск токена: email=d@d.d, token=66, найден=True
+2025-09-30 11:13:51,932 - INFO - Токен найден: id=1, created_at=2025-09-28 19:12:31.740800
+2025-09-30 11:13:51,937 - INFO - Время последнего использования токена обновлено
+2025-09-30 11:13:51,938 - INFO - Генерируем admin_id для d@d.d: 218578
+2025-09-30 11:13:51,943 - INFO - 127.0.0.1 - - [30/Sep/2025 11:13:51] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-09-30 11:13:52,229 - INFO - Админ d@d.d (ID: 218578) видит турниры: 2
+2025-09-30 11:13:52,237 - INFO - Все турниры в системе:
+2025-09-30 11:13:52,239 - INFO -   Турнир "first" (ID: 1) - admin_id: 218578
+2025-09-30 11:13:52,240 - INFO -   Турнир "второй" (ID: 2) - admin_id: 218578
+2025-09-30 11:13:52,259 - INFO - 127.0.0.1 - - [30/Sep/2025 11:13:52] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-09-30 11:17:02,844 - INFO - 127.0.0.1 - - [30/Sep/2025 11:17:02] "GET / HTTP/1.1" 200 -
+2025-09-30 11:30:17,571 - INFO - 127.0.0.1 - - [30/Sep/2025 11:30:17] "GET / HTTP/1.1" 200 -
+2025-09-30 11:31:23,219 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUctuwyAQ_JV0z06EMdiGUz6itzZCGNaJ5UcSgw-RlX8vJnEaVb3MsrOv0TCDqjvtTuhAfs2w8SGAm4xB5yCB74mwlC2YYcR0QUYezCaG-q2cR3yUqzee_vIsvplJNjc92A843A9JEDGiO4GsdecwAW37ZlDY66YDCXZvdxZWtrEgaVryolyZQfcY2pZ1ry5_bnEIZJ4HyrixfjFlxo0gpGK8LJhFzXWdi0qgTg2xBUeLhcirqgxzjVPu5jz2Ki4F6ccpqLvo0TemuejBq-58PKJV_xefwtKwKl5XI14ndMHjGcyI2odJHTKghPItEVsqPomQWSYZ23FKM76oWG1o9-2uDflza_wa-9dj9nBdrCdBCnq__wBvW5Wo.aNuRPw.POEK3GxgyvH5g33ahBsNKC7qCEc'}
+2025-09-30 11:31:23,223 - INFO - GET запрос на страницу токенов. Текущее количество: 2
+2025-09-30 11:31:23,226 - INFO - 127.0.0.1 - - [30/Sep/2025 11:31:23] "GET /request-token HTTP/1.1" 200 -

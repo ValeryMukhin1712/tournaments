@@ -4,38 +4,36 @@
 
 {% block content %}
 <style>
-body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
 .main-container {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px var(--shadow-color);
     margin: 2rem auto;
     padding: 2rem;
+    transition: all 0.3s ease;
 }
 
 .hero-title {
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px var(--shadow-color);
+    text-align: center;
 }
 
 .card-modern {
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-primary));
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px var(--shadow-color);
     transition: all 0.3s ease;
     overflow: hidden;
     position: relative;
+    backdrop-filter: blur(10px);
 }
 
 .card-modern::before {
@@ -45,7 +43,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -56,51 +54,71 @@ body {
 
 .card-modern:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 40px var(--shadow-hover);
+    background: linear-gradient(135deg, var(--bg-card-hover), var(--bg-secondary));
 }
 
 .icon-gradient {
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .btn-gradient {
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
     border: none;
     border-radius: 25px;
     color: white;
     padding: 0.5rem 1.5rem;
     transition: all 0.3s ease;
+    box-shadow: 0 5px 15px var(--shadow-strong);
 }
 
 .btn-gradient:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 20px var(--shadow-strong);
     color: white;
 }
 
 .form-control {
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     padding: 0.75rem 1rem;
     transition: all 0.3s ease;
+    background: var(--bg-card);
 }
 
 .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 191, 165, 0.25);
+    background: var(--bg-primary);
 }
 
 .form-label {
     font-weight: 600;
-    color: #495057;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
+.btn-outline-secondary {
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-color);
+}
+
 .form-text {
-    color: #6c757d;
+    color: var(--text-muted);
     font-size: 0.875rem;
     margin-top: 0.5rem;
 }
@@ -117,7 +135,7 @@ body {
 
 .floating-circle {
     position: absolute;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--float-color);
     border-radius: 50%;
     animation: float 6s ease-in-out infinite;
 }
@@ -170,7 +188,7 @@ body {
     <div class="main-container">
         <div class="text-center mb-5">
             <h1 class="hero-title display-4">
-                <i class="fas fa-crown me-3"></i>
+                <i class="fas fa-crown me-3 icon-gradient"></i>
                 Вход администратора
             </h1>
             <p class="lead text-muted">Войдите в систему с помощью email и токена</p>
@@ -185,25 +203,25 @@ body {
                             
                             <div class="mb-4">
                                 <label for="email" class="form-label">
-                                    <i class="fas fa-envelope me-2"></i>Email админа
+                                    <i class="fas fa-envelope me-2 icon-gradient"></i>Email админа
                                 </label>
                                 <input type="email" class="form-control" id="email" name="email" required placeholder="Введите email администратора">
                             </div>
                             
                             <div class="mb-4">
                                 <label for="token" class="form-label">
-                                    <i class="fas fa-key me-2"></i>Токен доступа
+                                    <i class="fas fa-key me-2 icon-gradient"></i>Токен доступа
                                 </label>
                                 <input type="text" class="form-control" id="token" name="token" required placeholder="Введите токен доступа">
                                 <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
+                                    <i class="fas fa-info-circle me-1 icon-gradient"></i>
                                     Используйте email и токен для входа в систему
                                 </div>
                             </div>
                             
                             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                                 <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">
-                                    <i class="fas fa-arrow-left me-2"></i>Назад
+                                    <i class="fas fa-arrow-left me-2 icon-gradient"></i>Назад
                                 </a>
                                 <button type="submit" class="btn btn-gradient">
                                     <i class="fas fa-sign-in-alt me-2"></i>Войти
