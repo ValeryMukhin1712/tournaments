@@ -396,6 +396,33 @@ body {
     .col-6 {
         margin-bottom: 1rem;
     }
+    
+}
+
+/* Отступы для средних экранов */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .row.g-4 {
+        margin-left: calc(50% - 250px) !important; /* Половина ширины кнопки для планшетов */
+        margin-right: calc(50% - 250px) !important;
+        max-width: 500px !important;
+    }
+}
+
+/* Отступы для больших экранов - половина ширины кнопки */
+@media (min-width: 1200px) {
+    .row.g-4 {
+        margin-left: calc(50% - 300px) !important; /* Половина ширины кнопки (примерно 300px) */
+        margin-right: calc(50% - 300px) !important;
+        max-width: 600px !important; /* Ограничиваем максимальную ширину */
+    }
+}
+
+@media (min-width: 1400px) {
+    .row.g-4 {
+        margin-left: calc(50% - 350px) !important; /* Увеличиваем отступ для очень больших экранов */
+        margin-right: calc(50% - 350px) !important;
+        max-width: 700px !important;
+    }
 }
 
 /* Дополнительные стили для увеличения расстояния между кнопками */
@@ -528,101 +555,6 @@ body {
     50% { transform: translateY(-20px); }
 }
 
-/* Меню смены темы (только для главной страницы) */
-.theme-selector {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 5px 15px var(--shadow-color);
-    backdrop-filter: blur(10px);
-}
-
-.theme-options {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.theme-option {
-    position: relative;
-    cursor: pointer;
-}
-
-.theme-option input[type="radio"] {
-    display: none;
-}
-
-.theme-option label {
-    display: block;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.theme-option label:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.theme-option input[type="radio"]:checked + label {
-    border-color: white;
-    transform: scale(1.15);
-    box-shadow: 0 0 0 3px var(--primary-color), 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.theme-option input[type="radio"]:checked + label::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* Цвета для каждой темы */
-.theme-original-emerald label {
-    background: linear-gradient(135deg, #00c851, #00e676);
-}
-
-.theme-deep-emerald label {
-    background: linear-gradient(135deg, #00695c, #00897b);
-}
-
-.theme-bright-emerald label {
-    background: linear-gradient(135deg, #00e676, #1de9b6);
-}
-
-.theme-blue label {
-    background: linear-gradient(135deg, #2196f3, #42a5f5);
-}
-
-.theme-red label {
-    background: linear-gradient(135deg, #f44336, #ef5350);
-}
-
-.theme-purple label {
-    background: linear-gradient(135deg, #9c27b0, #ba68c8);
-}
-
-.theme-gray label {
-    background: linear-gradient(135deg, #607d8b, #90a4ae);
-}
-
-.theme-black label {
-    background: linear-gradient(135deg, #424242, #616161);
-}
 
 /* Адаптивные размеры для мобильных устройств */
 @media (max-width: 576px) {
@@ -645,51 +577,6 @@ body {
     }
 }
 
-/* Адаптивность для theme-selector на мобильных */
-@media (max-width: 768px) {
-    .theme-selector {
-        top: 70px;
-        right: 10px;
-        padding: 10px;
-    }
-
-    .theme-options {
-        gap: 6px;
-        flex-wrap: wrap;
-        max-width: 200px;
-    }
-
-    .theme-option label {
-        width: 32px;
-        height: 32px;
-    }
-
-    .theme-option input[type="radio"]:checked + label::after {
-        font-size: 12px;
-    }
-}
-
-@media (max-width: 576px) {
-    .theme-selector {
-        top: 60px;
-        right: 5px;
-        padding: 8px;
-    }
-
-    .theme-options {
-        gap: 4px;
-        max-width: 180px;
-    }
-
-    .theme-option label {
-        width: 28px;
-        height: 28px;
-    }
-
-    .theme-option input[type="radio"]:checked + label::after {
-        font-size: 10px;
-    }
-}
 
 </style>
 
@@ -700,43 +587,6 @@ body {
     <div class="floating-circle"></div>
 </div>
 
-<!-- Меню смены темы (только для главной страницы) -->
-<div class="theme-selector">
-    <div class="theme-options">
-        <div class="theme-option theme-original-emerald">
-            <input type="radio" id="theme-original-emerald" name="theme" value="original-emerald" onchange="changeTheme(this.value)">
-            <label for="theme-original-emerald" title="Оригинальный изумруд"></label>
-        </div>
-        <div class="theme-option theme-deep-emerald">
-            <input type="radio" id="theme-deep-emerald" name="theme" value="deep-emerald" onchange="changeTheme(this.value)">
-            <label for="theme-deep-emerald" title="Глубокий изумруд"></label>
-        </div>
-        <div class="theme-option theme-bright-emerald">
-            <input type="radio" id="theme-bright-emerald" name="theme" value="bright-emerald" onchange="changeTheme(this.value)">
-            <label for="theme-bright-emerald" title="Яркий изумруд"></label>
-        </div>
-        <div class="theme-option theme-blue">
-            <input type="radio" id="theme-blue" name="theme" value="blue" onchange="changeTheme(this.value)">
-            <label for="theme-blue" title="Голубой"></label>
-        </div>
-        <div class="theme-option theme-red">
-            <input type="radio" id="theme-red" name="theme" value="red" onchange="changeTheme(this.value)">
-            <label for="theme-red" title="Красный"></label>
-        </div>
-        <div class="theme-option theme-purple">
-            <input type="radio" id="theme-purple" name="theme" value="purple" onchange="changeTheme(this.value)">
-            <label for="theme-purple" title="Фиолетовый"></label>
-        </div>
-        <div class="theme-option theme-gray">
-            <input type="radio" id="theme-gray" name="theme" value="gray" onchange="changeTheme(this.value)">
-            <label for="theme-gray" title="Серый"></label>
-        </div>
-        <div class="theme-option theme-black">
-            <input type="radio" id="theme-black" name="theme" value="black" onchange="changeTheme(this.value)">
-            <label for="theme-black" title="Чёрный"></label>
-        </div>
-    </div>
-</div>
 
 <div class="container">
     <div class="main-container">
@@ -839,9 +689,6 @@ body {
                             Турнирный Ассистент предназначен для круговых турниров с матчами из 3-х сетов. 
                             Например: настольного тенниса, бадминтона, волейбола и ...
                         </p>
-                        <a href="{{ url_for('test_green_colors') }}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-palette me-2"></i>Тест зелёных цветов
-                        </a>
                     </div>
                 </div>
             </div>

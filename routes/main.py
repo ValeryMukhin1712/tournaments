@@ -1514,7 +1514,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 chessboard[participant.id][other_participant.id] = {
                                     'type': 'in_progress',
                                     'value': 'В процессе',
-                                    'match_id': match.id
+                                    'match_id': match.id,
+                                    'sets_details': ''
                                 }
                         else:
                             # Матч запланирован
@@ -1528,14 +1529,16 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 'date': match.match_date,
                                 'time': match.match_time,
                                 'court': match.court_number,
-                                'is_next_match': is_next_match
+                                'is_next_match': is_next_match,
+                                'sets_details': ''
                             }
                     else:
                         # Матч не найден
                         chessboard[participant.id][other_participant.id] = {
                             'type': 'empty',
                             'value': '',
-                            'match_id': None
+                            'match_id': None,
+                            'sets_details': ''
                         }
         
         # Сортируем участников по очкам (убывание) только для статистики
@@ -1933,7 +1936,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 chessboard[participant.id][other_participant.id] = {
                                     'type': 'in_progress',
                                     'value': 'В процессе',
-                                    'match_id': match.id
+                                    'match_id': match.id,
+                                    'sets_details': ''
                                 }
                         else:
                             # Матч запланирован
@@ -1953,8 +1957,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         chessboard[participant.id][other_participant.id] = {
                             'type': 'empty',
                             'value': '',
-                            'match_id': None
+                            'match_id': None,
+                            'sets_details': ''
                         }
+        
+        # Определяем режим просмотра
+        is_viewer_mode = not is_participant
         
         return render_template('tournament_view.html', 
                              tournament=tournament,
@@ -1963,6 +1971,283 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              chessboard=chessboard,
                              schedule_display=schedule_display,
                              is_participant=is_participant,
+                             is_viewer_mode=is_viewer_mode,
+                             participant_name=participant_name)
+
+    @app.route('/tournament-spectator/<int:tournament_id>')
+    def tournament_spectator(tournament_id):
+        """Просмотр турнира для зрителей (без авторизации)"""
+        tournament = Tournament.query.get_or_404(tournament_id)
+        
+        # Получаем участников турнира
+        participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
+        
+        # Получаем матчи турнира
+        matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        
+        # Дедупликация матчей по уникальным полям (участники + дата + время)
+        seen_matches = set()
+        unique_matches = []
+        for match in matches:
+            match_key = (match.participant1_id, match.participant2_id, match.match_date, match.match_time)
+            if match_key not in seen_matches:
+                seen_matches.add(match_key)
+                unique_matches.append(match)
+        matches = unique_matches
+        
+        # Для зрителей всегда is_participant = False и is_viewer_mode = True
+        is_participant = False
+        is_viewer_mode = True
+        participant_name = ''
+        
+        # Подготавливаем данные для отображения с реальной статистикой
+        participants_with_stats = []
+        participants_with_stats_chessboard = []
+        
+        # Создаем словарь для подсчета статистики каждого участника
+        participant_stats_dict = {}
+        for participant in participants:
+            participant_stats_dict[participant.id] = {
+                'id': participant.id,
+                'name': participant.name,
+                'points': 0,
+                'matches_played': 0,
+                'matches_won': 0,
+                'matches_lost': 0,
+                'matches_drawn': 0,
+                'games': 0,
+                'wins': 0,
+                'losses': 0,
+                'draws': 0,
+                'goal_difference': 0
+            }
+        
+        # Подсчитываем статистику на основе матчей
+        for match in matches:
+            if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                participant1_id = match.participant1_id
+                participant2_id = match.participant2_id
+                
+                if participant1_id in participant_stats_dict and participant2_id in participant_stats_dict:
+                    # Обновляем статистику для участника 1
+                    participant_stats_dict[participant1_id]['games'] += 1
+                    participant_stats_dict[participant1_id]['matches_played'] += 1
+                    
+                    # Обновляем статистику для участника 2
+                    participant_stats_dict[participant2_id]['games'] += 1
+                    participant_stats_dict[participant2_id]['matches_played'] += 1
+                    
+                    # Определяем победителя
+                    if match.sets_won_1 > match.sets_won_2:
+                        # Участник 1 выиграл
+                        participant_stats_dict[participant1_id]['wins'] += 1
+                        participant_stats_dict[participant1_id]['matches_won'] += 1
+                        participant_stats_dict[participant1_id]['points'] += tournament.points_win
+                        participant_stats_dict[participant2_id]['losses'] += 1
+                        participant_stats_dict[participant2_id]['matches_lost'] += 1
+                        participant_stats_dict[participant2_id]['points'] += tournament.points_loss
+                    elif match.sets_won_2 > match.sets_won_1:
+                        # Участник 2 выиграл
+                        participant_stats_dict[participant2_id]['wins'] += 1
+                        participant_stats_dict[participant2_id]['matches_won'] += 1
+                        participant_stats_dict[participant2_id]['points'] += tournament.points_win
+                        participant_stats_dict[participant1_id]['losses'] += 1
+                        participant_stats_dict[participant1_id]['matches_lost'] += 1
+                        participant_stats_dict[participant1_id]['points'] += tournament.points_loss
+                    else:
+                        # Ничья
+                        participant_stats_dict[participant1_id]['draws'] += 1
+                        participant_stats_dict[participant1_id]['matches_drawn'] += 1
+                        participant_stats_dict[participant1_id]['points'] += tournament.points_draw
+                        participant_stats_dict[participant2_id]['draws'] += 1
+                        participant_stats_dict[participant2_id]['matches_drawn'] += 1
+                        participant_stats_dict[participant2_id]['points'] += tournament.points_draw
+                    
+                    # Обновляем разницу очков
+                    participant_stats_dict[participant1_id]['goal_difference'] += (match.sets_won_1 - match.sets_won_2)
+                    participant_stats_dict[participant2_id]['goal_difference'] += (match.sets_won_2 - match.sets_won_1)
+        
+        # Создаем списки участников с статистикой
+        for i, participant in enumerate(participants):
+            participant_stats = participant_stats_dict[participant.id]
+            
+            participants_with_stats_chessboard.append({
+                'participant': participant,
+                'stats': participant_stats,
+                'position': i + 1,
+                'is_late_participant': False
+            })
+            
+            participants_with_stats.append({
+                'participant': participant,
+                'stats': participant_stats,
+                'position': i + 1,
+                'is_late_participant': False
+            })
+        
+        # Сортируем участников по очкам (убывание)
+        participants_with_stats.sort(key=lambda x: x['stats']['points'], reverse=True)
+        participants_with_stats_chessboard.sort(key=lambda x: x['stats']['points'], reverse=True)
+        
+        # Обновляем позиции после сортировки
+        for i, participant_data in enumerate(participants_with_stats):
+            participant_data['position'] = i + 1
+        for i, participant_data in enumerate(participants_with_stats_chessboard):
+            participant_data['position'] = i + 1
+        
+        # Создаем шахматку (упрощенная версия)
+        chessboard = {}
+        for participant in participants:
+            chessboard[participant.id] = {}
+            for other_participant in participants:
+                if participant.id != other_participant.id:
+                    # Ищем матч между этими участниками
+                    match = next((m for m in matches if 
+                                (m.participant1_id == participant.id and m.participant2_id == other_participant.id) or
+                                (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
+                    
+                    if match:
+                        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                            # Матч завершен - показываем результат
+                            if match.participant1_id == participant.id:
+                                score = f"{match.sets_won_1}:{match.sets_won_2}"
+                                is_winner = match.sets_won_1 > match.sets_won_2
+                            else:
+                                score = f"{match.sets_won_2}:{match.sets_won_1}"
+                                is_winner = match.sets_won_2 > match.sets_won_1
+                            
+                            # Создаем детали сета
+                            sets_details = ""
+                            if hasattr(match, 'set1_score1') and match.set1_score1 is not None:
+                                sets_list = []
+                                if match.set1_score1 is not None and match.set1_score2 is not None:
+                                    sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                                if match.set2_score1 is not None and match.set2_score2 is not None:
+                                    sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                                if match.set3_score1 is not None and match.set3_score2 is not None:
+                                    sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                                if sets_list:
+                                    sets_details = ", ".join(sets_list)
+                            
+                            chessboard[participant.id][other_participant.id] = {
+                                'type': 'result',
+                                'value': score,
+                                'match_id': match.id,
+                                'is_winner': is_winner,
+                                'sets_details': sets_details
+                            }
+                        elif match.status in ['в процессе', 'играют']:
+                            # Матч в процессе
+                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                if match.participant1_id == participant.id:
+                                    score = f"{match.sets_won_1}:{match.sets_won_2}"
+                                else:
+                                    score = f"{match.sets_won_2}:{match.sets_won_1}"
+                                
+                                # Создаем детали сета для матча в процессе
+                                sets_details = ""
+                                if hasattr(match, 'set1_score1') and match.set1_score1 is not None:
+                                    sets_list = []
+                                    if match.set1_score1 is not None and match.set1_score2 is not None:
+                                        sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                                    if match.set2_score1 is not None and match.set2_score2 is not None:
+                                        sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                                    if match.set3_score1 is not None and match.set3_score2 is not None:
+                                        sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                                    if sets_list:
+                                        sets_details = ", ".join(sets_list)
+                                
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'sets_details': sets_details
+                                }
+                            else:
+                                # Нет счета - показываем "В процессе"
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': 'В процессе',
+                                    'match_id': match.id,
+                                    'sets_details': ''
+                                }
+                        else:
+                            # Матч запланирован
+                            chessboard[participant.id][other_participant.id] = {
+                                'type': 'upcoming',
+                                'value': 'vs',
+                                'match_id': match.id,
+                                'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
+                                'court_number': match.court_number,
+                                'date': match.match_date,
+                                'time': match.match_time,
+                                'court': match.court_number,
+                                'is_next_match': False,
+                                'sets_details': ''
+                            }
+                    else:
+                        # Матч не найден
+                        chessboard[participant.id][other_participant.id] = {
+                            'type': 'empty',
+                            'value': '',
+                            'match_id': None,
+                            'sets_details': ''
+                        }
+        
+        # Создаем расписание (упрощенная версия)
+        schedule_display = {}
+        for match in matches:
+            if match.match_date:
+                date_str = match.match_date.strftime('%Y-%m-%d')
+                if date_str not in schedule_display:
+                    schedule_display[date_str] = {
+                        'date_display': match.match_date.strftime('%d.%m.%Y'),
+                        'matches': []
+                    }
+                
+                # Находим участников по ID
+                participant1 = next((p for p in participants if p.id == match.participant1_id), None)
+                participant2 = next((p for p in participants if p.id == match.participant2_id), None)
+                
+                # Формируем счет матча
+                score = None
+                if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                    score = f"{match.sets_won_1}:{match.sets_won_2}"
+                elif match.status in ['в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                    score = f"{match.sets_won_1}:{match.sets_won_2}"
+                
+                schedule_display[date_str]['matches'].append({
+                    'match_id': match.id,
+                    'participant1': participant1.name if participant1 else 'Неизвестно',
+                    'participant2': participant2.name if participant2 else 'Неизвестно',
+                    'participant1_name': participant1.name if participant1 else 'Неизвестно',
+                    'participant2_name': participant2.name if participant2 else 'Неизвестно',
+                    'score': score,
+                    'status': match.status,
+                    'match_date': match.match_date,
+                    'match_time': match.match_time,
+                    'time': match.match_time.strftime('%H:%M') if match.match_time else 'Время не указано',
+                    'court_number': match.court_number,
+                    'global_number': match.match_number or 0,
+                    'is_participant_match': False  # Для зрителей всегда False
+                })
+        
+        # Сортируем матчи в каждом дне по времени и номеру матча
+        for date_str in schedule_display:
+            schedule_display[date_str]['matches'].sort(key=lambda x: (
+                x['time'] if x['time'] != 'Время не указано' else '23:59',
+                x['global_number']
+            ))
+        
+        return render_template('tournament_view.html', 
+                             tournament=tournament,
+                             participants=participants_with_stats_chessboard,
+                             participants_with_stats=participants_with_stats,
+                             participants_with_stats_chessboard=participants_with_stats_chessboard,
+                             chessboard=chessboard,
+                             schedule_display=schedule_display,
+                             is_participant=is_participant,
+                             is_viewer_mode=is_viewer_mode,
                              participant_name=participant_name)
 
     @app.route('/admin-logout')

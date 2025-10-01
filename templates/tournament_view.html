@@ -13,12 +13,24 @@
                         <i class="fas fa-trophy me-2"></i>
                         {{ tournament.name }}
                     </h1>
-                    <p class="text-muted mb-0">Режим просмотра</p>
+                    <p class="text-muted mb-0">
+                        {% if is_viewer_mode %}
+                            Режим зрителя
+                        {% else %}
+                            Режим участника
+                        {% endif %}
+                    </p>
                 </div>
                 <div>
-                    <a href="{{ url_for('participant_tournaments') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i><span class="d-none d-sm-inline">Назад к турнирам</span><span class="d-sm-none">Назад</span>
-                    </a>
+                    {% if is_viewer_mode %}
+                        <a href="{{ url_for('tournaments_list') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i><span class="d-none d-sm-inline">Назад к турнирам</span><span class="d-sm-none">Назад</span>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('participant_tournaments') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i><span class="d-none d-sm-inline">Назад к турнирам</span><span class="d-sm-none">Назад</span>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -119,7 +131,7 @@
                                                 </td>
                                                 <td>
                                                     <strong>{{ match.participant1 }}</strong> vs <strong>{{ match.participant2 }}</strong>
-                                                    {% if match.is_participant_match %}
+                                                    {% if match.is_participant_match and not is_viewer_mode %}
                                                         <span class="badge bg-primary ms-2">Ваш матч</span>
                                                     {% endif %}
                                                 </td>
@@ -173,66 +185,74 @@
             </div>
             {% endif %}
 
-            <!-- Таблица участников -->
+            <!-- Статистика участников -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                                <i class="fas fa-users me-2"></i>
-                                Участники турнира
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if participants %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Место</th>
-                                    <th>Участник</th>
-                                            <th>Победы</th>
-                                            <th>Поражения</th>
-                                    <th>Очки</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                        {% for item in participants %}
-                                        <tr class="{% if item.is_current_participant %}table-success{% endif %}">
-                                            <td>
-                                                <strong>{{ loop.index }}</strong>
-                                                {% if loop.index == 1 %}
-                                                    <i class="fas fa-crown text-warning ms-1"></i>
-                                                {% elif loop.index == 2 %}
-                                                    <i class="fas fa-medal text-secondary ms-1"></i>
-                                                {% elif loop.index == 3 %}
-                                                    <i class="fas fa-award text-warning ms-1"></i>
+                    <div class="card card-modern">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar me-2"></i>Статистика участников
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if participants_with_stats %}
+                                <div class="table-responsive">
+                                    <table class="table table-modern" id="statisticsTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="d-none d-sm-table-cell">Место</th>
+                                                <th class="d-table-cell d-sm-none">№</th>
+                                                <th>Участник</th>
+                                                <th class="d-none d-md-table-cell">Игр</th>
+                                                <th class="d-none d-lg-table-cell">Побед</th>
+                                                {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
+                                                <th class="d-none d-lg-table-cell">Ничьих</th>
                                                 {% endif %}
-                                            </td>
-                                            <td>
-                                                <strong>{{ item.participant.name }}</strong>
-                                                {% if item.is_current_participant %}
-                                                    <span class="badge bg-success ms-2">Вы</span>
+                                                <th class="d-none d-lg-table-cell">Поражений</th>
+                                                <th>Очки<br><small class="d-none d-sm-inline">в турнире</small></th>
+                                                <th class="d-none d-md-table-cell">Разница очков<br><small>в сетах</small></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for p1_data in participants_with_stats %}
+                                            {% set participant = p1_data.participant %}
+                                            {% set participant_stats = p1_data.stats %}
+                                            {% set participant_position = p1_data.position %}
+                                            <tr class="{% if p1_data.is_late_participant %}table-warning{% endif %}">
+                                                <td class="d-none d-sm-table-cell">{{ participant_position }}</td>
+                                                <td class="d-table-cell d-sm-none">{{ participant_position }}</td>
+                                                <td>
+                                                    <strong>{{ participant.name }}</strong>
+                                                    {% if participant.is_team %}
+                                                        <span class="badge bg-info ms-2">Команда</span>
+                                                    {% endif %}
+                                                    <div class="d-sm-none mt-1">
+                                                        <small class="text-muted">Очки: {{ participant_stats.points }}</small>
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-md-table-cell">{{ participant_stats.games }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ participant_stats.wins }}</td>
+                                                {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
+                                                <td class="d-none d-lg-table-cell">{{ participant_stats.draws }}</td>
                                                 {% endif %}
-                                            </td>
-                                            <td><span class="badge bg-success">{{ item.wins }}</span></td>
-                                            <td><span class="badge bg-danger">{{ item.losses }}</span></td>
-                                            <td><strong>{{ item.points }}</strong></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                            <div class="text-center py-4">
-                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">В турнире пока нет участников</p>
-                            </div>
-                {% endif %}
+                                                <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
+                                                <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
+                                                <td class="d-none d-md-table-cell">{{ participant_stats.goal_difference }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">В турнире пока нет участников</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
+                </div>
             </div>
-        </div>
 
 
             <!-- Турнирная таблица -->
