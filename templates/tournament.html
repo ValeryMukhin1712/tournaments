@@ -262,11 +262,6 @@
                      <button class="btn btn-info btn-sm" onclick="generateSchedule()">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание заново</span><span class="d-sm-none">Расписание</span>
                      </button>
-                     {% if has_active_matches %}
-                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addLateParticipantModal">
-                         <i class="fas fa-user-clock me-1"></i><span class="d-none d-sm-inline">Добавить опоздавшего участника</span><span class="d-sm-none">Опоздавший</span>
-                     </button>
-                     {% endif %}
                      {% else %}
                      <button class="btn btn-primary btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
@@ -289,7 +284,7 @@
                      <button class="btn btn-warning me-2" onclick="rescheduleTournament()">
                          <i class="fas fa-sync-alt me-2"></i>Пересчитать расписание
                      </button>
-                     <a href="{{ url_for('export_tournament', tournament_id=tournament.id) }}" class="btn btn-success">
+                     <a href="{{ url_for('export_tournament', tournament_id=tournament.id) }}" class="btn btn-success" download>
                          <i class="fas fa-file-excel me-2"></i>Выгрузить в Excel
                      </a>
                      {% endif %}
@@ -368,7 +363,9 @@
                                 {% endif %}
                                 <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
                                 <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
-                                <td class="d-none d-md-table-cell">{{ participant_stats.goal_difference }}</td>
+                                <td class="d-none d-md-table-cell">
+                                    {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
+                                </td>
                                 <td>
                                     {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
                                     <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')" title="Удалить участника">
@@ -871,6 +868,9 @@
 
 {% block scripts %}
 <script>
+        // Версия скрипта для принудительного обновления кэша
+        console.log('Загружен скрипт валидации v2.5 - исправлено условие для 12:11');
+
 // Инициализация сортировки таблицы статистики
 document.addEventListener('DOMContentLoaded', function() {
     initializeTableSorting();
@@ -1497,6 +1497,7 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 1; i <= 3; i++) {
                 const score1 = parseInt(document.getElementById(`set${i}Score1`).value) || 0;
                 const score2 = parseInt(document.getElementById(`set${i}Score2`).value) || 0;
+                console.log(`Основная валидация: сет ${i}, score1=${score1}, score2=${score2}`);
                 
                 if (score1 > 0 || score2 > 0) {
                     // Проверяем валидность счета
@@ -1507,8 +1508,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         const maxScore = Math.max(score1, score2);
                         const minScore = Math.min(score1, score2);
                         
-                        // Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
-                        if (minScore >= (pointsToWin - 1)) {
+                        console.log(`Проверяем счет: ${score1}:${score2}, pointsToWin: ${pointsToWin}, difference: ${difference}`);
+                        
+                        // Специальное правило: если оба участника набрали "очков для победы", то это равный счет (например, 11:11)
+                        if (score1 === pointsToWin && score2 === pointsToWin) {
+                            // Равный счет разрешен, но не будет отображаться в таблице
+                            console.log(`Равный счет ${score1}:${score2} разрешен, но не будет отображаться в таблице`);
+                        } else if ((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1))) {
+                            // Специальное правило: если один участник набрал "очков для победы", а другой на 1 меньше, то сет продолжается (например, 11:10)
+                            console.log(`Счет ${score1}:${score2} разрешен - сет продолжается (один участник набрал ${pointsToWin}, другой на 1 меньше)`);
+                        } else if (((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) {
+                            // Специальное правило: если оба участника набрали больше или равно "очков для победы" и разница = 1, то сет продолжается (например, 12:11)
+                            console.log(`Счет ${score1}:${score2} разрешен - сет продолжается`);
+                        } else if (minScore >= (pointsToWin - 1) && !(((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) && !((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1)))) {
+                            // Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
                             if (difference !== 2) {
                                 // Автоматически исправляем счет - делаем разницу ровно 2
                                 const correctMaxScore = minScore + 2;
@@ -1561,7 +1574,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Проверяем, завершен ли сет
                     // Сет завершен, если кто-то набрал необходимое количество очков И разница больше 1
-                    const setCompleted = (score1 >= pointsToWin || score2 >= pointsToWin) && difference > 1;
+                    // Равный счет (например, 11:11) не считается завершенным
+                    // Счет с разницей 1 (например, 11:10, 12:11) не считается завершенным
+                    const setCompleted = (score1 >= pointsToWin || score2 >= pointsToWin) && 
+                                       difference > 1 && 
+                                       !(score1 === pointsToWin && score2 === pointsToWin) &&
+                                       !(((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) &&
+                                       !((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1)));
                     
                     if (setCompleted) {
                         if (score1 > score2) {
@@ -1971,9 +1990,11 @@ function resetSetsForm() {
 
 
 function validateSetScore(setNumber) {
+    console.log(`validateSetScore вызвана для сета ${setNumber}`);
     const score1 = parseInt(document.getElementById(`set${setNumber}Score1`).value) || 0;
     const score2 = parseInt(document.getElementById(`set${setNumber}Score2`).value) || 0;
     const pointsToWin = {{ tournament.points_to_win }};
+    console.log(`validateSetScore: score1=${score1}, score2=${score2}, pointsToWin=${pointsToWin}`);
     
     if (score1 > 0 && score2 > 0) {
         const difference = Math.abs(score1 - score2);
@@ -1983,8 +2004,21 @@ function validateSetScore(setNumber) {
             const maxScore = Math.max(score1, score2);
             const minScore = Math.min(score1, score2);
             
-            // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
-            if (minScore >= pointsToWin) {
+            // Специальное правило: если оба участника набрали "очков для победы", то это равный счет (например, 11:11)
+            if (score1 === pointsToWin && score2 === pointsToWin) {
+                // Равный счет разрешен, но не будет отображаться в таблице
+                console.log(`Равный счет ${score1}:${score2} разрешен, но не будет отображаться в таблице`);
+                return;
+            } else if ((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1))) {
+                // Специальное правило: если один участник набрал "очков для победы", а другой на 1 меньше, то сет продолжается (например, 11:10)
+                console.log(`Счет ${score1}:${score2} разрешен - сет продолжается (один участник набрал ${pointsToWin}, другой на 1 меньше)`);
+                return;
+            } else if (((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) {
+                // Специальное правило: если оба участника набрали больше или равно "очков для победы" и разница = 1, то сет продолжается (например, 12:11)
+                console.log(`Счет ${score1}:${score2} разрешен - сет продолжается`);
+                return;
+            } else if (minScore >= (pointsToWin - 1) && !(((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) && !((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1)))) {
+                // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
                 if (difference !== 2) {
                     alert(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно "очков для победы" (${pointsToWin}), то разница должна быть ровно 2 очка.`);
                     return;
@@ -2088,6 +2122,7 @@ function checkThirdSetLock() {
 }
 
 function updateSetsWon() {
+    console.log('updateSetsWon вызвана');
     let setsWon1 = 0;
     let setsWon2 = 0;
     
@@ -2101,17 +2136,31 @@ function updateSetsWon() {
             
             if (score1 > 0 && score2 > 0) {
                 const difference = Math.abs(score1 - score2);
+                console.log(`updateSetsWon: Сет ${i}, счет ${score1}:${score2}, difference: ${difference}`);
                 
                 // Проверяем валидность счета
                 if (score1 > pointsToWin || score2 > pointsToWin) {
                     const maxScore = Math.max(score1, score2);
                     const minScore = Math.min(score1, score2);
                     
-                    // Если у проигравшего очков больше или равно "очков для победы", то разница должна быть ровно 2
-                    if (minScore >= pointsToWin) {
+                    console.log(`updateSetsWon: Проверка условий для ${score1}:${score2}`);
+                    console.log(`updateSetsWon: score1 > pointsToWin: ${score1 > pointsToWin}, score2 > pointsToWin: ${score2 > pointsToWin}, difference === 1: ${difference === 1}`);
+                    
+                    // Специальное правило: если оба участника набрали "очков для победы", то это равный счет (например, 11:11)
+                    if (score1 === pointsToWin && score2 === pointsToWin) {
+                        // Равный счет разрешен, но не будет отображаться в таблице
+                        console.log(`Равный счет ${score1}:${score2} разрешен, но не будет отображаться в таблице`);
+                    } else if ((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1))) {
+                        // Специальное правило: если один участник набрал "очков для победы", а другой на 1 меньше, то сет продолжается (например, 11:10)
+                        console.log(`updateSetsWon: Счет ${score1}:${score2} разрешен - сет продолжается (один участник набрал ${pointsToWin}, другой на 1 меньше)`);
+                    } else if (((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) {
+                        // Специальное правило: если оба участника набрали больше или равно "очков для победы" и разница = 1, то сет продолжается (например, 12:11)
+                        console.log(`updateSetsWon: Счет ${score1}:${score2} разрешен - сет продолжается`);
+                    } else if (minScore >= (pointsToWin - 1) && !(((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) && !((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1)))) {
+                        // Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
                         if (difference !== 2) {
-                            console.warn(`Неверный счет! Если у проигравшего (${minScore}) очков больше или равно "очков для победы" (${pointsToWin}), то разница должна быть ровно 2 очка.`);
-                            return;
+                            console.warn(`updateSetsWon: Неверный счет! Если у проигравшего (${minScore}) очков больше или равно (${pointsToWin - 1}), то разница должна быть ровно 2 очка.`);
+                            // НЕ возвращаемся - продолжаем обработку
                         }
                     } else {
                         // Если у проигравшего очков меньше "очков для победы", то максимальный счет должен быть равен "очков для победы"
@@ -2123,7 +2172,12 @@ function updateSetsWon() {
                 }
                 
                 // Сет завершен, если кто-то набрал необходимое количество очков И разница больше 1
-                const setCompleted = (score1 >= pointsToWin || score2 >= pointsToWin) && difference > 1;
+                // Исключаем случаи 11:10, 12:11, 11:11
+                const setCompleted = (score1 >= pointsToWin || score2 >= pointsToWin) && 
+                                   difference > 1 && 
+                                   !(score1 === pointsToWin && score2 === pointsToWin) &&
+                                   !(((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) &&
+                                   !((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1)));
                 
                 if (setCompleted) {
                     if (score1 > score2) {

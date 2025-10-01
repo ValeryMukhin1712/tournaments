@@ -237,7 +237,9 @@
                                                 {% endif %}
                                                 <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
                                                 <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
-                                                <td class="d-none d-md-table-cell">{{ participant_stats.goal_difference }}</td>
+                                                <td class="d-none d-md-table-cell">
+                                                    {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
+                                                </td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>

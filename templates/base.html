@@ -12,27 +12,27 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            /* Основные цвета темы - Оригинальный изумруд */
-            --primary-color: #00c851;
-            --primary-light: #00e676;
-            --primary-dark: #00a041;
-            --accent-color: #00bfa5;
-            --accent-light: #1de9b6;
+            /* Основные цвета темы - Серый */
+            --primary-color: #607d8b;
+            --primary-light: #90a4ae;
+            --primary-dark: #455a64;
+            --accent-color: #78909c;
+            --accent-light: #b0bec5;
             
             /* Фоновые цвета */
-            --bg-primary: #e8f5e8;
-            --bg-secondary: #f0fff0;
-            --bg-card: #f1f8e9;
-            --bg-card-hover: #f8fdf8;
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #fafafa;
+            --bg-card: #ffffff;
+            --bg-card-hover: #eeeeee;
             
             /* Границы и тени */
-            --border-color: #a5d6a7;
-            --shadow-color: rgba(0, 200, 81, 0.1);
-            --shadow-hover: rgba(0, 200, 81, 0.15);
-            --shadow-strong: rgba(0, 200, 81, 0.3);
+            --border-color: #bdbdbd;
+            --shadow-color: rgba(96, 125, 139, 0.1);
+            --shadow-hover: rgba(96, 125, 139, 0.15);
+            --shadow-strong: rgba(96, 125, 139, 0.3);
             
             /* Плавающие элементы */
-            --float-color: rgba(0, 200, 81, 0.1);
+            --float-color: rgba(96, 125, 139, 0.1);
             
             /* Дополнительные цвета для совместимости */
             --text-primary: #2c3e50;
@@ -443,6 +443,7 @@
             background: linear-gradient(135deg, #00e676, #1de9b6);
         }
 
+
         .theme-blue label {
             background: linear-gradient(135deg, #2196f3, #42a5f5);
         }
@@ -629,6 +630,10 @@
             {% if request.endpoint == 'index' %}
             <div class="theme-selector">
                 <div class="theme-options">
+                    <div class="theme-option theme-gray">
+                        <input type="radio" id="theme-gray" name="theme" value="gray" onchange="changeTheme(this.value)">
+                        <label for="theme-gray" title="Серый"></label>
+                    </div>
                     <div class="theme-option theme-original-emerald">
                         <input type="radio" id="theme-original-emerald" name="theme" value="original-emerald" onchange="changeTheme(this.value)">
                         <label for="theme-original-emerald" title="Оригинальный изумруд"></label>
@@ -652,10 +657,6 @@
                     <div class="theme-option theme-purple">
                         <input type="radio" id="theme-purple" name="theme" value="purple" onchange="changeTheme(this.value)">
                         <label for="theme-purple" title="Фиолетовый"></label>
-                    </div>
-                    <div class="theme-option theme-gray">
-                        <input type="radio" id="theme-gray" name="theme" value="gray" onchange="changeTheme(this.value)">
-                        <label for="theme-gray" title="Серый"></label>
                     </div>
                     <div class="theme-option theme-black">
                         <input type="radio" id="theme-black" name="theme" value="black" onchange="changeTheme(this.value)">
@@ -1020,9 +1021,24 @@
         }
     };
 
+    // Функция смены темы
+    function changeTheme(themeName) {
+        const root = document.documentElement;
+        const theme = themes[themeName];
+        
+        if (theme) {
+            Object.keys(theme).forEach(key => {
+                root.style.setProperty(key, theme[key]);
+            });
+            
+            // Сохраняем выбранную тему
+            localStorage.setItem('selectedTheme', themeName);
+        }
+    }
+
     // Загружаем сохраненную тему при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
-        const savedTheme = localStorage.getItem('selectedTheme') || 'original-emerald';
+        const savedTheme = localStorage.getItem('selectedTheme') || 'gray';
         const root = document.documentElement;
         const theme = themes[savedTheme];
         
@@ -1030,6 +1046,12 @@
             Object.keys(theme).forEach(key => {
                 root.style.setProperty(key, theme[key]);
             });
+        }
+        
+        // Устанавливаем выбранную тему в радиокнопках
+        const themeRadio = document.getElementById(`theme-${savedTheme}`);
+        if (themeRadio) {
+            themeRadio.checked = true;
         }
     });
     </script>

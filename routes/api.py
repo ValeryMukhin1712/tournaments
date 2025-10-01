@@ -254,7 +254,7 @@ def add_minutes_to_time(time_obj, minutes):
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
 
-def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList):
+def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings):
     """Создает API маршруты приложения"""
     
     # Получаем объект CSRF из приложения
@@ -439,7 +439,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if not tournament:
             return jsonify({'error': 'Турнир не найден'}), 404
             
-        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
             return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
         
         return jsonify({
@@ -567,7 +567,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'success': False, 'error': 'Неверная авторизация'}), 401
         
         # Проверяем права (создатель турнира или системный админ)
-        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
             return jsonify({'success': False, 'error': 'Недостаточно прав для удаления участника'}), 403
         
         try:
@@ -587,7 +587,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.commit()
             
             logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Удалено {len(matches_to_delete)} матчей с его участием. Результаты других матчей сохранены.")
-            logger.info(f"Участник '{participant_name}' (ID: {participant_id}) удален из турнира {tournament_id} админом {admin.email}")
+            logger.info(f"Участник '{participant_name}' (ID: {participant_id}) удален из турнира {tournament_id} админом {admin.username}")
             return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален. Результаты матчей других участников сохранены.'}), 200
             
         except Exception as e:
@@ -622,7 +622,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'error': 'Неверная авторизация'}), 401
         
         # Проверяем права (создатель турнира или системный админ)
-        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
             return jsonify({'error': 'Недостаточно прав для удаления турнира'}), 403
         
         try:
@@ -639,7 +639,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             db.session.commit()
             
-            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin.email}")
+            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin.username}")
             return jsonify({
                 'success': True, 
                 'message': f'Турнир "{tournament_name}" успешно удален'
@@ -778,7 +778,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if not tournament:
             return jsonify({'error': 'Турнир не найден'}), 404
             
-        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
             return jsonify({'error': 'Недостаточно прав для изменения матча'}), 403
         
         data = request.get_json()
@@ -827,8 +827,18 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                         loser_score = min(score1, score2)
                         winner_score = max(score1, score2)
                         
-                        # Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
-                        if loser_score >= (points_to_win - 1):
+                        # Специальное правило: если оба участника набрали "очков для победы", то это равный счет (например, 11:11)
+                        if score1 == points_to_win and score2 == points_to_win:
+                            # Равный счет разрешен, но не будет отображаться в таблице
+                            print(f"Равный счет {score1}:{score2} разрешен, но не будет отображаться в таблице")
+                        elif (score1 == points_to_win and score2 == (points_to_win - 1)) or (score2 == points_to_win and score1 == (points_to_win - 1)):
+                            # Специальное правило: если один участник набрал "очков для победы", а другой на 1 меньше, то сет продолжается (например, 11:10)
+                            print(f"Счет {score1}:{score2} разрешен - сет продолжается (один участник набрал {points_to_win}, другой на 1 меньше)")
+                        elif ((score1 > points_to_win and score2 >= points_to_win) or (score2 > points_to_win and score1 >= points_to_win)) and difference == 1:
+                            # Специальное правило: если оба участника набрали больше "очков для победы" и разница = 1, то сет продолжается (например, 12:11 или 11:12)
+                            print(f"Счет {score1}:{score2} разрешен - сет продолжается")
+                        elif loser_score >= (points_to_win - 1) and not (((score1 > points_to_win and score2 >= points_to_win) or (score2 > points_to_win and score1 >= points_to_win)) and difference == 1) and not ((score1 == points_to_win and score2 == (points_to_win - 1)) or (score2 == points_to_win and score1 == (points_to_win - 1))):
+                            # Если у проигравшего очков больше или равно ("очков для победы" - 1), то разница должна быть ровно 2
                             if difference != 2:
                                 return jsonify({
                                     'success': False,
@@ -838,7 +848,13 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                         # Если сет помечен как завершенный, проверяем правила победы
                         if completed:
                             # Проверяем: кто-то набрал необходимое количество очков И разница больше 1
-                            if not ((score1 >= points_to_win or score2 >= points_to_win) and difference > 1):
+                            # Равный счет (например, 11:11) не считается завершенным
+                            # Счет с разницей 1 (например, 11:10, 12:11) не считается завершенным
+                            if not ((score1 >= points_to_win or score2 >= points_to_win) and 
+                                   difference > 1 and 
+                                   not (score1 == points_to_win and score2 == points_to_win) and
+                                   not (((score1 > points_to_win and score2 >= points_to_win) or (score2 > points_to_win and score1 >= points_to_win)) and difference == 1) and
+                                   not ((score1 == points_to_win and score2 == (points_to_win - 1)) or (score2 == points_to_win and score1 == (points_to_win - 1)))):
                                 return jsonify({
                                     'success': False,
                                     'error': f'Сет {set_number} не может быть завершен со счетом {score1}:{score2}. Для победы нужно набрать {points_to_win} очков с разницей больше 1.'
@@ -984,7 +1000,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if not tournament:
             return jsonify({'error': 'Турнир не найден'}), 404
             
-        if admin.id != tournament.admin_id and admin.email != 'admin@system':
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
             return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
         
         db.session.delete(match)
@@ -1899,159 +1915,6 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"Ошибка при составлении расписания: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при составлении расписания'}), 500
 
-    @app.route('/api/tournaments/<int:tournament_id>/export', methods=['POST'])
-    def export_tournament(tournament_id):
-        """Экспорт данных турнира в Excel и отправка на email администратора"""
-        try:
-            # Проверяем CSRF токен
-            from flask_wtf.csrf import validate_csrf
-            try:
-                validate_csrf(request.headers.get('X-CSRFToken'))
-            except Exception as e:
-                logger.warning(f"CSRF validation failed: {e}")
-                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
-            
-            # Получаем турнир
-            tournament = Tournament.query.get(tournament_id)
-            if not tournament:
-                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
-            
-            # Получаем участников турнира
-            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-            
-            # Получаем матчи турнира
-            matches = Match.query.filter_by(tournament_id=tournament_id).all()
-            
-            # Создаем CSV файл без pandas
-            import io
-            import csv
-            from flask_mail import Mail, Message
-            from datetime import datetime
-            
-            # Создаем CSV файл в памяти
-            output = io.StringIO()
-            writer = csv.writer(output)
-            
-            # Заголовок турнира
-            writer.writerow(['ТУРНИР'])
-            writer.writerow(['Название', tournament.name])
-            writer.writerow(['Спорт', tournament.sport_type or 'Теннис'])
-            writer.writerow(['Дата начала', tournament.start_date.strftime('%d.%m.%Y') if tournament.start_date else 'Не указана'])
-            writer.writerow(['Количество участников', len(participants)])
-            writer.writerow(['Количество кортов', tournament.court_count or 4])
-            writer.writerow(['Длительность матча (мин)', tournament.match_duration or 15])
-            writer.writerow(['Длительность перерыва (мин)', tournament.break_duration or 2])
-            writer.writerow([])  # Пустая строка
-            
-            # Участники
-            writer.writerow(['УЧАСТНИКИ'])
-            writer.writerow(['Место', 'Участник', 'Игр', 'Побед', 'Поражений', 'Очки'])
-            
-            for i, participant in enumerate(participants, 1):
-                # Подсчитываем статистику участника
-                wins = 0
-                losses = 0
-                points = participant.points or 0
-                
-                for match in matches:
-                    if match.status == 'завершен':
-                        if match.participant1_id == participant.id:
-                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
-                                if match.sets_won_1 > match.sets_won_2:
-                                    wins += 1
-                                elif match.sets_won_1 < match.sets_won_2:
-                                    losses += 1
-                        elif match.participant2_id == participant.id:
-                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
-                                if match.sets_won_1 < match.sets_won_2:
-                                    wins += 1
-                                elif match.sets_won_1 > match.sets_won_2:
-                                    losses += 1
-                
-                writer.writerow([i, participant.name, wins + losses, wins, losses, points])
-            
-            writer.writerow([])  # Пустая строка
-            
-            # Матчи
-            writer.writerow(['МАТЧИ'])
-            writer.writerow(['Дата', 'Время', 'Корт', 'Участник 1', 'Участник 2', 'Счет', 'Статус', 'Сет 1', 'Сет 2', 'Сет 3'])
-            
-            for match in matches:
-                # Находим участников по ID
-                participant1 = next((p for p in participants if p.id == match.participant1_id), None)
-                participant2 = next((p for p in participants if p.id == match.participant2_id), None)
-                
-                writer.writerow([
-                    match.match_date.strftime('%d.%m.%Y') if match.match_date else 'Не указана',
-                    match.match_time.strftime('%H:%M') if match.match_time else 'Не указано',
-                    match.court_number or 'Не указан',
-                    participant1.name if participant1 else 'Неизвестно',
-                    participant2.name if participant2 else 'Неизвестно',
-                    f"{match.sets_won_1}:{match.sets_won_2}" if match.sets_won_1 is not None and match.sets_won_2 is not None else 'Не завершен',
-                    match.status,
-                    f"{match.set1_score1}:{match.set1_score2}" if match.set1_score1 is not None and match.set1_score2 is not None else '',
-                    f"{match.set2_score1}:{match.set2_score2}" if match.set2_score1 is not None and match.set2_score2 is not None else '',
-                    f"{match.set3_score1}:{match.set3_score2}" if match.set3_score1 is not None and match.set3_score2 is not None else ''
-                ])
-            
-            # Получаем данные CSV файла
-            csv_data = output.getvalue().encode('utf-8')
-            
-            # Отправляем email с CSV файлом
-            try:
-                from flask_mail import Message
-                
-                # Создаем сообщение
-                msg = Message(
-                    subject=f'Данные турнира "{tournament.name}"',
-                    sender=app.config['MAIL_DEFAULT_SENDER'],
-                    recipients=['yandvm@yandex.ru'],  # Email администратора турнира
-                    body=f'''
-Здравствуйте!
-
-Во вложении вы найдете полные данные турнира "{tournament.name}".
-
-Файл содержит:
-- Информацию о турнире
-- Статистику участников
-- Детали всех матчей
-
-Дата экспорта: {datetime.now().strftime('%d.%m.%Y %H:%M')}
-
-С уважением,
-Турнирный Ассистент
-                    '''
-                )
-                
-                # Прикрепляем CSV файл
-                msg.attach(
-                    filename=f'tournament_{tournament.name}_{datetime.now().strftime("%Y%m%d_%H%M")}.csv',
-                    content_type='text/csv',
-                    data=csv_data
-                )
-                
-                # Отправляем письмо (используем глобальный объект mail)
-                from flask import current_app
-                mail = current_app.extensions['mail']
-                mail.send(msg)
-                
-                logger.info(f"Данные турнира '{tournament.name}' отправлены на email yandvm@yandex.ru")
-                
-                return jsonify({
-                    'success': True,
-                    'message': f'Данные турнира "{tournament.name}" успешно отправлены на email администратора!'
-                })
-                
-            except Exception as email_error:
-                logger.error(f"Ошибка при отправке email: {email_error}")
-                return jsonify({
-                    'success': False,
-                    'error': f'Ошибка при отправке email: {str(email_error)}'
-                }), 500
-            
-        except Exception as e:
-            logger.error(f"Ошибка при экспорте турнира: {e}")
-            return jsonify({'success': False, 'error': f'Ошибка при экспорте турнира: {str(e)}'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>/add-late-participant', methods=['POST'])
     def add_late_participant(tournament_id):
@@ -2220,8 +2083,11 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     def admin_get_tokens():
         """Получение списка токенов для админ-панели"""
         try:
-            # Получаем все токены с информацией о статусе отправки
-            tokens = Token.query.order_by(Token.created_at.desc()).all()
+            # Получаем параметр max из запроса
+            max_tokens = request.args.get('max', type=int, default=4)
+            
+            # Получаем токены с ограничением по количеству
+            tokens = Token.query.order_by(Token.created_at.desc()).limit(max_tokens).all()
             
             token_list = []
             for token in tokens:
@@ -2239,14 +2105,24 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 }
                 token_list.append(token_data)
             
+            # Получаем общую статистику по всем токенам в базе
+            all_tokens = Token.query.all()
+            total_tokens = len(all_tokens)
+            pending_count = len([t for t in all_tokens if t.email_status == 'pending'])
+            manual_count = len([t for t in all_tokens if t.email_status == 'manual'])
+            sent_count = len([t for t in all_tokens if t.email_status == 'sent'])
+            failed_count = len([t for t in all_tokens if t.email_status == 'failed'])
+            
             return jsonify({
                 'success': True,
                 'tokens': token_list,
-                'total': len(token_list),
-                'pending': len([t for t in token_list if t['email_status'] == 'pending']),
-                'manual': len([t for t in token_list if t['email_status'] == 'manual']),
-                'sent': len([t for t in token_list if t['email_status'] == 'sent']),
-                'failed': len([t for t in token_list if t['email_status'] == 'failed'])
+                'total': total_tokens,
+                'pending': pending_count,
+                'manual': manual_count,
+                'sent': sent_count,
+                'failed': failed_count,
+                'showing': len(token_list),  # Количество отображаемых токенов
+                'max_tokens': int(Settings.get_setting('max_tokens', '4'))  # Текущее максимальное количество токенов
             })
             
         except Exception as e:
@@ -2435,3 +2311,31 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при отправке через внешний сервис: {e}")
             return jsonify({'success': False, 'error': f'Ошибка при отправке: {str(e)}'}), 500
+
+    @app.route('/api/admin/update-max-tokens', methods=['POST'])
+    def update_max_tokens():
+        """Обновление максимального количества токенов"""
+        try:
+            data = request.get_json()
+            max_tokens = data.get('max_tokens')
+            
+            if not max_tokens or not isinstance(max_tokens, int) or max_tokens < 1 or max_tokens > 100:
+                return jsonify({
+                    'success': False,
+                    'error': 'Некорректное значение максимального количества токенов (должно быть от 1 до 100)'
+                }), 400
+            
+            # Обновляем настройку
+            Settings.set_setting('max_tokens', str(max_tokens), 'Максимальное количество токенов для создания турниров')
+            
+            logger.info(f"Максимальное количество токенов обновлено на {max_tokens}")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Максимальное количество токенов обновлено на {max_tokens}',
+                'max_tokens': max_tokens
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении максимального количества токенов: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при обновлении настроек'}), 500

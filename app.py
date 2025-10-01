@@ -86,9 +86,10 @@ Notification = models['Notification']
 MatchLog = models['MatchLog']
 Token = models['Token']
 WaitingList = models['WaitingList']
+Settings = models['Settings']
 
 # Импорт и регистрация маршрутов
-register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList)
+register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -114,6 +115,10 @@ def init_db():
                 admin.password_hash = generate_password_hash('adm444')
                 db.session.commit()
                 logger.info("Пароль администратора обновлен: admin/adm444")
+            
+            # Инициализация настроек по умолчанию
+            Settings.set_setting('max_tokens', '4', 'Максимальное количество токенов для создания турниров')
+            logger.info("Настройки по умолчанию инициализированы")
                 
         except Exception as e:
             logger.error(f"Ошибка инициализации базы данных: {e}")

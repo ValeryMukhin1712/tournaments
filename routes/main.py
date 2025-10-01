@@ -284,7 +284,7 @@ def send_token_email_async(email, name, token, app=None):
     logger.info(f"Асинхронная отправка email запущена для {email}")
     return True  # Возвращаем True сразу, не ждем завершения
 
-def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList):
+def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings):
     """Создает основные маршруты приложения"""
     
     def check_tournament_access(tournament_id, admin_id=None):
@@ -386,12 +386,15 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             
             # ОТЛАДКА: Проверяем количество уже выданных токенов
             total_tokens = Token.query.count()
-            logger.info(f"Текущее количество выданных токенов: {total_tokens}")
+            max_tokens = int(Settings.get_setting('max_tokens', '4'))
+            logger.info(f"Текущее количество выданных токенов: {total_tokens}, максимум: {max_tokens}")
             
-            if total_tokens >= 2:
-                logger.info("Достигнут лимит токенов (2). Отказываем в выдаче нового токена.")
-                flash('Свободных токенов пока нет', 'warning')
-                return render_template('request_token.html')
+            if total_tokens >= max_tokens:
+                logger.info(f"Достигнут лимит токенов ({max_tokens}). Отказываем в выдаче нового токена.")
+                flash(f'Свободных токенов пока нет (лимит: {max_tokens})', 'warning')
+                return render_template('request_token.html', 
+                                     total_tokens=total_tokens,
+                                     max_tokens=max_tokens)
             
             # Генерируем целочисленный токен в диапазоне 10-99
             import random
@@ -450,11 +453,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         # Для GET запроса показываем информацию о количестве токенов
         total_tokens = Token.query.count()
-        logger.info(f"GET запрос на страницу токенов. Текущее количество: {total_tokens}")
+        max_tokens = int(Settings.get_setting('max_tokens', '4'))
+        logger.info(f"GET запрос на страницу токенов. Текущее количество: {total_tokens}, максимум: {max_tokens}")
         
         return render_template('request_token.html', 
                              total_tokens=total_tokens,
-                             max_tokens=2)
+                             max_tokens=max_tokens)
     
     @app.route('/create-tournament', methods=['GET', 'POST'])
     def create_tournament_form():
@@ -2063,9 +2067,21 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         participant_stats_dict[participant2_id]['matches_drawn'] += 1
                         participant_stats_dict[participant2_id]['points'] += tournament.points_draw
                     
-                    # Обновляем разницу очков
-                    participant_stats_dict[participant1_id]['goal_difference'] += (match.sets_won_1 - match.sets_won_2)
-                    participant_stats_dict[participant2_id]['goal_difference'] += (match.sets_won_2 - match.sets_won_1)
+                    # Обновляем разницу очков в сетах
+                    # Считаем разницу в очках внутри сетов, а не количество выигранных сетов
+                    set1_score1 = match.set1_score1 or 0
+                    set1_score2 = match.set1_score2 or 0
+                    set2_score1 = match.set2_score1 or 0
+                    set2_score2 = match.set2_score2 or 0
+                    set3_score1 = match.set3_score1 or 0
+                    set3_score2 = match.set3_score2 or 0
+                    
+                    # Общая разница в очках для участника 1
+                    participant1_score_diff = (set1_score1 - set1_score2) + (set2_score1 - set2_score2) + (set3_score1 - set3_score2)
+                    participant2_score_diff = (set1_score2 - set1_score1) + (set2_score2 - set2_score1) + (set3_score2 - set3_score1)
+                    
+                    participant_stats_dict[participant1_id]['goal_difference'] += participant1_score_diff
+                    participant_stats_dict[participant2_id]['goal_difference'] += participant2_score_diff
         
         # Создаем списки участников с статистикой
         for i, participant in enumerate(participants):
@@ -2312,5 +2328,111 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         return render_template('tournaments_list.html', 
                              tournaments=tournaments,
                              viewer_name=session.get('viewer_name', ''))
+    
+    @app.route('/export-tournament/<int:tournament_id>')
+    def export_tournament(tournament_id):
+        """Экспорт данных турнира в Excel файл для скачивания"""
+        from flask import Response
+        import io
+        import csv
+        from datetime import datetime
+        
+        try:
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Получаем участников турнира
+            participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            
+            # Получаем матчи турнира
+            matches = Match.query.filter_by(tournament_id=tournament_id).all()
+            
+            # Создаем CSV файл в памяти
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # Заголовок турнира
+            writer.writerow(['ТУРНИР'])
+            writer.writerow(['Название', tournament.name])
+            writer.writerow(['Спорт', tournament.sport_type or 'Теннис'])
+            writer.writerow(['Дата начала', tournament.start_date.strftime('%d.%m.%Y') if tournament.start_date else 'Не указана'])
+            writer.writerow(['Количество участников', len(participants)])
+            writer.writerow(['Количество кортов', tournament.court_count or 4])
+            writer.writerow(['Длительность матча (мин)', tournament.match_duration or 15])
+            writer.writerow(['Длительность перерыва (мин)', tournament.break_duration or 2])
+            writer.writerow([])  # Пустая строка
+            
+            # Участники
+            writer.writerow(['УЧАСТНИКИ'])
+            writer.writerow(['Место', 'Участник', 'Игр', 'Побед', 'Поражений', 'Очки'])
+            
+            for i, participant in enumerate(participants, 1):
+                # Подсчитываем статистику участника
+                wins = 0
+                losses = 0
+                points = participant.points or 0
+                
+                for match in matches:
+                    if match.status == 'завершен':
+                        if match.participant1_id == participant.id:
+                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                if match.sets_won_1 > match.sets_won_2:
+                                    wins += 1
+                                elif match.sets_won_1 < match.sets_won_2:
+                                    losses += 1
+                        elif match.participant2_id == participant.id:
+                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                if match.sets_won_1 < match.sets_won_2:
+                                    wins += 1
+                                elif match.sets_won_1 > match.sets_won_2:
+                                    losses += 1
+                
+                writer.writerow([i, participant.name, wins + losses, wins, losses, points])
+            
+            writer.writerow([])  # Пустая строка
+            
+            # Матчи
+            writer.writerow(['МАТЧИ'])
+            writer.writerow(['Дата', 'Время', 'Корт', 'Участник 1', 'Участник 2', 'Счет', 'Статус', 'Сет 1', 'Сет 2', 'Сет 3'])
+            
+            for match in matches:
+                # Находим участников по ID
+                participant1 = next((p for p in participants if p.id == match.participant1_id), None)
+                participant2 = next((p for p in participants if p.id == match.participant2_id), None)
+                
+                writer.writerow([
+                    match.match_date.strftime('%d.%m.%Y') if match.match_date else 'Не указана',
+                    match.match_time.strftime('%H:%M') if match.match_time else 'Не указано',
+                    match.court_number or 'Не указан',
+                    participant1.name if participant1 else 'Неизвестно',
+                    participant2.name if participant2 else 'Неизвестно',
+                    f"{match.sets_won_1}:{match.sets_won_2}" if match.sets_won_1 is not None and match.sets_won_2 is not None else 'Не завершен',
+                    match.status,
+                    f"{match.set1_score1}:{match.set1_score2}" if match.set1_score1 is not None and match.set1_score2 is not None else '',
+                    f"{match.set2_score1}:{match.set2_score2}" if match.set2_score1 is not None and match.set2_score2 is not None else '',
+                    f"{match.set3_score1}:{match.set3_score2}" if match.set3_score1 is not None and match.set3_score2 is not None else ''
+                ])
+            
+            # Получаем данные CSV файла
+            csv_data = output.getvalue().encode('utf-8')
+            
+            # Создаем имя файла
+            filename = f'tournament_{tournament.name}_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
+            
+            # Возвращаем файл для скачивания
+            return Response(
+                csv_data,
+                mimetype='text/csv',
+                headers={
+                    'Content-Disposition': f'attachment; filename="{filename}"',
+                    'Content-Type': 'text/csv; charset=utf-8'
+                }
+            )
+            
+        except Exception as e:
+            app.logger.error(f"Ошибка при экспорте турнира: {e}")
+            return jsonify({'success': False, 'error': f'Ошибка при экспорте турнира: {str(e)}'}), 500
     
     # ===== КОНЕЦ create_main_routes =====

@@ -95,7 +95,11 @@
                             <label for="search-input" class="form-label">Поиск по email или имени:</label>
                             <input type="text" class="form-control" id="search-input" placeholder="Введите email или имя...">
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
+                        <div class="col-md-2">
+                            <label for="max-tokens" class="form-label">Макс. токенов:</label>
+                            <input type="number" class="form-control" id="max-tokens" value="4" min="1" max="100">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
                             <button class="btn btn-primary me-2" onclick="loadTokens()">
                                 <i class="fas fa-sync-alt me-1"></i>Обновить
                             </button>
@@ -107,7 +111,10 @@
             <!-- Таблица токенов -->
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Список токенов</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Список токенов
+                        <small class="text-muted" id="showing-info">(загрузка...)</small>
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -186,7 +193,10 @@ let tokensData = [];
 // Загрузка токенов
 function loadTokens() {
     console.log('Загрузка токенов...');
-    fetch('/api/admin/tokens')
+    const maxTokens = document.getElementById('max-tokens').value;
+    console.log('Максимальное количество токенов:', maxTokens);
+    
+    fetch(`/api/admin/tokens?max=${maxTokens}`)
         .then(response => response.json())
         .then(data => {
             console.log('Получены данные токенов:', data);
@@ -205,6 +215,27 @@ function loadTokens() {
         });
 }
 
+// Загрузка текущего значения максимального количества токенов
+function loadMaxTokensSetting() {
+    console.log('Загрузка настройки максимального количества токенов...');
+    
+    fetch('/api/admin/tokens?max=1') // Загружаем минимальное количество для получения настройки
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.max_tokens) {
+                document.getElementById('max-tokens').value = data.max_tokens;
+                console.log('Установлено максимальное количество токенов:', data.max_tokens);
+                // После загрузки настройки загружаем токены с правильным лимитом
+                loadTokens();
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке настройки:', error);
+            // В случае ошибки все равно загружаем токены
+            loadTokens();
+        });
+}
+
 // Обновление статистики
 function updateStatistics(data) {
     document.getElementById('total-tokens').textContent = data.total;
@@ -215,6 +246,14 @@ function updateStatistics(data) {
     // Обновляем заголовок карточки "Ручная отправка" чтобы показать общее количество неотправленных
     const unsentCount = data.pending + data.manual + data.failed;
     document.getElementById('manual-tokens').textContent = unsentCount;
+    
+    // Обновляем информацию о количестве отображаемых токенов
+    const showingInfo = document.getElementById('showing-info');
+    if (data.showing !== undefined) {
+        showingInfo.textContent = `(показано ${data.showing} из ${data.total})`;
+    } else {
+        showingInfo.textContent = `(показано ${data.tokens.length} из ${data.total})`;
+    }
 }
 
 // Отображение таблицы токенов
@@ -427,8 +466,47 @@ function showAlert(message, type) {
 // Фильтрация при изменении
 document.getElementById('status-filter').addEventListener('change', () => renderTokensTable(tokensData));
 document.getElementById('search-input').addEventListener('input', () => renderTokensTable(tokensData));
+document.getElementById('max-tokens').addEventListener('change', () => {
+    updateMaxTokensSetting();
+    loadTokens();
+});
+
+// Обновление настройки максимального количества токенов
+function updateMaxTokensSetting() {
+    const maxTokens = document.getElementById('max-tokens').value;
+    console.log('Обновление максимального количества токенов на:', maxTokens);
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    fetch('/api/admin/update-max-tokens', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken || ''
+        },
+        body: JSON.stringify({
+            max_tokens: parseInt(maxTokens)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Настройка обновлена:', data.message);
+            showAlert(data.message, 'success');
+        } else {
+            console.error('Ошибка обновления настройки:', data.error);
+            showAlert('Ошибка при обновлении настройки: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        showAlert('Ошибка при обновлении настройки', 'danger');
+    });
+}
 
 // Загрузка при открытии страницы
-document.addEventListener('DOMContentLoaded', loadTokens);
+document.addEventListener('DOMContentLoaded', () => {
+    loadMaxTokensSetting();
+});
 </script>
 {% endblock %}
