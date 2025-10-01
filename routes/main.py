@@ -1079,6 +1079,15 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             name = request.form.get('name')
             description = request.form.get('description')
             sport_type = request.form.get('sport_type', 'пинг-понг')  # Значение по умолчанию
+            
+            # Обрабатываем кастомный вид спорта
+            if sport_type == 'custom':
+                custom_sport = request.form.get('custom_sport', '').strip()
+                if custom_sport:
+                    sport_type = custom_sport
+                else:
+                    flash('Пожалуйста, введите вид спорта', 'error')
+                    return render_template('admin_create_tournament.html', admin=admin)
             start_date = request.form.get('start_date')
             court_count = int(request.form.get('court_count', 4))
             match_duration = int(request.form.get('match_duration', 60))

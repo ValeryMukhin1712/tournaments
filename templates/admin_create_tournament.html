@@ -69,12 +69,47 @@
         border-radius: 10px;
         padding: 0.75rem;
         transition: all 0.3s ease;
+        color: var(--text-primary) !important;
+        height: auto !important;
+        min-height: 38px !important;
     }
 
     .form-control:focus, .form-select:focus {
         background: rgba(255, 255, 255, 1);
         border-color: var(--accent-color);
         box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+    }
+
+    .form-select option {
+        color: var(--text-primary);
+        background: white;
+        padding: 8px;
+    }
+
+    .form-select {
+        color: var(--text-primary) !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        line-height: 1.5 !important;
+        vertical-align: middle !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .form-select:focus {
+        color: var(--text-primary) !important;
+        background-color: rgba(255, 255, 255, 1) !important;
+    }
+
+    .form-select:not(:focus) {
+        color: var(--text-primary) !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .form-select option {
+        color: var(--text-primary) !important;
+        background: white !important;
+        padding: 8px !important;
+        line-height: 1.5 !important;
     }
 
     .form-label {
@@ -216,10 +251,14 @@
                                 <div class="mb-3">
                                     <label for="sport_type" class="form-label">Вид спорта *</label>
                                     <select class="form-select" id="sport_type" name="sport_type" required>
-                                        <option value="пинг-понг" selected>Пинг-понг</option>
-                                        <option value="бадминтон">Бадминтон</option>
-                                        <option value="волейбол">Волейбол</option>
+                                        <option value="Пинг-понг" selected>Пинг-понг</option>
+                                        <option value="Бадминтон">Бадминтон</option>
+                                        <option value="Волейбол">Волейбол</option>
+                                        <option value="custom">Другой...</option>
                                     </select>
+                                    <div id="custom_sport_container" class="mt-2" style="display: none;">
+                                        <input type="text" class="form-control" id="custom_sport" name="custom_sport" placeholder="Введите вид спорта">
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -319,6 +358,9 @@
 </div>
 
 <script>
+// Версия скрипта для обновления кэша
+console.log('Tournament creation script loaded v4.0 - hybrid select with custom input');
+
 // Устанавливаем текущую дату по умолчанию
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
@@ -332,13 +374,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const setsToWinInput = document.getElementById('sets_to_win');
     
     const sportDefaults = {
-        'пинг-понг': { matchDuration: 15, breakDuration: 2, pointsToWin: 11, setsToWin: 2 },
-        'бадминтон': { matchDuration: 20, breakDuration: 2, pointsToWin: 21, setsToWin: 2 },
-        'волейбол': { matchDuration: 20, breakDuration: 2, pointsToWin: 25, setsToWin: 2 }
+        'Пинг-понг': { matchDuration: 15, breakDuration: 2, pointsToWin: 11, setsToWin: 2 },
+        'Бадминтон': { matchDuration: 20, breakDuration: 2, pointsToWin: 21, setsToWin: 2 },
+        'Волейбол': { matchDuration: 20, breakDuration: 2, pointsToWin: 25, setsToWin: 2 }
     };
     
+    // Отладочная информация
+    console.log('Available sports:', Object.keys(sportDefaults));
+    console.log('Select options:', sportTypeSelect.querySelectorAll('option').length);
+    
+    // Получаем элементы для кастомного ввода
+    const customSportContainer = document.getElementById('custom_sport_container');
+    const customSportInput = document.getElementById('custom_sport');
+    
+    // Обработчик изменения вида спорта
     sportTypeSelect.addEventListener('change', function() {
-        const selectedSport = this.value;
+        const selectedValue = this.value;
+        
+        if (selectedValue === 'custom') {
+            // Показываем поле для ввода кастомного вида спорта
+            customSportContainer.style.display = 'block';
+            customSportInput.required = true;
+            customSportInput.focus();
+        } else {
+            // Скрываем поле для ввода кастомного вида спорта
+            customSportContainer.style.display = 'none';
+            customSportInput.required = false;
+            customSportInput.value = '';
+        }
+        
+        // Вызываем обработчик для обновления настроек
+        handleSportChange(selectedValue);
+    });
+    
+    // Функция для обработки изменения вида спорта
+    function handleSportChange(selectedSport) {
         const defaults = sportDefaults[selectedSport];
         
         if (defaults) {
@@ -362,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Добавляем новое уведомление
             sportTypeSelect.parentNode.appendChild(notification);
         }
-    });
+    }
 });
 </script>
 {% endblock %}
