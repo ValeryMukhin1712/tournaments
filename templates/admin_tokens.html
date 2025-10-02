@@ -1,81 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Управление токенами - Турнирный Ассистент{% endblock %}
+{% block title %}Управление паролями - Турнирный Ассистент{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-key me-2"></i>Управление токенами</h2>
+                <h2><i class="fas fa-key me-2"></i>Управление паролями</h2>
                 <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Назад к панели
                 </a>
             </div>
 
-            <!-- Статистика -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0" id="total-tokens">0</h4>
-                                    <small>Всего токенов</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-key fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0" id="pending-tokens">0</h4>
-                                    <small>Ожидают отправки</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-clock fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0" id="manual-tokens">0</h4>
-                                    <small>Неотправленные</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-hand-paper fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0" id="sent-tokens">0</h4>
-                                    <small>Отправлены</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-check fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Фильтры -->
             <div class="card mb-4">
@@ -84,7 +21,7 @@
                         <div class="col-md-4">
                             <label for="status-filter" class="form-label">Фильтр по статусу:</label>
                             <select class="form-select" id="status-filter">
-                                <option value="all">Все токены</option>
+                                <option value="all">Все пароли</option>
                                 <option value="pending">Ожидают отправки</option>
                                 <option value="manual">Ручная отправка</option>
                                 <option value="sent">Отправлены</option>
@@ -96,8 +33,8 @@
                             <input type="text" class="form-control" id="search-input" placeholder="Введите email или имя...">
                         </div>
                         <div class="col-md-2">
-                            <label for="max-tokens" class="form-label">Макс. токенов:</label>
-                            <input type="number" class="form-control" id="max-tokens" value="4" min="1" max="100">
+                            <label for="max-tokens" class="form-label">Макс. паролей:</label>
+                            <input type="number" class="form-control" id="max-tokens" value="10" min="1" max="90">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <button class="btn btn-primary me-2" onclick="loadTokens()">
@@ -112,7 +49,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Список токенов
+                        <i class="fas fa-list me-2"></i>Список паролей
                         <small class="text-muted" id="showing-info">(загрузка...)</small>
                     </h5>
                 </div>
@@ -122,7 +59,7 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Токен</th>
+                                    <th>Пароль</th>
                                     <th>Имя</th>
                                     <th>Email</th>
                                     <th>Создан</th>
@@ -153,14 +90,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ручная отправка токена</h5>
+                <h5 class="modal-title">Ручная отправка пароля</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="sendTokenForm">
                     <input type="hidden" id="token-id" name="token_id">
                     <div class="mb-3">
-                        <label for="token-value" class="form-label">Токен:</label>
+                        <label for="token-value" class="form-label">Пароль:</label>
                         <input type="text" class="form-control" id="token-value" readonly>
                     </div>
                     <div class="mb-3">
@@ -171,16 +108,12 @@
                         <label for="token-email" class="form-label">Email получателя:</label>
                         <input type="email" class="form-control" id="token-email" name="email">
                     </div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Внимание:</strong> Если email не указан, будет использован оригинальный email получателя.
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 <button type="button" class="btn btn-primary" onclick="sendTokenManually()">
-                    <i class="fas fa-paper-plane me-1"></i>Отправить токен
+                    <i class="fas fa-paper-plane me-1"></i>Отправить пароль
                 </button>
             </div>
         </div>
@@ -238,15 +171,6 @@ function loadMaxTokensSetting() {
 
 // Обновление статистики
 function updateStatistics(data) {
-    document.getElementById('total-tokens').textContent = data.total;
-    document.getElementById('pending-tokens').textContent = data.pending;
-    document.getElementById('manual-tokens').textContent = data.manual;
-    document.getElementById('sent-tokens').textContent = data.sent;
-    
-    // Обновляем заголовок карточки "Ручная отправка" чтобы показать общее количество неотправленных
-    const unsentCount = data.pending + data.manual + data.failed;
-    document.getElementById('manual-tokens').textContent = unsentCount;
-    
     // Обновляем информацию о количестве отображаемых токенов
     const showingInfo = document.getElementById('showing-info');
     if (data.showing !== undefined) {
@@ -278,7 +202,7 @@ function renderTokensTable(tokens) {
     }
     
     if (filteredTokens.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Токены не найдены</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Пароли не найдены</td></tr>';
         return;
     }
     

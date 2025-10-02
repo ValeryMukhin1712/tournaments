@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Запрос токена - Турнирный Ассистент v2.1{% endblock %}
+{% block title %}Запрос пароля - Турнирный Ассистент v2.1{% endblock %}
 
 {% block content %}
 <style>
@@ -162,9 +162,9 @@
         <div class="text-center mb-5">
             <h1 class="hero-title display-4">
                 <i class="fas fa-key me-3"></i>
-                Получить токен
+                Получить пароль
             </h1>
-            <p class="lead text-muted">Заполните форму для получения токена доступа</p>
+            <p class="lead text-muted">Заполните форму для получения пароля доступа</p>
         </div>
         
         <div class="row justify-content-center">
@@ -187,7 +187,7 @@
                         <div class="text-center mb-4">
                             <small class="text-muted">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Выдано токенов: {{ total_tokens }}/{{ max_tokens }}
+                                Выдано паролей: {{ total_tokens }}/{{ max_tokens }}
                                 {% if total_tokens >= max_tokens %}
                                 <span class="badge bg-warning ms-2">Лимит достигнут</span>
                                 {% endif %}
@@ -213,7 +213,7 @@
                                     <i class="fas fa-arrow-left me-2"></i>Назад
                                 </a>
                                 <button type="submit" class="btn btn-gradient">
-                                    <i class="fas fa-key me-2"></i>Получить токен
+                                    <i class="fas fa-key me-2"></i>Получить пароль
                                 </button>
                             </div>
                         </form>

@@ -2084,7 +2084,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         """Получение списка токенов для админ-панели"""
         try:
             # Получаем параметр max из запроса
-            max_tokens = request.args.get('max', type=int, default=4)
+            max_tokens = request.args.get('max', type=int, default=10)
             
             # Получаем токены с ограничением по количеству
             tokens = Token.query.order_by(Token.created_at.desc()).limit(max_tokens).all()
@@ -2122,7 +2122,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 'sent': sent_count,
                 'failed': failed_count,
                 'showing': len(token_list),  # Количество отображаемых токенов
-                'max_tokens': int(Settings.get_setting('max_tokens', '4'))  # Текущее максимальное количество токенов
+                'max_tokens': int(Settings.get_setting('max_tokens', '10'))  # Текущее максимальное количество паролей
             })
             
         except Exception as e:

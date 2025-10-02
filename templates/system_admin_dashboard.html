@@ -13,7 +13,7 @@
                 </h1>
                 <div class="btn-group">
                     <a href="{{ url_for('admin_tokens') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-key me-1"></i>Управление токенами
+                        <i class="fas fa-key me-1"></i>Управление паролями
                     </a>
                 </div>
             </div>
@@ -42,6 +42,7 @@
                                         <th class="d-none d-lg-table-cell">Вид спорта</th>
                                         <th class="d-none d-md-table-cell">Дата начала</th>
                                         <th class="d-none d-sm-table-cell">Участники</th>
+                                        <th class="d-none d-lg-table-cell">Администратор</th>
                                         <th>Действия</th>
                                     </tr>
                                 </thead>
@@ -61,6 +62,9 @@
                                                 <br><small class="text-muted">{{ tournament.description[:30] }}{% if tournament.description|length > 30 %}...{% endif %}</small>
                                             {% endif %}
                                             <br><span class="badge bg-info">{{ tournament.sport_type }}</span>
+                                            {% if tournament.admin_info %}
+                                                <br><small class="text-muted"><i class="fas fa-user me-1"></i>{{ tournament.admin_info.name }}</small>
+                                            {% endif %}
                                         </td>
                                         <td class="d-none d-lg-table-cell">
                                             <span class="badge bg-info">{{ tournament.sport_type }}</span>
@@ -74,6 +78,16 @@
                                         </td>
                                         <td class="d-none d-sm-table-cell">
                                             <span class="badge bg-primary">{{ tournament.participant_count or 0 }}</span>
+                                        </td>
+                                        <td class="d-none d-lg-table-cell">
+                                            {% if tournament.admin_info %}
+                                                <div>
+                                                    <strong>{{ tournament.admin_info.name }}</strong>
+                                                    <br><small class="text-muted">{{ tournament.admin_info.email }}</small>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">Не найден</span>
+                                            {% endif %}
                                         </td>
                                         <td>
                                             <div class="btn-group-vertical btn-group-sm d-md-none" role="group">
@@ -127,7 +141,7 @@
                                     <tr>
                                         <th>Имя</th>
                                         <th>Email</th>
-                                        <th>Токен</th>
+                                        <th>Пароль</th>
                                         <th>Количество турниров</th>
                                         <th>Действия</th>
                                     </tr>
@@ -147,11 +161,11 @@
                                         <td>
                                             {% if admin.token %}
                                                 <code>{{ admin.token }}</code>
-                                                <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ admin.token }}')" title="Копировать токен">
+                                                <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ admin.token }}')" title="Копировать пароль">
                                                     <i class="fas fa-copy"></i>
                                                 </button>
                                             {% else %}
-                                                <span class="text-muted">Нет токена</span>
+                                                <span class="text-muted">Нет пароля</span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -295,9 +309,14 @@ function deleteTournamentAdmin(adminId) {
         .then(data => {
             console.log('Данные ответа:', data);
             if (data.success) {
-                // Удаляем строку из таблицы
-                button.closest('tr').remove();
-                showAlert('<strong>Успешно!</strong> Администратор турнира удален.', 'success');
+                // Показываем сообщение об успехе
+                showAlert('<strong>Успешно!</strong> Администратор турнира удален. Страница обновляется...', 'success');
+                
+                // Автоматически обновляем страницу через 1.5 секунды
+                setTimeout(() => {
+                    console.log('Обновляем страницу после удаления администратора');
+                    window.location.reload();
+                }, 1500);
             } else {
                 throw new Error(data.error || 'Ошибка при удалении администратора турнира');
             }

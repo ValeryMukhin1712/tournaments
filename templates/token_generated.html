@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Токен сгенерирован - Турнирный Ассистент v2.1{% endblock %}
+{% block title %}Пароль сгенерирован - Турнирный Ассистент v2.1{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -9,22 +9,22 @@
             <div class="card border-success">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-check-circle me-2"></i>Токен успешно сгенерирован!
+                        <i class="fas fa-check-circle me-2"></i>Пароль успешно сгенерирован!
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-success">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong>Поздравляем, {{ name }}!</strong><br>
-                        Ваш токен для создания турниров готов. Сохраните его в надежном месте.
+                        Ваш пароль для создания турниров готов. Сохраните его в надежном месте.
                     </div>
                     
                     
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Ваш токен:</label>
+                        <label class="form-label fw-bold">Ваш пароль:</label>
                         <div class="input-group">
-                            <input type="text" class="form-control font-monospace text-center fs-3 fw-bold" id="token" value="{{ token }}" readonly style="font-size: 2rem !important;">
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyToken()">
+                            <input type="text" class="form-control font-monospace text-center fs-3 fw-bold" id="password" value="{{ token }}" readonly style="font-size: 2rem !important;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyPassword()">
                                 <i class="fas fa-copy"></i> Копировать
                             </button>
                         </div>
@@ -47,7 +47,7 @@
                             <div class="card bg-light">
                                 <div class="card-body">
                                     <h6 class="card-title">
-                                        <i class="fas fa-key me-2"></i>Информация о токене
+                                        <i class="fas fa-key me-2"></i>Информация о пароле
                                     </h6>
                                     <p class="card-text mb-1"><strong>Действителен:</strong> 30 дней</p>
                                     <p class="card-text mb-1"><strong>Создан:</strong> {{ created_at }}</p>
@@ -61,16 +61,16 @@
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         <strong>Важно!</strong>
                         <ul class="mb-0 mt-2">
-                            <li>Сохраните токен в надежном месте</li>
-                            <li>Не передавайте токен третьим лицам</li>
-                            <li>Токен понадобится для входа в систему как администратор турнира</li>
-                            <li>Если токен будет утерян, обратитесь к администратору системы</li>
+                            <li>Сохраните пароль в надежном месте</li>
+                            <li>Не передавайте пароль третьим лицам</li>
+                            <li>Пароль понадобится для входа в систему как администратор турнира</li>
+                            <li>Если пароль будет утерян, обратитесь к администратору системы</li>
                         </ul>
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                         <a href="{{ url_for('admin_tournament') }}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>Войти с токеном
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти с паролем
                         </a>
                         <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
                             <i class="fas fa-home me-2"></i>На главную
@@ -83,15 +83,15 @@
             <div class="card mt-4">
                 <div class="card-header">
                     <h6 class="card-title mb-0">
-                        <i class="fas fa-question-circle me-2"></i>Как использовать токен?
+                        <i class="fas fa-question-circle me-2"></i>Как использовать пароль?
                     </h6>
                 </div>
                 <div class="card-body">
                     <ol class="mb-0">
-                        <li>Нажмите кнопку "Войти с токеном" выше</li>
-                        <li>Введите ваш email и скопированный токен</li>
+                        <li>Нажмите кнопку "Войти с паролем" выше</li>
+                        <li>Введите ваш email и скопированный пароль</li>
                         <li>После входа вы сможете создавать и управлять турнирами</li>
-                        <li>Используйте токен для входа в систему в любое время</li>
+                        <li>Используйте пароль для входа в систему в любое время</li>
                     </ol>
                 </div>
             </div>
@@ -100,10 +100,10 @@
 </div>
 
 <script>
-function copyToken() {
-    const tokenInput = document.getElementById('token');
-    tokenInput.select();
-    tokenInput.setSelectionRange(0, 99999); // Для мобильных устройств
+function copyPassword() {
+    const passwordInput = document.getElementById('password');
+    passwordInput.select();
+    passwordInput.setSelectionRange(0, 99999); // Для мобильных устройств
     
     try {
         document.execCommand('copy');
@@ -122,13 +122,13 @@ function copyToken() {
         }, 2000);
         
     } catch (err) {
-        alert('Не удалось скопировать токен. Выделите текст и скопируйте вручную.');
+        alert('Не удалось скопировать пароль. Выделите текст и скопируйте вручную.');
     }
 }
 
-// Автоматически выделяем токен при загрузке страницы
+// Автоматически выделяем пароль при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('token').select();
+    document.getElementById('password').select();
 });
 </script>
 {% endblock %}

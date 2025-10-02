@@ -28,13 +28,13 @@ def send_token_email_railway_fallback(email, name, token):
             
             payload = {
                 'to': email,
-                'subject': 'Ваш токен для создания турниров',
+                'subject': 'Ваш пароль для создания турниров',
                 'body': f"""
 Здравствуйте, {name}!
 
-Ваш токен для создания турниров: {token}
+Ваш пароль для создания турниров: {token}
 
-Этот токен действителен в течение 30 дней.
+Этот пароль действителен в течение 30 дней.
 Используйте его для входа в систему как администратор турнира.
 
 С уважением,
@@ -165,15 +165,15 @@ def send_token_email(email, name, token):
         msg = MIMEMultipart()
         msg['From'] = from_email
         msg['To'] = email
-        msg['Subject'] = "Ваш токен для создания турниров"
+        msg['Subject'] = "Ваш пароль для создания турниров"
         
         # Текст сообщения
         body = f"""
 Здравствуйте, {name}!
 
-Ваш токен для создания турниров: {token}
+Ваш пароль для создания турниров: {token}
 
-Этот токен действителен в течение 30 дней.
+Этот пароль действителен в течение 30 дней.
 Используйте его для входа в систему как администратор турнира.
 
 С уважением,
@@ -395,23 +395,48 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             
             # ОТЛАДКА: Проверяем количество уже выданных токенов
             total_tokens = Token.query.count()
-            max_tokens = int(Settings.get_setting('max_tokens', '4'))
+            max_tokens = int(Settings.get_setting('max_tokens', '10'))
             logger.info(f"Текущее количество выданных токенов: {total_tokens}, максимум: {max_tokens}")
             
             if total_tokens >= max_tokens:
                 logger.info(f"Достигнут лимит токенов ({max_tokens}). Отказываем в выдаче нового токена.")
-                flash(f'Свободных токенов пока нет (лимит: {max_tokens})', 'warning')
+                flash(f'Свободных паролей пока нет (лимит: {max_tokens})', 'warning')
                 return render_template('request_token.html', 
                                      total_tokens=total_tokens,
                                      max_tokens=max_tokens)
             
-            # Генерируем целочисленный токен в диапазоне 10-99
+            # Генерируем уникальный токен
             import random
-            token = random.randint(10, 99)
+            import string
             
-            # Проверяем, что токен уникален (независимо от использованности)
-            while Token.query.filter_by(token=token).first():
-                token = random.randint(10, 99)
+            def generate_unique_token():
+                """Генерирует уникальный 2-значный пароль"""
+                # Получаем все уже выданные пароли
+                existing_tokens = set(token.token for token in Token.query.all())
+                logger.info(f"Уже выданные пароли: {sorted(existing_tokens)}")
+                
+                # Генерируем список всех возможных 2-значных паролей (10-99)
+                available_tokens = set(range(10, 100)) - existing_tokens
+                logger.info(f"Доступные пароли: {sorted(available_tokens)}")
+                
+                if not available_tokens:
+                    logger.error("Все 2-значные пароли исчерпаны!")
+                    raise ValueError("Все возможные 2-значные пароли уже выданы. Максимум 90 паролей.")
+                
+                # Выбираем случайный пароль из доступных
+                token = random.choice(list(available_tokens))
+                logger.info(f"Выбран пароль: {token}")
+                return token
+            
+            try:
+                token = generate_unique_token()
+                logger.info(f"Сгенерирован уникальный пароль: {token}")
+            except ValueError as e:
+                logger.error(f"Ошибка генерации пароля: {e}")
+                flash('Все доступные пароли исчерпаны. Обратитесь к администратору системы.', 'error')
+                return render_template('request_token.html', 
+                                     total_tokens=total_tokens,
+                                     max_tokens=max_tokens)
             
             # Создаем запись в базе данных
             try:
@@ -450,7 +475,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     
             except Exception as e:
                 logger.error(f'Ошибка сохранения токена в БД: {e}')
-                flash('Ошибка при создании токена. Попробуйте еще раз.', 'error')
+                flash('Ошибка при создании пароля. Попробуйте еще раз.', 'error')
                 return render_template('request_token.html')
             
             # Показываем страницу с токеном
@@ -755,7 +780,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     from datetime import timedelta
                     if datetime.utcnow() - token_obj.created_at > timedelta(days=30):
                         app.logger.warning(f'Токен истек: создан {token_obj.created_at}')
-                        flash('Токен истек. Получите новый токен.', 'error')
+                        flash('Пароль истек. Получите новый пароль.', 'error')
                         return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
                     
                     # Обновляем время последнего использования (но не помечаем как использованный)
@@ -987,10 +1012,26 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         except Exception as e:
             app.logger.error(f'Ошибка получения администраторов турниров: {e}')
         
-        # Загружаем количество участников для каждого турнира
+        # Загружаем количество участников для каждого турнира и информацию об администраторе
         for tournament in tournaments:
             participant_count = Participant.query.filter_by(tournament_id=tournament.id).count()
             tournament.participant_count = participant_count
+            
+            # Добавляем информацию об администраторе турнира
+            tournament.admin_info = None
+            for admin in tournament_admins:
+                if admin['id'] == tournament.admin_id:
+                    tournament.admin_info = admin
+                    break
+            
+            # Если администратор не найден, создаем заглушку
+            if not tournament.admin_info:
+                tournament.admin_info = {
+                    'id': tournament.admin_id,
+                    'name': f'Администратор #{tournament.admin_id}',
+                    'email': 'Не найден',
+                    'token': None
+                }
         
         return render_template('system_admin_dashboard.html', 
                              admin={'id': admin_id, 'email': admin_email, 'name': 'Системный администратор'}, 
