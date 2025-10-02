@@ -1053,6 +1053,22 @@
         if (themeRadio) {
             themeRadio.checked = true;
         }
+        
+        // Глобальная очистка flash сообщений через 5 секунд
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                if (alert && alert.classList.contains('show')) {
+                    alert.classList.remove('show');
+                    alert.classList.add('fade');
+                    setTimeout(function() {
+                        if (alert.parentNode) {
+                            alert.parentNode.removeChild(alert);
+                        }
+                    }, 300);
+                }
+            }, 5000); // 5 секунд
+        });
     });
     </script>
     

@@ -262,6 +262,9 @@
                      <button class="btn btn-info btn-sm" onclick="generateSchedule()">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание заново</span><span class="d-sm-none">Расписание</span>
                      </button>
+                     <a href="{{ url_for('export_tournament', tournament_id=tournament.id) }}" class="btn btn-success btn-sm" download>
+                         <i class="fas fa-file-excel me-1"></i><span class="d-none d-sm-inline">Выгрузить в Excel</span><span class="d-sm-none">Excel</span>
+                     </a>
                      {% else %}
                      <button class="btn btn-primary btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>

@@ -348,6 +348,15 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     def request_token():
         """Страница запроса токена для создания турнира"""
         logger.info(f"Request token: method={request.method}, headers={dict(request.headers)}")
+        
+        # Очищаем все flash сообщения при загрузке страницы
+        if request.method == 'GET':
+            # Очищаем flash сообщения для GET запроса
+            from flask import get_flashed_messages
+            messages = get_flashed_messages()
+            if messages:
+                logger.info(f"Очищено {len(messages)} flash сообщений при загрузке страницы токенов")
+        
         if request.method == 'POST':
             # Проверяем CSRF токен (упрощенная проверка для Railway)
             csrf_token = request.form.get('csrf_token')
@@ -2110,11 +2119,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'is_late_participant': False
             })
         
-        # Сортируем участников по очкам (убывание)
-        participants_with_stats.sort(key=lambda x: x['stats']['points'], reverse=True)
-        participants_with_stats_chessboard.sort(key=lambda x: x['stats']['points'], reverse=True)
+        # Сортируем участников по именам (алфавитный порядок) для режима зрителя
+        participants_with_stats.sort(key=lambda x: x['participant'].name.lower())
+        participants_with_stats_chessboard.sort(key=lambda x: x['participant'].name.lower())
         
-        # Обновляем позиции после сортировки
+        # Обновляем позиции после сортировки (по алфавиту)
         for i, participant_data in enumerate(participants_with_stats):
             participant_data['position'] = i + 1
         for i, participant_data in enumerate(participants_with_stats_chessboard):
