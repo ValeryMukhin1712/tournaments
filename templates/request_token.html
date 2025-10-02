@@ -171,17 +171,21 @@
             <div class="col-md-8">
                 <div class="card card-modern">
                     <div class="card-body p-4">
-                        <!-- Flash сообщения - показываем только последнее -->
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                {% set last_message = messages[-1] %}
-                                <div class="alert alert-{{ 'danger' if last_message[0] == 'error' else last_message[0] }} alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-{{ 'exclamation-triangle' if last_message[0] == 'error' else 'info-circle' if last_message[0] == 'info' else 'check-circle' if last_message[0] == 'success' else 'exclamation-triangle' }} me-2"></i>
-                                    {{ last_message[1] }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endif %}
-                        {% endwith %}
+                        <!-- Flash сообщения очищаются на сервере для GET-запросов -->
+                        <!-- Показываем только новые сообщения, созданные на этой странице при POST -->
+                        {% if request_method == 'POST' %}
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                            <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                                            {{ message }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
                         
                         {% if total_tokens is defined %}
                         <div class="text-center mb-4">

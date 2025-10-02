@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Турнирный Ассистент (Вариант 2 - Размытый фон){% endblock %}
+
+{% block content %}
+<style>
+:root {
+    /* Основные цвета темы - Оригинальный изумруд */
+    --primary-color: #00c851;
+    --primary-light: #00e676;
+    --primary-dark: #00a041;
+    --accent-color: #00bfa5;
+    --accent-light: #1de9b6;
+    
+    /* Фоновые цвета */
+    --bg-primary: #e8f5e8;
+    --bg-secondary: #f0fff0;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    
+    /* Границы и тени */
+    --border-color: #a5d6a7;
+    --shadow-color: rgba(0, 200, 81, 0.2);
+    --shadow-hover: rgba(0, 200, 81, 0.3);
+    --shadow-strong: rgba(0, 200, 81, 0.4);
+    
+    /* Плавающие элементы */
+    --float-color: rgba(0, 200, 81, 0.15);
+}
+
+body {
+    background-image: url('../Imgs/photo_2025-10-02_10-55-13.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Размытый оверлей */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../Imgs/photo_2025-10-02_10-55-13.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px);
+    z-index: -2;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(0, 200, 81, 0.1), 
+        rgba(0, 191, 165, 0.1), 
+        rgba(0, 230, 118, 0.1)
+    );
+    z-index: -1;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.3);
+    margin: 2rem auto;
+    padding: 3rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-title {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.hero-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+    border-radius: 2px;
+}
+
+.hero-subtitle {
+    text-align: center;
+    color: #555;
+    font-size: 1.3rem;
+    margin-bottom: 3rem;
+    font-weight: 400;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.role-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2.5rem;
+    margin: 4rem 0;
+}
+
+.role-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    transition: all 0.4s ease;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+}
+
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 200, 81, 0.1), 
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.role-card:hover::before {
+    left: 100%;
+}
+
+.role-card:hover {
+    transform: translateY(-15px) scale(1.03);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.15),
+        0 0 0 1px var(--primary-color),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-color: var(--primary-light);
+    background: var(--bg-card-hover);
+}
+
+.role-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.4s ease;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.role-card:nth-child(1) .role-icon { color: #4CAF50; }
+.role-card:nth-child(2) .role-icon { color: #2196F3; }
+.role-card:nth-child(3) .role-icon { color: #FF9800; }
+.role-card:nth-child(4) .role-icon { color: #9C27B0; }
+
+.role-card:hover .role-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.role-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.role-description {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.role-btn {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.4s ease;
+    box-shadow: 
+        0 6px 20px rgba(0, 200, 81, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.role-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.role-btn:hover::before {
+    left: 100%;
+}
+
+.role-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 10px 30px rgba(0, 200, 81, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+    color: white;
+}
+
+.role-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Анимация появления карточек */
+.role-card {
+    opacity: 0;
+    transform: translateY(50px);
+    animation: slideUp 0.8s ease forwards;
+}
+
+.role-card:nth-child(1) { animation-delay: 0.1s; }
+.role-card:nth-child(2) { animation-delay: 0.2s; }
+.role-card:nth-child(3) { animation-delay: 0.3s; }
+.role-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .role-buttons {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .main-container {
+        margin: 1rem;
+        padding: 2rem;
+    }
+    
+    .role-card {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .main-container {
+        padding: 1.5rem;
+    }
+    
+    .role-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+
+<div class="container-fluid">
+    <div class="main-container">
+        <h1 class="hero-title">🏆 Турнирный Ассистент</h1>
+        <p class="hero-subtitle">Профессиональная система управления турнирами</p>
+        
+        <div class="role-buttons">
+            <div class="role-card">
+                <div class="role-icon">👤</div>
+                <h3 class="role-title">Ваши турниры</h3>
+                <p class="role-description">Просматривайте турниры, в которых вы участвуете, следите за расписанием матчей и результатами</p>
+                <a href="{{ url_for('my_tournaments_login') }}" class="role-btn">Войти как участник</a>
+            </div>
+            
+            <div class="role-card">
+                <div class="role-icon">⚙️</div>
+                <h3 class="role-title">Администратор</h3>
+                <p class="role-description">Управляйте своими турнирами, добавляйте участников, ведите результаты матчей</p>
+                <a href="{{ url_for('admin_tournament') }}" class="role-btn">Панель администратора</a>
+            </div>
+            
+            <div class="role-card">
+                <div class="role-icon">🔑</div>
+                <h3 class="role-title">Получить пароль</h3>
+                <p class="role-description">Получите пароль администратора для создания и управления турнирами</p>
+                <a href="{{ url_for('request_token') }}" class="role-btn">Запросить пароль</a>
+            </div>
+            
+            <div class="role-card">
+                <div class="role-icon">🚪</div>
+                <h3 class="role-title">Войти с паролем</h3>
+                <p class="role-description">Войдите в систему, используя полученный пароль администратора</p>
+                <a href="{{ url_for('login') }}" class="role-btn">Войти в систему</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

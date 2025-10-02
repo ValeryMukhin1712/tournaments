@@ -101,6 +101,26 @@ body {
     background-clip: text;
 }
 
+/* Стили для эмодзи-иконок */
+.role-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.card-modern:hover .role-icon {
+    transform: scale(1.1);
+}
+
+/* Адаптивные размеры иконок */
+@media (min-width: 576px) {
+    .role-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+}
+
 .btn-gradient {
     background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
     border: none;
@@ -608,9 +628,9 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-1" onclick="window.location.href='{{ url_for('request_token') }}'">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <i class="fas fa-plus-circle fa-2x fa-sm-3x icon-gradient"></i>
+                            <div class="role-icon">🔑</div>
                         </div>
-                        <h4 class="card-title card-title-mobile">Создать турнир</h4>
+                        <h4 class="card-title card-title-mobile">Получить пароль</h4>
                         <p class="card-text text-muted small d-none d-sm-block">
                             Получите пароль для создания и управления турниром
                         </p>
@@ -626,7 +646,7 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="window.location.href='{{ url_for('admin_tournament') }}'">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <i class="fas fa-crown fa-2x fa-sm-3x icon-gradient"></i>
+                            <div class="role-icon">⚙️</div>
                         </div>
                         <h4 class="card-title card-title-mobile">Админ турнира</h4>
                         <p class="card-text text-muted small d-none d-sm-block">
@@ -644,7 +664,7 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-3" onclick="showParticipantLogin()">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <i class="fas fa-user-check fa-2x fa-sm-3x icon-gradient"></i>
+                            <div class="role-icon">👤</div>
                         </div>
                         <h4 class="card-title card-title-mobile">Ваши турниры</h4>
                         <p class="card-text text-muted small d-none d-sm-block">
@@ -662,7 +682,11 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-4" onclick="window.location.href='{{ url_for('tournaments_list') }}'">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <i class="fas fa-list fa-2x fa-sm-3x icon-gradient"></i>
+                            <div class="role-icon" style="display: flex; gap: 0.3rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                                <span style="font-size: 0.8em;">🏸</span>
+                                <span style="font-size: 0.8em;">🏓</span>
+                                <span style="font-size: 0.8em;">🏐</span>
+                            </div>
                         </div>
                         <h4 class="card-title card-title-mobile">Все турниры</h4>
                         <p class="card-text text-muted small d-none d-sm-block">

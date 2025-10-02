@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Варианты дизайна с фоновым изображением - Турнирный Ассистент</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 200, 81, 0.1);
+            margin: 2rem auto;
+            padding: 3rem;
+            max-width: 1200px;
+        }
+
+        .hero-title {
+            background: linear-gradient(45deg, #00c851, #00e676);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .variants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .variant-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 25px rgba(0, 200, 81, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .variant-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 200, 81, 0.2);
+            border-color: #00c851;
+        }
+
+        .variant-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .variant-card:nth-child(1) .variant-icon { color: #4CAF50; }
+        .variant-card:nth-child(2) .variant-icon { color: #2196F3; }
+        .variant-card:nth-child(3) .variant-icon { color: #FF9800; }
+        .variant-card:nth-child(4) .variant-icon { color: #9C27B0; }
+
+        .variant-card:hover .variant-icon {
+            transform: scale(1.1);
+        }
+
+        .variant-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #00a041;
+            margin-bottom: 1rem;
+        }
+
+        .variant-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .variant-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .variant-features li {
+            color: #555;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .variant-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00c851;
+            font-weight: bold;
+        }
+
+        .variant-btn {
+            background: linear-gradient(45deg, #00c851, #00e676);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 200, 81, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .variant-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .variant-btn:hover::before {
+            left: 100%;
+        }
+
+        .variant-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 200, 81, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        .note {
+            background: #f8f9fa;
+            border-left: 4px solid #00c851;
+            padding: 1rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .note-title {
+            font-weight: 600;
+            color: #00a041;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-text {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .variants-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .main-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <h1 class="hero-title">🎨 Варианты дизайна с фоновым изображением</h1>
+            <p class="hero-subtitle">Выберите наиболее подходящий стиль для главной страницы</p>
+            
+            <div class="note">
+                <div class="note-title">📝 Примечание</div>
+                <p class="note-text">
+                    Все варианты используют фоновое изображение <code>./Imgs/photo_2025-10-02_10-55-13.jpg</code>. 
+                    Убедитесь, что файл находится в папке <code>Imgs</code> для корректного отображения фона.
+                </p>
+            </div>
+            
+            <div class="variants-grid">
+                <div class="variant-card">
+                    <div class="variant-icon">🌟</div>
+                    <h3 class="variant-title">Вариант 1 - Полупрозрачный</h3>
+                    <p class="variant-description">Элегантный дизайн с полупрозрачным темным оверлеем и стеклянными эффектами</p>
+                    <ul class="variant-features">
+                        <li>Полупрозрачный оверлей (30% черного)</li>
+                        <li>Стеклянный эффект с размытием</li>
+                        <li>Плавающие анимированные элементы</li>
+                        <li>Эффект мерцания при наведении</li>
+                        <li>Пульсирующие кнопки</li>
+                    </ul>
+                    <a href="bg_variant1_standalone.html" class="variant-btn" target="_blank">
+                        <i class="fas fa-eye me-1"></i>Посмотреть
+                    </a>
+                </div>
+                
+                <div class="variant-card">
+                    <div class="variant-icon">🔮</div>
+                    <h3 class="variant-title">Вариант 2 - Размытый фон</h3>
+                    <p class="variant-description">Премиум дизайн с размытым фоном и цветными градиентными оверлеями</p>
+                    <ul class="variant-features">
+                        <li>Размытый фон (blur: 8px)</li>
+                        <li>Цветной градиентный оверлей</li>
+                        <li>Премиум стеклянный эффект</li>
+                        <li>Анимация появления карточек</li>
+                        <li>Разноцветные иконки с эффектами</li>
+                    </ul>
+                    <a href="bg_variant2_standalone.html" class="variant-btn" target="_blank">
+                        <i class="fas fa-eye me-1"></i>Посмотреть
+                    </a>
+                </div>
+                
+                <div class="variant-card">
+                    <div class="variant-icon">✨</div>
+                    <h3 class="variant-title">Вариант 3 - Минималистичный</h3>
+                    <p class="variant-description">Чистый и простой дизайн с светлым оверлеем для максимальной читаемости</p>
+                    <ul class="variant-features">
+                        <li>Светлый оверлей (70% белого)</li>
+                        <li>Минималистичный дизайн</li>
+                        <li>Простые анимации</li>
+                        <li>Легкие тени и мягкие переходы</li>
+                        <li>Отличная читаемость текста</li>
+                    </ul>
+                    <a href="bg_variant3_standalone.html" class="variant-btn" target="_blank">
+                        <i class="fas fa-eye me-1"></i>Посмотреть
+                    </a>
+                </div>
+                
+                <div class="variant-card">
+                    <div class="variant-icon">🌙</div>
+                    <h3 class="variant-title">Вариант 4 - Темный стиль</h3>
+                    <p class="variant-description">Драматичный темный дизайн с неоновыми эффектами и киберпанк эстетикой</p>
+                    <ul class="variant-features">
+                        <li>Темный оверлей (60% черного)</li>
+                        <li>Эффекты свечения для элементов</li>
+                        <li>Светящиеся границы при наведении</li>
+                        <li>Неоновые акценты в зеленых тонах</li>
+                        <li>Киберпанк эстетика</li>
+                    </ul>
+                    <a href="bg_variant4_standalone.html" class="variant-btn" target="_blank">
+                        <i class="fas fa-eye me-1"></i>Посмотреть
+                    </a>
+                </div>
+            </div>
+            
+            <div class="note">
+                <div class="note-title">💡 Рекомендации</div>
+                <p class="note-text">
+                    <strong>Вариант 1</strong> - универсальный выбор для большинства случаев.<br>
+                    <strong>Вариант 2</strong> - для премиум-ощущения и современного вида.<br>
+                    <strong>Вариант 3</strong> - для максимальной читаемости и простоты.<br>
+                    <strong>Вариант 4</strong> - для создания уникальной атмосферы и выделения среди конкурентов.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

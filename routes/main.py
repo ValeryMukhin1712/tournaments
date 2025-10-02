@@ -328,6 +328,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Новая стартовая страница с выбором роли
         return render_template('index.html')
     
+    # Тестовые варианты дизайна с фоновым изображением
+    @app.route('/bg-variant1')
+    def index_bg_variant1():
+        return render_template('index_bg_variant1.html')
+    
+    @app.route('/bg-variant2')
+    def index_bg_variant2():
+        return render_template('index_bg_variant2.html')
+    
+    @app.route('/bg-variant3')
+    def index_bg_variant3():
+        return render_template('index_bg_variant3.html')
+    
+    @app.route('/bg-variant4')
+    def index_bg_variant4():
+        return render_template('index_bg_variant4.html')
+    
     @app.route('/test-green-colors')
     def test_green_colors():
         """Тестовая страница с квадратами зелёных цветов"""
@@ -349,13 +366,18 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         """Страница запроса токена для создания турнира"""
         logger.info(f"Request token: method={request.method}, headers={dict(request.headers)}")
         
-        # Очищаем все flash сообщения при загрузке страницы
+        # Очищаем все flash сообщения при загрузке страницы ДО рендеринга шаблона
         if request.method == 'GET':
-            # Очищаем flash сообщения для GET запроса
-            from flask import get_flashed_messages
+            # Принудительно очищаем все flash сообщения для GET запроса
+            from flask import get_flashed_messages, session
             messages = get_flashed_messages()
             if messages:
                 logger.info(f"Очищено {len(messages)} flash сообщений при загрузке страницы токенов")
+            # Дополнительно очищаем сессию от flash сообщений
+            if '_flashes' in session:
+                session.pop('_flashes', None)
+            # Принудительно очищаем все возможные остатки flash сообщений
+            session.modified = True
         
         if request.method == 'POST':
             # Проверяем CSRF токен (упрощенная проверка для Railway)
@@ -363,7 +385,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             if not csrf_token:
                 logger.warning("CSRF токен отсутствует в запросе")
                 flash('Ошибка безопасности. Попробуйте еще раз.', 'error')
-                return render_template('request_token.html')
+                total_tokens = Token.query.count()
+                max_tokens = int(Settings.get_setting('max_tokens', '4'))
+                return render_template('request_token.html', 
+                                     total_tokens=total_tokens,
+                                     max_tokens=max_tokens,
+                                     request_method=request.method)
             
             # Дополнительная проверка CSRF
             try:
@@ -381,7 +408,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             # Валидация
             if not name or not email:
                 flash('Пожалуйста, заполните все обязательные поля.', 'error')
-                return render_template('request_token.html')
+                total_tokens = Token.query.count()
+                max_tokens = int(Settings.get_setting('max_tokens', '4'))
+                return render_template('request_token.html', 
+                                     total_tokens=total_tokens,
+                                     max_tokens=max_tokens,
+                                     request_method=request.method)
             
             # Проверяем уникальность email
             existing_token = Token.query.filter_by(email=email).first()
@@ -476,7 +508,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             except Exception as e:
                 logger.error(f'Ошибка сохранения токена в БД: {e}')
                 flash('Ошибка при создании пароля. Попробуйте еще раз.', 'error')
-                return render_template('request_token.html')
+                total_tokens = Token.query.count()
+                max_tokens = int(Settings.get_setting('max_tokens', '4'))
+                return render_template('request_token.html', 
+                                     total_tokens=total_tokens,
+                                     max_tokens=max_tokens,
+                                     request_method=request.method)
             
             # Показываем страницу с токеном
             return render_template('token_generated.html', 
@@ -492,7 +529,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         return render_template('request_token.html', 
                              total_tokens=total_tokens,
-                             max_tokens=max_tokens)
+                             max_tokens=max_tokens,
+                             request_method=request.method)
     
     @app.route('/create-tournament', methods=['GET', 'POST'])
     def create_tournament_form():

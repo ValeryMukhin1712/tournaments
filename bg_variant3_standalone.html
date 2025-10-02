@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вариант 3 - Минималистичный - Турнирный Ассистент</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Основные цвета темы - Оригинальный изумруд */
+            --primary-color: #00c851;
+            --primary-light: #00e676;
+            --primary-dark: #00a041;
+            --accent-color: #00bfa5;
+            --accent-light: #1de9b6;
+            
+            /* Фоновые цвета */
+            --bg-primary: #e8f5e8;
+            --bg-secondary: #f0fff0;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-card-hover: rgba(255, 255, 255, 1);
+            
+            /* Границы и тени */
+            --border-color: #a5d6a7;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --shadow-strong: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            background-image: url('./Imgs/photo_2025-10-02_10-55-13.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        /* Светлый оверлей для минималистичного вида */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: -1;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px var(--shadow-color);
+            margin: 3rem auto;
+            padding: 3rem;
+            max-width: 1200px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 300;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-title .trophy {
+            color: var(--primary-color);
+            font-weight: 400;
+        }
+
+        .hero-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin-bottom: 0;
+        }
+
+        .role-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 0;
+        }
+
+        .role-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 200, 81, 0.1);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            position: relative;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--shadow-hover);
+            border-color: var(--primary-color);
+            background: var(--bg-card-hover);
+        }
+
+        .role-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .role-card:nth-child(1) .role-icon { color: #4CAF50; }
+        .role-card:nth-child(2) .role-icon { color: #2196F3; }
+        .role-card:nth-child(3) .role-icon { color: #FF9800; }
+        .role-card:nth-child(4) .role-icon { color: #9C27B0; }
+
+        .role-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .role-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .role-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-transform: none;
+            cursor: pointer;
+        }
+
+        .role-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 200, 81, 0.3);
+        }
+
+        /* Простая анимация появления */
+        .role-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .role-card:nth-child(1) { animation-delay: 0.1s; }
+        .role-card:nth-child(2) { animation-delay: 0.2s; }
+        .role-card:nth-child(3) { animation-delay: 0.3s; }
+        .role-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .role-buttons {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .main-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .main-container {
+                padding: 1.5rem;
+            }
+            
+            .role-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="hero-section">
+                <h1 class="hero-title"><span class="trophy">🏆</span> Турнирный Ассистент</h1>
+                <p class="hero-subtitle">Профессиональная система управления турнирами</p>
+            </div>
+            
+            <div class="role-buttons">
+                <div class="role-card">
+                    <div class="role-icon">👤</div>
+                    <h3 class="role-title">Ваши турниры</h3>
+                    <p class="role-description">Просматривайте турниры, в которых вы участвуете, следите за расписанием матчей и результатами</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Войти как участник')">Войти как участник</a>
+                </div>
+                
+                <div class="role-card">
+                    <div class="role-icon">⚙️</div>
+                    <h3 class="role-title">Администратор</h3>
+                    <p class="role-description">Управляйте своими турнирами, добавляйте участников, ведите результаты матчей</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Панель администратора')">Панель администратора</a>
+                </div>
+                
+                <div class="role-card">
+                    <div class="role-icon">🔑</div>
+                    <h3 class="role-title">Получить пароль</h3>
+                    <p class="role-description">Получите пароль администратора для создания и управления турнирами</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Запросить пароль')">Запросить пароль</a>
+                </div>
+                
+                <div class="role-card">
+                    <div class="role-icon">🚪</div>
+                    <h3 class="role-title">Войти с паролем</h3>
+                    <p class="role-description">Войдите в систему, используя полученный пароль администратора</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Войти в систему')">Войти в систему</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

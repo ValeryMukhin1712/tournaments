@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вариант 1 - Полупрозрачный фон - Турнирный Ассистент</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Основные цвета темы - Оригинальный изумруд */
+            --primary-color: #00c851;
+            --primary-light: #00e676;
+            --primary-dark: #00a041;
+            --accent-color: #00bfa5;
+            --accent-light: #1de9b6;
+            
+            /* Фоновые цвета */
+            --bg-primary: #e8f5e8;
+            --bg-secondary: #f0fff0;
+            --bg-card: rgba(241, 248, 233, 0.9);
+            --bg-card-hover: rgba(248, 253, 248, 0.95);
+            
+            /* Границы и тени */
+            --border-color: #a5d6a7;
+            --shadow-color: rgba(0, 200, 81, 0.2);
+            --shadow-hover: rgba(0, 200, 81, 0.3);
+            --shadow-strong: rgba(0, 200, 81, 0.4);
+            
+            /* Плавающие элементы */
+            --float-color: rgba(0, 200, 81, 0.15);
+        }
+
+        body {
+            background-image: url('./Imgs/photo_2025-10-02_10-55-13.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Полупрозрачный оверлей для лучшей читаемости */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin: 2rem auto;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 1200px;
+        }
+
+        .hero-title {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .role-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .role-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, var(--float-color), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .role-card:hover::before {
+            opacity: 1;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .role-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px var(--shadow-hover);
+            border-color: var(--primary-color);
+            background: var(--bg-card-hover);
+        }
+
+        .role-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover .role-icon {
+            transform: scale(1.1);
+            color: var(--primary-light);
+        }
+
+        .role-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .role-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .role-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .role-btn:hover::before {
+            left: 100%;
+        }
+
+        .role-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-hover);
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Анимация пульсации для кнопок */
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 15px var(--shadow-color); }
+            50% { box-shadow: 0 8px 25px var(--shadow-hover); }
+            100% { box-shadow: 0 4px 15px var(--shadow-color); }
+        }
+
+        .role-card:nth-child(1) .role-btn {
+            animation: pulse 3s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+
+        .role-card:nth-child(2) .role-btn {
+            animation: pulse 3s ease-in-out infinite;
+            animation-delay: 0.2s;
+        }
+
+        .role-card:nth-child(3) .role-btn {
+            animation: pulse 3s ease-in-out infinite;
+            animation-delay: 0.4s;
+        }
+
+        .role-card:nth-child(4) .role-btn {
+            animation: pulse 3s ease-in-out infinite;
+            animation-delay: 0.6s;
+        }
+
+        /* Плавающие элементы */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--float-color);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-circle:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .role-buttons {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .main-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="main-container">
+            <h1 class="hero-title">🏆 Турнирный Ассистент</h1>
+            <p class="hero-subtitle">Профессиональная система управления турнирами</p>
+            
+            <div class="role-buttons">
+                <div class="role-card">
+                    <div class="role-icon">👤</div>
+                    <h3 class="role-title">Ваши турниры</h3>
+                    <p class="role-description">Просматривайте турниры, в которых вы участвуете, следите за расписанием матчей и результатами</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Войти как участник')">Войти как участник</a>
+                </div>
+                
+                <div class="role-card">
+                    <div class="role-icon">⚙️</div>
+                    <h3 class="role-title">Администратор</h3>
+                    <p class="role-description">Управляйте своими турнирами, добавляйте участников, ведите результаты матчей</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Панель администратора')">Панель администратора</a>
+                </div>
+                
+                <div class="role-card">
+                    <div class="role-icon">🔑</div>
+                    <h3 class="role-title">Получить пароль</h3>
+                    <p class="role-description">Получите пароль администратора для создания и управления турнирами</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Запросить пароль')">Запросить пароль</a>
+                </div>
+                
+                <div class="role-card">
+                    <div class="role-icon">🚪</div>
+                    <h3 class="role-title">Войти с паролем</h3>
+                    <p class="role-description">Войдите в систему, используя полученный пароль администратора</p>
+                    <a href="#" class="role-btn" onclick="alert('Демо: Войти в систему')">Войти в систему</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

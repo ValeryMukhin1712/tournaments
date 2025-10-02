@@ -251,9 +251,9 @@
                                 <div class="mb-3">
                                     <label for="sport_type" class="form-label">Вид спорта *</label>
                                     <select class="form-select" id="sport_type" name="sport_type" required>
-                                        <option value="Пинг-понг" selected>Пинг-понг</option>
-                                        <option value="Бадминтон">Бадминтон</option>
+                                        <option value="Бадминтон" selected>Бадминтон</option>
                                         <option value="Волейбол">Волейбол</option>
+                                        <option value="Пинг-понг">Пинг-понг</option>
                                         <option value="custom">Другой...</option>
                                     </select>
                                     <div id="custom_sport_container" class="mt-2" style="display: none;">
@@ -309,7 +309,7 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="points_to_win" class="form-label">Очков для победы в сете</label>
-                                    <input type="number" class="form-control" id="points_to_win" name="points_to_win" value="11" min="1" max="50">
+                                    <input type="number" class="form-control" id="points_to_win" name="points_to_win" value="21" min="1" max="50">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -374,14 +374,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const setsToWinInput = document.getElementById('sets_to_win');
     
     const sportDefaults = {
-        'Пинг-понг': { matchDuration: 15, breakDuration: 2, pointsToWin: 11, setsToWin: 2 },
         'Бадминтон': { matchDuration: 20, breakDuration: 2, pointsToWin: 21, setsToWin: 2 },
-        'Волейбол': { matchDuration: 20, breakDuration: 2, pointsToWin: 25, setsToWin: 2 }
+        'Волейбол': { matchDuration: 20, breakDuration: 2, pointsToWin: 25, setsToWin: 2 },
+        'Пинг-понг': { matchDuration: 15, breakDuration: 2, pointsToWin: 11, setsToWin: 2 }
     };
     
     // Отладочная информация
     console.log('Available sports:', Object.keys(sportDefaults));
     console.log('Select options:', sportTypeSelect.querySelectorAll('option').length);
+    
+    // Устанавливаем значения по умолчанию для бадминтона при загрузке страницы
+    const defaultSport = 'Бадминтон';
+    if (sportDefaults[defaultSport]) {
+        const defaults = sportDefaults[defaultSport];
+        matchDurationInput.value = defaults.matchDuration;
+        breakDurationInput.value = defaults.breakDuration;
+        pointsToWinInput.value = defaults.pointsToWin;
+        setsToWinInput.value = defaults.setsToWin;
+        console.log('Установлены значения по умолчанию для бадминтона:', defaults);
+    }
     
     // Получаем элементы для кастомного ввода
     const customSportContainer = document.getElementById('custom_sport_container');

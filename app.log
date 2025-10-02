@@ -29484,3 +29484,1834 @@ with app.app_context(). See the documentation for more information.
 2025-10-02 09:50:06,853 - INFO - Режим отладки: production
 2025-10-02 09:50:06,869 - WARNING -  * Debugger is active!
 2025-10-02 09:50:06,869 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 09:51:30,422 - INFO - 127.0.0.1 - - [02/Oct/2025 09:51:30] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 09:51:48,473 - INFO - Найдено турниров для удаления: 2
+2025-10-02 09:51:48,474 - INFO - Удаляем турнир: firs (ID: 1)
+2025-10-02 09:51:48,475 - INFO - Удалено участников: 0
+2025-10-02 09:51:48,476 - INFO - Удалено матчей: 0
+2025-10-02 09:51:48,477 - INFO - Турнир firs помечен для удаления
+2025-10-02 09:51:48,477 - INFO - Удаляем турнир: 3 (ID: 2)
+2025-10-02 09:51:48,482 - INFO - Удалено участников: 0
+2025-10-02 09:51:48,483 - INFO - Удалено матчей: 0
+2025-10-02 09:51:48,483 - INFO - Турнир 3 помечен для удаления
+2025-10-02 09:51:48,485 - INFO - Удалено токенов по email admin_629224@system: 0
+2025-10-02 09:51:48,486 - INFO - Удалено дополнительных токенов: 1
+2025-10-02 09:51:48,491 - INFO - Изменения сохранены в базу данных
+2025-10-02 09:51:48,492 - INFO - Администратор турнира 629224 удален. Удалено турниров: 2
+2025-10-02 09:51:48,492 - INFO - 127.0.0.1 - - [02/Oct/2025 09:51:48] "DELETE /api/admin/tournament-admins/629224 HTTP/1.1" 200 -
+2025-10-02 09:51:50,014 - INFO - 127.0.0.1 - - [02/Oct/2025 09:51:50] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 09:53:35,119 - INFO - 127.0.0.1 - - [02/Oct/2025 09:53:35] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 09:53:35,272 - INFO - 127.0.0.1 - - [02/Oct/2025 09:53:35] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 09:53:35,375 - INFO - 127.0.0.1 - - [02/Oct/2025 09:53:35] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 10:29:29,103 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:29] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 10:29:29,195 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:29] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 10:29:29,348 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:29] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 10:29:32,025 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:32] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 10:29:32,082 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:32] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 10:29:32,289 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:32] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 10:29:38,108 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:38] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 10:29:38,154 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:38] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 10:29:38,378 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:38] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 10:29:41,154 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:41] "GET / HTTP/1.1" 200 -
+2025-10-02 10:29:44,161 - INFO - Системный администратор успешно авторизован
+2025-10-02 10:29:44,163 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:44] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 10:29:44,212 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:44] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 10:29:45,422 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:45] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 10:29:45,727 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:45] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 10:29:46,036 - INFO - 127.0.0.1 - - [02/Oct/2025 10:29:46] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 10:39:36,936 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:36] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 10:39:37,044 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:37] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 10:39:37,197 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:37] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 10:39:39,581 - INFO - Системный админ видит все турниры: 2
+2025-10-02 10:39:39,634 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:39] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 10:39:45,346 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:45] "GET / HTTP/1.1" 200 -
+2025-10-02 10:39:48,448 - INFO - Системный администратор успешно авторизован
+2025-10-02 10:39:48,448 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:48] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 10:39:48,786 - INFO - 127.0.0.1 - - [02/Oct/2025 10:39:48] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 11:12:34,988 - INFO - 127.0.0.1 - - [02/Oct/2025 11:12:34] "GET / HTTP/1.1" 200 -
+2025-10-02 11:20:02,921 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 11:20:03,118 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 11:20:03,358 - INFO -  * Restarting with stat
+2025-10-02 11:20:03,452 - INFO -  * Restarting with stat
+2025-10-02 11:20:05,826 - INFO - База данных инициализирована успешно
+2025-10-02 11:20:05,829 - INFO - База данных инициализирована успешно
+2025-10-02 11:20:06,539 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 11:20:06,542 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 11:20:06,544 - INFO - Запуск приложения на порту 5000
+2025-10-02 11:20:06,545 - INFO - Переменная окружения PORT: None
+2025-10-02 11:20:06,545 - INFO - Режим отладки: production
+2025-10-02 11:20:06,563 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 11:20:06,569 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 11:20:06,570 - INFO - Запуск приложения на порту 5000
+2025-10-02 11:20:06,570 - INFO - Переменная окружения PORT: None
+2025-10-02 11:20:06,570 - INFO - Режим отладки: production
+2025-10-02 11:20:06,608 - WARNING -  * Debugger is active!
+2025-10-02 11:20:06,608 - WARNING -  * Debugger is active!
+2025-10-02 11:20:06,614 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 11:20:06,615 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 11:20:29,053 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 11:20:29,101 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 11:20:29,158 - INFO -  * Restarting with stat
+2025-10-02 11:20:29,200 - INFO -  * Restarting with stat
+2025-10-02 11:20:30,331 - INFO - База данных инициализирована успешно
+2025-10-02 11:20:30,367 - INFO - База данных инициализирована успешно
+2025-10-02 11:20:30,900 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 11:20:30,905 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 11:20:30,905 - INFO - Запуск приложения на порту 5000
+2025-10-02 11:20:30,905 - INFO - Переменная окружения PORT: None
+2025-10-02 11:20:30,906 - INFO - Режим отладки: production
+2025-10-02 11:20:30,922 - WARNING -  * Debugger is active!
+2025-10-02 11:20:30,926 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 11:20:30,937 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 11:20:30,941 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 11:20:30,941 - INFO - Запуск приложения на порту 5000
+2025-10-02 11:20:30,942 - INFO - Переменная окружения PORT: None
+2025-10-02 11:20:30,942 - INFO - Режим отладки: production
+2025-10-02 11:20:30,955 - WARNING -  * Debugger is active!
+2025-10-02 11:20:30,958 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 11:33:12,500 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:12] "[35m[1mGET /bg-variant1 HTTP/1.1[0m" 500 -
+2025-10-02 11:33:12,601 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:12] "GET /bg-variant1?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-10-02 11:33:12,614 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:12] "GET /bg-variant1?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-10-02 11:33:12,997 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:12] "GET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2025-10-02 11:33:13,238 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:13] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 11:33:15,500 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:15] "[35m[1mGET /bg-variant1 HTTP/1.1[0m" 500 -
+2025-10-02 11:33:15,765 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:15] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-10-02 11:33:15,835 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:15] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-10-02 11:33:16,169 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:16] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 11:33:16,434 - INFO - 127.0.0.1 - - [02/Oct/2025 11:33:16] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 12:09:08,767 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJy9UstugzAQ_BW6Z1L5sSHEp3xEb02EHGMSVCApBllVlH-vsUliqblV7WXNzr5mZ7lAUTXSHLUB8X6BZHAPmFEpbQyksB0JUpws197SySIJSOKfKgpn3obwPsLZA0f_jSpNrH2B3TV9PpWFNB7NK73NA5JswdotJFEWjegsPZJHdYHtnBRYrbzFiHP5O0Za_yujP7sMnYbuUvdv9NocQVSyMToFWbZ1V-hW1g2I4G3Mlxl0C7dgXYKgN6eTrXaJXjwaSUUf04IsXD1kwcBunUSEMUqKFfzRbt4_WiesieTOcDh96M6x4rmDlOmrO-L0LPNMK8oUUxnLVIn7siKZUiu-Zoyi4gr3ONXVpgiLF74piKEfnUBn2Q-1qs-yG4rmdDjosngenJWhrpWfXvT6c9TG3fgCqtdycJXSecAIWy4oWRD2RtYCuSDsNV8tOaIrvV3Cbqzz5p7W3pqC4Pn1-g3tuyOD.aN4sRA.IdjEaUKb1z8EQBcs5LH1UvXqeG8'}
+2025-10-02 12:09:08,772 - INFO - Очищено 4 flash сообщений при загрузке страницы токенов
+2025-10-02 12:09:08,806 - INFO - GET запрос на страницу токенов. Текущее количество: 1, максимум: 10
+2025-10-02 12:09:08,855 - INFO - 127.0.0.1 - - [02/Oct/2025 12:09:08] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 12:10:07,056 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:07] "GET / HTTP/1.1" 200 -
+2025-10-02 12:10:10,953 - INFO - Системный администратор успешно авторизован
+2025-10-02 12:10:10,955 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:10] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 12:10:11,253 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:11] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 12:10:14,965 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:14] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 12:10:15,304 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:15] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 12:10:15,646 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:15] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 12:10:21,893 - INFO - Максимальное количество токенов обновлено на 4
+2025-10-02 12:10:21,895 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:21] "POST /api/admin/update-max-tokens HTTP/1.1" 200 -
+2025-10-02 12:10:22,193 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:22] "GET /api/admin/tokens?max=4 HTTP/1.1" 200 -
+2025-10-02 12:10:22,530 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:22] "GET /api/admin/tokens?max=4 HTTP/1.1" 200 -
+2025-10-02 12:10:25,425 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:25] "GET / HTTP/1.1" 200 -
+2025-10-02 12:10:27,841 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUctuwyAQ_JWKc1PxWDuYUz6ix0oILzhFjZ0EsKwqyr8XYzup1F4GdnZndlluRHfBxU-iOnOK7pUY2_tBu974E1FLdIjfMbmebElviWJbMJje5cKPkQJnMwo5I5Q78MJUBbGgLXxb7s1LOWhB-FUkn6V_7YA-VWsDt_CPCdP5yw15KiEzhTF0DwYYWFk7ZBw51rxGC63taI24Fw3nDFAgtDDrfNTLw3UxJSqFMS_oYkLy6C9mSPp0Ph6d1f8n182wbFW66-Cuo4uJqBvB4EzKSpMjwimvdozuKH-njQKhKH-T-0oAZOn2E9NhytHqOU2bKVFC3u8_d4KLbA.aN5Bcg.YFVJzEBIMF5ZWecWcrUDgAa-CTc'}
+2025-10-02 12:10:27,846 - INFO - GET запрос на страницу токенов. Текущее количество: 1, максимум: 4
+2025-10-02 12:10:27,849 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:27] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 12:10:45,240 - INFO - 127.0.0.1 - - [02/Oct/2025 12:10:45] "GET / HTTP/1.1" 200 -
+2025-10-02 13:03:23,257 - INFO - 127.0.0.1 - - [02/Oct/2025 13:03:23] "GET / HTTP/1.1" 200 -
+2025-10-02 13:05:15,685 - INFO - Участник 1 вошел в систему
+2025-10-02 13:05:15,685 - INFO - 127.0.0.1 - - [02/Oct/2025 13:05:15] "[32mPOST /participant-login HTTP/1.1[0m" 302 -
+2025-10-02 13:05:16,033 - INFO - 127.0.0.1 - - [02/Oct/2025 13:05:16] "GET /participant-tournaments HTTP/1.1" 200 -
+2025-10-02 13:05:16,079 - INFO - 127.0.0.1 - - [02/Oct/2025 13:05:16] "GET /participant-tournaments HTTP/1.1" 200 -
+2025-10-02 13:05:29,240 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUdtuwjAM_ZXOz2XKjVLyxEfsbUNVcFyoaAtrUlUT4t-XphQqbS8n8XF8fOzcoChr407kQH_eIPHhANcjknOQwlfPFFcjSorIR1RsYpJ4lIt0FnFKHxa8ePEq3hWmCX-D_X2fBgcduRPo0tSOUjC2qdqCGlPVoKdo536cpwbmZGVB8zloTUPh4agqoj2Zxw781U2uI2JEG_nJ3TZZGFaLR_nr6V-5x_yLcaYxFXs69JcztcGVzAOFriufTNinzTNCLlBgJjK06mBLliFu5FYIrlCiOqixrnLFNHgRRUH7rg8LuprOV1hdTeuL-nI8ki3-Tz42w4NU7F509N2TC398A-zI-FBpQgSCifWKsxUTH2yrldRMvOebtVQqlM4_MeyGED00h2EWBS3z-_0XfXKwpw.aN5OWw.GtRWSMKJlqXzosZXzITmnwt8kGQ'}
+2025-10-02 13:05:29,244 - INFO - Очищено 1 flash сообщений при загрузке страницы токенов
+2025-10-02 13:05:29,250 - INFO - GET запрос на страницу токенов. Текущее количество: 1, максимум: 4
+2025-10-02 13:05:29,255 - INFO - 127.0.0.1 - - [02/Oct/2025 13:05:29] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 13:05:55,902 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '126', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUctuwyAQ_JWKc1PxWDuYUz6ix0oILzhFjZ0EsKwqyr8XYzup1F4GdnZndlluRHfBxU-iOnOK7pUY2_tBu974E1FLdIjfMbmebElviWJbMJje5cKPkQJnMwo5I5Q78MJUBbGgLXxb7s1LOWhB-FUkn6V_7YA-VWsDt_CPCdP5yw15KiEzhTF0DwYYWFk7ZBw51rxGC63taI24Fw3nDFAgtDDrfNTLw3UxJSqFMS_oYkLy6C9mSPp0Ph6d1f8n182wbFW66-Cuo4uJqBvB4EzKSpMjwimvdozuKH-njQKhKH-T-0oAZOn2E9NhytHqOU2bKVFC3u8_d4KLbA.aN5OaQ.Ly7ThjfCF-sdhSPgv-JwfpqkI2A'}
+2025-10-02 13:05:55,911 - INFO - Текущее количество выданных токенов: 1, максимум: 4
+2025-10-02 13:05:55,913 - INFO - Уже выданные пароли: [38]
+2025-10-02 13:05:55,914 - INFO - Доступные пароли: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+2025-10-02 13:05:55,915 - INFO - Выбран пароль: 62
+2025-10-02 13:05:55,915 - INFO - Сгенерирован уникальный пароль: 62
+2025-10-02 13:05:55,938 - INFO - Отправка email с токеном 62 на a@a для а
+2025-10-02 13:05:55,941 - INFO - Запуск асинхронной отправки email на a@a
+2025-10-02 13:05:55,941 - INFO - Асинхронная отправка email запущена для a@a
+2025-10-02 13:05:55,941 - INFO - Результат отправки email: True
+2025-10-02 13:05:55,941 - INFO - [SUCCESS] Email отправлен на a@a
+2025-10-02 13:05:55,953 - INFO - 127.0.0.1 - - [02/Oct/2025 13:05:55] "POST /request-token HTTP/1.1" 200 -
+2025-10-02 13:05:56,944 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-10-02 13:05:56,945 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-10-02 13:05:56,946 - INFO - Все переменные окружения MAIL_*: []
+2025-10-02 13:05:56,947 - INFO - RAILWAY_ENVIRONMENT: НЕ УСТАНОВЛЕНО
+2025-10-02 13:05:56,947 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-10-02 13:05:56,950 - INFO - Попытка отправки email на a@a с токеном 62
+2025-10-02 13:05:56,950 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-10-02 13:05:56,950 - INFO - От: tournaments.master@gmail.com, Кому: a@a
+2025-10-02 13:05:57,098 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-10-02 13:05:57,273 - INFO - [OK] TLS включен
+2025-10-02 13:05:57,524 - INFO - [OK] Авторизация успешна
+2025-10-02 13:05:58,329 - INFO - [OK] Email отправлен, результат: {}
+2025-10-02 13:05:58,350 - INFO - [OK] SMTP соединение закрыто
+2025-10-02 13:05:58,350 - INFO - [SUCCESS] Токен 62 успешно отправлен на a@a (а) от tournaments.master@gmail.com
+2025-10-02 13:05:58,519 - INFO - База данных инициализирована успешно
+2025-10-02 13:05:59,384 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:05:59,394 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:05:59,395 - ERROR - Ошибка обновления статуса токена 62: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-10-02 13:05:59,395 - INFO - Асинхронная отправка завершена: True
+2025-10-02 13:06:08,202 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:08] "GET / HTTP/1.1" 200 -
+2025-10-02 13:06:09,758 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:09] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 13:06:25,848 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:25] "GET / HTTP/1.1" 200 -
+2025-10-02 13:06:28,632 - INFO - Системный администратор успешно авторизован
+2025-10-02 13:06:28,633 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:28] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 13:06:28,990 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:28] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:06:32,598 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:32] "GET / HTTP/1.1" 200 -
+2025-10-02 13:06:34,431 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:34] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 13:06:41,555 - INFO - Попытка входа: email=a@a, token=62
+2025-10-02 13:06:41,557 - INFO - Поиск токена: email=a@a, token=62, найден=True
+2025-10-02 13:06:41,557 - INFO - Токен найден: id=3, created_at=2025-10-02 10:05:55.915270
+2025-10-02 13:06:41,565 - INFO - Время последнего использования токена обновлено
+2025-10-02 13:06:41,566 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 13:06:41,574 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:41] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:06:41,875 - INFO - Админ a@a (ID: 629224) видит турниры: 0
+2025-10-02 13:06:41,877 - INFO - Все турниры в системе:
+2025-10-02 13:06:41,877 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:06:41,877 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:06:41,906 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:41] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:06:45,125 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:45] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:06:56,415 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:56] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:06:56,431 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 13:06:56,432 - INFO - Все турниры в системе:
+2025-10-02 13:06:56,433 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:06:56,433 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:06:56,433 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:06:56,445 - INFO - 127.0.0.1 - - [02/Oct/2025 13:06:56] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:07:05,545 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:05] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:07:14,294 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:14] "[35m[1mPOST /api/tournaments/5/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:07:14,330 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:14] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:07:18,491 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 13:07:18,491 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:07:18,494 - INFO - Создано 1 туров
+2025-10-02 13:07:18,496 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 13:07:18,496 - INFO - Тур 1: 1 матчей
+2025-10-02 13:07:18,498 - INFO - Создание матча: 1 vs 2 (площадка 1)
+2025-10-02 13:07:18,505 - INFO - Автоматически создано 1 матчей для турнира 5 с сохранением результатов
+2025-10-02 13:07:18,510 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:18] "[35m[1mPOST /api/tournaments/5/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:07:18,855 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:18,855 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:18,856 - INFO - Матч 5: итоговый счет=None
+2025-10-02 13:07:18,857 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:18] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:07:26,209 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:07:26,237 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:07:26,237 - INFO - Создано 3 туров
+2025-10-02 13:07:26,237 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:07:26,237 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:07:26,242 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:07:26,244 - INFO - Тур 1: 1 матчей
+2025-10-02 13:07:26,244 - INFO - Создание матча: 2 vs 3 (площадка 1)
+2025-10-02 13:07:26,245 - INFO - Тур 2: 1 матчей
+2025-10-02 13:07:26,245 - INFO - Создание матча: 1 vs 3 (площадка 1)
+2025-10-02 13:07:26,246 - INFO - Тур 3: 1 матчей
+2025-10-02 13:07:26,247 - INFO - Создание матча: 1 vs 2 (площадка 1)
+2025-10-02 13:07:26,255 - INFO - Автоматически создано 3 матчей для турнира 5 с сохранением результатов
+2025-10-02 13:07:26,261 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:26] "[35m[1mPOST /api/tournaments/5/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:07:26,305 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:26,305 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:26,306 - INFO - Матч 5: итоговый счет=None
+2025-10-02 13:07:26,311 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:26,312 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:26,313 - INFO - Матч 6: итоговый счет=None
+2025-10-02 13:07:26,314 - INFO - Матч 7: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:26,315 - INFO - Матч 7: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:26,315 - INFO - Матч 7: итоговый счет=None
+2025-10-02 13:07:26,316 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:26,317 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:26,318 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:07:26,328 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:26] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:07:31,400 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:31] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-10-02 13:07:37,376 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:37] "GET /api/matches/5 HTTP/1.1" 200 -
+2025-10-02 13:07:37,649 - INFO - Начислены очки за матч 5: участник 1 = 1, участник 2 = 0
+2025-10-02 13:07:37,662 - INFO - Матч 5 обновлен
+2025-10-02 13:07:37,662 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:37] "PUT /api/matches/5 HTTP/1.1" 200 -
+2025-10-02 13:07:37,694 - INFO - Матч 5: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=2
+2025-10-02 13:07:37,694 - INFO - Матч 5: статус 'завершен' попадает в условие
+2025-10-02 13:07:37,694 - INFO - Матч 5: итоговый счет=2:0
+2025-10-02 13:07:37,695 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:37,695 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:37,695 - INFO - Матч 6: итоговый счет=None
+2025-10-02 13:07:37,696 - INFO - Матч 7: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:37,697 - INFO - Матч 7: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:37,697 - INFO - Матч 7: итоговый счет=None
+2025-10-02 13:07:37,697 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:07:37,698 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:07:37,698 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:07:37,700 - INFO - 127.0.0.1 - - [02/Oct/2025 13:07:37] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:08:07,681 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:08:07,689 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:08:07,689 - INFO - Создано 3 туров
+2025-10-02 13:08:07,689 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:08:07,690 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:08:07,691 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:08:07,691 - INFO - Тур 1: 1 матчей
+2025-10-02 13:08:07,692 - INFO - Создание матча: 2 vs 3 (площадка 1)
+2025-10-02 13:08:07,692 - INFO - Тур 2: 1 матчей
+2025-10-02 13:08:07,693 - INFO - Создание матча: 1 vs 3 (площадка 1)
+2025-10-02 13:08:07,693 - INFO - Тур 3: 1 матчей
+2025-10-02 13:08:07,694 - INFO - Создание матча: 1 vs 2 (площадка 1)
+2025-10-02 13:08:07,705 - INFO - Расписание составлено для турнира aaa: создано 3 матчей
+2025-10-02 13:08:07,707 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:07] "POST /api/tournaments/5/generate-schedule HTTP/1.1" 200 -
+2025-10-02 13:08:09,841 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:08:09,841 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:08:09,841 - INFO - Матч 5: итоговый счет=None
+2025-10-02 13:08:09,841 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:08:09,841 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:08:09,841 - INFO - Матч 6: итоговый счет=None
+2025-10-02 13:08:09,841 - INFO - Матч 7: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:08:09,847 - INFO - Матч 7: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:08:09,847 - INFO - Матч 7: итоговый счет=None
+2025-10-02 13:08:09,849 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:09] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:08:19,425 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:19] "GET /api/matches/7 HTTP/1.1" 200 -
+2025-10-02 13:08:24,712 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:24] "GET /api/matches/7 HTTP/1.1" 200 -
+2025-10-02 13:08:25,081 - INFO - Начислены очки за матч 7: участник 1 = 2, участник 2 = 0
+2025-10-02 13:08:25,096 - INFO - Матч 7 обновлен
+2025-10-02 13:08:25,098 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:25] "PUT /api/matches/7 HTTP/1.1" 200 -
+2025-10-02 13:08:25,298 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:08:25,298 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:08:25,298 - INFO - Матч 5: итоговый счет=None
+2025-10-02 13:08:25,298 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:08:25,298 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:08:25,298 - INFO - Матч 6: итоговый счет=None
+2025-10-02 13:08:25,309 - INFO - Матч 7: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=2
+2025-10-02 13:08:25,311 - INFO - Матч 7: статус 'завершен' попадает в условие
+2025-10-02 13:08:25,314 - INFO - Матч 7: итоговый счет=2:0
+2025-10-02 13:08:25,333 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:25] "GET /tournament/5 HTTP/1.1" 200 -
+2025-10-02 13:08:50,816 - INFO - 127.0.0.1 - - [02/Oct/2025 13:08:50] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:09:01,459 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:01] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:09:01,766 - INFO - Админ a@a (ID: 629224) видит турниры: 2
+2025-10-02 13:09:01,770 - INFO - Все турниры в системе:
+2025-10-02 13:09:01,770 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:09:01,771 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:09:01,771 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:09:01,771 - INFO -   Турнир "aaaaa" (ID: 6) - admin_id: 629224
+2025-10-02 13:09:01,787 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:01] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:09:06,926 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:06] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:09:38,646 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:38] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:09:38,679 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:38] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:09:46,237 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 13:09:46,239 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:09:46,239 - INFO - Создано 1 туров
+2025-10-02 13:09:46,239 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 13:09:46,239 - INFO - Тур 1: 1 матчей
+2025-10-02 13:09:46,239 - INFO - Создание матча: 1 vs 2 (площадка 1)
+2025-10-02 13:09:46,247 - INFO - Автоматически создано 1 матчей для турнира 6 с сохранением результатов
+2025-10-02 13:09:46,251 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:46] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:09:46,597 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:09:46,598 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:09:46,599 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:09:46,603 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:46] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:09:54,028 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:09:54,028 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:09:54,028 - INFO - Создано 3 туров
+2025-10-02 13:09:54,028 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:09:54,028 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:09:54,032 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:09:54,033 - INFO - Тур 1: 1 матчей
+2025-10-02 13:09:54,033 - INFO - Создание матча: 2 vs 3 (площадка 1)
+2025-10-02 13:09:54,034 - INFO - Тур 2: 1 матчей
+2025-10-02 13:09:54,035 - INFO - Создание матча: 1 vs 3 (площадка 1)
+2025-10-02 13:09:54,036 - INFO - Тур 3: 1 матчей
+2025-10-02 13:09:54,036 - INFO - Создание матча: 1 vs 2 (площадка 1)
+2025-10-02 13:09:54,043 - INFO - Автоматически создано 3 матчей для турнира 6 с сохранением результатов
+2025-10-02 13:09:54,047 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:54] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:09:54,076 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:09:54,077 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:09:54,077 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:09:54,078 - INFO - Матч 9: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:09:54,078 - INFO - Матч 9: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:09:54,078 - INFO - Матч 9: итоговый счет=None
+2025-10-02 13:09:54,078 - INFO - Матч 10: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:09:54,079 - INFO - Матч 10: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:09:54,079 - INFO - Матч 10: итоговый счет=None
+2025-10-02 13:09:54,079 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:09:54,079 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:09:54,079 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:09:54,087 - INFO - 127.0.0.1 - - [02/Oct/2025 13:09:54] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:18:25,179 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:18:25,588 - INFO -  * Restarting with stat
+2025-10-02 13:18:25,599 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:18:25,960 - INFO -  * Restarting with stat
+2025-10-02 13:18:28,612 - INFO - База данных инициализирована успешно
+2025-10-02 13:18:28,616 - INFO - База данных инициализирована успешно
+2025-10-02 13:18:29,442 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:18:29,448 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:18:29,449 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:18:29,449 - INFO - Переменная окружения PORT: None
+2025-10-02 13:18:29,449 - INFO - Режим отладки: production
+2025-10-02 13:18:29,462 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:18:29,471 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:18:29,472 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:18:29,472 - INFO - Переменная окружения PORT: None
+2025-10-02 13:18:29,473 - INFO - Режим отладки: production
+2025-10-02 13:18:29,540 - WARNING -  * Debugger is active!
+2025-10-02 13:18:29,540 - WARNING -  * Debugger is active!
+2025-10-02 13:18:29,548 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:19:14,766 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:19:14,860 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:19:14,963 - INFO -  * Restarting with stat
+2025-10-02 13:19:15,071 - INFO -  * Restarting with stat
+2025-10-02 13:19:16,869 - INFO - База данных инициализирована успешно
+2025-10-02 13:19:16,898 - INFO - База данных инициализирована успешно
+2025-10-02 13:19:17,818 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:19:17,824 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:19:17,824 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:19:17,825 - INFO - Переменная окружения PORT: None
+2025-10-02 13:19:17,826 - INFO - Режим отладки: production
+2025-10-02 13:19:17,830 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:19:17,842 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:19:17,843 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:19:17,846 - INFO - Переменная окружения PORT: None
+2025-10-02 13:19:17,846 - INFO - Режим отладки: production
+2025-10-02 13:19:17,867 - WARNING -  * Debugger is active!
+2025-10-02 13:19:17,879 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:19:17,881 - WARNING -  * Debugger is active!
+2025-10-02 13:19:17,897 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:19:27,775 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:19:27,891 - INFO -  * Restarting with stat
+2025-10-02 13:19:28,017 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:19:28,120 - INFO -  * Restarting with stat
+2025-10-02 13:19:29,108 - INFO - База данных инициализирована успешно
+2025-10-02 13:19:29,293 - INFO - База данных инициализирована успешно
+2025-10-02 13:19:29,841 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:19:29,849 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:19:29,850 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:19:29,850 - INFO - Переменная окружения PORT: None
+2025-10-02 13:19:29,851 - INFO - Режим отладки: production
+2025-10-02 13:19:29,886 - WARNING -  * Debugger is active!
+2025-10-02 13:19:29,896 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:19:30,152 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:19:30,161 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:19:30,161 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:19:30,162 - INFO - Переменная окружения PORT: None
+2025-10-02 13:19:30,162 - INFO - Режим отладки: production
+2025-10-02 13:19:30,192 - WARNING -  * Debugger is active!
+2025-10-02 13:19:30,199 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:20:51,106 - INFO - База данных инициализирована успешно
+2025-10-02 13:20:52,529 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:20:52,542 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:20:52,543 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:20:52,544 - INFO - Переменная окружения PORT: None
+2025-10-02 13:20:52,545 - INFO - Режим отладки: production
+2025-10-02 13:20:52,656 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.204:5000
+2025-10-02 13:20:52,657 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-02 13:20:52,662 - INFO -  * Restarting with stat
+2025-10-02 13:20:55,484 - INFO - База данных инициализирована успешно
+2025-10-02 13:20:57,203 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:20:57,217 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:20:57,217 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:20:57,218 - INFO - Переменная окружения PORT: None
+2025-10-02 13:20:57,219 - INFO - Режим отладки: production
+2025-10-02 13:20:57,262 - WARNING -  * Debugger is active!
+2025-10-02 13:20:57,272 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:21:14,346 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:21:14,540 - INFO -  * Restarting with stat
+2025-10-02 13:21:14,674 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:21:14,851 - INFO -  * Restarting with stat
+2025-10-02 13:21:15,579 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:21:15,809 - INFO -  * Restarting with stat
+2025-10-02 13:21:16,794 - INFO - База данных инициализирована успешно
+2025-10-02 13:21:17,034 - INFO - База данных инициализирована успешно
+2025-10-02 13:21:17,765 - INFO - База данных инициализирована успешно
+2025-10-02 13:21:17,838 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:21:17,842 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:21:17,845 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:21:17,845 - INFO - Переменная окружения PORT: None
+2025-10-02 13:21:17,845 - INFO - Режим отладки: production
+2025-10-02 13:21:17,879 - WARNING -  * Debugger is active!
+2025-10-02 13:21:17,890 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:21:18,006 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:21:18,016 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:21:18,017 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:21:18,017 - INFO - Переменная окружения PORT: None
+2025-10-02 13:21:18,018 - INFO - Режим отладки: production
+2025-10-02 13:21:18,056 - WARNING -  * Debugger is active!
+2025-10-02 13:21:18,061 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:21:18,694 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:21:18,703 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:21:18,704 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:21:18,705 - INFO - Переменная окружения PORT: None
+2025-10-02 13:21:18,706 - INFO - Режим отладки: production
+2025-10-02 13:21:18,733 - WARNING -  * Debugger is active!
+2025-10-02 13:21:18,739 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:23:12,297 - INFO - Участник '1' удален из турнира 6. Удалено 3 матчей с его участием. Результаты других матчей сохранены.
+2025-10-02 13:23:12,297 - ERROR - Ошибка при удалении участника 7: 'Admin' object has no attribute 'username'
+2025-10-02 13:23:12,298 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:12] "[35m[1mDELETE /api/tournaments/6/participants/7 HTTP/1.1[0m" 500 -
+2025-10-02 13:23:20,912 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:20] "[33mDELETE /api/tournaments/6/participants/7 HTTP/1.1[0m" 404 -
+2025-10-02 13:23:24,729 - INFO - Матч 9: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:23:24,729 - INFO - Матч 9: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:23:24,729 - INFO - Матч 9: итоговый счет=None
+2025-10-02 13:23:24,891 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:24] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:23:28,178 - INFO - Участник '2' удален из турнира 6. Удалено 1 матчей с его участием. Результаты других матчей сохранены.
+2025-10-02 13:23:28,178 - ERROR - Ошибка при удалении участника 8: 'Admin' object has no attribute 'username'
+2025-10-02 13:23:28,179 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:28] "[35m[1mDELETE /api/tournaments/6/participants/8 HTTP/1.1[0m" 500 -
+2025-10-02 13:23:32,128 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:32] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:23:35,984 - INFO - Участник '3' удален из турнира 6. Удалено 0 матчей с его участием. Результаты других матчей сохранены.
+2025-10-02 13:23:35,985 - ERROR - Ошибка при удалении участника 9: 'Admin' object has no attribute 'username'
+2025-10-02 13:23:35,986 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:35] "[35m[1mDELETE /api/tournaments/6/participants/9 HTTP/1.1[0m" 500 -
+2025-10-02 13:23:37,782 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:37] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:23:51,624 - ERROR - Ошибка при удалении турнира 6: 'Admin' object has no attribute 'username'
+2025-10-02 13:23:51,626 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:51] "[35m[1mDELETE /api/tournaments/6 HTTP/1.1[0m" 500 -
+2025-10-02 13:23:56,888 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 13:23:56,892 - INFO - Все турниры в системе:
+2025-10-02 13:23:56,892 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:23:56,893 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:23:56,893 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:23:56,925 - INFO - 127.0.0.1 - - [02/Oct/2025 13:23:56] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:24:06,351 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:06] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:24:17,710 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:17] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:24:18,016 - INFO - Админ a@a (ID: 629224) видит турниры: 2
+2025-10-02 13:24:18,025 - INFO - Все турниры в системе:
+2025-10-02 13:24:18,027 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:24:18,028 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:24:18,030 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:24:18,032 - INFO -   Турнир "фф" (ID: 6) - admin_id: 629224
+2025-10-02 13:24:18,054 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:18] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:24:21,814 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:21] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:24:28,424 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:28] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:24:28,461 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:28] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:24:32,453 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 13:24:32,457 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:24:32,457 - INFO - Создано 1 туров
+2025-10-02 13:24:32,458 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 13:24:32,459 - INFO - Тур 1: 1 матчей
+2025-10-02 13:24:32,459 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 1)
+2025-10-02 13:24:32,460 - INFO - Матч 7 vs 8 получил номер 1
+2025-10-02 13:24:32,465 - INFO - Автоматически создано 1 матчей для турнира 6 с сохранением результатов
+2025-10-02 13:24:32,475 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:32] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:24:32,810 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:32,811 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:32,811 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:24:32,814 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:32] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:24:38,536 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:24:38,539 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:24:38,540 - INFO - Создано 3 туров
+2025-10-02 13:24:38,541 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:24:38,541 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:24:38,542 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:24:38,542 - INFO - Тур 1: 1 матчей
+2025-10-02 13:24:38,542 - INFO - Создание нового матча: 2 vs 3 (площадка 1, номер 1)
+2025-10-02 13:24:38,542 - INFO - Матч 8 vs 9 получил номер 1
+2025-10-02 13:24:38,542 - INFO - Тур 2: 1 матчей
+2025-10-02 13:24:38,544 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 2)
+2025-10-02 13:24:38,544 - INFO - Матч 7 vs 9 получил номер 2
+2025-10-02 13:24:38,545 - INFO - Тур 3: 1 матчей
+2025-10-02 13:24:38,545 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 3)
+2025-10-02 13:24:38,548 - INFO - Матч 7 vs 8 получил номер 3
+2025-10-02 13:24:38,557 - INFO - Автоматически создано 3 матчей для турнира 6 с сохранением результатов
+2025-10-02 13:24:38,561 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:38] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:24:38,595 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:38,596 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:38,598 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:24:38,598 - INFO - Матч 9: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:38,599 - INFO - Матч 9: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:38,599 - INFO - Матч 9: итоговый счет=None
+2025-10-02 13:24:38,600 - INFO - Матч 10: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:38,602 - INFO - Матч 10: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:38,603 - INFO - Матч 10: итоговый счет=None
+2025-10-02 13:24:38,603 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:38,603 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:38,603 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:24:38,608 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:38] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:24:46,584 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:46,584 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:46,585 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:24:46,585 - INFO - Матч 9: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:46,585 - INFO - Матч 9: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:46,586 - INFO - Матч 9: итоговый счет=None
+2025-10-02 13:24:46,587 - INFO - Матч 10: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:46,587 - INFO - Матч 10: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:46,588 - INFO - Матч 10: итоговый счет=None
+2025-10-02 13:24:46,588 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:24:46,588 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:24:46,589 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:24:46,591 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:46] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:24:46,964 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-10-02 13:24:46,966 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-10-02 13:24:58,034 - ERROR - Ошибка при удалении турнира 6: 'Admin' object has no attribute 'username'
+2025-10-02 13:24:58,035 - INFO - 127.0.0.1 - - [02/Oct/2025 13:24:58] "[35m[1mDELETE /api/tournaments/6 HTTP/1.1[0m" 500 -
+2025-10-02 13:25:09,444 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 13:25:09,446 - INFO - Все турниры в системе:
+2025-10-02 13:25:09,448 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:25:09,448 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:25:09,449 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:25:09,454 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:09] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:25:12,948 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:12] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:25:17,363 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:17] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:25:17,657 - INFO - Админ a@a (ID: 629224) видит турниры: 2
+2025-10-02 13:25:17,660 - INFO - Все турниры в системе:
+2025-10-02 13:25:17,661 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:25:17,662 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:25:17,662 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:25:17,665 - INFO -   Турнир "ф" (ID: 6) - admin_id: 629224
+2025-10-02 13:25:17,679 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:17] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:25:20,668 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:20] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:25:26,732 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:26] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:25:26,761 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:26] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:25:30,566 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 13:25:30,566 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:25:30,566 - INFO - Создано 1 туров
+2025-10-02 13:25:30,566 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 13:25:30,566 - INFO - Тур 1: 1 матчей
+2025-10-02 13:25:30,569 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 1)
+2025-10-02 13:25:30,573 - INFO - Матч 7 vs 8 получил номер 1
+2025-10-02 13:25:30,580 - INFO - Автоматически создано 1 матчей для турнира 6 с сохранением результатов
+2025-10-02 13:25:30,584 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:30] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:25:30,917 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:25:30,917 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:25:30,918 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:25:30,926 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:30] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:25:41,459 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:25:41,461 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:25:41,461 - INFO - Создано 3 туров
+2025-10-02 13:25:41,461 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:25:41,461 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:25:41,461 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:25:41,461 - INFO - Тур 1: 1 матчей
+2025-10-02 13:25:41,461 - INFO - Создание нового матча: 2 vs 3 (площадка 1, номер 1)
+2025-10-02 13:25:41,468 - INFO - Матч 8 vs 9 получил номер 1
+2025-10-02 13:25:41,469 - INFO - Тур 2: 1 матчей
+2025-10-02 13:25:41,472 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 2)
+2025-10-02 13:25:41,474 - INFO - Матч 7 vs 9 получил номер 2
+2025-10-02 13:25:41,475 - INFO - Тур 3: 1 матчей
+2025-10-02 13:25:41,476 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 3)
+2025-10-02 13:25:41,478 - INFO - Матч 7 vs 8 получил номер 3
+2025-10-02 13:25:41,488 - INFO - Автоматически создано 3 матчей для турнира 6 с сохранением результатов
+2025-10-02 13:25:41,504 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:41] "[35m[1mPOST /api/tournaments/6/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:25:41,546 - INFO - Матч 8: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:25:41,552 - INFO - Матч 8: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:25:41,554 - INFO - Матч 8: итоговый счет=None
+2025-10-02 13:25:41,556 - INFO - Матч 9: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:25:41,557 - INFO - Матч 9: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:25:41,558 - INFO - Матч 9: итоговый счет=None
+2025-10-02 13:25:41,559 - INFO - Матч 10: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:25:41,560 - INFO - Матч 10: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:25:41,561 - INFO - Матч 10: итоговый счет=None
+2025-10-02 13:25:41,563 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:25:41,567 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:25:41,576 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:25:41,583 - INFO - 127.0.0.1 - - [02/Oct/2025 13:25:41] "GET /tournament/6 HTTP/1.1" 200 -
+2025-10-02 13:28:56,674 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:28:56,890 - INFO -  * Restarting with stat
+2025-10-02 13:28:56,902 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:28:56,960 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:28:57,141 - INFO -  * Restarting with stat
+2025-10-02 13:28:57,221 - INFO -  * Restarting with stat
+2025-10-02 13:28:59,420 - INFO - База данных инициализирована успешно
+2025-10-02 13:28:59,461 - INFO - База данных инициализирована успешно
+2025-10-02 13:28:59,493 - INFO - База данных инициализирована успешно
+2025-10-02 13:29:00,585 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:29:00,590 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:29:00,598 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:29:00,599 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:29:00,599 - INFO - Переменная окружения PORT: None
+2025-10-02 13:29:00,600 - INFO - Режим отладки: production
+2025-10-02 13:29:00,603 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:29:00,607 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:29:00,608 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:29:00,608 - INFO - Переменная окружения PORT: None
+2025-10-02 13:29:00,608 - INFO - Режим отладки: production
+2025-10-02 13:29:00,614 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:29:00,615 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:29:00,616 - INFO - Переменная окружения PORT: None
+2025-10-02 13:29:00,617 - INFO - Режим отладки: production
+2025-10-02 13:29:00,644 - WARNING -  * Debugger is active!
+2025-10-02 13:29:00,651 - WARNING -  * Debugger is active!
+2025-10-02 13:29:00,656 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:29:00,656 - WARNING -  * Debugger is active!
+2025-10-02 13:29:00,665 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:29:00,666 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:29:07,951 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:29:08,028 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:29:08,102 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:29:08,147 - INFO -  * Restarting with stat
+2025-10-02 13:29:08,270 - INFO -  * Restarting with stat
+2025-10-02 13:29:08,355 - INFO -  * Restarting with stat
+2025-10-02 13:29:10,545 - INFO - База данных инициализирована успешно
+2025-10-02 13:29:10,560 - INFO - База данных инициализирована успешно
+2025-10-02 13:29:10,637 - INFO - База данных инициализирована успешно
+2025-10-02 13:29:11,660 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:29:11,667 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:29:11,672 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:29:11,674 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:29:11,674 - INFO - Переменная окружения PORT: None
+2025-10-02 13:29:11,675 - INFO - Режим отладки: production
+2025-10-02 13:29:11,678 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:29:11,679 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:29:11,680 - INFO - Переменная окружения PORT: None
+2025-10-02 13:29:11,680 - INFO - Режим отладки: production
+2025-10-02 13:29:11,715 - WARNING -  * Debugger is active!
+2025-10-02 13:29:11,717 - WARNING -  * Debugger is active!
+2025-10-02 13:29:11,726 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:29:11,729 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:29:11,793 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:29:11,800 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:29:11,801 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:29:11,801 - INFO - Переменная окружения PORT: None
+2025-10-02 13:29:11,801 - INFO - Режим отладки: production
+2025-10-02 13:29:11,837 - WARNING -  * Debugger is active!
+2025-10-02 13:29:11,850 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:30:00,150 - INFO - База данных инициализирована успешно
+2025-10-02 13:30:02,047 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:30:02,072 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:30:29,158 - INFO - База данных инициализирована успешно
+2025-10-02 13:30:30,600 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:30:30,625 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:31:21,976 - INFO - The CSRF session token is missing.
+2025-10-02 13:31:21,977 - INFO - 127.0.0.1 - - [02/Oct/2025 13:31:21] "[31m[1mPOST /api/tournaments/6/generate-schedule HTTP/1.1[0m" 400 -
+2025-10-02 13:31:36,972 - INFO - База данных инициализирована успешно
+2025-10-02 13:31:38,728 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:31:38,743 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:31:38,792 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:31:38,795 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:31:38,795 - INFO - create_round_robin_schedule: получено 3 участников: ['1', '2', '3']
+2025-10-02 13:31:38,796 - INFO - Создано 3 туров для 3 участников
+2025-10-02 13:31:38,797 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:31:38,798 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:31:38,801 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:31:38,803 - INFO - Всего уникальных матчей: 3
+2025-10-02 13:31:38,804 - INFO - Тур 1: 1 матчей
+2025-10-02 13:31:38,805 - INFO - Создание нового матча: 2 vs 3 (площадка 1, номер 1)
+2025-10-02 13:31:38,806 - INFO - Матч 8 vs 9 получил номер 1
+2025-10-02 13:31:38,807 - INFO - Тур 2: 1 матчей
+2025-10-02 13:31:38,808 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 2)
+2025-10-02 13:31:38,809 - INFO - Матч 7 vs 9 получил номер 2
+2025-10-02 13:31:38,810 - INFO - Тур 3: 1 матчей
+2025-10-02 13:31:38,810 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 3)
+2025-10-02 13:31:38,811 - INFO - Матч 7 vs 8 получил номер 3
+2025-10-02 13:32:03,474 - INFO - База данных инициализирована успешно
+2025-10-02 13:32:04,285 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:32:04,293 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:32:37,109 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:32:37,320 - INFO -  * Restarting with stat
+2025-10-02 13:32:37,357 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:32:37,363 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:32:37,505 - INFO -  * Restarting with stat
+2025-10-02 13:32:37,508 - INFO -  * Restarting with stat
+2025-10-02 13:32:38,994 - INFO - База данных инициализирована успешно
+2025-10-02 13:32:39,087 - INFO - База данных инициализирована успешно
+2025-10-02 13:32:39,091 - INFO - База данных инициализирована успешно
+2025-10-02 13:32:40,384 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:32:40,387 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:32:40,387 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:32:40,391 - INFO - Переменная окружения PORT: None
+2025-10-02 13:32:40,391 - INFO - Режим отладки: production
+2025-10-02 13:32:40,405 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:32:40,411 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:32:40,412 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:32:40,413 - INFO - Переменная окружения PORT: None
+2025-10-02 13:32:40,413 - INFO - Режим отладки: production
+2025-10-02 13:32:40,415 - WARNING -  * Debugger is active!
+2025-10-02 13:32:40,417 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:32:40,421 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:32:40,425 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:32:40,425 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:32:40,425 - INFO - Переменная окружения PORT: None
+2025-10-02 13:32:40,426 - INFO - Режим отладки: production
+2025-10-02 13:32:40,440 - WARNING -  * Debugger is active!
+2025-10-02 13:32:40,442 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:32:40,451 - WARNING -  * Debugger is active!
+2025-10-02 13:32:40,454 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:36:22,413 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:22] "GET / HTTP/1.1" 200 -
+2025-10-02 13:36:23,901 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:23] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 13:36:28,783 - INFO - Попытка входа: email=a@a, token=62
+2025-10-02 13:36:28,786 - INFO - Поиск токена: email=a@a, token=62, найден=True
+2025-10-02 13:36:28,786 - INFO - Токен найден: id=3, created_at=2025-10-02 10:05:55.915270
+2025-10-02 13:36:28,794 - INFO - Время последнего использования токена обновлено
+2025-10-02 13:36:28,795 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 13:36:28,800 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:28] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:36:29,089 - INFO - Админ a@a (ID: 629224) видит турниры: 2
+2025-10-02 13:36:29,090 - INFO - Все турниры в системе:
+2025-10-02 13:36:29,090 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:36:29,090 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:36:29,091 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:36:29,091 - INFO -   Турнир "ф" (ID: 6) - admin_id: 629224
+2025-10-02 13:36:29,125 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:29] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:36:33,009 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:33] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:36:34,873 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:34] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:36:47,933 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:47] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:36:55,402 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:55] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:36:55,670 - INFO - Админ a@a (ID: 629224) видит турниры: 3
+2025-10-02 13:36:55,673 - INFO - Все турниры в системе:
+2025-10-02 13:36:55,674 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:36:55,675 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:36:55,676 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:36:55,677 - INFO -   Турнир "ф" (ID: 6) - admin_id: 629224
+2025-10-02 13:36:55,679 - INFO -   Турнир "ффф" (ID: 7) - admin_id: 629224
+2025-10-02 13:36:55,706 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:55] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:36:59,652 - INFO - 127.0.0.1 - - [02/Oct/2025 13:36:59] "GET /tournament/7 HTTP/1.1" 200 -
+2025-10-02 13:37:04,844 - INFO - 127.0.0.1 - - [02/Oct/2025 13:37:04] "[35m[1mPOST /api/tournaments/7/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:37:04,870 - INFO - 127.0.0.1 - - [02/Oct/2025 13:37:04] "GET /tournament/7 HTTP/1.1" 200 -
+2025-10-02 13:37:09,550 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 13:37:09,555 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:37:09,556 - INFO - create_round_robin_schedule: получено 2 участников: ['1', '2']
+2025-10-02 13:37:09,556 - INFO - Создано 1 туров для 2 участников
+2025-10-02 13:37:09,556 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 13:37:09,558 - INFO - Всего уникальных матчей: 1
+2025-10-02 13:37:09,558 - INFO - Тур 1: 1 матчей
+2025-10-02 13:37:09,558 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 1)
+2025-10-02 13:37:09,559 - INFO - Матч 10 vs 11 получил номер 1
+2025-10-02 13:37:09,569 - INFO - Автоматически создано 1 матчей для турнира 7 с сохранением результатов
+2025-10-02 13:37:09,576 - INFO - 127.0.0.1 - - [02/Oct/2025 13:37:09] "[35m[1mPOST /api/tournaments/7/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:37:09,925 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:37:09,928 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:37:09,928 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:37:09,939 - INFO - 127.0.0.1 - - [02/Oct/2025 13:37:09] "GET /tournament/7 HTTP/1.1" 200 -
+2025-10-02 13:37:14,256 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:37:14,260 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:37:14,262 - INFO - create_round_robin_schedule: получено 3 участников: ['1', '2', '3']
+2025-10-02 13:37:14,263 - INFO - Создано 3 туров для 3 участников
+2025-10-02 13:37:14,264 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:37:14,265 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:37:14,266 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:37:14,266 - INFO - Всего уникальных матчей: 3
+2025-10-02 13:37:14,267 - INFO - Тур 1: 1 матчей
+2025-10-02 13:37:14,268 - INFO - Создание нового матча: 2 vs 3 (площадка 1, номер 1)
+2025-10-02 13:37:14,269 - INFO - Матч 11 vs 12 получил номер 1
+2025-10-02 13:37:14,271 - INFO - Тур 2: 1 матчей
+2025-10-02 13:37:14,271 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 2)
+2025-10-02 13:37:14,271 - INFO - Матч 10 vs 12 получил номер 2
+2025-10-02 13:37:14,272 - INFO - Тур 3: 1 матчей
+2025-10-02 13:37:14,273 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 3)
+2025-10-02 13:37:14,273 - INFO - Матч 10 vs 11 получил номер 3
+2025-10-02 13:37:14,284 - INFO - Автоматически создано 3 матчей для турнира 7 с сохранением результатов
+2025-10-02 13:37:14,290 - INFO - 127.0.0.1 - - [02/Oct/2025 13:37:14] "[35m[1mPOST /api/tournaments/7/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:37:14,324 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:37:14,324 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:37:14,324 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:37:14,325 - INFO - Матч 12: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:37:14,327 - INFO - Матч 12: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:37:14,328 - INFO - Матч 12: итоговый счет=None
+2025-10-02 13:37:14,329 - INFO - Матч 13: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:37:14,330 - INFO - Матч 13: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:37:14,330 - INFO - Матч 13: итоговый счет=None
+2025-10-02 13:37:14,330 - INFO - Матч 14: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:37:14,331 - INFO - Матч 14: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:37:14,332 - INFO - Матч 14: итоговый счет=None
+2025-10-02 13:37:14,337 - INFO - 127.0.0.1 - - [02/Oct/2025 13:37:14] "GET /tournament/7 HTTP/1.1" 200 -
+2025-10-02 13:42:28,121 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:42:28,151 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:42:28,153 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:42:28,313 - INFO -  * Restarting with stat
+2025-10-02 13:42:28,342 - INFO -  * Restarting with stat
+2025-10-02 13:42:28,353 - INFO -  * Restarting with stat
+2025-10-02 13:42:30,531 - INFO - База данных инициализирована успешно
+2025-10-02 13:42:30,533 - INFO - База данных инициализирована успешно
+2025-10-02 13:42:30,635 - INFO - База данных инициализирована успешно
+2025-10-02 13:42:31,490 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:42:31,497 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:42:31,499 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:42:31,499 - INFO - Переменная окружения PORT: None
+2025-10-02 13:42:31,499 - INFO - Режим отладки: production
+2025-10-02 13:42:31,534 - WARNING -  * Debugger is active!
+2025-10-02 13:42:31,540 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:42:31,572 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:42:31,579 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:42:31,580 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:42:31,581 - INFO - Переменная окружения PORT: None
+2025-10-02 13:42:31,581 - INFO - Режим отладки: production
+2025-10-02 13:42:31,601 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:42:31,611 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:42:31,612 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:42:31,612 - INFO - Переменная окружения PORT: None
+2025-10-02 13:42:31,612 - INFO - Режим отладки: production
+2025-10-02 13:42:31,619 - WARNING -  * Debugger is active!
+2025-10-02 13:42:31,627 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:42:31,646 - WARNING -  * Debugger is active!
+2025-10-02 13:42:31,656 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:42:58,570 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:42:58,619 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:42:58,647 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:42:58,725 - INFO -  * Restarting with stat
+2025-10-02 13:42:58,788 - INFO -  * Restarting with stat
+2025-10-02 13:42:58,814 - INFO -  * Restarting with stat
+2025-10-02 13:43:00,684 - INFO - База данных инициализирована успешно
+2025-10-02 13:43:00,721 - INFO - База данных инициализирована успешно
+2025-10-02 13:43:00,763 - INFO - База данных инициализирована успешно
+2025-10-02 13:43:01,738 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:43:01,745 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:43:01,746 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:43:01,746 - INFO - Переменная окружения PORT: None
+2025-10-02 13:43:01,747 - INFO - Режим отладки: production
+2025-10-02 13:43:01,771 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:43:01,774 - WARNING -  * Debugger is active!
+2025-10-02 13:43:01,778 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:43:01,780 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:43:01,781 - INFO - Переменная окружения PORT: None
+2025-10-02 13:43:01,782 - INFO - Режим отладки: production
+2025-10-02 13:43:01,782 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:43:01,797 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:43:01,807 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:43:01,808 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:43:01,808 - INFO - Переменная окружения PORT: None
+2025-10-02 13:43:01,809 - INFO - Режим отладки: production
+2025-10-02 13:43:01,816 - WARNING -  * Debugger is active!
+2025-10-02 13:43:01,826 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:43:01,839 - WARNING -  * Debugger is active!
+2025-10-02 13:43:01,849 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:47:45,322 - INFO - База данных инициализирована успешно
+2025-10-02 13:47:46,206 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:47:46,215 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:48:44,004 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:48:44,180 - INFO -  * Restarting with stat
+2025-10-02 13:48:44,195 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:48:44,264 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:48:44,386 - INFO -  * Restarting with stat
+2025-10-02 13:48:44,456 - INFO -  * Restarting with stat
+2025-10-02 13:48:45,935 - INFO - База данных инициализирована успешно
+2025-10-02 13:48:45,962 - INFO - База данных инициализирована успешно
+2025-10-02 13:48:46,025 - INFO - База данных инициализирована успешно
+2025-10-02 13:48:46,908 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:48:46,913 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:48:46,915 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:48:46,915 - INFO - Переменная окружения PORT: None
+2025-10-02 13:48:46,915 - INFO - Режим отладки: production
+2025-10-02 13:48:46,943 - WARNING -  * Debugger is active!
+2025-10-02 13:48:46,949 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:48:46,978 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:48:46,986 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:48:46,986 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:48:46,987 - INFO - Переменная окружения PORT: None
+2025-10-02 13:48:46,987 - INFO - Режим отладки: production
+2025-10-02 13:48:46,988 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:48:46,998 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:48:46,998 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:48:46,999 - INFO - Переменная окружения PORT: None
+2025-10-02 13:48:46,999 - INFO - Режим отладки: production
+2025-10-02 13:48:47,015 - WARNING -  * Debugger is active!
+2025-10-02 13:48:47,020 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:48:47,030 - WARNING -  * Debugger is active!
+2025-10-02 13:48:47,039 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:50:48,239 - INFO - 127.0.0.1 - - [02/Oct/2025 13:50:48] "GET / HTTP/1.1" 200 -
+2025-10-02 13:51:29,537 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:51:29,580 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:51:29,599 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 13:51:29,746 - INFO -  * Restarting with stat
+2025-10-02 13:51:29,785 - INFO -  * Restarting with stat
+2025-10-02 13:51:29,812 - INFO -  * Restarting with stat
+2025-10-02 13:51:31,481 - INFO - База данных инициализирована успешно
+2025-10-02 13:51:31,499 - INFO - База данных инициализирована успешно
+2025-10-02 13:51:31,529 - INFO - База данных инициализирована успешно
+2025-10-02 13:51:32,400 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:51:32,407 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:51:32,408 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:51:32,408 - INFO - Переменная окружения PORT: None
+2025-10-02 13:51:32,409 - INFO - Режим отладки: production
+2025-10-02 13:51:32,416 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:51:32,424 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:51:32,425 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:51:32,426 - INFO - Переменная окружения PORT: None
+2025-10-02 13:51:32,427 - INFO - Режим отладки: production
+2025-10-02 13:51:32,436 - WARNING -  * Debugger is active!
+2025-10-02 13:51:32,444 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:51:32,452 - WARNING -  * Debugger is active!
+2025-10-02 13:51:32,458 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:51:32,487 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 13:51:32,494 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 13:51:32,495 - INFO - Запуск приложения на порту 5000
+2025-10-02 13:51:32,495 - INFO - Переменная окружения PORT: None
+2025-10-02 13:51:32,495 - INFO - Режим отладки: production
+2025-10-02 13:51:32,523 - WARNING -  * Debugger is active!
+2025-10-02 13:51:32,532 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 13:51:48,025 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:51:48,025 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:51:48,026 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:51:48,027 - INFO - Матч 12: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:51:48,027 - INFO - Матч 12: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:51:48,028 - INFO - Матч 12: итоговый счет=None
+2025-10-02 13:51:48,028 - INFO - Матч 13: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:51:48,029 - INFO - Матч 13: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:51:48,032 - INFO - Матч 13: итоговый счет=None
+2025-10-02 13:51:48,034 - INFO - Матч 14: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:51:48,036 - INFO - Матч 14: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:51:48,038 - INFO - Матч 14: итоговый счет=None
+2025-10-02 13:51:48,240 - INFO - 127.0.0.1 - - [02/Oct/2025 13:51:48] "GET /tournament/7 HTTP/1.1" 200 -
+2025-10-02 13:52:00,659 - INFO - Создание расписания для 4 участников: ['1', '2', '3', '4']
+2025-10-02 13:52:00,660 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:52:00,661 - INFO - create_round_robin_schedule: получено 4 участников: ['1', '2', '3', '4']
+2025-10-02 13:52:00,661 - INFO - Создано 3 туров для 4 участников
+2025-10-02 13:52:00,662 - INFO - Тур 1: ['1 vs 4', '2 vs 3']
+2025-10-02 13:52:00,662 - INFO - Тур 2: ['1 vs 3', '4 vs 2']
+2025-10-02 13:52:00,663 - INFO - Тур 3: ['1 vs 2', '3 vs 4']
+2025-10-02 13:52:00,663 - INFO - Всего уникальных матчей: 6
+2025-10-02 13:52:00,663 - INFO - Тур 1: 2 матчей
+2025-10-02 13:52:00,664 - INFO - Создание нового матча: 1 vs 4 (площадка 1, номер 1)
+2025-10-02 13:52:00,664 - INFO - Создание нового матча: 2 vs 3 (площадка 2, номер 2)
+2025-10-02 13:52:00,665 - INFO - Матч 10 vs 16 получил номер 1
+2025-10-02 13:52:00,666 - INFO - Матч 11 vs 12 получил номер 2
+2025-10-02 13:52:00,667 - INFO - Тур 2: 2 матчей
+2025-10-02 13:52:00,667 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 3)
+2025-10-02 13:52:00,667 - INFO - Создание нового матча: 4 vs 2 (площадка 2, номер 4)
+2025-10-02 13:52:00,668 - INFO - Матч 10 vs 12 получил номер 3
+2025-10-02 13:52:00,669 - INFO - Матч 16 vs 11 получил номер 4
+2025-10-02 13:52:00,669 - INFO - Тур 3: 2 матчей
+2025-10-02 13:52:00,669 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 5)
+2025-10-02 13:52:00,670 - INFO - Создание нового матча: 3 vs 4 (площадка 2, номер 6)
+2025-10-02 13:52:00,671 - INFO - Матч 10 vs 11 получил номер 5
+2025-10-02 13:52:00,671 - INFO - Матч 12 vs 16 получил номер 6
+2025-10-02 13:52:00,679 - INFO - Автоматически пересоздано 6 матчей для турнира 7 (удалено 4 старых матчей)
+2025-10-02 13:52:00,684 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:00] "[35m[1mPOST /api/tournaments/7/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:52:00,714 - INFO - Матч 11: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:00,714 - INFO - Матч 11: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:00,714 - INFO - Матч 11: итоговый счет=None
+2025-10-02 13:52:00,715 - INFO - Матч 12: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:00,716 - INFO - Матч 12: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:00,716 - INFO - Матч 12: итоговый счет=None
+2025-10-02 13:52:00,717 - INFO - Матч 13: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:00,717 - INFO - Матч 13: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:00,717 - INFO - Матч 13: итоговый счет=None
+2025-10-02 13:52:00,718 - INFO - Матч 14: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:00,719 - INFO - Матч 14: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:00,719 - INFO - Матч 14: итоговый счет=None
+2025-10-02 13:52:00,720 - INFO - Матч 15: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:00,721 - INFO - Матч 15: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:00,721 - INFO - Матч 15: итоговый счет=None
+2025-10-02 13:52:00,722 - INFO - Матч 16: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:00,722 - INFO - Матч 16: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:00,722 - INFO - Матч 16: итоговый счет=None
+2025-10-02 13:52:00,728 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:00] "GET /tournament/7 HTTP/1.1" 200 -
+2025-10-02 13:52:16,924 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:16] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 13:52:23,815 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:23] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 13:52:23,826 - INFO - Админ a@a (ID: 629224) видит турниры: 4
+2025-10-02 13:52:23,830 - INFO - Все турниры в системе:
+2025-10-02 13:52:23,831 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 13:52:23,831 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 13:52:23,832 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 13:52:23,833 - INFO -   Турнир "ф" (ID: 6) - admin_id: 629224
+2025-10-02 13:52:23,833 - INFO -   Турнир "ффф" (ID: 7) - admin_id: 629224
+2025-10-02 13:52:23,833 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 13:52:23,833 - INFO -   Турнир "ййй" (ID: 9) - admin_id: 629224
+2025-10-02 13:52:23,878 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:23] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 13:52:27,905 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:27] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 13:52:40,690 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:40] "[35m[1mPOST /api/tournaments/9/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:52:40,722 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:40] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 13:52:46,730 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 13:52:46,731 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:52:46,731 - INFO - create_round_robin_schedule: получено 2 участников: ['1', '2']
+2025-10-02 13:52:46,732 - INFO - Создано 1 туров для 2 участников
+2025-10-02 13:52:46,732 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 13:52:46,732 - INFO - Всего уникальных матчей: 1
+2025-10-02 13:52:46,733 - INFO - Тур 1: 1 матчей
+2025-10-02 13:52:46,733 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 1)
+2025-10-02 13:52:46,735 - INFO - Матч 17 vs 18 получил номер 1
+2025-10-02 13:52:46,739 - INFO - Автоматически пересоздано 1 матчей для турнира 9 (удалено 0 старых матчей)
+2025-10-02 13:52:46,744 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:46] "[35m[1mPOST /api/tournaments/9/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:52:47,081 - INFO - Матч 17: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:47,083 - INFO - Матч 17: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:47,085 - INFO - Матч 17: итоговый счет=None
+2025-10-02 13:52:47,094 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:47] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 13:52:52,876 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:52:52,877 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:52:52,877 - INFO - create_round_robin_schedule: получено 3 участников: ['1', '2', '3']
+2025-10-02 13:52:52,877 - INFO - Создано 3 туров для 3 участников
+2025-10-02 13:52:52,877 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:52:52,877 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:52:52,877 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:52:52,880 - INFO - Всего уникальных матчей: 3
+2025-10-02 13:52:52,882 - INFO - Тур 1: 1 матчей
+2025-10-02 13:52:52,882 - INFO - Создание нового матча: 2 vs 3 (площадка 1, номер 1)
+2025-10-02 13:52:52,883 - INFO - Матч 18 vs 19 получил номер 1
+2025-10-02 13:52:52,884 - INFO - Тур 2: 1 матчей
+2025-10-02 13:52:52,884 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 2)
+2025-10-02 13:52:52,885 - INFO - Матч 17 vs 19 получил номер 2
+2025-10-02 13:52:52,886 - INFO - Тур 3: 1 матчей
+2025-10-02 13:52:52,886 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 3)
+2025-10-02 13:52:52,887 - INFO - Матч 17 vs 18 получил номер 3
+2025-10-02 13:52:52,893 - INFO - Автоматически пересоздано 3 матчей для турнира 9 (удалено 1 старых матчей)
+2025-10-02 13:52:52,898 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:52] "[35m[1mPOST /api/tournaments/9/participants HTTP/1.1[0m" 201 -
+2025-10-02 13:52:52,928 - INFO - Матч 17: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:52,928 - INFO - Матч 17: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:52,929 - INFO - Матч 17: итоговый счет=None
+2025-10-02 13:52:52,929 - INFO - Матч 18: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:52,932 - INFO - Матч 18: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:52,933 - INFO - Матч 18: итоговый счет=None
+2025-10-02 13:52:52,933 - INFO - Матч 19: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:52:52,934 - INFO - Матч 19: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:52:52,935 - INFO - Матч 19: итоговый счет=None
+2025-10-02 13:52:52,939 - INFO - 127.0.0.1 - - [02/Oct/2025 13:52:52] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 13:53:09,707 - INFO - 127.0.0.1 - - [02/Oct/2025 13:53:09] "GET /api/matches/19 HTTP/1.1" 200 -
+2025-10-02 13:53:17,071 - INFO - 127.0.0.1 - - [02/Oct/2025 13:53:17] "GET /api/matches/19 HTTP/1.1" 200 -
+2025-10-02 13:53:17,342 - INFO - Начислены очки за матч 19: участник 1 = 1, участник 2 = 0
+2025-10-02 13:53:17,352 - INFO - Матч 19 обновлен
+2025-10-02 13:53:17,353 - INFO - 127.0.0.1 - - [02/Oct/2025 13:53:17] "PUT /api/matches/19 HTTP/1.1" 200 -
+2025-10-02 13:53:17,386 - INFO - Матч 17: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:53:17,387 - INFO - Матч 17: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:53:17,388 - INFO - Матч 17: итоговый счет=None
+2025-10-02 13:53:17,388 - INFO - Матч 18: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:53:17,389 - INFO - Матч 18: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:53:17,390 - INFO - Матч 18: итоговый счет=None
+2025-10-02 13:53:17,391 - INFO - Матч 19: статус='завершен', sets_won_1=2, sets_won_2=0, set1_score1=11, set1_score2=3
+2025-10-02 13:53:17,391 - INFO - Матч 19: статус 'завершен' попадает в условие
+2025-10-02 13:53:17,391 - INFO - Матч 19: итоговый счет=2:0
+2025-10-02 13:53:17,394 - INFO - 127.0.0.1 - - [02/Oct/2025 13:53:17] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 13:54:02,590 - INFO - Создание расписания для 3 участников: ['1', '2', '3']
+2025-10-02 13:54:02,604 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 13:54:02,604 - INFO - create_round_robin_schedule: получено 3 участников: ['1', '2', '3']
+2025-10-02 13:54:02,605 - INFO - Создано 3 туров для 3 участников
+2025-10-02 13:54:02,605 - INFO - Тур 1: ['2 vs 3']
+2025-10-02 13:54:02,606 - INFO - Тур 2: ['1 vs 3']
+2025-10-02 13:54:02,606 - INFO - Тур 3: ['1 vs 2']
+2025-10-02 13:54:02,606 - INFO - Всего уникальных матчей: 3
+2025-10-02 13:54:02,606 - INFO - Тур 1: 1 матчей
+2025-10-02 13:54:02,607 - INFO - Создание нового матча: 2 vs 3 (площадка 1, номер 1)
+2025-10-02 13:54:02,607 - INFO - Матч 18 vs 19 получил номер 1
+2025-10-02 13:54:02,608 - INFO - Тур 2: 1 матчей
+2025-10-02 13:54:02,608 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 2)
+2025-10-02 13:54:02,608 - INFO - Матч 17 vs 19 получил номер 2
+2025-10-02 13:54:02,609 - INFO - Тур 3: 1 матчей
+2025-10-02 13:54:02,609 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 3)
+2025-10-02 13:54:02,609 - INFO - Матч 17 vs 18 получил номер 3
+2025-10-02 13:54:02,619 - INFO - Расписание составлено для турнира ййй: создано 3 матчей
+2025-10-02 13:54:02,620 - INFO - 127.0.0.1 - - [02/Oct/2025 13:54:02] "POST /api/tournaments/9/generate-schedule HTTP/1.1" 200 -
+2025-10-02 13:54:04,984 - INFO - Матч 17: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:54:04,985 - INFO - Матч 17: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:54:04,986 - INFO - Матч 17: итоговый счет=None
+2025-10-02 13:54:04,987 - INFO - Матч 18: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:54:04,987 - INFO - Матч 18: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:54:04,987 - INFO - Матч 18: итоговый счет=None
+2025-10-02 13:54:04,987 - INFO - Матч 19: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 13:54:04,994 - INFO - Матч 19: статус 'запланирован' НЕ попадает в условие
+2025-10-02 13:54:04,996 - INFO - Матч 19: итоговый счет=None
+2025-10-02 13:54:05,014 - INFO - 127.0.0.1 - - [02/Oct/2025 13:54:05] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 14:07:34,003 - INFO - Создание расписания для 4 участников: ['1', '2', '3', '4']
+2025-10-02 14:07:34,004 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 14:07:34,005 - INFO - create_round_robin_schedule: получено 4 участников: ['1', '2', '3', '4']
+2025-10-02 14:07:34,006 - INFO - Создано 3 туров для 4 участников
+2025-10-02 14:07:34,006 - INFO - Тур 1: ['1 vs 4', '2 vs 3']
+2025-10-02 14:07:34,006 - INFO - Тур 2: ['1 vs 3', '4 vs 2']
+2025-10-02 14:07:34,008 - INFO - Тур 3: ['1 vs 2', '3 vs 4']
+2025-10-02 14:07:34,008 - INFO - Всего уникальных матчей: 6
+2025-10-02 14:07:34,008 - INFO - Тур 1: 2 матчей
+2025-10-02 14:07:34,009 - INFO - Создание нового матча: 1 vs 4 (площадка 1, номер 1)
+2025-10-02 14:07:34,010 - INFO - Создание нового матча: 2 vs 3 (площадка 2, номер 2)
+2025-10-02 14:07:34,010 - INFO - Матч 17 vs 20 получил номер 1
+2025-10-02 14:07:34,011 - INFO - Матч 18 vs 19 получил номер 2
+2025-10-02 14:07:34,011 - INFO - Тур 2: 2 матчей
+2025-10-02 14:07:34,011 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 3)
+2025-10-02 14:07:34,012 - INFO - Создание нового матча: 4 vs 2 (площадка 2, номер 4)
+2025-10-02 14:07:34,014 - INFO - Матч 17 vs 19 получил номер 3
+2025-10-02 14:07:34,015 - INFO - Матч 20 vs 18 получил номер 4
+2025-10-02 14:07:34,016 - INFO - Тур 3: 2 матчей
+2025-10-02 14:07:34,017 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 5)
+2025-10-02 14:07:34,018 - INFO - Создание нового матча: 3 vs 4 (площадка 2, номер 6)
+2025-10-02 14:07:34,019 - INFO - Матч 17 vs 18 получил номер 5
+2025-10-02 14:07:34,020 - INFO - Матч 19 vs 20 получил номер 6
+2025-10-02 14:07:34,027 - INFO - Автоматически пересоздано 6 матчей для турнира 9 (удалено 3 старых матчей)
+2025-10-02 14:07:34,032 - INFO - 127.0.0.1 - - [02/Oct/2025 14:07:34] "[35m[1mPOST /api/tournaments/9/participants HTTP/1.1[0m" 201 -
+2025-10-02 14:07:34,232 - INFO - Матч 17: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 14:07:34,233 - INFO - Матч 17: статус 'запланирован' НЕ попадает в условие
+2025-10-02 14:07:34,234 - INFO - Матч 17: итоговый счет=None
+2025-10-02 14:07:34,234 - INFO - Матч 18: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 14:07:34,235 - INFO - Матч 18: статус 'запланирован' НЕ попадает в условие
+2025-10-02 14:07:34,235 - INFO - Матч 18: итоговый счет=None
+2025-10-02 14:07:34,236 - INFO - Матч 19: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 14:07:34,236 - INFO - Матч 19: статус 'запланирован' НЕ попадает в условие
+2025-10-02 14:07:34,236 - INFO - Матч 19: итоговый счет=None
+2025-10-02 14:07:34,237 - INFO - Матч 20: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 14:07:34,237 - INFO - Матч 20: статус 'запланирован' НЕ попадает в условие
+2025-10-02 14:07:34,240 - INFO - Матч 20: итоговый счет=None
+2025-10-02 14:07:34,240 - INFO - Матч 21: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 14:07:34,240 - INFO - Матч 21: статус 'запланирован' НЕ попадает в условие
+2025-10-02 14:07:34,240 - INFO - Матч 21: итоговый счет=None
+2025-10-02 14:07:34,240 - INFO - Матч 22: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 14:07:34,241 - INFO - Матч 22: статус 'запланирован' НЕ попадает в условие
+2025-10-02 14:07:34,242 - INFO - Матч 22: итоговый счет=None
+2025-10-02 14:07:34,248 - INFO - 127.0.0.1 - - [02/Oct/2025 14:07:34] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 14:13:49,946 - INFO - Админ a@a (ID: 629224) видит турниры: 4
+2025-10-02 14:13:49,947 - INFO - Все турниры в системе:
+2025-10-02 14:13:49,948 - INFO -   Турнир "ww" (ID: 3) - admin_id: 267293
+2025-10-02 14:13:49,948 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:13:49,948 - INFO -   Турнир "aaa" (ID: 5) - admin_id: 629224
+2025-10-02 14:13:49,949 - INFO -   Турнир "ф" (ID: 6) - admin_id: 629224
+2025-10-02 14:13:49,949 - INFO -   Турнир "ффф" (ID: 7) - admin_id: 629224
+2025-10-02 14:13:49,950 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:13:49,950 - INFO -   Турнир "ййй" (ID: 9) - admin_id: 629224
+2025-10-02 14:13:49,967 - INFO - 127.0.0.1 - - [02/Oct/2025 14:13:49] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:13:52,609 - INFO - 127.0.0.1 - - [02/Oct/2025 14:13:52] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:15:50,224 - INFO - 127.0.0.1 - - [02/Oct/2025 14:15:50] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:22:57,054 - INFO - База данных инициализирована успешно
+2025-10-02 14:22:57,616 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:22:57,622 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:22:57,622 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:22:57,622 - INFO - Переменная окружения PORT: None
+2025-10-02 14:22:57,622 - INFO - Режим отладки: production
+2025-10-02 14:22:57,675 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.204:5000
+2025-10-02 14:22:57,675 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-02 14:22:57,679 - INFO -  * Restarting with stat
+2025-10-02 14:22:59,249 - INFO - База данных инициализирована успешно
+2025-10-02 14:22:59,880 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:22:59,885 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:22:59,885 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:22:59,885 - INFO - Переменная окружения PORT: None
+2025-10-02 14:22:59,885 - INFO - Режим отладки: production
+2025-10-02 14:22:59,914 - WARNING -  * Debugger is active!
+2025-10-02 14:22:59,916 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 14:23:04,359 - INFO - 127.0.0.1 - - [02/Oct/2025 14:23:04] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:23:08,154 - INFO - 127.0.0.1 - - [02/Oct/2025 14:23:08] "GET / HTTP/1.1" 200 -
+2025-10-02 14:23:28,950 - INFO - Системный администратор успешно авторизован
+2025-10-02 14:23:28,952 - INFO - 127.0.0.1 - - [02/Oct/2025 14:23:28] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 14:23:29,428 - INFO - 127.0.0.1 - - [02/Oct/2025 14:23:29] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:23:53,586 - INFO - Турнир 'ww' (ID: 3) удален админом admin@system
+2025-10-02 14:23:53,587 - INFO - 127.0.0.1 - - [02/Oct/2025 14:23:53] "DELETE /api/tournaments/3 HTTP/1.1" 200 -
+2025-10-02 14:24:01,513 - INFO - Найдено турниров для удаления: 4
+2025-10-02 14:24:01,513 - INFO - Удаляем турнир: aaa (ID: 5)
+2025-10-02 14:24:01,515 - INFO - Удалено участников: 3
+2025-10-02 14:24:01,516 - INFO - Удалено матчей: 3
+2025-10-02 14:24:01,517 - INFO - Турнир aaa помечен для удаления
+2025-10-02 14:24:01,517 - INFO - Удаляем турнир: ф (ID: 6)
+2025-10-02 14:24:01,519 - INFO - Удалено участников: 3
+2025-10-02 14:24:01,520 - INFO - Удалено матчей: 3
+2025-10-02 14:24:01,521 - INFO - Турнир ф помечен для удаления
+2025-10-02 14:24:01,521 - INFO - Удаляем турнир: ффф (ID: 7)
+2025-10-02 14:24:01,522 - INFO - Удалено участников: 4
+2025-10-02 14:24:01,523 - INFO - Удалено матчей: 6
+2025-10-02 14:24:01,523 - INFO - Турнир ффф помечен для удаления
+2025-10-02 14:24:01,523 - INFO - Удаляем турнир: ййй (ID: 9)
+2025-10-02 14:24:01,525 - INFO - Удалено участников: 4
+2025-10-02 14:24:01,526 - INFO - Удалено матчей: 6
+2025-10-02 14:24:01,527 - INFO - Турнир ййй помечен для удаления
+2025-10-02 14:24:01,528 - INFO - Удалено токенов по email admin_629224@system: 0
+2025-10-02 14:24:01,530 - INFO - Удалено дополнительных токенов: 1
+2025-10-02 14:24:01,536 - INFO - Изменения сохранены в базу данных
+2025-10-02 14:24:01,536 - INFO - Администратор турнира 629224 удален. Удалено турниров: 4
+2025-10-02 14:24:01,537 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:01] "DELETE /api/admin/tournament-admins/629224 HTTP/1.1" 200 -
+2025-10-02 14:24:03,391 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:03] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:24:06,686 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:06] "GET / HTTP/1.1" 200 -
+2025-10-02 14:24:07,767 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJzNVEluwjAUvUr616HyFJN4xSG6KygytgNRk0DjZFEh7l5jBzAqu6pVNs_-o98f5BOUVSPt3lgQ7ydIBneAHZUy1kIK6xExzC5IjUd8QYaCJvFHFZm5x2DeRnpy1zN_ZyoN0egFNuf0-cskuNLoTe0xD5pkDVLKNSSRG444ZV6TR4GB8uQUqC09soi4_jWl-ZHyFzbhPLn9J6tZ7_TDrGY7MVo84J8w3KTue-qN3YOoZGNNClK3dVeaVtYNiCCt7JcdTAtXY61B4KvQydY4R18XjqrA97EFhlTdGbIw5iKJ-LDIKf_RlCjd1LJoL0KNDN0YDocP0zlWnDiVsn1107jF1Dk3ChNFFCdcabbVFeJKLWlBCGaKKrZluYurbRkKL31SEEM_ugYdZT_Uqj7Kbiibw25ndPncOHUGu1T-9bI3n6OxbiFOoHojBxcpnQQEkWyB0QKRN0wFykSWvRY0Jzl1obdJrKSTom5TdE0MgpPz-RuSKtUg.aN5gsA.L5adU6fF7NbtCbHauqtn4S5rjdA'}
+2025-10-02 14:24:07,768 - INFO - Очищено 8 flash сообщений при загрузке страницы токенов
+2025-10-02 14:24:07,775 - INFO - GET запрос на страницу токенов. Текущее количество: 1, максимум: 10
+2025-10-02 14:24:07,794 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:07] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:24:27,672 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:27] "GET / HTTP/1.1" 200 -
+2025-10-02 14:24:29,036 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqBIYxw6kfsOAkRQzq0JG2BHKaq_z5KmrTSdnngZ79nYy7E9NGnL6J7OyT_Sqwbw2T8aMNA9BLt00_KfiRrMjii2RpMdvSl8HOmAtgNubqhqHcBlWkqYkVX-a7e25d60IriqUg9Sv_aCfpQ3Rv4hd8mzMdvP5WpJBQKU-w3RjDhlPTIAAElSHSicz2ViO-8BWACOYpOqKILySwPN9WU6BznsqCTjTlgONkpm-F4OHhn_k_eN8OKVe1uoj_PPmWiLwSjt7kobYkIUGh2jO4ofDCuaaOb5q3lChQv0u0n9rZET9vmdDUmWsL1-guWwovn.aN5g1w.9JTFXQ1LoynPqYXMlcfO4JynQCU'}
+2025-10-02 14:24:29,041 - INFO - GET запрос на страницу токенов. Текущее количество: 1, максимум: 10
+2025-10-02 14:24:29,042 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:29] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:24:56,241 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '126', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqBIYxw6kfsOAkRQzq0JG2BHKaq_z5KmrTSdnngZ79nYy7E9NGnL6J7OyT_Sqwbw2T8aMNA9BLt00_KfiRrMjii2RpMdvSl8HOmAtgNubqhqHcBlWkqYkVX-a7e25d60IriqUg9Sv_aCfpQ3Rv4hd8mzMdvP5WpJBQKU-w3RjDhlPTIAAElSHSicz2ViO-8BWACOYpOqKILySwPN9WU6BznsqCTjTlgONkpm-F4OHhn_k_eN8OKVe1uoj_PPmWiLwSjt7kobYkIUGh2jO4ofDCuaaOb5q3lChQv0u0n9rZET9vmdDUmWsL1-guWwovn.aN5g1w.9JTFXQ1LoynPqYXMlcfO4JynQCU'}
+2025-10-02 14:24:56,244 - INFO - Текущее количество выданных токенов: 1, максимум: 10
+2025-10-02 14:24:56,246 - INFO - Уже выданные пароли: [38]
+2025-10-02 14:24:56,246 - INFO - Доступные пароли: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+2025-10-02 14:24:56,247 - INFO - Выбран пароль: 99
+2025-10-02 14:24:56,247 - INFO - Сгенерирован уникальный пароль: 99
+2025-10-02 14:24:56,255 - INFO - Отправка email с токеном 99 на a@a для а
+2025-10-02 14:24:56,256 - INFO - Запуск асинхронной отправки email на a@a
+2025-10-02 14:24:56,256 - INFO - Асинхронная отправка email запущена для a@a
+2025-10-02 14:24:56,256 - INFO - Результат отправки email: True
+2025-10-02 14:24:56,256 - INFO - [SUCCESS] Email отправлен на a@a
+2025-10-02 14:24:56,265 - INFO - 127.0.0.1 - - [02/Oct/2025 14:24:56] "POST /request-token HTTP/1.1" 200 -
+2025-10-02 14:24:57,259 - INFO - Email настройки: server=smtp.gmail.com, port=587, username=tournaments.master@gmail.com
+2025-10-02 14:24:57,259 - INFO - Переменные окружения: MAIL_SERVER=None, MAIL_USERNAME=None
+2025-10-02 14:24:57,260 - INFO - Все переменные окружения MAIL_*: []
+2025-10-02 14:24:57,260 - INFO - RAILWAY_ENVIRONMENT: НЕ УСТАНОВЛЕНО
+2025-10-02 14:24:57,260 - INFO - Проверка email настроек: username=tournaments.master@gmail.com, password=***
+2025-10-02 14:24:57,263 - INFO - Попытка отправки email на a@a с токеном 99
+2025-10-02 14:24:57,264 - INFO - SMTP настройки: smtp.gmail.com:587, пользователь: tournaments.master@gmail.com
+2025-10-02 14:24:57,265 - INFO - От: tournaments.master@gmail.com, Кому: a@a
+2025-10-02 14:24:57,377 - INFO - [OK] SMTP подключение установлено (таймаут 30 сек)
+2025-10-02 14:24:57,449 - INFO - [OK] TLS включен
+2025-10-02 14:24:57,716 - INFO - [OK] Авторизация успешна
+2025-10-02 14:24:58,461 - INFO - [OK] Email отправлен, результат: {}
+2025-10-02 14:24:58,487 - INFO - [OK] SMTP соединение закрыто
+2025-10-02 14:24:58,488 - INFO - [SUCCESS] Токен 99 успешно отправлен на a@a (а) от tournaments.master@gmail.com
+2025-10-02 14:24:58,615 - INFO - База данных инициализирована успешно
+2025-10-02 14:24:59,308 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:24:59,313 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:24:59,314 - ERROR - Ошибка обновления статуса токена 99: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-10-02 14:24:59,314 - INFO - Асинхронная отправка завершена: True
+2025-10-02 14:25:01,220 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:01] "GET / HTTP/1.1" 200 -
+2025-10-02 14:25:02,729 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqBY1jCqR-x4yREwOmiJWkL5DBV_fdR0qSVtssDP_s9G3NhpgsUv5ju7BDplVk_9pOh0fYD00u0jz8x0cjWZO-ZFmsw2ZFy4efMEcQNq_qGWO4IhZEFXUFf-Lbcm5dy8IL4VFQ_Sv_aIX-o7g1o4bcJ0_GbpjyVgky5GLqNQYG-VuQEOHAKlPPY-o4r596rBkCgqxy2WGddH83ycFNMmU5hzgs62ZB615_slMxwPBzIm_-T982IbFW6m0DnmWJi-sJcIJuy0uaIAQe5E3zH4UOgBtRSvYGUElSWbj-xtzl62nbFV2Omm-Z6_QWV_ovs.aN5hCA.X2pi9LynQlpCehoRL02llX1Aj3o'}
+2025-10-02 14:25:02,731 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:25:02,735 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:02] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:25:08,168 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:08] "GET / HTTP/1.1" 200 -
+2025-10-02 14:25:09,246 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:09] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:25:12,737 - INFO - Попытка входа: email=a@a, token=62
+2025-10-02 14:25:12,740 - INFO - Поиск токена: email=a@a, token=62, найден=False
+2025-10-02 14:25:12,744 - WARNING - Токен не найден: email=a@a, token=62
+2025-10-02 14:25:12,744 - WARNING - Токены с таким email: [(99, False)]
+2025-10-02 14:25:12,748 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:12] "POST /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:25:20,513 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:20] "GET / HTTP/1.1" 200 -
+2025-10-02 14:25:24,764 - INFO - Системный администратор успешно авторизован
+2025-10-02 14:25:24,766 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:24] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 14:25:24,837 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:24] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:25:31,764 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:31] "GET / HTTP/1.1" 200 -
+2025-10-02 14:25:33,077 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJyVUsFygyAQ_RWHs8kArsZwykf01mYcBEycqknBHDqZ_HvpYgJNe-llZfftvn08vJKmG6Q7GkfE65Vks_8QY-3Jkpy8XSgw_R2LEiOPZ6B4RhRaPG8zM8p-yDCpMQagxhKEaYNRJqx6jTgvMGMJApEK0t3YAyoPvJuUPYtCoQ1Jl-xFQVDEuX8JTfb9cCHAmwBDnF5gFZYGNWGaRmVLk4k3K-ia7G_73L-NNe5IRCcHZ3Ii9dhPDZpMRMh27tPNZiR3sNdEsHsyydH4RjSXJVayZ0ODwqfHTHRC0lTH1t90y13os41AHwrn07uZvKqK-5JytntUgIGuK6MYV1xVvFIaWt3RSqlNseWcgSoUtFD7ud414eINkhIx24s36Czt3Kv-LKe5GU6Hg9HN3-DiDPNUuL2x5uNinP_7r0RZI2c_KX1GOOXlitEV5S8MBAdRVmteliWv_OjjJXbSZ4nbBb0TE7Hd3m5fD_z-qw.aN5hJA.ude1URJbYzbNr6UAcKLaPV0shf0'}
+2025-10-02 14:25:33,078 - INFO - Очищено 1 flash сообщений при загрузке страницы токенов
+2025-10-02 14:25:33,082 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:25:33,085 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:33] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:25:51,726 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:51] "GET / HTTP/1.1" 200 -
+2025-10-02 14:25:52,805 - INFO - 127.0.0.1 - - [02/Oct/2025 14:25:52] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:26:01,368 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 14:26:01,370 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 14:26:01,370 - INFO - Токен найден: id=3, created_at=2025-10-02 11:24:56.247538
+2025-10-02 14:26:01,378 - INFO - Время последнего использования токена обновлено
+2025-10-02 14:26:01,378 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 14:26:01,389 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:01] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:26:01,688 - INFO - Админ a@a (ID: 629224) видит турниры: 0
+2025-10-02 14:26:01,690 - INFO - Все турниры в системе:
+2025-10-02 14:26:01,690 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:26:01,690 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:26:01,719 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:01] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:26:03,620 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:03] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:26:20,356 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:20] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:26:20,366 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 14:26:20,367 - INFO - Все турниры в системе:
+2025-10-02 14:26:20,367 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:26:20,367 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:26:20,367 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 14:26:20,380 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:20] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:26:23,409 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:23] "GET / HTTP/1.1" 200 -
+2025-10-02 14:26:24,675 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFywiAQ_ZV0z7EDhGDCqR_RW3UYXIhmmkQbyKHj-O9FUEs7Xh7wdvft2-UMqhu0O1gH8uMMhQ8HuAXROgclbBbCKb9iZSPSK3KSmCIeXRYWEVN4l_Hsl-fxzrFM1eQFtpfyeWeWUqusp4nYJKbYQJZwRyiyJ80s1pFpMp00wS0pOV1H5Nkc5upwW4ZFzdYdQHZ6cLYEbcZ-UnbU_QAS9JuGO9cbkIK1jPE7M-nRhqQk-sjzx087BbptA4Vu7h5M2LlphEXKkKFgAg3fmY4IxHUVdCnHCvmON6Gud8p9O29HFUVB-nkJ7k569j32Jz15NRz3e2vU8-DNGg1Ssbua7ddiXfiNM-BstQ-VOryAEVavKFkR9k65ZFzW4pXVdc1EKP27hv_j3sZq28vlB6EpuU0.aN5hXA.lQCCWAAzHS-3W5aAa0PFj7YDveM'}
+2025-10-02 14:26:24,675 - INFO - Очищено 2 flash сообщений при загрузке страницы токенов
+2025-10-02 14:26:24,679 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:26:24,681 - INFO - 127.0.0.1 - - [02/Oct/2025 14:26:24] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:29:54,375 - INFO - 127.0.0.1 - - [02/Oct/2025 14:29:54] "GET / HTTP/1.1" 200 -
+2025-10-02 14:29:55,541 - INFO - 127.0.0.1 - - [02/Oct/2025 14:29:55] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:29:58,615 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 14:29:58,615 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 14:29:58,616 - INFO - Токен найден: id=3, created_at=2025-10-02 11:24:56.247538
+2025-10-02 14:29:58,620 - INFO - Время последнего использования токена обновлено
+2025-10-02 14:29:58,621 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 14:29:58,630 - INFO - 127.0.0.1 - - [02/Oct/2025 14:29:58] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:29:58,937 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 14:29:58,940 - INFO - Все турниры в системе:
+2025-10-02 14:29:58,942 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:29:58,942 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:29:58,943 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 14:29:58,956 - INFO - 127.0.0.1 - - [02/Oct/2025 14:29:58] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:30:01,164 - INFO - 127.0.0.1 - - [02/Oct/2025 14:30:01] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:32:58,789 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 14:32:59,147 - INFO -  * Restarting with stat
+2025-10-02 14:33:01,890 - INFO - База данных инициализирована успешно
+2025-10-02 14:33:02,823 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:33:02,834 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:33:02,835 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:33:02,836 - INFO - Переменная окружения PORT: None
+2025-10-02 14:33:02,836 - INFO - Режим отладки: production
+2025-10-02 14:33:02,875 - WARNING -  * Debugger is active!
+2025-10-02 14:33:02,886 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 14:37:19,539 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 14:37:19,872 - INFO -  * Restarting with stat
+2025-10-02 14:37:22,535 - INFO - База данных инициализирована успешно
+2025-10-02 14:37:23,328 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:37:23,338 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:37:23,338 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:37:23,339 - INFO - Переменная окружения PORT: None
+2025-10-02 14:37:23,339 - INFO - Режим отладки: production
+2025-10-02 14:37:23,377 - WARNING -  * Debugger is active!
+2025-10-02 14:37:23,386 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 14:38:09,757 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:09] "GET / HTTP/1.1" 200 -
+2025-10-02 14:38:11,246 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkMFuwjAMhl-F-VymxE0zmtMeYrcNRcF1oaItrEkPE-LdZ1pgbNrFTj7n_2P7BL5uQ9xxBPd-gkWSBHEk4hghg49RGW0uMecp6ks0aiaLKdUPZTvFubx54PjDzXQ2lM1q9QTr8zqTNgaOO3B1aCNnEKqu6T13oWnBQXgNcGNNBc5iiWhupA8dy6PZ7v4uHfbcCy5LQRSH-k5komplmTQSkkVLldlUtbJEL7n4akM5mY1Zia6JPn7FxJ2fTMGlYZTujmFIDTXH0CffHrZbrvz_xWtrWqym3_3AnyNH2fIJaOCQRBnkBqiwWGq1VPimjUPjCvuMRVGgFenvNfwd9zpWWZ7P37-1jK0.aN5iNg.9Ijmrqe60eZ2fItJ65Bfiiqs3K4'}
+2025-10-02 14:38:11,246 - INFO - Очищено 1 flash сообщений при загрузке страницы токенов
+2025-10-02 14:38:11,264 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:38:11,284 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:11] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:38:18,627 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:18] "GET / HTTP/1.1" 200 -
+2025-10-02 14:38:19,622 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5kIw.6qfp0AYIktgW1Qg2yCPkGyBrlvE'}
+2025-10-02 14:38:19,628 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:38:19,631 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:19] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:38:26,147 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5kIw.6qfp0AYIktgW1Qg2yCPkGyBrlvE'}
+2025-10-02 14:38:26,151 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:38:26,153 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:26] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:38:26,463 - ERROR - Not Found Error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-10-02 14:38:26,463 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:26] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-10-02 14:38:30,029 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:30] "GET / HTTP/1.1" 200 -
+2025-10-02 14:38:31,052 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5kIw.6qfp0AYIktgW1Qg2yCPkGyBrlvE'}
+2025-10-02 14:38:31,057 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:38:31,059 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:31] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:38:33,889 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:33] "GET / HTTP/1.1" 200 -
+2025-10-02 14:38:35,148 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:35] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:38:39,175 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:39] "GET / HTTP/1.1" 200 -
+2025-10-02 14:38:42,130 - INFO - Системный администратор успешно авторизован
+2025-10-02 14:38:42,131 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:42] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 14:38:42,513 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:42] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:38:54,658 - INFO - 127.0.0.1 - - [02/Oct/2025 14:38:54] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 14:39:11,370 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:11] "[35m[1mPOST /api/tournaments/9/participants HTTP/1.1[0m" 201 -
+2025-10-02 14:39:11,720 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:11] "GET /tournament/9 HTTP/1.1" 200 -
+2025-10-02 14:39:15,136 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:15] "GET / HTTP/1.1" 200 -
+2025-10-02 14:39:16,401 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqBY1jg1I_YcRIiQDq0JG2BHKaq_z5KmrTSdnngZ79nYy5E99GnL6J6MyT_Sowbw6T9aMJA1BLt00_KfiRrMjii2BpMZvSl8HOmCOyGTXtDrHeEyvCKtqKrfFfv8qUetCI-FbWP0r92SB-qewO_8NuE-fjtpzKVlIWyKfYbgwxdK7xlYMEKENZh53oqrH1vJABD21jssC26kPTycF1NicpxLgs6mZiDDSczZT0cDwfv9P_J-2ZYsarddfTn2adM1IXY6E0uSlMiAhT4jtEdhQ-GClBx8QaccxBFuv3E3pToadsNXY2JkvJ6_QWfL4v2.aN5kQg.icUjeZQCMyWC95OzB4rmvRtyQi4'}
+2025-10-02 14:39:16,411 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:39:16,414 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:16] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:39:20,924 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:20] "GET / HTTP/1.1" 200 -
+2025-10-02 14:39:21,883 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:21] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:39:27,322 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 14:39:27,325 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 14:39:27,325 - INFO - Токен найден: id=3, created_at=2025-10-02 11:24:56.247538
+2025-10-02 14:39:27,334 - INFO - Время последнего использования токена обновлено
+2025-10-02 14:39:27,335 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 14:39:27,347 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:27] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:39:27,632 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 14:39:27,636 - INFO - Все турниры в системе:
+2025-10-02 14:39:27,637 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:39:27,637 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:39:27,638 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 14:39:27,710 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:27] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:39:30,944 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:30] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:39:47,605 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:47] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:39:47,619 - INFO - Админ a@a (ID: 629224) видит турниры: 2
+2025-10-02 14:39:47,620 - INFO - Все турниры в системе:
+2025-10-02 14:39:47,621 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:39:47,621 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:39:47,621 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 14:39:47,621 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 14:39:47,631 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:47] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:39:50,164 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:50] "GET / HTTP/1.1" 200 -
+2025-10-02 14:39:52,090 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFygyAQ_RW7Z9OBFYly6kf01mQYApg4VZOKHjpO_r0ETEo7uTzg7dvdt8sCsumUO1kH4mOBbPIHuFlr6xzksJsJo-yGhQ1Ib8hIZLJwNEmYB4zhQ8LjL8_Cnek8ZpMX2F_z550xSoukpwlYRSbbBRlrVoQs0dPEXBmYKqkQva-i6HEbkCUTmJu3fe5XNFp3AtGoztkclOnbQdpetR0IUG8K7lxrQHCsEdmdGVRvvSgWfeim86cdPF3XntJubB6M37apuNUUNWqOXBt2MA3hWm8LX5cyXWh2YJXPa510326yvQxFQUzj7N1d1Di1ur2oYZLd-Xi0Rj4PrtaoLxW6y9F-zdb5f1hAj1ZNPlP5FyDBckPJhuA7ZQKZKPkrlmWJ3Kf-XcP_cdex6vp6_QFLqrgX.aN5kgw.-iPkpSdgmK7Z-RKXznV30fAKGq0'}
+2025-10-02 14:39:52,091 - INFO - Очищено 2 flash сообщений при загрузке страницы токенов
+2025-10-02 14:39:52,095 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:39:52,098 - INFO - 127.0.0.1 - - [02/Oct/2025 14:39:52] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:43:15,328 - INFO - 127.0.0.1 - - [02/Oct/2025 14:43:15] "GET / HTTP/1.1" 200 -
+2025-10-02 14:43:17,462 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5kiA.m3hhvPZgvXQX1NM5vl4x-_fztAM'}
+2025-10-02 14:43:17,467 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:43:17,470 - INFO - 127.0.0.1 - - [02/Oct/2025 14:43:17] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:43:28,956 - INFO - 127.0.0.1 - - [02/Oct/2025 14:43:28] "GET / HTTP/1.1" 200 -
+2025-10-02 14:44:20,345 - INFO - 127.0.0.1 - - [02/Oct/2025 14:44:20] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:44:52,342 - INFO - 127.0.0.1 - - [02/Oct/2025 14:44:52] "GET / HTTP/1.1" 200 -
+2025-10-02 14:44:57,058 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5kiA.m3hhvPZgvXQX1NM5vl4x-_fztAM'}
+2025-10-02 14:44:57,062 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:44:57,064 - INFO - 127.0.0.1 - - [02/Oct/2025 14:44:57] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:46:56,098 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 14:46:56,256 - INFO -  * Restarting with stat
+2025-10-02 14:46:57,479 - INFO - База данных инициализирована успешно
+2025-10-02 14:46:58,079 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:46:58,081 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:46:58,081 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:46:58,083 - INFO - Переменная окружения PORT: None
+2025-10-02 14:46:58,083 - INFO - Режим отладки: production
+2025-10-02 14:46:58,105 - WARNING -  * Debugger is active!
+2025-10-02 14:46:58,111 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 14:51:10,156 - INFO - База данных инициализирована успешно
+2025-10-02 14:51:10,660 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:51:10,666 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:51:10,667 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:51:10,667 - INFO - Переменная окружения PORT: None
+2025-10-02 14:51:10,667 - INFO - Режим отладки: production
+2025-10-02 14:51:10,694 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.10.11.204:5000
+2025-10-02 14:51:10,695 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-02 14:51:10,696 - INFO -  * Restarting with stat
+2025-10-02 14:51:12,016 - INFO - База данных инициализирована успешно
+2025-10-02 14:51:12,572 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:51:12,579 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:51:12,579 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:51:12,579 - INFO - Переменная окружения PORT: None
+2025-10-02 14:51:12,579 - INFO - Режим отладки: production
+2025-10-02 14:51:12,599 - WARNING -  * Debugger is active!
+2025-10-02 14:51:12,602 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 14:55:30,998 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 14:55:31,162 - INFO -  * Restarting with stat
+2025-10-02 14:55:32,200 - INFO - База данных инициализирована успешно
+2025-10-02 14:55:32,724 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 14:55:32,729 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 14:55:32,729 - INFO - Запуск приложения на порту 5000
+2025-10-02 14:55:32,729 - INFO - Переменная окружения PORT: None
+2025-10-02 14:55:32,729 - INFO - Режим отладки: production
+2025-10-02 14:55:32,749 - WARNING -  * Debugger is active!
+2025-10-02 14:55:32,752 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 14:55:57,036 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5kiA.m3hhvPZgvXQX1NM5vl4x-_fztAM'}
+2025-10-02 14:55:57,040 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:55:57,063 - INFO - 127.0.0.1 - - [02/Oct/2025 14:55:57] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 14:56:00,383 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:00] "GET / HTTP/1.1" 200 -
+2025-10-02 14:56:01,600 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:01] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 14:56:06,469 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 14:56:06,471 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 14:56:06,471 - INFO - Токен найден: id=3, created_at=2025-10-02 11:24:56.247538
+2025-10-02 14:56:06,480 - INFO - Время последнего использования токена обновлено
+2025-10-02 14:56:06,480 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 14:56:06,488 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:06] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:56:06,778 - INFO - Админ a@a (ID: 629224) видит турниры: 2
+2025-10-02 14:56:06,779 - INFO - Все турниры в системе:
+2025-10-02 14:56:06,780 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:56:06,780 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:56:06,780 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 14:56:06,780 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 14:56:06,810 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:06] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:56:09,312 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:09] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 14:56:16,405 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:16] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 14:56:16,415 - INFO - Админ a@a (ID: 629224) видит турниры: 3
+2025-10-02 14:56:16,416 - INFO - Все турниры в системе:
+2025-10-02 14:56:16,416 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 14:56:16,417 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 14:56:16,417 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 14:56:16,417 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 14:56:16,417 - INFO -   Турнир "чч" (ID: 11) - admin_id: 629224
+2025-10-02 14:56:16,428 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:16] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 14:56:31,920 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:31] "GET / HTTP/1.1" 200 -
+2025-10-02 14:56:33,443 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFygyAQ_RW7Z9MRRKKc-hG9NRmGLJg4VZMKHjpO_r0ETEo7uTzk7du3j3UB2fbKnowF8bFA5vwBdkY01kIOu7lghN2wNAHJDVkRmSwcbVLmAWP5kPD0l2fhm2Eeu4sX2F_z55NplJbJTB2wjky2CzK2XRGyRE-ScFVg6sQhZl9FMWNwKVnyAn3Lts_9iiZjTyBa1VuTg9JDN0ozqK4HAepNwZ3rNAhOG0rZnRnVYLwomj507vxpRk83jafQTu2D8dvWNTdIKFLklKNmB90WHHFbel_CsER2YLXv66y039aZQQZTEG6afbqLmlyH3UWNTvbn49Fo-by4RiPeKkyXk_majfX_YQGcjHK-U_kb0IJWG1JsCvpOmKBMVPyVVlVFuW_9u4b_z12f1TTX6w-yH7e5.aN5oYA.S9uiog9YaFBoA3fik9jeq1PpQzA'}
+2025-10-02 14:56:33,444 - INFO - Очищено 2 flash сообщений при загрузке страницы токенов
+2025-10-02 14:56:33,448 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 14:56:33,450 - INFO - 127.0.0.1 - - [02/Oct/2025 14:56:33] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 15:02:43,683 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 15:02:44,023 - INFO -  * Restarting with stat
+2025-10-02 15:02:45,544 - INFO - База данных инициализирована успешно
+2025-10-02 15:02:46,089 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 15:02:46,096 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 15:02:46,096 - INFO - Запуск приложения на порту 5000
+2025-10-02 15:02:46,096 - INFO - Переменная окружения PORT: None
+2025-10-02 15:02:46,096 - INFO - Режим отладки: production
+2025-10-02 15:02:46,118 - WARNING -  * Debugger is active!
+2025-10-02 15:02:46,125 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 15:03:21,054 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 15:03:21,178 - INFO -  * Restarting with stat
+2025-10-02 15:03:22,384 - INFO - База данных инициализирована успешно
+2025-10-02 15:03:22,935 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 15:03:22,941 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 15:03:22,942 - INFO - Запуск приложения на порту 5000
+2025-10-02 15:03:22,942 - INFO - Переменная окружения PORT: None
+2025-10-02 15:03:22,942 - INFO - Режим отладки: production
+2025-10-02 15:03:22,961 - WARNING -  * Debugger is active!
+2025-10-02 15:03:22,965 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 15:03:37,052 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 15:03:37,179 - INFO -  * Restarting with stat
+2025-10-02 15:03:38,453 - INFO - База данных инициализирована успешно
+2025-10-02 15:03:39,035 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 15:03:39,040 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 15:03:39,041 - INFO - Запуск приложения на порту 5000
+2025-10-02 15:03:39,041 - INFO - Переменная окружения PORT: None
+2025-10-02 15:03:39,041 - INFO - Режим отладки: production
+2025-10-02 15:03:39,065 - WARNING -  * Debugger is active!
+2025-10-02 15:03:39,070 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 15:03:50,255 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 15:03:50,425 - INFO -  * Restarting with stat
+2025-10-02 15:03:51,682 - INFO - База данных инициализирована успешно
+2025-10-02 15:03:52,257 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 15:03:52,262 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 15:03:52,263 - INFO - Запуск приложения на порту 5000
+2025-10-02 15:03:52,263 - INFO - Переменная окружения PORT: None
+2025-10-02 15:03:52,263 - INFO - Режим отладки: production
+2025-10-02 15:03:52,287 - WARNING -  * Debugger is active!
+2025-10-02 15:03:52,291 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 15:03:55,915 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 15:03:56,098 - INFO -  * Restarting with stat
+2025-10-02 15:03:57,552 - INFO - База данных инициализирована успешно
+2025-10-02 15:03:58,108 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 15:03:58,112 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 15:03:58,113 - INFO - Запуск приложения на порту 5000
+2025-10-02 15:03:58,113 - INFO - Переменная окружения PORT: None
+2025-10-02 15:03:58,113 - INFO - Режим отладки: production
+2025-10-02 15:03:58,136 - WARNING -  * Debugger is active!
+2025-10-02 15:03:58,141 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 15:43:06,587 - INFO - 127.0.0.1 - - [02/Oct/2025 15:43:06] "[35m[1mGET /bg-variant1 HTTP/1.1[0m" 500 -
+2025-10-02 15:43:06,784 - INFO - 127.0.0.1 - - [02/Oct/2025 15:43:06] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-10-02 15:43:06,791 - INFO - 127.0.0.1 - - [02/Oct/2025 15:43:06] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-10-02 15:43:07,139 - INFO - 127.0.0.1 - - [02/Oct/2025 15:43:07] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 15:43:07,405 - INFO - 127.0.0.1 - - [02/Oct/2025 15:43:07] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 15:45:48,038 - INFO - 127.0.0.1 - - [02/Oct/2025 15:45:48] "[35m[1mGET /bg-variant1 HTTP/1.1[0m" 500 -
+2025-10-02 15:45:48,075 - INFO - 127.0.0.1 - - [02/Oct/2025 15:45:48] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-10-02 15:45:48,249 - INFO - 127.0.0.1 - - [02/Oct/2025 15:45:48] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-10-02 15:45:48,582 - INFO - 127.0.0.1 - - [02/Oct/2025 15:45:48] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 15:45:48,844 - INFO - 127.0.0.1 - - [02/Oct/2025 15:45:48] "[36mGET /bg-variant1?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-10-02 15:46:07,384 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\main.py', reloading
+2025-10-02 15:46:07,600 - INFO -  * Restarting with stat
+2025-10-02 15:46:09,197 - INFO - База данных инициализирована успешно
+2025-10-02 15:46:09,793 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 15:46:09,799 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 15:46:09,799 - INFO - Запуск приложения на порту 5000
+2025-10-02 15:46:09,799 - INFO - Переменная окружения PORT: None
+2025-10-02 15:46:09,799 - INFO - Режим отладки: production
+2025-10-02 15:46:09,828 - WARNING -  * Debugger is active!
+2025-10-02 15:46:09,834 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 15:46:20,713 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN5ocQ.J5wNZ9hycS0xRwvBNfAlojhtpj0'}
+2025-10-02 15:46:20,721 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 15:46:20,756 - INFO - 127.0.0.1 - - [02/Oct/2025 15:46:20] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 15:47:27,121 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:27] "GET / HTTP/1.1" 200 -
+2025-10-02 15:47:28,203 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:28] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 15:47:32,055 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 15:47:32,056 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 15:47:32,057 - INFO - Токен найден: id=3, created_at=2025-10-02 11:24:56.247538
+2025-10-02 15:47:32,066 - INFO - Время последнего использования токена обновлено
+2025-10-02 15:47:32,067 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 15:47:32,075 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:32] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 15:47:32,359 - INFO - Админ a@a (ID: 629224) видит турниры: 3
+2025-10-02 15:47:32,362 - INFO - Все турниры в системе:
+2025-10-02 15:47:32,363 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 15:47:32,363 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 15:47:32,363 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 15:47:32,363 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 15:47:32,364 - INFO -   Турнир "чч" (ID: 11) - admin_id: 629224
+2025-10-02 15:47:32,424 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:32] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 15:47:36,386 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:36] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 15:47:41,868 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:41] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 15:47:41,880 - INFO - Админ a@a (ID: 629224) видит турниры: 4
+2025-10-02 15:47:41,881 - INFO - Все турниры в системе:
+2025-10-02 15:47:41,881 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 15:47:41,881 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 15:47:41,882 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 15:47:41,882 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 15:47:41,882 - INFO -   Турнир "чч" (ID: 11) - admin_id: 629224
+2025-10-02 15:47:41,882 - INFO -   Турнир "ааа" (ID: 12) - admin_id: 629224
+2025-10-02 15:47:41,896 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:41] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 15:47:44,761 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:44] "GET / HTTP/1.1" 200 -
+2025-10-02 15:47:45,959 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUU1zwiAQ_SvpnmMHCMGEU39Eb9VhcCGaaRJtIIeO438vglra8fKAt_vefnAG1Q3aHawD-XGGwocD3IJonYMSNgvhlF-xshHpFTlJTBGPLguLiCm8y3j2y_N451gmNXmB7aV8Xpml1CqraSI2iSk2kNW7IxSZimYt1pFpMp80wS0pdbqOyDNHc-1wW4ZFzdYdQHZ6cLYEbcZ-UnbU_QAS9JuGO9cbkIK1jPE7M-nRhqRk-sjzx087BbptA4Vu7h5M2LlphEXKkKFgAg3fmY4IxHUVfCnHCvmON0HXO-W-nbejiqYg_byE7k569j32Jz15NRz3e2vU8-CtNRqsYnU126_FuvAbZ8DZah-UOryAEVavKFkR9k65ZFzW4pXVdc1EkP5dw_9xb2O17eXyA41quUE.aN50bQ.X2P07Mf95XOVWXf8-DXhUHVqtAc'}
+2025-10-02 15:47:45,960 - INFO - Очищено 2 flash сообщений при загрузке страницы токенов
+2025-10-02 15:47:45,966 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 15:47:45,968 - INFO - 127.0.0.1 - - [02/Oct/2025 15:47:45] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 15:48:30,075 - INFO - 127.0.0.1 - - [02/Oct/2025 15:48:30] "GET / HTTP/1.1" 200 -
+2025-10-02 15:48:46,781 - INFO - 127.0.0.1 - - [02/Oct/2025 15:48:46] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 15:48:51,367 - INFO - 127.0.0.1 - - [02/Oct/2025 15:48:51] "GET / HTTP/1.1" 200 -
+2025-10-02 15:48:52,318 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN50cQ.CK9rWcWhsi6sepcz6Dlk0rL-OPU'}
+2025-10-02 15:48:52,324 - INFO - GET запрос на страницу токенов. Текущее количество: 2, максимум: 10
+2025-10-02 15:48:52,326 - INFO - 127.0.0.1 - - [02/Oct/2025 15:48:52] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 15:49:07,750 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '121', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN50tA.tnCkOxqMKSneElhcfdWATjGNwdA'}
+2025-10-02 15:49:07,755 - INFO - Текущее количество выданных токенов: 2, максимум: 10
+2025-10-02 15:49:07,755 - INFO - Уже выданные пароли: [38, 99]
+2025-10-02 15:49:07,755 - INFO - Доступные пароли: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98]
+2025-10-02 15:49:07,757 - INFO - Выбран пароль: 98
+2025-10-02 15:49:07,757 - INFO - Сгенерирован уникальный пароль: 98
+2025-10-02 15:49:07,765 - ERROR - Ошибка сохранения токена в БД: cannot access local variable 'session' where it is not associated with a value
+2025-10-02 15:49:07,774 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:07] "POST /request-token HTTP/1.1" 200 -
+2025-10-02 15:49:20,177 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '121', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtkEFuAjEMRe_idUGJx0lJVj1El5Wi4Hho1JmBJpkFQty9EQKkVl362f_72xcIY5H6CX6MU5UXiGnOS5A55gk8xLcID5YTeIsOkR5kibP0oY9V0aCec-34JUvHznXEtYxPQprSzgprZGSLlhPt06gs8-vQfTXxwLSnXdflGuq5NpnDzRR8K2tPd4qlZc6nuLQwHQ8HSeH_5j2a7la37aHI9yq1gb8AF4mtK2OvABWajVYbhe-aPJI3dovGGLRd-vsNf8-9n-Xc9foDp9RmCw.aN50ww.LLiDRCH1lNiJaIdYqVtRiIbZmvk'}
+2025-10-02 15:49:20,187 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:20] "POST /request-token HTTP/1.1" 200 -
+2025-10-02 15:49:34,579 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:34] "GET / HTTP/1.1" 200 -
+2025-10-02 15:49:35,811 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:35] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 15:49:46,123 - INFO - Попытка входа: email=r@r, token=98
+2025-10-02 15:49:46,126 - INFO - Поиск токена: email=r@r, token=98, найден=True
+2025-10-02 15:49:46,127 - INFO - Токен найден: id=4, created_at=2025-10-02 12:49:07.757013
+2025-10-02 15:49:46,135 - INFO - Время последнего использования токена обновлено
+2025-10-02 15:49:46,135 - INFO - Генерируем admin_id для r@r: 225326
+2025-10-02 15:49:46,139 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:46] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 15:49:46,445 - INFO - Админ r@r (ID: 225326) видит турниры: 0
+2025-10-02 15:49:46,450 - INFO - Все турниры в системе:
+2025-10-02 15:49:46,451 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 15:49:46,451 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 15:49:46,453 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 15:49:46,453 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 15:49:46,454 - INFO -   Турнир "чч" (ID: 11) - admin_id: 629224
+2025-10-02 15:49:46,455 - INFO -   Турнир "ааа" (ID: 12) - admin_id: 629224
+2025-10-02 15:49:46,460 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:46] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 15:49:48,336 - INFO - 127.0.0.1 - - [02/Oct/2025 15:49:48] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 15:50:01,614 - INFO - 127.0.0.1 - - [02/Oct/2025 15:50:01] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 15:50:01,625 - INFO - Админ r@r (ID: 225326) видит турниры: 1
+2025-10-02 15:50:01,626 - INFO - Все турниры в системе:
+2025-10-02 15:50:01,627 - INFO -   Турнир "ee" (ID: 4) - admin_id: 267293
+2025-10-02 15:50:01,627 - INFO -   Турнир "Тест исправлений" (ID: 8) - admin_id: 1
+2025-10-02 15:50:01,627 - INFO -   Турнир "ууу" (ID: 9) - admin_id: 629224
+2025-10-02 15:50:01,628 - INFO -   Турнир "яя" (ID: 10) - admin_id: 629224
+2025-10-02 15:50:01,628 - INFO -   Турнир "чч" (ID: 11) - admin_id: 629224
+2025-10-02 15:50:01,628 - INFO -   Турнир "ааа" (ID: 12) - admin_id: 629224
+2025-10-02 15:50:01,628 - INFO -   Турнир "rrr" (ID: 13) - admin_id: 225326
+2025-10-02 15:50:01,631 - INFO - 127.0.0.1 - - [02/Oct/2025 15:50:01] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 15:50:08,735 - INFO - 127.0.0.1 - - [02/Oct/2025 15:50:08] "GET / HTTP/1.1" 200 -
+2025-10-02 15:50:10,538 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUEGSgyAQ_Io7Z7MlIxLllEfsbZOiCGBiRU0W8LCVyt8XIWY95NIwPT0zXX0H0fbSnY0D_n2HzIcH3KSUcQ5y2E8FJXTG0kQkM9IiMVl82lWbRUzt44rHf57GP1V5Zj_g8MjfH8WkKlfndMQ6MdkerLV7yFYysrJTRaZeDSa3T1FytY1IV571bOmQh1CscWfgreydyUHqoRuFGWTXAwe7s7BwnQaOWJXIFmaUg5lFL4m_XswYmKYOlHK2fTEhWl0zowgqVAyZ0vSo24IptS0bREJVqeiRznOdE-7XeTOIuBS4t1MwdpPWd6q7ydGL_no6GS3eN5-uSFgVrwtrfibjQvJ3UNZIHyZlqAALrDak2BT4RShHyiv2iVVVIQujSwJyJ0P13JniWxYDb5rH4w-7nbOf.aN50-Q.ZTx3OJL8s7Y3mTcYo_UBpf6nrps'}
+2025-10-02 15:50:10,539 - INFO - Очищено 2 flash сообщений при загрузке страницы токенов
+2025-10-02 15:50:10,542 - INFO - GET запрос на страницу токенов. Текущее количество: 3, максимум: 10
+2025-10-02 15:50:10,545 - INFO - 127.0.0.1 - - [02/Oct/2025 15:50:10] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 15:51:02,715 - INFO - 127.0.0.1 - - [02/Oct/2025 15:51:02] "GET / HTTP/1.1" 200 -
+2025-10-02 15:54:14,244 - INFO - 127.0.0.1 - - [02/Oct/2025 15:54:14] "GET / HTTP/1.1" 200 -
+2025-10-02 15:59:05,748 - INFO - 127.0.0.1 - - [02/Oct/2025 15:59:05] "GET / HTTP/1.1" 200 -
+2025-10-02 15:59:59,981 - INFO - Системный администратор успешно авторизован
+2025-10-02 15:59:59,982 - INFO - 127.0.0.1 - - [02/Oct/2025 15:59:59] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 16:00:00,108 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:00] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:00:04,336 - INFO - Турнир 'ee' (ID: 4) удален админом admin@system
+2025-10-02 16:00:04,338 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:04] "DELETE /api/tournaments/4 HTTP/1.1" 200 -
+2025-10-02 16:00:06,693 - INFO - Турнир 'Тест исправлений' (ID: 8) удален админом admin@system
+2025-10-02 16:00:06,693 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:06] "DELETE /api/tournaments/8 HTTP/1.1" 200 -
+2025-10-02 16:00:08,849 - INFO - Турнир 'ууу' (ID: 9) удален админом admin@system
+2025-10-02 16:00:08,850 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:08] "DELETE /api/tournaments/9 HTTP/1.1" 200 -
+2025-10-02 16:00:11,134 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:11] "GET / HTTP/1.1" 200 -
+2025-10-02 16:00:12,581 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqB47CEUz9ix0mIgNOhNWkL5DBV_fcR0qSVtssDP_s9G3Nlug8Uv5jqzTHSKzNu8KOmwfgjU0u0jz8x0cDWpHdMiTUYzUC58HPiCGLGqpkRyx2hMHVBW9AVviv39qUcvCA-FTWP0r92yB-qewNa-G3CdPqmMU_VNpmyMfQbgwJdI8kKsGAlSOuwcz2X1r5XLYBAW1nscNb5qJeH62LKVApTXtDZhOStP5sx6ePpcCCn_0_eNyOyVemuA10miompK7OBTMpKkyMGHOqd4DsOHwIVoKrlG9R1DTJLt5_Ymxw9bbviqzFTbXu7_QKeRIv1.aN53Tw.OmZ1X_QD9ySNf4ULjo-NVCRZEP0'}
+2025-10-02 16:00:12,586 - INFO - GET запрос на страницу токенов. Текущее количество: 3, максимум: 10
+2025-10-02 16:00:12,588 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:12] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 16:00:15,894 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:15] "GET / HTTP/1.1" 200 -
+2025-10-02 16:00:17,876 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:17] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 16:00:19,723 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:19] "GET / HTTP/1.1" 200 -
+2025-10-02 16:00:24,847 - INFO - Системный администратор успешно авторизован
+2025-10-02 16:00:24,848 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:24] "POST /admin-system-login HTTP/1.1" 200 -
+2025-10-02 16:00:25,213 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:25] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:00:30,836 - INFO - Турнир 'яя' (ID: 10) удален админом admin@system
+2025-10-02 16:00:30,836 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:30] "DELETE /api/tournaments/10 HTTP/1.1" 200 -
+2025-10-02 16:00:34,398 - INFO - Найдено турниров для удаления: 2
+2025-10-02 16:00:34,398 - INFO - Удаляем турнир: чч (ID: 11)
+2025-10-02 16:00:34,400 - INFO - Удалено участников: 0
+2025-10-02 16:00:34,402 - INFO - Удалено матчей: 0
+2025-10-02 16:00:34,402 - INFO - Турнир чч помечен для удаления
+2025-10-02 16:00:34,402 - INFO - Удаляем турнир: ааа (ID: 12)
+2025-10-02 16:00:34,417 - INFO - Удалено участников: 0
+2025-10-02 16:00:34,418 - INFO - Удалено матчей: 0
+2025-10-02 16:00:34,419 - INFO - Турнир ааа помечен для удаления
+2025-10-02 16:00:34,420 - INFO - Удалено токенов по email admin_629224@system: 0
+2025-10-02 16:00:34,421 - INFO - Удалено дополнительных токенов: 1
+2025-10-02 16:00:34,427 - INFO - Изменения сохранены в базу данных
+2025-10-02 16:00:34,428 - INFO - Администратор турнира 629224 удален. Удалено турниров: 2
+2025-10-02 16:00:34,429 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:34] "DELETE /api/admin/tournament-admins/629224 HTTP/1.1" 200 -
+2025-10-02 16:00:36,277 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:36] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:00:39,337 - INFO - Найдено турниров для удаления: 0
+2025-10-02 16:00:39,339 - INFO - Удалено токенов по email admin_267293@system: 0
+2025-10-02 16:00:39,340 - INFO - Удалено дополнительных токенов: 1
+2025-10-02 16:00:39,358 - INFO - Изменения сохранены в базу данных
+2025-10-02 16:00:39,359 - INFO - Администратор турнира 267293 удален. Удалено турниров: 0
+2025-10-02 16:00:39,359 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:39] "DELETE /api/admin/tournament-admins/267293 HTTP/1.1" 200 -
+2025-10-02 16:00:40,898 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:40] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:00:46,292 - INFO - Найдено турниров для удаления: 1
+2025-10-02 16:00:46,292 - INFO - Удаляем турнир: rrr (ID: 13)
+2025-10-02 16:00:46,294 - INFO - Удалено участников: 0
+2025-10-02 16:00:46,296 - INFO - Удалено матчей: 0
+2025-10-02 16:00:46,296 - INFO - Турнир rrr помечен для удаления
+2025-10-02 16:00:46,310 - INFO - Удалено токенов по email admin_225326@system: 0
+2025-10-02 16:00:46,311 - INFO - Удалено дополнительных токенов: 1
+2025-10-02 16:00:46,317 - INFO - Изменения сохранены в базу данных
+2025-10-02 16:00:46,317 - INFO - Администратор турнира 225326 удален. Удалено турниров: 1
+2025-10-02 16:00:46,317 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:46] "DELETE /api/admin/tournament-admins/225326 HTTP/1.1" 200 -
+2025-10-02 16:00:48,153 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:48] "GET /system-admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:00:52,977 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:52] "GET /admin-tokens HTTP/1.1" 200 -
+2025-10-02 16:00:53,033 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:53] "GET /api/admin/tokens?max=1 HTTP/1.1" 200 -
+2025-10-02 16:00:53,383 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:53] "GET /api/admin/tokens?max=10 HTTP/1.1" 200 -
+2025-10-02 16:00:55,655 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:55] "GET / HTTP/1.1" 200 -
+2025-10-02 16:00:58,070 - INFO - Request token: method=GET, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqB47CEUz9ix0mIgNOhNWkL5DBV_fcR0qSVtssDP_s9G3Nlug8Uv5jqzTHSKzNu8KOmwfgjU0u0jz8x0cDWpHdMiTUYzUC58HPiCGLGqpkRyx2hMHVBW9AVviv39qUcvCA-FTWP0r92yB-qewNa-G3CdPqmMU_VNpmyMfQbgwJdI8kKsGAlSOuwcz2X1r5XLYBAW1nscNb5qJeH62LKVApTXtDZhOStP5sx6ePpcCCn_0_eNyOyVemuA10miompK7OBTMpKkyMGHOqd4DsOHwIVoKrlG9R1DTJLt5_Ymxw9bbviqzFTbXu7_QKeRIv1.aN53aA.Jcj4mlpUmsVhAI7iLJI-7kDdbSY'}
+2025-10-02 16:00:58,073 - INFO - GET запрос на страницу токенов. Текущее количество: 0, максимум: 10
+2025-10-02 16:00:58,075 - INFO - 127.0.0.1 - - [02/Oct/2025 16:00:58] "GET /request-token HTTP/1.1" 200 -
+2025-10-02 16:01:14,781 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '121', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqB47CEUz9ix0mIgNOhNWkL5DBV_fcR0qSVtssDP_s9G3Nlug8Uv5jqzTHSKzNu8KOmwfgjU0u0jz8x0cDWpHdMiTUYzUC58HPiCGLGqpkRyx2hMHVBW9AVviv39qUcvCA-FTWP0r92yB-qewNa-G3CdPqmMU_VNpmyMfQbgwJdI8kKsGAlSOuwcz2X1r5XLYBAW1nscNb5qJeH62LKVApTXtDZhOStP5sx6ePpcCCn_0_eNyOyVemuA10miompK7OBTMpKkyMGHOqd4DsOHwIVoKrlG9R1DTJLt5_Ymxw9bbviqzFTbXu7_QKeRIv1.aN53ig.p5apYjHpuw9WyMmNUr_i2fg8_Ao'}
+2025-10-02 16:01:14,784 - INFO - Текущее количество выданных токенов: 0, максимум: 10
+2025-10-02 16:01:14,785 - INFO - Уже выданные пароли: []
+2025-10-02 16:01:14,785 - INFO - Доступные пароли: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+2025-10-02 16:01:14,785 - INFO - Выбран пароль: 99
+2025-10-02 16:01:14,785 - INFO - Сгенерирован уникальный пароль: 99
+2025-10-02 16:01:14,793 - ERROR - Ошибка сохранения токена в БД: cannot access local variable 'session' where it is not associated with a value
+2025-10-02 16:01:14,801 - INFO - 127.0.0.1 - - [02/Oct/2025 16:01:14] "POST /request-token HTTP/1.1" 200 -
+2025-10-02 16:01:23,609 - INFO - Request token: method=POST, headers={'Host': 'localhost:5000', 'Connection': 'keep-alive', 'Content-Length': '121', 'Cache-Control': 'max-age=0', 'Sec-Ch-Ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Ch-Ua-Platform': '"Windows"', 'Origin': 'http://localhost:5000', 'Content-Type': 'application/x-www-form-urlencoded', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Sec-Fetch-Dest': 'document', 'Referer': 'http://localhost:5000/request-token', 'Accept-Encoding': 'gzip, deflate, br, zstd', 'Accept-Language': 'ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7', 'Cookie': 'session=.eJxtUcFuwyAM_ZWJ8zqB47CEUz9ix0mIgNOhNWkL5DBV_fcR0qSVtssDP_s9G3Nlug8Uv5jqzTHSKzNu8KOmwfgjU0u0jz8x0cDWpHdMiTUYzUC58HPiCGLGqpkRyx2hMHVBW9AVviv39qUcvCA-FTWP0r92yB-qewNa-G3CdPqmMU_VNpmyMfQbgwJdI8kKsGAlSOuwcz2X1r5XLYBAW1nscNb5qJeH62LKVApTXtDZhOStP5sx6ePpcCCn_0_eNyOyVemuA10miompK7OBTMpKkyMGHOqd4DsOHwIVoKrlG9R1DTJLt5_Ymxw9bbviqzFTbXu7_QKeRIv1.aN53mg.Sj4-Izx5CMKYTgwF4NA2dCK-CAM'}
+2025-10-02 16:01:23,613 - INFO - 127.0.0.1 - - [02/Oct/2025 16:01:23] "POST /request-token HTTP/1.1" 200 -
+2025-10-02 16:01:39,171 - INFO - 127.0.0.1 - - [02/Oct/2025 16:01:39] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 16:01:51,354 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 16:01:51,358 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 16:01:51,358 - INFO - Токен найден: id=1, created_at=2025-10-02 13:01:14.786618
+2025-10-02 16:01:51,365 - INFO - Время последнего использования токена обновлено
+2025-10-02 16:01:51,365 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 16:01:51,370 - INFO - 127.0.0.1 - - [02/Oct/2025 16:01:51] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 16:01:51,383 - INFO - Админ a@a (ID: 629224) видит турниры: 0
+2025-10-02 16:01:51,384 - INFO - Все турниры в системе:
+2025-10-02 16:01:51,386 - INFO - 127.0.0.1 - - [02/Oct/2025 16:01:51] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:01:53,931 - INFO - 127.0.0.1 - - [02/Oct/2025 16:01:53] "GET /admin-create-tournament HTTP/1.1" 200 -
+2025-10-02 16:02:14,707 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:14] "[32mPOST /admin-create-tournament HTTP/1.1[0m" 302 -
+2025-10-02 16:02:14,718 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 16:02:14,720 - INFO - Все турниры в системе:
+2025-10-02 16:02:14,720 - INFO -   Турнир "a_1" (ID: 1) - admin_id: 629224
+2025-10-02 16:02:14,724 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:14] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:02:22,122 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:22] "GET /tournament/1 HTTP/1.1" 200 -
+2025-10-02 16:02:30,408 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:30] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-10-02 16:02:30,429 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:30] "GET /tournament/1 HTTP/1.1" 200 -
+2025-10-02 16:02:34,549 - INFO - Создание расписания для 2 участников: ['1', '2']
+2025-10-02 16:02:34,550 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 16:02:34,550 - INFO - create_round_robin_schedule: получено 2 участников: ['1', '2']
+2025-10-02 16:02:34,550 - INFO - Создано 1 туров для 2 участников
+2025-10-02 16:02:34,550 - INFO - Тур 1: ['1 vs 2']
+2025-10-02 16:02:34,551 - INFO - Всего уникальных матчей: 1
+2025-10-02 16:02:34,551 - INFO - Тур 1: 1 матчей
+2025-10-02 16:02:34,551 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 1)
+2025-10-02 16:02:34,552 - INFO - Матч 1 vs 2 получил номер 1
+2025-10-02 16:02:34,559 - INFO - Автоматически пересоздано 1 матчей для турнира 1 (удалено 0 старых матчей)
+2025-10-02 16:02:34,564 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:34] "[35m[1mPOST /api/tournaments/1/participants HTTP/1.1[0m" 201 -
+2025-10-02 16:02:34,922 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:02:34,923 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:02:34,923 - INFO - Матч 1: итоговый счет=None
+2025-10-02 16:02:34,933 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:34] "GET /tournament/1 HTTP/1.1" 200 -
+2025-10-02 16:02:42,656 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:42] "GET / HTTP/1.1" 200 -
+2025-10-02 16:02:46,151 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:46] "GET /tournaments HTTP/1.1" 200 -
+2025-10-02 16:02:55,279 - INFO - Участник 3 (уровень: любитель) подал заявку в лист ожидания турнира a_1 (ID: 1)
+2025-10-02 16:02:55,280 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:55] "POST /api/join-request HTTP/1.1" 200 -
+2025-10-02 16:02:59,569 - INFO - 127.0.0.1 - - [02/Oct/2025 16:02:59] "GET / HTTP/1.1" 200 -
+2025-10-02 16:03:00,528 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:00] "GET /admin-tournament HTTP/1.1" 200 -
+2025-10-02 16:03:03,924 - INFO - Попытка входа: email=a@a, token=99
+2025-10-02 16:03:03,926 - INFO - Поиск токена: email=a@a, token=99, найден=True
+2025-10-02 16:03:03,926 - INFO - Токен найден: id=1, created_at=2025-10-02 13:01:14.786618
+2025-10-02 16:03:03,932 - INFO - Время последнего использования токена обновлено
+2025-10-02 16:03:03,933 - INFO - Генерируем admin_id для a@a: 629224
+2025-10-02 16:03:03,941 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:03] "[32mPOST /admin-tournament HTTP/1.1[0m" 302 -
+2025-10-02 16:03:04,242 - INFO - Админ a@a (ID: 629224) видит турниры: 1
+2025-10-02 16:03:04,243 - INFO - Все турниры в системе:
+2025-10-02 16:03:04,243 - INFO -   Турнир "a_1" (ID: 1) - admin_id: 629224
+2025-10-02 16:03:04,247 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:04] "GET /admin-dashboard HTTP/1.1" 200 -
+2025-10-02 16:03:09,954 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:09,955 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:09,956 - INFO - Матч 1: итоговый счет=None
+2025-10-02 16:03:09,965 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:09] "GET /tournament/1 HTTP/1.1" 200 -
+2025-10-02 16:03:14,174 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:14] "GET /api/tournaments/1/waiting-list HTTP/1.1" 200 -
+2025-10-02 16:03:22,155 - INFO - Создание расписания для 4 участников: ['1', '2', '5', '3']
+2025-10-02 16:03:22,156 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 16:03:22,156 - INFO - create_round_robin_schedule: получено 4 участников: ['1', '2', '5', '3']
+2025-10-02 16:03:22,156 - INFO - Создано 3 туров для 4 участников
+2025-10-02 16:03:22,156 - INFO - Тур 1: ['1 vs 3', '2 vs 5']
+2025-10-02 16:03:22,156 - INFO - Тур 2: ['1 vs 5', '3 vs 2']
+2025-10-02 16:03:22,156 - INFO - Тур 3: ['1 vs 2', '5 vs 3']
+2025-10-02 16:03:22,157 - INFO - Всего уникальных матчей: 6
+2025-10-02 16:03:22,157 - INFO - Тур 1: 2 матчей
+2025-10-02 16:03:22,157 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 1)
+2025-10-02 16:03:22,157 - INFO - Создание нового матча: 2 vs 5 (площадка 2, номер 2)
+2025-10-02 16:03:22,158 - INFO - Матч 1 vs 4 получил номер 1
+2025-10-02 16:03:22,158 - INFO - Матч 2 vs 3 получил номер 2
+2025-10-02 16:03:22,158 - INFO - Тур 2: 2 матчей
+2025-10-02 16:03:22,158 - INFO - Создание нового матча: 1 vs 5 (площадка 1, номер 3)
+2025-10-02 16:03:22,159 - INFO - Создание нового матча: 3 vs 2 (площадка 2, номер 4)
+2025-10-02 16:03:22,160 - INFO - Матч 1 vs 3 получил номер 3
+2025-10-02 16:03:22,160 - INFO - Матч 4 vs 2 получил номер 4
+2025-10-02 16:03:22,161 - INFO - Тур 3: 2 матчей
+2025-10-02 16:03:22,161 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 5)
+2025-10-02 16:03:22,161 - INFO - Создание нового матча: 5 vs 3 (площадка 2, номер 6)
+2025-10-02 16:03:22,162 - INFO - Матч 1 vs 2 получил номер 5
+2025-10-02 16:03:22,162 - INFO - Матч 3 vs 4 получил номер 6
+2025-10-02 16:03:22,162 - INFO - Расписание пересчитано для 2 новых участников из листа ожидания
+2025-10-02 16:03:22,162 - INFO - Принято 2 заявок из листа ожидания турнира a_1
+2025-10-02 16:03:22,163 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:22] "POST /api/tournaments/1/accept-waiting HTTP/1.1" 200 -
+2025-10-02 16:03:24,382 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:24,383 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:24,383 - INFO - Матч 1: итоговый счет=None
+2025-10-02 16:03:24,385 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:24] "GET /api/tournaments/1/waiting-list HTTP/1.1" 200 -
+2025-10-02 16:03:24,387 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:24] "GET /tournament/1 HTTP/1.1" 200 -
+2025-10-02 16:03:35,546 - INFO - Создание расписания для 4 участников: ['1', '2', '5', '3']
+2025-10-02 16:03:35,564 - INFO - Сохранено 0 результатов существующих матчей
+2025-10-02 16:03:35,564 - INFO - create_round_robin_schedule: получено 4 участников: ['1', '2', '5', '3']
+2025-10-02 16:03:35,564 - INFO - Создано 3 туров для 4 участников
+2025-10-02 16:03:35,565 - INFO - Тур 1: ['1 vs 3', '2 vs 5']
+2025-10-02 16:03:35,565 - INFO - Тур 2: ['1 vs 5', '3 vs 2']
+2025-10-02 16:03:35,565 - INFO - Тур 3: ['1 vs 2', '5 vs 3']
+2025-10-02 16:03:35,565 - INFO - Всего уникальных матчей: 6
+2025-10-02 16:03:35,565 - INFO - Тур 1: 2 матчей
+2025-10-02 16:03:35,565 - INFO - Создание нового матча: 1 vs 3 (площадка 1, номер 1)
+2025-10-02 16:03:35,566 - INFO - Создание нового матча: 2 vs 5 (площадка 2, номер 2)
+2025-10-02 16:03:35,566 - INFO - Матч 1 vs 4 получил номер 1
+2025-10-02 16:03:35,566 - INFO - Матч 2 vs 3 получил номер 2
+2025-10-02 16:03:35,566 - INFO - Тур 2: 2 матчей
+2025-10-02 16:03:35,566 - INFO - Создание нового матча: 1 vs 5 (площадка 1, номер 3)
+2025-10-02 16:03:35,566 - INFO - Создание нового матча: 3 vs 2 (площадка 2, номер 4)
+2025-10-02 16:03:35,567 - INFO - Матч 1 vs 3 получил номер 3
+2025-10-02 16:03:35,567 - INFO - Матч 4 vs 2 получил номер 4
+2025-10-02 16:03:35,567 - INFO - Тур 3: 2 матчей
+2025-10-02 16:03:35,567 - INFO - Создание нового матча: 1 vs 2 (площадка 1, номер 5)
+2025-10-02 16:03:35,567 - INFO - Создание нового матча: 5 vs 3 (площадка 2, номер 6)
+2025-10-02 16:03:35,568 - INFO - Матч 1 vs 2 получил номер 5
+2025-10-02 16:03:35,568 - INFO - Матч 3 vs 4 получил номер 6
+2025-10-02 16:03:35,580 - INFO - Расписание составлено для турнира a_1: создано 6 матчей
+2025-10-02 16:03:35,581 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:35] "POST /api/tournaments/1/generate-schedule HTTP/1.1" 200 -
+2025-10-02 16:03:37,962 - INFO - Матч 1: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:37,962 - INFO - Матч 1: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:37,962 - INFO - Матч 1: итоговый счет=None
+2025-10-02 16:03:37,963 - INFO - Матч 2: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:37,963 - INFO - Матч 2: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:37,963 - INFO - Матч 2: итоговый счет=None
+2025-10-02 16:03:37,963 - INFO - Матч 3: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:37,963 - INFO - Матч 3: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:37,964 - INFO - Матч 3: итоговый счет=None
+2025-10-02 16:03:37,964 - INFO - Матч 4: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:37,964 - INFO - Матч 4: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:37,965 - INFO - Матч 4: итоговый счет=None
+2025-10-02 16:03:37,965 - INFO - Матч 5: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:37,965 - INFO - Матч 5: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:37,965 - INFO - Матч 5: итоговый счет=None
+2025-10-02 16:03:37,966 - INFO - Матч 6: статус='запланирован', sets_won_1=0, sets_won_2=0, set1_score1=None, set1_score2=None
+2025-10-02 16:03:37,966 - INFO - Матч 6: статус 'запланирован' НЕ попадает в условие
+2025-10-02 16:03:37,966 - INFO - Матч 6: итоговый счет=None
+2025-10-02 16:03:37,973 - INFO - 127.0.0.1 - - [02/Oct/2025 16:03:37] "GET /tournament/1 HTTP/1.1" 200 -
+2025-10-02 16:04:27,856 - INFO - 127.0.0.1 - - [02/Oct/2025 16:04:27] "GET /api/tournaments/1/waiting-list HTTP/1.1" 200 -
+2025-10-02 16:06:43,153 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 16:06:43,298 - INFO -  * Restarting with stat
+2025-10-02 16:06:44,988 - INFO - База данных инициализирована успешно
+2025-10-02 16:06:45,617 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 16:06:45,621 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 16:06:45,621 - INFO - Запуск приложения на порту 5000
+2025-10-02 16:06:45,621 - INFO - Переменная окружения PORT: None
+2025-10-02 16:06:45,622 - INFO - Режим отладки: production
+2025-10-02 16:06:45,647 - WARNING -  * Debugger is active!
+2025-10-02 16:06:45,652 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 16:06:56,370 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 16:06:56,538 - INFO -  * Restarting with stat
+2025-10-02 16:06:58,111 - INFO - База данных инициализирована успешно
+2025-10-02 16:06:58,747 - INFO - Пароль администратора обновлен: admin/adm444
+2025-10-02 16:06:58,756 - INFO - Настройки по умолчанию инициализированы
+2025-10-02 16:06:58,757 - INFO - Запуск приложения на порту 5000
+2025-10-02 16:06:58,757 - INFO - Переменная окружения PORT: None
+2025-10-02 16:06:58,757 - INFO - Режим отладки: production
+2025-10-02 16:06:58,787 - WARNING -  * Debugger is active!
+2025-10-02 16:06:58,795 - INFO -  * Debugger PIN: 531-880-768
+2025-10-02 16:07:19,626 - INFO -  * Detected change in 'C:\\Cursor\\Tournaments_v.1\\routes\\api.py', reloading
+2025-10-02 16:07:19,815 - INFO -  * Restarting with stat

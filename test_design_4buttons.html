@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовый дизайн 4 кнопок - Турнирный Ассистент</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Основные цвета темы - Оригинальный изумруд */
+            --primary-color: #00c851;
+            --primary-light: #00e676;
+            --primary-dark: #00a041;
+            --accent-color: #00bfa5;
+            --accent-light: #1de9b6;
+            
+            /* Фоновые цвета */
+            --bg-primary: #e8f5e8;
+            --bg-secondary: #f0fff0;
+            --bg-card: #f1f8e9;
+            --bg-card-hover: #f8fdf8;
+            
+            /* Границы и тени */
+            --border-color: #a5d6a7;
+            --shadow-color: rgba(0, 200, 81, 0.1);
+            --shadow-hover: rgba(0, 200, 81, 0.15);
+            --shadow-strong: rgba(0, 200, 81, 0.3);
+            
+            /* Плавающи.е элементы */
+            --float-color: rgba(0, 200, 81, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px var(--shadow-color);
+            margin: 2rem auto;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            max-width: 1200px;
+        }
+
+        .hero-title {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px var(--shadow-color);
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .card-modern {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-primary));
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow: 
+                0 8px 16px var(--shadow-color),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card-modern:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-modern:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(145deg, var(--bg-card-hover), var(--bg-secondary));
+            box-shadow: 
+                0 12px 24px var(--shadow-hover),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        /* Иконки из bg_variant1_standalone.html */
+        .role-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .card-modern:hover .role-icon {
+            transform: scale(1.1);
+        }
+
+        /* Адаптивные размеры иконок */
+        @media (min-width: 576px) {
+            .role-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Встроенные кнопки как в оригинале - узкие */
+        .card-button-area {
+            height: 35px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+            color: var(--primary-dark);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            /* Делаем кнопку узкой как в оригинале */
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            color: white !important;
+            border-radius: 20px;
+            padding: 4px 12px;
+            margin: 0 auto;
+            width: fit-content;
+            min-width: 120px;
+            max-width: 180px;
+            box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+        }
+
+        .card-modern:hover .card-button-area {
+            color: white !important;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 200, 81, 0.4);
+        }
+
+        .card-title {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .card-text {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Адаптивные стили для мобильных устройств */
+        @media (max-width: 576px) {
+            .card-title {
+                font-size: 1rem;
+                line-height: 1.2;
+                margin-bottom: 0.5rem;
+            }
+            
+            .card-modern .card-body {
+                padding: 1rem !important;
+            }
+        }
+
+        /* Последовательное пульсирование кнопок */
+        .pulse-delay-1 {
+            animation: pulse-button-1 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .pulse-delay-2 {
+            animation: pulse-button-2 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .pulse-delay-3 {
+            animation: pulse-button-3 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .pulse-delay-4 {
+            animation: pulse-button-4 16s infinite;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Анимация для кнопки 1 (0-4s) */
+        @keyframes pulse-button-1 {
+            0%, 25% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            12.5% {
+                box-shadow: 0 6px 20px rgba(0, 200, 81, 0.6);
+                transform: scale(1.05);
+            }
+            25.1%, 100% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+        }
+
+        /* Анимация для кнопки 2 (4-8s) */
+        @keyframes pulse-button-2 {
+            0%, 24.9% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            25%, 50% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            37.5% {
+                box-shadow: 0 6px 20px rgba(0, 200, 81, 0.6);
+                transform: scale(1.05);
+            }
+            50.1%, 100% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+        }
+
+        /* Анимация для кнопки 3 (8-12s) */
+        @keyframes pulse-button-3 {
+            0%, 49.9% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            50%, 75% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            62.5% {
+                box-shadow: 0 6px 20px rgba(0, 200, 81, 0.6);
+                transform: scale(1.05);
+            }
+            75.1%, 100% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+        }
+
+        /* Анимация для кнопки 4 (12-16s) */
+        @keyframes pulse-button-4 {
+            0%, 74.9% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            75%, 100% {
+                box-shadow: 0 3px 10px rgba(0, 200, 81, 0.3);
+                transform: scale(1);
+            }
+            87.5% {
+                box-shadow: 0 6px 20px rgba(0, 200, 81, 0.6);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Дополнительный отступ для предотвращения наложения */
+        .col-6 {
+            margin-bottom: 1rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .main-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                margin: 1rem auto;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Отступы для средних экранов - ограничиваем ширину карточек */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .row.g-4 {
+                margin-left: calc(50% - 250px) !important;
+                margin-right: calc(50% - 250px) !important;
+                max-width: 500px !important;
+            }
+        }
+
+        /* Отступы для больших экранов - ограничиваем ширину карточек */
+        @media (min-width: 1200px) {
+            .row.g-4 {
+                margin-left: calc(50% - 300px) !important;
+                margin-right: calc(50% - 300px) !important;
+                max-width: 600px !important;
+            }
+        }
+
+        /* Отступы для очень больших экранов */
+        @media (min-width: 1400px) {
+            .row.g-4 {
+                margin-left: calc(50% - 350px) !important;
+                margin-right: calc(50% - 350px) !important;
+                max-width: 700px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-container">
+            <h1 class="hero-title">🏆 Турнирный Ассистент</h1>
+            <p class="hero-subtitle">Выберите вашу роль для продолжения</p>
+            
+            <div class="row g-4">
+                <!-- 1. Ваши турниры -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-1" onclick="alert('Демо: Войти как участник')" style="cursor: pointer;">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <div class="role-icon">👤</div>
+                            </div>
+                            <h4 class="card-title">Ваши турниры</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Просматривайте турниры, в которых вы участвуете, следите за расписанием матчей и результатами
+                            </p>
+                            <div class="card-button-area">
+                                <i class="fas fa-user me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Ваши турниры</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 2. Администратор -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="alert('Демо: Панель администратора')" style="cursor: pointer;">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <div class="role-icon">⚙️</div>
+                            </div>
+                            <h4 class="card-title">Администратор</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Управляйте своими турнирами, добавляйте участников, ведите результаты матчей
+                            </p>
+                            <div class="card-button-area">
+                                <i class="fas fa-sign-in-alt me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти с паролем</span><span class="d-sm-none">Войти с паролем</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3. Получить пароль -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-3" onclick="alert('Демо: Запросить пароль')" style="cursor: pointer;">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <div class="role-icon">🔑</div>
+                            </div>
+                            <h4 class="card-title">Получить пароль</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Получите пароль администратора для создания и управления турнирами
+                            </p>
+                            <div class="card-button-area">
+                                <i class="fas fa-key me-1 me-sm-2"></i><span class="d-none d-sm-inline">Получить пароль</span><span class="d-sm-none">Пароль</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. Войти с паролем -->
+                <div class="col-6 col-sm-6">
+                    <div class="card card-modern h-100 pulse-animation pulse-delay-4" onclick="alert('Демо: Войти в систему')" style="cursor: pointer;">
+                        <div class="card-body text-center p-3 p-sm-4">
+                            <div class="mb-2 mb-sm-3">
+                                <div class="role-icon">🚪</div>
+                            </div>
+                            <h4 class="card-title">Войти с паролем</h4>
+                            <p class="card-text text-muted small d-none d-sm-block">
+                                Войдите в систему, используя полученный пароль администратора
+                            </p>
+                            <div class="card-button-area">
+                                <i class="fas fa-sign-in-alt me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти с паролем</span><span class="d-sm-none">Войти с паролем</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

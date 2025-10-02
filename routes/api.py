@@ -58,9 +58,21 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
     # Создаем круговое расписание по правильному алгоритму
     rounds = create_round_robin_schedule(participants)
     
-    logger.info(f"Создано {len(rounds)} туров")
+    logger.info(f"Создано {len(rounds)} туров для {len(participants)} участников")
     for i, round_matches in enumerate(rounds, 1):
         logger.info(f"Тур {i}: {[f'{m[0].name} vs {m[1].name}' for m in round_matches]}")
+    
+    # Проверяем на дубликаты
+    all_matches = []
+    for round_matches in rounds:
+        for match in round_matches:
+            participant1, participant2 = match
+            key = tuple(sorted([participant1.id, participant2.id]))
+            if key in all_matches:
+                logger.error(f"ДУБЛИКАТ МАТЧА: {participant1.name} vs {participant2.name}")
+            else:
+                all_matches.append(key)
+    logger.info(f"Всего уникальных матчей: {len(all_matches)}")
     
     # Распределяем матчи по времени и площадкам
     scheduled_matches = []
@@ -87,7 +99,7 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
         participant1, participant2 = match
         p1_id, p2_id = participant1.id, participant2.id
         
-        logger.info(f"Восстановление матча: {participant1.name} vs {participant2.name}")
+        logger.info(f"Восстановление завершенного матча: {participant1.name} vs {participant2.name} (номер {global_match_number})")
         
         # Создаем матч с сохраненными результатами
         match_obj = Match(
@@ -152,7 +164,7 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
                 participant1, participant2 = match
                 p1_id, p2_id = participant1.id, participant2.id
                 
-                logger.info(f"Создание матча: {participant1.name} vs {participant2.name} (площадка {court_num})")
+                logger.info(f"Создание нового матча: {participant1.name} vs {participant2.name} (площадка {court_num}, номер {global_match_number})")
                 
                 # Создаем матч
                 match_obj = Match(
@@ -173,9 +185,11 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
         # Сортируем матчи тура по номеру площадки для правильной нумерации
         round_matches_created.sort(key=lambda m: m.court_number)
         
-        # Переназначаем номера матчей в туре (используем глобальную нумерацию)
+        # Переназначаем номера матчей в туре (используем правильную нумерацию)
+        start_number = global_match_number - len(round_matches_created)
         for i, match in enumerate(round_matches_created):
-            match.match_number = global_match_number - len(round_matches_created) + i
+            match.match_number = start_number + i
+            logger.info(f"Матч {match.participant1_id} vs {match.participant2_id} получил номер {match.match_number}")
         
         # Переходим к следующему времени
         current_time = add_minutes_to_time(current_time, time_match + time_break)
@@ -193,6 +207,7 @@ def create_round_robin_schedule(participants):
     Создает круговое расписание по правильному алгоритму
     """
     n = len(participants)
+    logger.info(f"create_round_robin_schedule: получено {n} участников: {[p.name for p in participants]}")
     if n < 2:
         return []
     
@@ -516,11 +531,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Автоматически создаем расписание после добавления участника
             participants = Participant.query.filter_by(tournament_id=tournament_id).all()
             if len(participants) >= 2:  # Минимум 2 участника для создания расписания
+                # Удаляем существующие матчи перед созданием новых
+                existing_matches = Match.query.filter_by(tournament_id=tournament_id).all()
+                for match in existing_matches:
+                    db.session.delete(match)
+                
                 # Создаем новое расписание с сохранением результатов
                 matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
                 db.session.commit()
                 
-                logger.info(f"Автоматически создано {matches_created} матчей для турнира {tournament_id} с сохранением результатов")
+                logger.info(f"Автоматически пересоздано {matches_created} матчей для турнира {tournament_id} (удалено {len(existing_matches)} старых матчей)")
             
             return jsonify({
                 'success': True,
@@ -586,9 +606,23 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.delete(participant)
             db.session.commit()
             
-            logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Удалено {len(matches_to_delete)} матчей с его участием. Результаты других матчей сохранены.")
-            logger.info(f"Участник '{participant_name}' (ID: {participant_id}) удален из турнира {tournament_id} админом {admin.username}")
-            return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален. Результаты матчей других участников сохранены.'}), 200
+            # Пересоздаем расписание для оставшихся участников
+            remaining_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+            if len(remaining_participants) >= 2:
+                # Удаляем все оставшиеся матчи
+                all_matches = Match.query.filter_by(tournament_id=tournament_id).all()
+                for match in all_matches:
+                    db.session.delete(match)
+                
+                # Создаем новое расписание
+                matches_created = create_smart_schedule(tournament, remaining_participants, Match, db, preserve_results=True)
+                db.session.commit()
+                
+                logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Пересоздано {matches_created} матчей для {len(remaining_participants)} оставшихся участников.")
+            else:
+                logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Осталось {len(remaining_participants)} участников - расписание не создается.")
+            
+            return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален. Расписание обновлено.'}), 200
             
         except Exception as e:
             db.session.rollback()
@@ -639,7 +673,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             db.session.commit()
             
-            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin.username}")
+            logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin_email}")
             return jsonify({
                 'success': True, 
                 'message': f'Турнир "{tournament_name}" успешно удален'
@@ -1809,19 +1843,22 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             db.session.commit()
             
-            # Создаем матчи для новых участников
+            # Автоматически пересоставляем расписание для новых участников
             if accepted_count > 0:
                 # Используем create_smart_schedule для полного пересчета расписания
                 # с сохранением результатов существующих матчей
                 try:
                     # Получаем всех участников турнира
                     all_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
+                    logger.info(f"Пересоставление расписания: добавлено {accepted_count} участников, всего участников: {len(all_participants)}")
                     
                     # Вызываем create_smart_schedule с правильными параметрами
-                    create_smart_schedule(tournament, all_participants, Match, db, preserve_results=True)
-                    logger.info(f"Расписание пересчитано для {accepted_count} новых участников из листа ожидания")
+                    matches_created = create_smart_schedule(tournament, all_participants, Match, db, preserve_results=True)
+                    db.session.commit()
+                    
+                    logger.info(f"Расписание автоматически пересоставлено: создано/обновлено {matches_created} матчей для {accepted_count} новых участников из листа ожидания")
                 except Exception as e:
-                    logger.error(f"Ошибка при пересчете расписания: {e}")
+                    logger.error(f"Ошибка при автоматическом пересоставлении расписания: {e}")
                     # Если не удалось пересчитать расписание, создаем матчи вручную
                     all_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
                     
@@ -1863,7 +1900,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             return jsonify({
                 'success': True, 
-                'message': f'Принято {accepted_count} заявок из листа ожидания',
+                'message': f'Принято {accepted_count} заявок из листа ожидания. Расписание автоматически пересоставлено.',
                 'accepted_count': accepted_count
             })
             
