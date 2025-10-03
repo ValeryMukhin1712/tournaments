@@ -12,6 +12,195 @@ from email.mime.multipart import MIMEMultipart
 
 logger = logging.getLogger(__name__)
 
+def calculate_participant_ranking(participants, matches, tournament):
+    """
+    Определяет места участников согласно правилам:
+    1. Место выше у того у кого больше очков
+    2. При равенстве очков место выше у того кто победил в личной встрече
+    3. Если три участника имеют одинаковое количество очков и победы в личных встречах "закольцованы",
+       то в этом случае выше место у того у кого наибольшая суммарная разница очков в сетах
+    """
+    logger.info(f"calculate_participant_ranking: обрабатываем {len(participants)} участников")
+    # Сначала рассчитываем базовую статистику для каждого участника
+    participant_stats = {}
+    
+    for participant in participants:
+        participant_stats[participant.id] = {
+            'participant': participant,
+            'points': 0,
+            'wins': 0,
+            'losses': 0,
+            'draws': 0,
+            'games': 0,
+            'set_difference': 0,  # разность очков в сетах
+            'head_to_head': {}  # результаты личных встреч с другими участниками
+        }
+    
+    # Обрабатываем все завершенные матчи
+    for match in matches:
+        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+            p1_id = match.participant1_id
+            p2_id = match.participant2_id
+            
+            if p1_id not in participant_stats or p2_id not in participant_stats:
+                continue
+                
+            stats1 = participant_stats[p1_id]
+            stats2 = participant_stats[p2_id]
+            
+            # Обновляем количество игр
+            stats1['games'] += 1
+            stats2['games'] += 1
+            
+            # Определяем победителя и начисляем очки
+            if match.sets_won_1 > match.sets_won_2:
+                # Участник 1 победил
+                stats1['wins'] += 1
+                stats2['losses'] += 1
+                stats1['points'] += (tournament.points_win or 1)
+                stats2['points'] += (tournament.points_loss or 0)
+                
+                # Записываем результат личной встречи
+                stats1['head_to_head'][p2_id] = 'win'
+                stats2['head_to_head'][p1_id] = 'loss'
+                
+            elif match.sets_won_1 < match.sets_won_2:
+                # Участник 2 победил
+                stats2['wins'] += 1
+                stats1['losses'] += 1
+                stats2['points'] += (tournament.points_win or 1)
+                stats1['points'] += (tournament.points_loss or 0)
+                
+                # Записываем результат личной встречи
+                stats2['head_to_head'][p1_id] = 'win'
+                stats1['head_to_head'][p2_id] = 'loss'
+                
+            else:
+                # Ничья
+                stats1['draws'] += 1
+                stats2['draws'] += 1
+                stats1['points'] += (tournament.points_draw or 1)
+                stats2['points'] += (tournament.points_draw or 1)
+                
+                # Записываем результат личной встречи
+                stats1['head_to_head'][p2_id] = 'draw'
+                stats2['head_to_head'][p1_id] = 'draw'
+            
+            # Рассчитываем разность очков в сетах (по реальным очкам, а не по количеству сетов)
+            # Суммируем все очки участника во всех сетах
+            p1_total_score = 0
+            p2_total_score = 0
+            
+            # Подсчитываем очки участника 1
+            if match.set1_score1 is not None:
+                p1_total_score += match.set1_score1
+            if match.set2_score1 is not None:
+                p1_total_score += match.set2_score1
+            if match.set3_score1 is not None:
+                p1_total_score += match.set3_score1
+            
+            # Подсчитываем очки участника 2
+            if match.set1_score2 is not None:
+                p2_total_score += match.set1_score2
+            if match.set2_score2 is not None:
+                p2_total_score += match.set2_score2
+            if match.set3_score2 is not None:
+                p2_total_score += match.set3_score2
+            
+            # Рассчитываем разность очков
+            set_diff1 = p1_total_score - p2_total_score
+            set_diff2 = p2_total_score - p1_total_score
+            
+            stats1['set_difference'] += set_diff1
+            stats2['set_difference'] += set_diff2
+    
+    # Теперь определяем места
+    participants_list = list(participant_stats.values())
+    
+    # Сортируем участников по правилам
+    def ranking_key(participant_data):
+        p_id = participant_data['participant'].id
+        points = participant_data['points']
+        
+        # Основной критерий - очки (убывание)
+        return (-points, p_id)
+    
+    # Группируем участников по очкам
+    points_groups = {}
+    for p_data in participants_list:
+        points = p_data['points']
+        if points not in points_groups:
+            points_groups[points] = []
+        points_groups[points].append(p_data)
+    
+    # Обрабатываем каждую группу с одинаковыми очками
+    final_ranking = []
+    current_place = 1
+    
+    for points in sorted(points_groups.keys(), reverse=True):
+        group = points_groups[points]
+        
+        if len(group) == 1:
+            # Один участник в группе - просто добавляем
+            group[0]['place'] = current_place
+            final_ranking.append(group[0])
+            current_place += 1
+        else:
+            # Несколько участников с одинаковыми очками
+            # Сортируем по личным встречам
+            group_sorted = sort_by_head_to_head(group, participant_stats)
+            
+            # Проверяем, есть ли "закольцованные" результаты
+            is_circular = is_circular_head_to_head(group_sorted, participant_stats)
+            logger.info(f"Группа с очками {points}: закольцованные результаты = {is_circular}")
+            
+            if is_circular:
+                # Если есть закольцованные результаты, сортируем по разности очков в сетах
+                logger.info(f"Сортировка по разности очков в сетах: {[(p['participant'].id, p['set_difference']) for p in group_sorted]}")
+                group_sorted.sort(key=lambda x: x['set_difference'], reverse=True)
+                logger.info(f"После сортировки: {[(p['participant'].id, p['set_difference']) for p in group_sorted]}")
+            
+            # Назначаем места
+            for i, p_data in enumerate(group_sorted):
+                p_data['place'] = current_place + i
+                final_ranking.append(p_data)
+            
+            current_place += len(group_sorted)
+    
+    logger.info(f"calculate_participant_ranking: итоговый рейтинг: {[(p['participant'].id, p['place'], p['points'], p['set_difference']) for p in final_ranking]}")
+    return final_ranking
+
+def sort_by_head_to_head(group, all_stats):
+    """
+    Сортирует группу участников по результатам личных встреч
+    """
+    def head_to_head_key(participant_data):
+        p_id = participant_data['participant'].id
+        head_to_head = participant_data['head_to_head']
+        
+        # Подсчитываем очки от личных встреч с участниками из той же группы
+        group_ids = {p['participant'].id for p in group}
+        h2h_points = 0
+        
+        for opponent_id, result in head_to_head.items():
+            if opponent_id in group_ids:
+                if result == 'win':
+                    h2h_points += 3
+                elif result == 'draw':
+                    h2h_points += 1
+        
+        return -h2h_points  # Убывание
+    
+    return sorted(group, key=head_to_head_key)
+
+def is_circular_head_to_head(group, all_stats):
+    """
+    Проверяет, есть ли закольцованные результаты в личных встречах.
+    Упрощенная логика: если в группе 3 или более участников с одинаковыми очками,
+    то считаем, что есть закольцованные результаты и используем разность очков в сетах.
+    """
+    return len(group) >= 3
+
 def send_token_email_railway_fallback(email, name, token):
     """Альтернативный метод отправки email для Railway (через внешний API)"""
     try:
@@ -1430,7 +1619,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'losses': 0,
                 'draws': 0,
                 'points': 0,  # Будем пересчитывать на основе завершённых матчей
-                'goal_difference': 0
+                'goal_difference': 0,
+                'set_difference': 0  # разность очков в сетах
             }
             
             # Подсчитываем реальную статистику участника
@@ -1460,6 +1650,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 participant_stats['goal_difference'] += match.set4_score1 - match.set4_score2
                             if hasattr(match, 'set5_score1') and hasattr(match, 'set5_score2') and match.set5_score1 is not None and match.set5_score2 is not None:
                                 participant_stats['goal_difference'] += match.set5_score1 - match.set5_score2
+                            
+                            # Рассчитываем разность выигранных сетов для участника 1
+                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                participant_stats['set_difference'] += match.sets_won_1 - match.sets_won_2
                                 
                     elif match.participant2_id == participant.id:
                         participant_stats['games'] += 1
@@ -1485,6 +1679,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 participant_stats['goal_difference'] += match.set4_score2 - match.set4_score1
                             if hasattr(match, 'set5_score1') and hasattr(match, 'set5_score2') and match.set5_score1 is not None and match.set5_score2 is not None:
                                 participant_stats['goal_difference'] += match.set5_score2 - match.set5_score1
+                            
+                            # Рассчитываем разность выигранных сетов для участника 2
+                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                                participant_stats['set_difference'] += match.sets_won_2 - match.sets_won_1
             
             # Определяем, является ли участник опоздавшим
             is_late_participant = False
@@ -1642,12 +1840,21 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             'sets_details': ''
                         }
         
-        # Сортируем участников по очкам (убывание) только для статистики
-        participants_with_stats.sort(key=lambda x: x['stats']['points'], reverse=True)
+        # Используем новую логику определения мест
+        participants_ranking = calculate_participant_ranking(participants, matches, tournament)
         
-        # Обновляем позиции после сортировки только для статистики
-        for i, participant_data in enumerate(participants_with_stats):
-            participant_data['position'] = i + 1
+        # Создаем словарь для быстрого поиска позиций по ID участника
+        position_by_id = {}
+        for participant_data in participants_ranking:
+            position_by_id[participant_data['participant'].id] = participant_data['place']
+        
+        # Обновляем позиции в participants_with_stats
+        for participant_data in participants_with_stats:
+            participant_id = participant_data['participant'].id
+            participant_data['position'] = position_by_id.get(participant_id, 999)
+        
+        # Сортируем участников по местам
+        participants_with_stats.sort(key=lambda x: x['position'])
         
         # Также обновляем позиции в турнирной таблице (шахматке)
         # Создаем словарь для быстрого поиска позиций по ID участника
@@ -1892,8 +2099,21 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'is_current_participant': participant.name == participant_name
             })
         
-        # Сортируем участников по очкам (убывание)
-        participants_with_stats.sort(key=lambda x: x['points'], reverse=True)
+        # Используем новую логику определения мест
+        participants_ranking = calculate_participant_ranking(participants, matches, tournament)
+        
+        # Создаем словарь для быстрого поиска позиций по ID участника
+        position_by_id = {}
+        for participant_data in participants_ranking:
+            position_by_id[participant_data['participant'].id] = participant_data['place']
+        
+        # Обновляем позиции в participants_with_stats
+        for participant_data in participants_with_stats:
+            participant_id = participant_data['participant'].id
+            participant_data['position'] = position_by_id.get(participant_id, 999)
+        
+        # Сортируем участников по местам
+        participants_with_stats.sort(key=lambda x: x['position'])
         
         # Определяем время создания первого матча для определения опоздавших участников
         first_match_time = None
@@ -2120,7 +2340,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'wins': 0,
                 'losses': 0,
                 'draws': 0,
-                'goal_difference': 0
+                'goal_difference': 0,
+                'set_difference': 0
             }
         
         # Подсчитываем статистику на основе матчей
@@ -2179,6 +2400,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     
                     participant_stats_dict[participant1_id]['goal_difference'] += participant1_score_diff
                     participant_stats_dict[participant2_id]['goal_difference'] += participant2_score_diff
+                    
+                    # Обновляем разность выигранных сетов
+                    participant_stats_dict[participant1_id]['set_difference'] += match.sets_won_1 - match.sets_won_2
+                    participant_stats_dict[participant2_id]['set_difference'] += match.sets_won_2 - match.sets_won_1
         
         # Создаем списки участников с статистикой
         for i, participant in enumerate(participants):
@@ -2446,7 +2671,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             # Получаем матчи турнира
             matches = Match.query.filter_by(tournament_id=tournament_id).all()
             
-            # Создаем CSV файл в памяти
+            # Создаем CSV файл в памяти с правильной кодировкой для кириллицы
             output = io.StringIO()
             writer = csv.writer(output)
             
@@ -2461,32 +2686,24 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             writer.writerow(['Длительность перерыва (мин)', tournament.break_duration or 2])
             writer.writerow([])  # Пустая строка
             
-            # Участники
-            writer.writerow(['УЧАСТНИКИ'])
-            writer.writerow(['Место', 'Участник', 'Игр', 'Побед', 'Поражений', 'Очки'])
+            # Статистика участников с правильным ранжированием
+            writer.writerow(['СТАТИСТИКА УЧАСТНИКОВ'])
+            writer.writerow(['Место', 'Участник', 'Игр', 'Побед', 'Поражений', 'Ничьих', 'Очки', 'Разность очков в сетах'])
             
-            for i, participant in enumerate(participants, 1):
-                # Подсчитываем статистику участника
-                wins = 0
-                losses = 0
-                points = participant.points or 0
+            # Используем нашу функцию для правильного ранжирования
+            participants_ranking = calculate_participant_ranking(participants, matches, tournament)
+            
+            for participant_data in participants_ranking:
+                participant = participant_data['participant']
+                place = participant_data['place']
+                wins = participant_data['wins']
+                losses = participant_data['losses']
+                draws = participant_data['draws']
+                points = participant_data['points']
+                set_difference = participant_data['set_difference']
+                games = participant_data['games']
                 
-                for match in matches:
-                    if match.status == 'завершен':
-                        if match.participant1_id == participant.id:
-                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
-                                if match.sets_won_1 > match.sets_won_2:
-                                    wins += 1
-                                elif match.sets_won_1 < match.sets_won_2:
-                                    losses += 1
-                        elif match.participant2_id == participant.id:
-                            if match.sets_won_1 is not None and match.sets_won_2 is not None:
-                                if match.sets_won_1 < match.sets_won_2:
-                                    wins += 1
-                                elif match.sets_won_1 > match.sets_won_2:
-                                    losses += 1
-                
-                writer.writerow([i, participant.name, wins + losses, wins, losses, points])
+                writer.writerow([place, participant.name, games, wins, losses, draws, points, set_difference])
             
             writer.writerow([])  # Пустая строка
             
@@ -2512,8 +2729,42 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     f"{match.set3_score1}:{match.set3_score2}" if match.set3_score1 is not None and match.set3_score2 is not None else ''
                 ])
             
+            writer.writerow([])  # Пустая строка
+            
+            # Шахматка (турнирная сетка)
+            writer.writerow(['ШАХМАТКА'])
+            
+            # Создаем матрицу результатов
+            n = len(participants)
+            results_matrix = [['-' for _ in range(n)] for _ in range(n)]
+            
+            for match in matches:
+                if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                    p1_idx = next((i for i, p in enumerate(participants) if p.id == match.participant1_id), -1)
+                    p2_idx = next((i for i, p in enumerate(participants) if p.id == match.participant2_id), -1)
+                    
+                    if p1_idx != -1 and p2_idx != -1:
+                        # Формируем результат в формате "2:0" (сеты:сеты)
+                        result_p1 = f"{match.sets_won_1}:{match.sets_won_2}"
+                        result_p2 = f"{match.sets_won_2}:{match.sets_won_1}"
+                        results_matrix[p1_idx][p2_idx] = result_p1
+                        results_matrix[p2_idx][p1_idx] = result_p2
+            
+            # Заголовок шахматки - используем имена участников
+            header = [''] + [participant.name for participant in participants]
+            writer.writerow(header)
+            
+            # Выводим шахматку
+            for i, participant in enumerate(participants):
+                row = [participant.name] + results_matrix[i]
+                writer.writerow(row)
+            
             # Получаем данные CSV файла
-            csv_data = output.getvalue().encode('utf-8')
+            csv_content = output.getvalue()
+            
+            # Добавляем BOM для правильного отображения кириллицы в Excel
+            csv_data = '\ufeff' + csv_content
+            csv_data = csv_data.encode('utf-8')
             
             # Создаем имя файла
             filename = f'tournament_{tournament.name}_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
