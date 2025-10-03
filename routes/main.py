@@ -12,6 +12,65 @@ from email.mime.multipart import MIMEMultipart
 
 logger = logging.getLogger(__name__)
 
+def check_tournament_completion(tournament, participants, matches):
+    """
+    Проверяет, завершен ли турнир (все матчи сыграны)
+    Возвращает True если турнир завершен, False если нет
+    """
+    if not participants or len(participants) < 2:
+        return False
+    
+    # Для круговой системы количество матчей = n*(n-1)/2
+    total_matches = len(participants) * (len(participants) - 1) // 2
+    
+    # Подсчитываем завершенные матчи
+    completed_matches = 0
+    for match in matches:
+        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+            completed_matches += 1
+    
+    logger.info(f"check_tournament_completion: турнир {tournament.id}, участников: {len(participants)}, "
+                f"завершенных матчей: {completed_matches}/{total_matches}")
+    
+    return completed_matches >= total_matches
+
+def has_unfinished_matches(matches):
+    """
+    Проверяет, есть ли незавершённые матчи в турнире
+    Возвращает True если есть незавершённые матчи, False если все завершены
+    """
+    if not matches:
+        return False
+    
+    for match in matches:
+        if match.status != 'завершен' or match.sets_won_1 is None or match.sets_won_2 is None:
+            return True
+    
+    return False
+
+def update_tournament_status(tournament, participants, matches, db):
+    """
+    Обновляет статус турнира на основе завершенности матчей
+    """
+    if tournament.status == 'завершен':
+        return  # Турнир уже завершен
+    
+    is_completed = check_tournament_completion(tournament, participants, matches)
+    
+    if is_completed and tournament.status != 'завершен':
+        tournament.status = 'завершен'
+        db.session.commit()
+        logger.info(f"Турнир {tournament.id} '{tournament.name}' автоматически завершен - все матчи сыграны")
+        return True
+    elif not is_completed and tournament.status == 'завершен':
+        # Если турнир был помечен как завершенный, но не все матчи сыграны
+        tournament.status = 'активен'
+        db.session.commit()
+        logger.info(f"Турнир {tournament.id} '{tournament.name}' переведен в статус 'активен' - не все матчи сыграны")
+        return False
+    
+    return False
+
 def calculate_participant_ranking(participants, matches, tournament):
     """
     Определяет места участников согласно правилам:
@@ -1181,6 +1240,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Получаем всех пользователей
         users = User.query.all()
         
+        # Получаем всех игроков
+        players = Player.query.order_by(Player.last_used_at.desc(), Player.name.asc()).all()
+        
         # Получаем всех администраторов турниров
         tournament_admins = []
         try:
@@ -1264,6 +1326,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              admin={'id': admin_id, 'email': admin_email, 'name': 'Системный администратор'}, 
                              tournaments=tournaments,
                              users=users,
+                             players=players,
                              tournament_admins=tournament_admins)
 
     @app.route('/admin-tokens')
@@ -1483,6 +1546,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
         matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        
+        # Проверяем и обновляем статус турнира
+        tournament_completed = update_tournament_status(tournament, participants, matches, db)
         
         # Автоматически создаем расписание, если есть участники, но нет матчей
         if len(participants) >= 2 and len(matches) == 0:
@@ -1867,6 +1933,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             participant_id = participant_data['participant'].id
             participant_data['position'] = position_by_id.get(participant_id, len(participants))
         
+        # Проверяем, есть ли незавершённые матчи
+        has_unfinished = has_unfinished_matches(matches)
+        
         return render_template('tournament.html', 
                              tournament=tournament, 
                              participants=participants, 
@@ -1879,6 +1948,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              statistics=statistics,
                              has_missing_matches=False,
                              next_match_ids=[],
+                             has_unfinished=has_unfinished,
                              current_user=current_user)
     
     @app.route('/participant-login', methods=['POST'])
@@ -2285,6 +2355,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Определяем режим просмотра
         is_viewer_mode = not is_participant
         
+        # Проверяем, есть ли незавершённые матчи
+        has_unfinished = has_unfinished_matches(matches)
+        
         return render_template('tournament_view.html', 
                              tournament=tournament,
                              participants=participants_with_stats,
@@ -2293,7 +2366,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              schedule_display=schedule_display,
                              is_participant=is_participant,
                              is_viewer_mode=is_viewer_mode,
-                             participant_name=participant_name)
+                             participant_name=participant_name,
+                             has_unfinished=has_unfinished)
 
     @app.route('/tournament-spectator/<int:tournament_id>')
     def tournament_spectator(tournament_id):
@@ -2305,6 +2379,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         # Получаем матчи турнира
         matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        
+        # Проверяем и обновляем статус турнира
+        tournament_completed = update_tournament_status(tournament, participants, matches, db)
         
         # Дедупликация матчей по уникальным полям (участники + дата + время)
         seen_matches = set()
@@ -2577,6 +2654,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 x['global_number']
             ))
         
+        # Проверяем, есть ли незавершённые матчи
+        has_unfinished = has_unfinished_matches(matches)
+        
         return render_template('tournament_view.html', 
                              tournament=tournament,
                              participants=participants_with_stats_chessboard,
@@ -2586,7 +2666,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              schedule_display=schedule_display,
                              is_participant=is_participant,
                              is_viewer_mode=is_viewer_mode,
-                             participant_name=participant_name)
+                             participant_name=participant_name,
+                             has_unfinished=has_unfinished)
 
     @app.route('/admin-logout')
     def admin_logout():

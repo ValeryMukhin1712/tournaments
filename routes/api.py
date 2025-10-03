@@ -1015,6 +1015,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             match.updated_at = datetime.utcnow()
             db.session.commit()
             
+            # Проверяем завершение турнира после обновления матча
+            from routes.main import update_tournament_status
+            tournament = Tournament.query.get(match.tournament_id)
+            if tournament:
+                participants = Participant.query.filter_by(tournament_id=tournament.id).all()
+                matches = Match.query.filter_by(tournament_id=tournament.id).all()
+                tournament_completed = update_tournament_status(tournament, participants, matches, db)
+                if tournament_completed:
+                    logger.info(f"Турнир {tournament.id} '{tournament.name}' автоматически завершен после обновления матча {match_id}")
+            
             logger.info(f"Матч {match_id} обновлен")
             return jsonify({'success': True, 'message': 'Матч успешно обновлен'})
             
@@ -2547,3 +2557,95 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при поиске игроков: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при поиске игроков'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/status', methods=['PUT'])
+    def update_tournament_status_api(tournament_id):
+        """Ручное изменение статуса турнира (только для администраторов)"""
+        from flask import session, request, jsonify
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # Проверяем авторизацию
+            if 'admin_id' not in session:
+                return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+            
+            admin_id = session['admin_id']
+            admin_email = session.get('admin_email', '')
+            
+            # Проверяем доступ к турниру
+            tournament = Tournament.query.get_or_404(tournament_id)
+            if tournament.admin_id != admin_id and admin_email != 'admin@system':
+                return jsonify({'success': False, 'error': 'Нет доступа к турниру'}), 403
+            
+            data = request.get_json()
+            if not data or 'status' not in data:
+                return jsonify({'success': False, 'error': 'Необходимо указать статус'}), 400
+            
+            new_status = data['status']
+            valid_statuses = ['регистрация', 'активен', 'завершен']
+            
+            if new_status not in valid_statuses:
+                return jsonify({'success': False, 'error': f'Недопустимый статус. Допустимые: {", ".join(valid_statuses)}'}), 400
+            
+            old_status = tournament.status
+            tournament.status = new_status
+            db.session.commit()
+            
+            logger.info(f"Статус турнира {tournament_id} изменен с '{old_status}' на '{new_status}' администратором {admin_id}")
+            
+            return jsonify({
+                'success': True, 
+                'message': f'Статус турнира изменен на "{new_status}"',
+                'tournament': {
+                    'id': tournament.id,
+                    'name': tournament.name,
+                    'status': tournament.status
+                }
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при изменении статуса турнира: {str(e)}")
+            return jsonify({'success': False, 'error': f'Ошибка при изменении статуса: {str(e)}'}), 500
+
+    # API для удаления игроков (только для системного администратора)
+    @app.route('/api/admin/players/<int:player_id>', methods=['DELETE'])
+    def delete_player_admin(player_id):
+        """Удаление игрока из списка (только для системного администратора)"""
+        from flask import session
+        
+        # Проверяем, что системный админ авторизован
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        
+        # Проверяем, что это системный администратор
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Доступ запрещен. Требуются права системного администратора'}), 403
+        
+        try:
+            # Находим игрока
+            player = Player.query.get(player_id)
+            if not player:
+                return jsonify({'success': False, 'error': 'Игрок не найден'}), 404
+            
+            player_name = player.name
+            
+            # Удаляем игрока
+            db.session.delete(player)
+            db.session.commit()
+            
+            logger.info(f"Игрок '{player_name}' (ID: {player_id}) удален системным администратором")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Игрок "{player_name}" успешно удален'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении игрока: {str(e)}")
+            return jsonify({'success': False, 'error': f'Ошибка при удалении игрока: {str(e)}'}), 500

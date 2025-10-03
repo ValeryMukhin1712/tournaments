@@ -248,6 +248,23 @@
                     - {{ tournament.end_date.strftime('%d.%m.%Y') }}
                 {% endif %}
             </p>
+            
+            <!-- Статус турнира -->
+            <div class="mb-3">
+                {% if tournament.status == 'завершен' %}
+                    <span class="badge bg-success fs-6 px-3 py-2">
+                        <i class="fas fa-flag-checkered me-2"></i>Турнир завершен
+                    </span>
+                {% elif tournament.status == 'активен' %}
+                    <span class="badge bg-warning fs-6 px-3 py-2">
+                        <i class="fas fa-play me-2"></i>Турнир активен
+                    </span>
+                {% else %}
+                    <span class="badge bg-info fs-6 px-3 py-2">
+                        <i class="fas fa-user-plus me-2"></i>Регистрация участников
+                    </span>
+                {% endif %}
+            </div>
         </div>
         
         <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mb-5">
@@ -516,6 +533,89 @@
         </div>
     </div>
 </div>
+
+<!-- Сообщение о завершении турнира -->
+{% if tournament.status == 'завершен' and not has_unfinished %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-trophy fa-4x text-warning mb-3"></i>
+                    <h1 class="display-4 fw-bold text-success mb-3" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                        🏆 Турнир завершён! 🏆
+                    </h1>
+                    <p class="lead text-muted">Все матчи сыграны. Итоговые результаты:</p>
+                </div>
+                
+                <!-- Список победителей -->
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th class="text-center" style="width: 60px;">Место</th>
+                                        <th>Участник</th>
+                                        <th class="text-center">Очки</th>
+                                        <th class="text-center">Побед</th>
+                                        <th class="text-center">Ничьих</th>
+                                        <th class="text-center">Поражений</th>
+                                        <th class="text-center">Разница очков</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for participant_data in participants_with_stats %}
+                                    {% set participant = participant_data.participant %}
+                                    {% set stats = participant_data.stats %}
+                                    {% set position = participant_data.position %}
+                                    <tr class="{% if position == 1 %}table-warning fw-bold{% elif position <= 3 %}table-light{% endif %}">
+                                        <td class="text-center">
+                                            {% if position == 1 %}
+                                                <span class="badge bg-warning text-dark fs-6">🥇</span>
+                                            {% elif position == 2 %}
+                                                <span class="badge bg-secondary fs-6">🥈</span>
+                                            {% elif position == 3 %}
+                                                <span class="badge bg-warning text-dark fs-6">🥉</span>
+                                            {% else %}
+                                                <span class="badge bg-light text-dark">{{ position }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-bold">{{ participant.name }}</td>
+                                        <td class="text-center fw-bold text-primary">{{ stats.points }}</td>
+                                        <td class="text-center">{{ stats.wins }}</td>
+                                        <td class="text-center">{{ stats.draws }}</td>
+                                        <td class="text-center">{{ stats.losses }}</td>
+                                        <td class="text-center {% if stats.goal_difference > 0 %}text-success{% elif stats.goal_difference < 0 %}text-danger{% endif %}">
+                                            {{ stats.goal_difference }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Поздравление победителя -->
+                {% if participants_with_stats|length > 0 %}
+                {% set winner = participants_with_stats[0] %}
+                <div class="mt-4">
+                    <div class="alert alert-warning border-warning">
+                        <h4 class="alert-heading mb-3">
+                            <i class="fas fa-crown me-2"></i>
+                            Поздравляем победителя!
+                        </h4>
+                        <h3 class="text-warning fw-bold mb-2">{{ winner.participant.name }}</h3>
+                        <p class="mb-0">с победой в турнире "{{ tournament.name }}"!</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Расписание матчей -->
 <div class="row mt-4">
@@ -811,7 +911,7 @@
                         <!-- Кнопки действий -->
                         <div class="mt-3">
                             <button type="button" class="btn btn-primary" id="addSelectedPlayersBtn" disabled>
-                                <i class="fas fa-user-plus me-2"></i>Добавить выбранных игроков
+                                <i class="fas fa-user-plus me-2"></i>Добавить выбранных игроков (<span id="selectedCount">0</span>)
                             </button>
                             <button type="button" class="btn btn-outline-secondary" id="clearPlayerSelectionBtn">
                                 <i class="fas fa-times me-2"></i>Очистить выбор
@@ -1491,10 +1591,13 @@ function isMeaningfulScore(score1, score2, pointsToWin) {
     // И НЕ считаем осмысленным счет, если оба значения равны pointsToWin (значение по умолчанию)
     // И НЕ считаем осмысленным счет, если одно из значений равно 0 (начальное состояние)
     // И НЕ считаем осмысленным счет 0:0 (начальное состояние)
+    // И НЕ считаем осмысленным счет, если разница меньше 2 (сет еще не завершен)
+    const difference = Math.abs(score1 - score2);
     return (score1 >= pointsToWin && score2 >= pointsToWin && 
             !(score1 === pointsToWin && score2 === pointsToWin) &&
             !(score1 === 0 || score2 === 0) &&
-            !(score1 === 0 && score2 === 0));
+            !(score1 === 0 && score2 === 0) &&
+            difference >= 2);
 }
 
 // Функция для блокировки редактирования предыдущих сетов
@@ -1523,16 +1626,19 @@ function updateSetEditability() {
             
             // Блокируем редактирование, если есть осмысленный счет в следующем сете
             // НО НЕ блокируем, если текущий сет имеет значения по умолчанию
+            // И НЕ блокируем третий сет, если он активно редактируется
             const isCurrentSetDefault = (score1 === pointsToWin && score2 === pointsToWin);
+            const isThirdSet = (i === 3);
+            const isThirdSetActive = isThirdSet && (score1 > 0 || score2 > 0);
             
-            if (hasNextMeaningfulScore && !isCurrentSetDefault) {
+            if (hasNextMeaningfulScore && !isCurrentSetDefault && !isThirdSetActive) {
                 console.log(`Блокируем сет ${i} (есть осмысленный счет в следующем сете)`);
                 score1Input.readOnly = true;
                 score2Input.readOnly = true;
                 score1Input.classList.add('bg-light');
                 score2Input.classList.add('bg-light');
             } else {
-                console.log(`Разблокируем сет ${i} (нет блокировки или значения по умолчанию)`);
+                console.log(`Разблокируем сет ${i} (нет блокировки или значения по умолчанию или активный третий сет)`);
                 score1Input.readOnly = false;
                 score2Input.readOnly = false;
                 score1Input.classList.remove('bg-light');
@@ -1950,7 +2056,6 @@ function deleteParticipant(participantId, participantName) {
         .then(data => {
             console.log('Данные ответа:', data);
             if (data.success) {
-                alert(data.message || 'Участник успешно удален!');
                 location.reload();
             } else {
                 alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
@@ -2088,7 +2193,8 @@ function validateSetScore(setNumber) {
                 }
             } else {
                 // Если у проигравшего очков меньше "очков для победы", то максимальный счет должен быть равен "очков для победы"
-                if (maxScore > pointsToWin) {
+                // НО только если разница очков >= 2 (сет завершен)
+                if (maxScore > pointsToWin && difference >= 2) {
                     const correctMaxScore = pointsToWin;
                     const correctMinScore = minScore;
                     
@@ -2101,6 +2207,9 @@ function validateSetScore(setNumber) {
                     }
                     
                     alert(`Неверный счет! Если у проигравшего (${minScore}) очков меньше "очков для победы" (${pointsToWin}), то максимальный счет победителя должен быть ${pointsToWin}. Исправлено на ${correctMaxScore}:${correctMinScore}`);
+                } else if (maxScore > pointsToWin && difference < 2) {
+                    // Если разница меньше 2, то сет еще не завершен, разрешаем ввод
+                    console.log(`Сет ${setNumber}: счет ${score1}:${score2} - сет продолжается (разница ${difference} < 2)`);
                 }
             }
         }
@@ -2236,8 +2345,14 @@ function updateSetsWon() {
                 
                 // Сет завершен, если кто-то набрал необходимое количество очков И разница больше 1
                 // Исключаем случаи 11:10, 12:11, 11:11
+                // И проверяем, что у проигравшего достаточно очков для валидного завершения
+                const loserScore = Math.min(score1, score2);
+                const winnerScore = Math.max(score1, score2);
+                const isValidScore = loserScore >= (pointsToWin - 1) || (winnerScore <= pointsToWin && loserScore >= (pointsToWin - 2));
+                
                 const setCompleted = (score1 >= pointsToWin || score2 >= pointsToWin) && 
-                                   difference > 1 && 
+                                   difference >= 2 && 
+                                   isValidScore &&
                                    !(score1 === pointsToWin && score2 === pointsToWin) &&
                                    !(((score1 > pointsToWin && score2 >= pointsToWin) || (score2 > pointsToWin && score1 >= pointsToWin)) && difference === 1) &&
                                    !((score1 === pointsToWin && score2 === (pointsToWin - 1)) || (score2 === pointsToWin && score1 === (pointsToWin - 1)));
@@ -2365,8 +2480,8 @@ function showMatchCompletionPrompt(winner) {
     }
     
     // Получаем имена участников
-    const participant1Name = document.getElementById('p1Name').textContent;
-    const participant2Name = document.getElementById('p2Name').textContent;
+    const participant1Name = document.getElementById('participant1Name').value;
+    const participant2Name = document.getElementById('participant2Name').value;
     const winnerName = winner === 1 ? participant1Name : participant2Name;
     
     // Показываем предложение сохранить результат
@@ -2581,6 +2696,17 @@ function displayPlayers(players) {
             </td>
         `;
         
+        // Добавляем обработчик события для чекбокса
+        const checkbox = row.querySelector('.player-checkbox');
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                selectedPlayers.add(parseInt(this.value));
+            } else {
+                selectedPlayers.delete(parseInt(this.value));
+            }
+            updateAddButtonState();
+        });
+        
         tbody.appendChild(row);
     });
     
@@ -2630,12 +2756,22 @@ async function searchPlayers(query) {
 // Обновление состояния кнопки добавления
 function updateAddButtonState() {
     const addBtn = document.getElementById('addSelectedPlayersBtn');
+    const selectedCount = document.getElementById('selectedCount');
+    
     addBtn.disabled = selectedPlayers.size === 0;
+    
+    if (selectedCount) {
+        selectedCount.textContent = selectedPlayers.size;
+    }
 }
 
 // Добавление выбранных игроков
 async function addSelectedPlayers() {
     if (selectedPlayers.size === 0) return;
+    
+    console.log('=== НАЧАЛО ДОБАВЛЕНИЯ ВЫБРАННЫХ ИГРОКОВ ===');
+    console.log('Выбранные игроки (ID):', Array.from(selectedPlayers));
+    console.log('Все игроки:', allPlayers);
     
     const addBtn = document.getElementById('addSelectedPlayersBtn');
     const originalText = addBtn.innerHTML;
@@ -2644,30 +2780,64 @@ async function addSelectedPlayers() {
     addBtn.disabled = true;
     
     try {
-        const promises = Array.from(selectedPlayers).map(playerId => {
+        const results = [];
+        const errors = [];
+        
+        // Обрабатываем каждого игрока отдельно
+        for (const playerId of selectedPlayers) {
+            console.log(`Обрабатываем игрока с ID: ${playerId}`);
             const player = allPlayers.find(p => p.id === playerId);
-            return addPlayerToTournament(player.name);
-        });
+            console.log('Найденный игрок:', player);
+            
+            if (player) {
+                try {
+                    console.log(`Пытаемся добавить игрока "${player.name}"...`);
+                    await addPlayerToTournament(player.name);
+                    results.push({ player: player.name, success: true });
+                    console.log(`✅ Игрок "${player.name}" успешно добавлен`);
+                } catch (error) {
+                    console.error(`❌ Ошибка при добавлении игрока "${player.name}":`, error);
+                    errors.push({ player: player.name, error: error.message });
+                }
+            } else {
+                console.error(`❌ Игрок с ID ${playerId} не найден в списке allPlayers`);
+                errors.push({ player: `ID:${playerId}`, error: 'Игрок не найден в списке' });
+            }
+        }
         
-        await Promise.all(promises);
+        console.log('Результаты добавления:', results);
+        console.log('Ошибки:', errors);
         
-        // Очищаем выбор
-        selectedPlayers.clear();
-        document.querySelectorAll('.player-checkbox').forEach(cb => cb.checked = false);
-        updateAddButtonState();
+        // Очищаем выбор только если хотя бы один игрок был добавлен
+        if (results.length > 0) {
+            selectedPlayers.clear();
+            document.querySelectorAll('.player-checkbox').forEach(cb => cb.checked = false);
+            updateAddButtonState();
+            console.log('Выбор очищен');
+        }
         
-        // Показываем уведомление
-        showNotification('Игроки успешно добавлены в турнир!', 'success');
+        // Показываем соответствующие уведомления
+        if (results.length > 0 && errors.length === 0) {
+            showNotification(`Все ${results.length} игроков успешно добавлены в турнир!`, 'success');
+        } else if (results.length > 0 && errors.length > 0) {
+            showNotification(`Добавлено ${results.length} игроков. ${errors.length} игроков уже участвуют в турнире.`, 'warning');
+        } else if (errors.length > 0) {
+            showNotification('Все выбранные игроки уже участвуют в турнире', 'warning');
+        }
+        
+        console.log('=== КОНЕЦ ДОБАВЛЕНИЯ ВЫБРАННЫХ ИГРОКОВ ===');
+        
+        // Перезагружаем страницу только если хотя бы один игрок был добавлен
+        if (results.length > 0) {
+            console.log('🔄 Перезагружаем страницу для обновления списка участников...');
+            setTimeout(() => {
+                location.reload();
+            }, 1000); // Небольшая задержка для показа уведомления
+        }
         
     } catch (error) {
-        console.error('Ошибка при добавлении игроков:', error);
-        
-        // Показываем соответствующее сообщение об ошибке
-        if (error.message && error.message.includes('уже участвует в турнире')) {
-            showNotification('Некоторые игроки уже участвуют в турнире', 'warning');
-        } else {
-            showNotification('Ошибка при добавлении игроков', 'error');
-        }
+        console.error('Критическая ошибка при добавлении игроков:', error);
+        showNotification('Ошибка при добавлении игроков', 'error');
     } finally {
         addBtn.innerHTML = originalText;
         addBtn.disabled = false;
@@ -2731,6 +2901,8 @@ function showNotification(message, type = 'info') {
 
 // Добавление игрока в турнир
 async function addPlayerToTournament(playerName) {
+    console.log(`🔄 Начинаем добавление игрока "${playerName}" в турнир {{ tournament.id }}`);
+    
     try {
         const csrfToken = getCSRFToken();
         console.log('CSRF Token для добавления игрока:', csrfToken);
@@ -2748,26 +2920,27 @@ async function addPlayerToTournament(playerName) {
             })
         });
         
-        console.log('Ответ сервера:', response.status, response.statusText);
+        console.log(`📡 Ответ сервера для "${playerName}":`, response.status, response.statusText);
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Ошибка сервера:', errorData);
+            console.error(`❌ Ошибка сервера для "${playerName}":`, errorData);
             throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Данные ответа:', data);
+        console.log(`✅ Данные ответа для "${playerName}":`, data);
         
         if (data.success) {
-            // Обновляем страницу турнира
-            location.reload();
+            console.log(`🎉 Игрок "${playerName}" успешно добавлен!`);
+            return data; // Возвращаем данные вместо перезагрузки страницы
         } else {
+            console.error(`❌ Неуспешный ответ для "${playerName}":`, data);
             throw new Error(data.error || 'Неизвестная ошибка');
         }
         
     } catch (error) {
-        console.error('Ошибка при добавлении игрока в турнир:', error);
+        console.error(`💥 Ошибка при добавлении игрока "${playerName}" в турнир:`, error);
         
         // Проверяем, является ли ошибка о том, что участник уже существует
         if (error.message && error.message.includes('уже существует в турнире')) {
@@ -2780,18 +2953,29 @@ async function addPlayerToTournament(playerName) {
 
 // Обработчики событий для вкладки игроков
 document.addEventListener('DOMContentLoaded', function() {
-    // Функция для управления видимостью кнопки "Добавить"
+    // Функция для управления видимостью кнопок в модальном окне
     function toggleAddButton() {
         const playersTab = document.getElementById('players-tab');
         const waitingTab = document.getElementById('waiting-tab');
         const addButton = document.querySelector('#addParticipantModal .modal-footer .btn-primary');
+        const addSelectedWaitingBtn = document.getElementById('addSelectedWaitingBtn');
         
+        // Управление основной кнопкой "Добавить"
         if (addButton) {
             if ((playersTab && playersTab.classList.contains('active')) || 
                 (waitingTab && waitingTab.classList.contains('active'))) {
                 addButton.style.display = 'none';
             } else {
                 addButton.style.display = 'inline-block';
+            }
+        }
+        
+        // Управление кнопкой "Принять выбранных" из вкладки "Лист ожидания"
+        if (addSelectedWaitingBtn) {
+            if (waitingTab && waitingTab.classList.contains('active')) {
+                addSelectedWaitingBtn.style.display = 'inline-block';
+            } else {
+                addSelectedWaitingBtn.style.display = 'none';
             }
         }
     }

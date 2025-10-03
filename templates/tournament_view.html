@@ -58,6 +58,21 @@
             </div>
                                 <div class="col-md-6">
                                     <p><strong>Участников:</strong> {{ participants|length }}</p>
+                                    <p><strong>Статус:</strong> 
+                                        {% if tournament.status == 'завершен' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-flag-checkered me-1"></i>Завершен
+                                            </span>
+                                        {% elif tournament.status == 'активен' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-play me-1"></i>Активен
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-user-plus me-1"></i>Регистрация
+                                            </span>
+                                        {% endif %}
+                                    </p>
             </div>
         </div>
         {% if tournament.description %}
@@ -181,6 +196,89 @@
                 {% endif %}
             </div>
         </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Сообщение о завершении турнира -->
+            {% if tournament.status == 'завершен' and not has_unfinished %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-body text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-trophy fa-4x text-warning mb-3"></i>
+                                <h1 class="display-4 fw-bold text-success mb-3" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                                    🏆 Турнир завершён! 🏆
+                                </h1>
+                                <p class="lead text-muted">Все матчи сыграны. Итоговые результаты:</p>
+                            </div>
+                            
+                            <!-- Список победителей -->
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-striped">
+                                            <thead class="table-success">
+                                                <tr>
+                                                    <th class="text-center" style="width: 60px;">Место</th>
+                                                    <th>Участник</th>
+                                                    <th class="text-center">Очки</th>
+                                                    <th class="text-center">Побед</th>
+                                                    <th class="text-center">Ничьих</th>
+                                                    <th class="text-center">Поражений</th>
+                                                    <th class="text-center">Разница очков</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for participant_data in participants %}
+                                                {% set participant = participant_data.participant %}
+                                                {% set stats = participant_data.stats %}
+                                                {% set position = participant_data.position %}
+                                                <tr class="{% if position == 1 %}table-warning fw-bold{% elif position <= 3 %}table-light{% endif %}">
+                                                    <td class="text-center">
+                                                        {% if position == 1 %}
+                                                            <span class="badge bg-warning text-dark fs-6">🥇</span>
+                                                        {% elif position == 2 %}
+                                                            <span class="badge bg-secondary fs-6">🥈</span>
+                                                        {% elif position == 3 %}
+                                                            <span class="badge bg-warning text-dark fs-6">🥉</span>
+                                                        {% else %}
+                                                            <span class="badge bg-light text-dark">{{ position }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="fw-bold">{{ participant.name }}</td>
+                                                    <td class="text-center fw-bold text-primary">{{ stats.points }}</td>
+                                                    <td class="text-center">{{ stats.wins }}</td>
+                                                    <td class="text-center">{{ stats.draws }}</td>
+                                                    <td class="text-center">{{ stats.losses }}</td>
+                                                    <td class="text-center {% if stats.goal_difference > 0 %}text-success{% elif stats.goal_difference < 0 %}text-danger{% endif %}">
+                                                        {{ stats.goal_difference }}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Поздравление победителя -->
+                            {% if participants|length > 0 %}
+                            {% set winner = participants[0] %}
+                            <div class="mt-4">
+                                <div class="alert alert-warning border-warning">
+                                    <h4 class="alert-heading mb-3">
+                                        <i class="fas fa-crown me-2"></i>
+                                        Поздравляем победителя!
+                                    </h4>
+                                    <h3 class="text-warning fw-bold mb-2">{{ winner.participant.name }}</h3>
+                                    <p class="mb-0">с победой в турнире "{{ tournament.name }}"!</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endif %}

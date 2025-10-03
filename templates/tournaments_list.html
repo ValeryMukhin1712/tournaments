@@ -38,7 +38,21 @@
                                         {% else %}
                                             Не указана
                                         {% endif %}<br>
-                                        <strong>Участников:</strong> {{ tournament.participant_count }}
+                                        <strong>Участников:</strong> {{ tournament.participant_count }}<br>
+                                        <strong>Статус:</strong> 
+                                        {% if tournament.status == 'завершен' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-flag-checkered me-1"></i>Завершен
+                                            </span>
+                                        {% elif tournament.status == 'активен' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-play me-1"></i>Активен
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-user-plus me-1"></i>Регистрация
+                                            </span>
+                                        {% endif %}
                                     </p>
                                     {% if tournament.description %}
                                         <p class="card-text">

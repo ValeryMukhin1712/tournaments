@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Турнирный Ассистент - Руководство пользователя</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .manual-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+        .step {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 2px;
+        }
+        .admin { background: #dc3545; color: white; }
+        .trusted { background: #ffc107; color: #212529; }
+        .participant { background: #28a745; color: white; }
+        .toc {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 8px 0;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+        }
+        .toc a:hover {
+            color: #007bff;
+        }
+        .screenshot {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="manual-container">
+            <div class="header">
+                <h1><i class="fas fa-trophy me-3"></i>Турнирный Ассистент</h1>
+                <h3>Полное руководство пользователя</h3>
+                <p class="lead">Веб-приложение для управления турнирами по настольному теннису, бадминтону и волейболу</p>
+            </div>
+            
+            <div class="content">
+                <!-- Содержание -->
+                <div class="toc">
+                    <h4><i class="fas fa-list me-2"></i>Содержание</h4>
+                    <ul>
+                        <li><a href="#overview">1. Обзор приложения</a></li>
+                        <li><a href="#getting-started">2. Начало работы</a></li>
+                        <li><a href="#roles">3. Роли пользователей</a></li>
+                        <li><a href="#tournaments">4. Управление турнирами</a></li>
+                        <li><a href="#participants">5. Управление участниками</a></li>
+                        <li><a href="#matches">6. Матчи и результаты</a></li>
+                        <li><a href="#schedule">7. Расписание</a></li>
+                        <li><a href="#statistics">8. Статистика</a></li>
+                        <li><a href="#player-list">9. Список игроков</a></li>
+                        <li><a href="#waiting-list">10. Лист ожидания</a></li>
+                        <li><a href="#troubleshooting">11. Решение проблем</a></li>
+                    </ul>
+                </div>
+
+                <!-- 1. Обзор приложения -->
+                <div id="overview" class="section">
+                    <h2><i class="fas fa-info-circle me-2"></i>1. Обзор приложения</h2>
+                    
+                    <div class="feature-card">
+                        <h5><i class="fas fa-star me-2"></i>Основные возможности</h5>
+                        <ul>
+                            <li><strong>Создание и управление турнирами</strong> - полный контроль над турнирами</li>
+                            <li><strong>Круговая система</strong> - каждый участник играет с каждым</li>
+                            <li><strong>Интерактивная шахматка</strong> - удобный ввод результатов</li>
+                            <li><strong>Автоматическое расписание</strong> - с учетом количества площадок</li>
+                            <li><strong>Статистика участников</strong> - победы, поражения, очки</li>
+                            <li><strong>Система ролей</strong> - разные уровни доступа</li>
+                            <li><strong>Список игроков</strong> - база данных всех участников</li>
+                            <li><strong>Лист ожидания</strong> - для переполненных турниров</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h5><i class="fas fa-gamepad me-2"></i>Поддерживаемые виды спорта</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <i class="fas fa-table-tennis fa-2x text-primary"></i>
+                                <h6>Настольный теннис</h6>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-shuttle-van fa-2x text-success"></i>
+                                <h6>Бадминтон</h6>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-volleyball-ball fa-2x text-warning"></i>
+                                <h6>Волейбол</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Начало работы -->
+                <div id="getting-started" class="section">
+                    <h2><i class="fas fa-play me-2"></i>2. Начало работы</h2>
+                    
+                    <div class="step">
+                        <h5>Шаг 1: Доступ к приложению</h5>
+                        <p>Откройте браузер и перейдите по адресу: <code>http://localhost:5000</code></p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 2: Выбор роли</h5>
+                        <p>На главной странице выберите свою роль:</p>
+                        <ul>
+                            <li><strong>Участник</strong> - для просмотра турниров и подачи заявок</li>
+                            <li><strong>Доверенный участник</strong> - для ввода результатов матчей</li>
+                            <li><strong>Администратор</strong> - для полного управления турнирами</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 3: Получение доступа</h5>
+                        <p>Для получения доступа к турниру:</p>
+                        <ol>
+                            <li>Нажмите "Получить доступ"</li>
+                            <li>Введите email и имя</li>
+                            <li>Получите код доступа по email</li>
+                            <li>Введите код для входа в систему</li>
+                        </ol>
+                    </div>
+
+                    <div class="warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Важно:</strong> Для первого входа в систему используйте email <code>admin@system</code> с любым кодом доступа.
+                    </div>
+                </div>
+
+                <!-- 3. Роли пользователей -->
+                <div id="roles" class="section">
+                    <h2><i class="fas fa-users me-2"></i>3. Роли пользователей</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="feature-card">
+                                <h5><span class="role-badge admin">Администратор</span></h5>
+                                <ul>
+                                    <li>Создание и удаление турниров</li>
+                                    <li>Добавление/удаление участников</li>
+                                    <li>Управление расписанием</li>
+                                    <li>Просмотр всех результатов</li>
+                                    <li>Управление листом ожидания</li>
+                                    <li>Доступ к статистике</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-card">
+                                <h5><span class="role-badge trusted">Доверенный участник</span></h5>
+                                <ul>
+                                    <li>Просмотр турниров</li>
+                                    <li>Ввод результатов матчей</li>
+                                    <li>Просмотр статистики</li>
+                                    <li>Просмотр расписания</li>
+                                    <li>Подача заявок на участие</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-card">
+                                <h5><span class="role-badge participant">Участник</span></h5>
+                                <ul>
+                                    <li>Просмотр турниров</li>
+                                    <li>Просмотр результатов</li>
+                                    <li>Просмотр расписания</li>
+                                    <li>Подача заявок на участие</li>
+                                    <li>Просмотр своей статистики</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Управление турнирами -->
+                <div id="tournaments" class="section">
+                    <h2><i class="fas fa-trophy me-2"></i>4. Управление турнирами</h2>
+                    
+                    <h4>Создание турнира (только для администраторов)</h4>
+                    <div class="step">
+                        <h5>Шаг 1: Переход к созданию</h5>
+                        <p>На главной странице нажмите "Создать турнир" или перейдите в админ-панель</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 2: Заполнение данных</h5>
+                        <ul>
+                            <li><strong>Название турнира</strong> - уникальное имя</li>
+                            <li><strong>Вид спорта</strong> - настольный теннис, бадминтон или волейбол</li>
+                            <li><strong>Дата начала</strong> - дата проведения турнира</li>
+                            <li><strong>Время начала</strong> - время первого матча</li>
+                            <li><strong>Время окончания</strong> - время последнего матча</li>
+                            <li><strong>Количество площадок</strong> - для составления расписания</li>
+                            <li><strong>Длительность матча</strong> - в минутах</li>
+                            <li><strong>Перерыв между матчами</strong> - в минутах</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 3: Сохранение</h5>
+                        <p>Нажмите "Создать турнир" для сохранения</p>
+                    </div>
+
+                    <h4>Просмотр турниров</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-list me-2"></i>Список турниров</h5>
+                        <p>На странице "Турниры" отображаются все доступные турниры с информацией:</p>
+                        <ul>
+                            <li>Название и вид спорта</li>
+                            <li>Дата и время проведения</li>
+                            <li>Количество участников</li>
+                            <li>Статус турнира</li>
+                            <li>Кнопки для подачи заявки или входа</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 5. Управление участниками -->
+                <div id="participants" class="section">
+                    <h2><i class="fas fa-user-plus me-2"></i>5. Управление участниками</h2>
+                    
+                    <h4>Добавление участников (только для администраторов)</h4>
+                    <div class="step">
+                        <h5>Способ 1: Ручной ввод</h5>
+                        <ol>
+                            <li>Откройте турнир</li>
+                            <li>Нажмите "Добавить участника"</li>
+                            <li>Выберите вкладку "Ручной ввод"</li>
+                            <li>Введите имя участника</li>
+                            <li>Выберите тип (индивидуальный/команда)</li>
+                            <li>Нажмите "Добавить"</li>
+                        </ol>
+                    </div>
+
+                    <div class="step">
+                        <h5>Способ 2: Из списка игроков</h5>
+                        <ol>
+                            <li>Откройте турнир</li>
+                            <li>Нажмите "Добавить участника"</li>
+                            <li>Выберите вкладку "Добавить из списка"</li>
+                            <li>Найдите нужного игрока в списке</li>
+                            <li>Отметьте галочкой или нажмите "Добавить"</li>
+                        </ol>
+                    </div>
+
+                    <div class="step">
+                        <h5>Способ 3: Из листа ожидания</h5>
+                        <ol>
+                            <li>Откройте турнир</li>
+                            <li>Нажмите "Добавить участника"</li>
+                            <li>Выберите вкладку "Лист ожидания"</li>
+                            <li>Просмотрите заявки</li>
+                            <li>Нажмите "Принять" для добавления участника</li>
+                        </ol>
+                    </div>
+
+                    <div class="success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Автоматическое расписание:</strong> При добавлении участников расписание матчей создается автоматически.
+                    </div>
+
+                    <h4>Удаление участников</h4>
+                    <div class="step">
+                        <h5>Удаление из турнира</h5>
+                        <ol>
+                            <li>Откройте турнир</li>
+                            <li>В таблице участников найдите нужного</li>
+                            <li>Нажмите кнопку "Удалить"</li>
+                            <li>Подтвердите удаление</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- 6. Матчи и результаты -->
+                <div id="matches" class="section">
+                    <h2><i class="fas fa-table-tennis me-2"></i>6. Матчи и результаты</h2>
+                    
+                    <h4>Просмотр матчей</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-chess me-2"></i>Шахматка результатов</h5>
+                        <p>На странице турнира отображается интерактивная таблица (шахматка) со всеми матчами:</p>
+                        <ul>
+                            <li>По горизонтали и вертикали - участники</li>
+                            <li>На пересечении - результат матча</li>
+                            <li>Клик по ячейке открывает форму ввода результата</li>
+                            <li>Завершенные матчи выделены цветом</li>
+                        </ul>
+                    </div>
+
+                    <h4>Ввод результатов (доверенные участники и администраторы)</h4>
+                    <div class="step">
+                        <h5>Шаг 1: Открытие формы</h5>
+                        <p>Кликните на ячейку с матчем в шахматке</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 2: Заполнение результата</h5>
+                        <ul>
+                            <li><strong>Сет 1:</strong> Счет первого сета (например, 21:19)</li>
+                            <li><strong>Сет 2:</strong> Счет второго сета</li>
+                            <li><strong>Сет 3:</strong> Счет третьего сета (если нужен)</li>
+                            <li><strong>Статус:</strong> Завершен, В процессе, Запланирован</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 3: Сохранение</h5>
+                        <p>Нажмите "Сохранить результат" для сохранения</p>
+                    </div>
+
+                    <div class="warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание:</strong> Результаты автоматически обновляют статистику участников и турнирную таблицу.
+                    </div>
+
+                    <h4>Редактирование результатов</h4>
+                    <div class="step">
+                        <h5>Изменение результата</h5>
+                        <ol>
+                            <li>Кликните на ячейку с уже введенным результатом</li>
+                            <li>Измените данные в форме</li>
+                            <li>Нажмите "Сохранить изменения"</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- 7. Расписание -->
+                <div id="schedule" class="section">
+                    <h2><i class="fas fa-calendar-alt me-2"></i>7. Расписание</h2>
+                    
+                    <h4>Просмотр расписания</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-calendar me-2"></i>Расписание матчей</h5>
+                        <p>На странице турнира отображается расписание с информацией:</p>
+                        <ul>
+                            <li><strong>Номер матча</strong> - порядковый номер</li>
+                            <li><strong>Время</strong> - время начала матча</li>
+                            <li><strong>Площадка</strong> - номер площадки</li>
+                            <li><strong>Участники</strong> - кто играет</li>
+                            <li><strong>Счет</strong> - текущий результат</li>
+                            <li><strong>Статус</strong> - запланирован, в процессе, завершен</li>
+                        </ul>
+                    </div>
+
+                    <h4>Автоматическое составление расписания</h4>
+                    <div class="step">
+                        <h5>Генерация расписания</h5>
+                        <ol>
+                            <li>Добавьте участников в турнир</li>
+                            <li>Нажмите "Составить расписание заново"</li>
+                            <li>Система автоматически создаст расписание</li>
+                        </ol>
+                    </div>
+
+                    <div class="success">
+                        <i class="fas fa-magic me-2"></i>
+                        <strong>Умное расписание:</strong> Система учитывает количество площадок, длительность матчей и перерывы между ними.
+                    </div>
+
+                    <h4>Фильтрация расписания</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-filter me-2"></i>Фильтры</h5>
+                        <ul>
+                            <li><strong>По дате</strong> - просмотр матчей на конкретную дату</li>
+                            <li><strong>По площадке</strong> - матчи на определенной площадке</li>
+                            <li><strong>По статусу</strong> - запланированные, завершенные, в процессе</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 8. Статистика -->
+                <div id="statistics" class="section">
+                    <h2><i class="fas fa-chart-bar me-2"></i>8. Статистика</h2>
+                    
+                    <h4>Турнирная таблица</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-trophy me-2"></i>Статистика участников</h5>
+                        <p>Автоматически обновляемая таблица с показателями:</p>
+                        <ul>
+                            <li><strong>Место</strong> - позиция в турнире</li>
+                            <li><strong>Участник</strong> - имя участника</li>
+                            <li><strong>Игр</strong> - количество сыгранных матчей</li>
+                            <li><strong>Побед</strong> - количество побед</li>
+                            <li><strong>Ничьих</strong> - количество ничьих</li>
+                            <li><strong>Поражений</strong> - количество поражений</li>
+                            <li><strong>Очки</strong> - набранные очки</li>
+                            <li><strong>Разница очков</strong> - разница в сетах</li>
+                        </ul>
+                    </div>
+
+                    <h4>Система подсчета очков</h4>
+                    <div class="step">
+                        <h5>Начисление очков</h5>
+                        <ul>
+                            <li><strong>Победа:</strong> 2 очка</li>
+                            <li><strong>Ничья:</strong> 1 очко</li>
+                            <li><strong>Поражение:</strong> 0 очков</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h5>Определение места</h5>
+                        <p>Места определяются по:</p>
+                        <ol>
+                            <li>Количеству очков (по убыванию)</li>
+                            <li>Разнице очков в сетах (по убыванию)</li>
+                            <li>Алфавитному порядку имен (при равенстве)</li>
+                        </ol>
+                    </div>
+
+                    <h4>Сортировка таблицы</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-sort me-2"></i>Интерактивная сортировка</h5>
+                        <p>Кликните по заголовку колонки для сортировки:</p>
+                        <ul>
+                            <li>По месту в турнире</li>
+                            <li>По количеству игр</li>
+                            <li>По количеству побед</li>
+                            <li>По количеству очков</li>
+                            <li>По разнице очков</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 9. Список игроков -->
+                <div id="player-list" class="section">
+                    <h2><i class="fas fa-users me-2"></i>9. Список игроков</h2>
+                    
+                    <h4>Автоматическое ведение списка</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-database me-2"></i>База данных игроков</h5>
+                        <p>Система автоматически ведет список всех игроков, которые когда-либо участвовали в турнирах:</p>
+                        <ul>
+                            <li>Имя игрока</li>
+                            <li>Дата первого участия</li>
+                            <li>Дата последнего участия</li>
+                            <li>Автоматическое обновление при добавлении участников</li>
+                        </ul>
+                    </div>
+
+                    <h4>Использование списка игроков</h4>
+                    <div class="step">
+                        <h5>Добавление из списка</h5>
+                        <ol>
+                            <li>Откройте турнир</li>
+                            <li>Нажмите "Добавить участника"</li>
+                            <li>Выберите вкладку "Добавить из списка"</li>
+                            <li>Найдите игрока в списке</li>
+                            <li>Отметьте галочкой или нажмите "Добавить"</li>
+                        </ol>
+                    </div>
+
+                    <div class="step">
+                        <h5>Поиск игроков</h5>
+                        <ol>
+                            <li>В поле поиска введите имя игрока</li>
+                            <li>Список автоматически фильтруется</li>
+                            <li>Выберите нужного игрока</li>
+                        </ol>
+                    </div>
+
+                    <div class="success">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Совет:</strong> Список игроков помогает быстро добавлять участников, которые уже участвовали в других турнирах.
+                    </div>
+                </div>
+
+                <!-- 10. Лист ожидания -->
+                <div id="waiting-list" class="section">
+                    <h2><i class="fas fa-clock me-2"></i>10. Лист ожидания</h2>
+                    
+                    <h4>Подача заявки на участие</h4>
+                    <div class="step">
+                        <h5>Шаг 1: Выбор турнира</h5>
+                        <p>На странице "Турниры" найдите нужный турнир и нажмите "Подать заявку"</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 2: Заполнение заявки</h5>
+                        <ul>
+                            <li>Введите ваше имя</li>
+                            <li>Выберите тип участия (индивидуальный/команда)</li>
+                            <li>Нажмите "Подать заявку"</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h5>Шаг 3: Ожидание рассмотрения</h5>
+                        <p>Администратор турнира рассмотрит вашу заявку и примет решение</p>
+                    </div>
+
+                    <h4>Управление листом ожидания (только для администраторов)</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-list-check me-2"></i>Просмотр заявок</h5>
+                        <p>В турнире на вкладке "Лист ожидания" отображаются все заявки:</p>
+                        <ul>
+                            <li>Имя заявителя</li>
+                            <li>Тип участия</li>
+                            <li>Дата подачи заявки</li>
+                            <li>Статус заявки</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h5>Принятие заявки</h5>
+                        <ol>
+                            <li>Откройте турнир</li>
+                            <li>Перейдите на вкладку "Лист ожидания"</li>
+                            <li>Нажмите "Принять" рядом с заявкой</li>
+                            <li>Участник автоматически добавится в турнир</li>
+                        </ol>
+                    </div>
+
+                    <div class="step">
+                        <h5>Отклонение заявки</h5>
+                        <ol>
+                            <li>Нажмите "Отклонить" рядом с заявкой</li>
+                            <li>Заявка будет помечена как отклоненная</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- 11. Решение проблем -->
+                <div id="troubleshooting" class="section">
+                    <h2><i class="fas fa-tools me-2"></i>11. Решение проблем</h2>
+                    
+                    <h4>Часто встречающиеся проблемы</h4>
+                    
+                    <div class="warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Проблема: Не могу войти в систему</h5>
+                        <p><strong>Решение:</strong></p>
+                        <ul>
+                            <li>Проверьте правильность email и кода доступа</li>
+                            <li>Убедитесь, что код не истек</li>
+                            <li>Попробуйте запросить новый код доступа</li>
+                            <li>Для первого входа используйте admin@system</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Проблема: Не отображается расписание</h5>
+                        <p><strong>Решение:</strong></p>
+                        <ul>
+                            <li>Убедитесь, что в турнире есть участники</li>
+                            <li>Нажмите "Составить расписание заново"</li>
+                            <li>Проверьте настройки турнира (время, площадки)</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Проблема: Не могу добавить участника</h5>
+                        <p><strong>Решение:</strong></p>
+                        <ul>
+                            <li>Убедитесь, что у вас есть права администратора</li>
+                            <li>Проверьте, что участник с таким именем еще не добавлен</li>
+                            <li>Попробуйте добавить через другую вкладку (ручной ввод/список/лист ожидания)</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Проблема: Не сохраняется результат матча</h5>
+                        <p><strong>Решение:</strong></p>
+                        <ul>
+                            <li>Убедитесь, что у вас есть права на ввод результатов</li>
+                            <li>Проверьте правильность формата счета (например, 21:19)</li>
+                            <li>Убедитесь, что матч не завершен другим пользователем</li>
+                        </ul>
+                    </div>
+
+                    <h4>Техническая поддержка</h4>
+                    <div class="feature-card">
+                        <h5><i class="fas fa-life-ring me-2"></i>Получение помощи</h5>
+                        <p>Если проблема не решается:</p>
+                        <ul>
+                            <li>Очистите кэш браузера</li>
+                            <li>Попробуйте другой браузер</li>
+                            <li>Перезагрузите страницу</li>
+                            <li>Проверьте подключение к интернету</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Заключение -->
+                <div class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h2><i class="fas fa-graduation-cap me-2"></i>Заключение</h2>
+                    <p>Турнирный Ассистент - это мощный инструмент для организации и проведения спортивных турниров. Следуя данному руководству, вы сможете эффективно использовать все возможности приложения.</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-rocket me-2"></i>Быстрый старт</h5>
+                            <p>Начните с создания турнира и добавления участников. Система автоматически создаст расписание и поможет в управлении.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-star me-2"></i>Продвинутые функции</h5>
+                            <p>Используйте список игроков, лист ожидания и детальную статистику для профессиональной организации турниров.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Футер -->
+                <div class="text-center mt-5 pt-4" style="border-top: 1px solid #dee2e6;">
+                    <p class="text-muted">
+                        <i class="fas fa-trophy me-2"></i>
+                        Турнирный Ассистент v1.0 | 
+                        <i class="fas fa-calendar me-1"></i>
+                        2025 | 
+                        <i class="fas fa-code me-1"></i>
+                        Powered by Flask & Bootstrap
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Плавная прокрутка к якорям
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Подсветка активного раздела
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.toc a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-primary');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('text-primary');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
