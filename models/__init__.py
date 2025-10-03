@@ -10,6 +10,7 @@ from .match_log import create_match_log_model
 from .token import create_token_model
 from .waiting_list import create_waiting_list_model
 from .settings import create_settings_model
+from .player import create_player_model
 
 def create_models(db):
     """Создает все модели с переданным экземпляром db"""
@@ -22,6 +23,7 @@ def create_models(db):
     Token = create_token_model(db)
     WaitingList = create_waiting_list_model(db)
     Settings = create_settings_model(db)
+    Player = create_player_model(db)
     
     return {
         'User': User,
@@ -32,5 +34,6 @@ def create_models(db):
         'MatchLog': MatchLog,
         'Token': Token,
         'WaitingList': WaitingList,
-        'Settings': Settings
+        'Settings': Settings,
+        'Player': Player
     }

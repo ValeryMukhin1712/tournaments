@@ -200,17 +200,35 @@
                                     <table class="table table-modern" id="statisticsTable">
                                         <thead>
                                             <tr>
-                                                <th class="d-none d-sm-table-cell">Место</th>
-                                                <th class="d-table-cell d-sm-none">№</th>
-                                                <th>Участник</th>
-                                                <th class="d-none d-md-table-cell">Игр</th>
-                                                <th class="d-none d-lg-table-cell">Побед</th>
-                                                {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
-                                                <th class="d-none d-lg-table-cell">Ничьих</th>
-                                                {% endif %}
-                                                <th class="d-none d-lg-table-cell">Поражений</th>
-                                                <th>Очки<br><small class="d-none d-sm-inline">в турнире</small></th>
-                                                <th class="d-none d-md-table-cell">Разница очков<br><small>в сетах</small></th>
+                                                <th class="sortable d-none d-sm-table-cell" data-column="position">
+                                                    Место <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                <th class="sortable d-table-cell d-sm-none" data-column="position">
+                                                    № <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                <th class="sortable" data-column="name">
+                                                    Участник <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                <th class="sortable d-none d-md-table-cell" data-column="games">
+                                                    Игр <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                <th class="sortable d-none d-lg-table-cell" data-column="wins">
+                                                    Побед <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                
+                                                <th class="sortable d-none d-lg-table-cell" data-column="draws">
+                                                    Ничьих <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                
+                                                <th class="sortable d-none d-lg-table-cell" data-column="losses">
+                                                    Поражений <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                <th class="sortable" data-column="points">
+                                                    Очки<br><small class="d-none d-sm-inline">в турнире</small> <i class="fas fa-sort ms-1"></i>
+                                                </th>
+                                                <th class="sortable d-none d-md-table-cell" data-column="goal_difference">
+                                                    Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -232,9 +250,7 @@
                                                 </td>
                                                 <td class="d-none d-md-table-cell">{{ participant_stats.games }}</td>
                                                 <td class="d-none d-lg-table-cell">{{ participant_stats.wins }}</td>
-                                                {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
                                                 <td class="d-none d-lg-table-cell">{{ participant_stats.draws }}</td>
-                                                {% endif %}
                                                 <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
                                                 <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
                                                 <td class="d-none d-md-table-cell">

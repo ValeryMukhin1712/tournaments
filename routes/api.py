@@ -55,6 +55,12 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
                 }
         logger.info(f"Сохранено {len(existing_results)} результатов существующих матчей")
     
+    # Удаляем все существующие матчи перед созданием новых
+    existing_matches = Match.query.filter_by(tournament_id=tournament.id).all()
+    for match in existing_matches:
+        db.session.delete(match)
+    logger.info(f"Удалено {len(existing_matches)} существующих матчей")
+    
     # Создаем круговое расписание по правильному алгоритму
     rounds = create_round_robin_schedule(participants)
     
@@ -186,9 +192,8 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
         round_matches_created.sort(key=lambda m: m.court_number)
         
         # Переназначаем номера матчей в туре (используем правильную нумерацию)
-        start_number = global_match_number - len(round_matches_created)
         for i, match in enumerate(round_matches_created):
-            match.match_number = start_number + i
+            match.match_number = global_match_number - len(round_matches_created) + i
             logger.info(f"Матч {match.participant1_id} vs {match.participant2_id} получил номер {match.match_number}")
         
         # Переходим к следующему времени
@@ -269,7 +274,7 @@ def add_minutes_to_time(time_obj, minutes):
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
 
-def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings):
+def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player):
     """Создает API маршруты приложения"""
     
     # Получаем объект CSRF из приложения
@@ -526,6 +531,19 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 registered_at=tournament.created_at  # Устанавливаем время регистрации как время создания турнира
             )
             db.session.add(participant)
+            
+            # Автоматически добавляем игрока в список игроков
+            player_name = data['name'].strip()
+            existing_player = Player.query.filter_by(name=player_name).first()
+            if not existing_player:
+                new_player = Player(name=player_name)
+                db.session.add(new_player)
+                logger.info(f"Игрок '{player_name}' добавлен в список игроков")
+            else:
+                # Обновляем время последнего использования
+                existing_player.last_used_at = datetime.utcnow()
+                logger.info(f"Время последнего использования игрока '{player_name}' обновлено")
+            
             db.session.commit()
             
             # Автоматически создаем расписание после добавления участника
@@ -1837,6 +1855,18 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 
                 db.session.add(new_participant)
                 
+                # Автоматически добавляем игрока в список игроков
+                player_name = waiting_entry.name.strip()
+                existing_player = Player.query.filter_by(name=player_name).first()
+                if not existing_player:
+                    new_player = Player(name=player_name)
+                    db.session.add(new_player)
+                    logger.info(f"Игрок '{player_name}' добавлен в список игроков из листа ожидания")
+                else:
+                    # Обновляем время последнего использования
+                    existing_player.last_used_at = datetime.utcnow()
+                    logger.info(f"Время последнего использования игрока '{player_name}' обновлено из листа ожидания")
+                
                 # Помечаем заявку как принятую
                 waiting_entry.status = 'принят'
                 accepted_count += 1
@@ -1994,6 +2024,19 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             )
             
             db.session.add(participant)
+            
+            # Автоматически добавляем игрока в список игроков
+            player_name = name.strip()
+            existing_player = Player.query.filter_by(name=player_name).first()
+            if not existing_player:
+                new_player = Player(name=player_name)
+                db.session.add(new_player)
+                logger.info(f"Игрок '{player_name}' добавлен в список игроков (опоздавший участник)")
+            else:
+                # Обновляем время последнего использования
+                existing_player.last_used_at = datetime.utcnow()
+                logger.info(f"Время последнего использования игрока '{player_name}' обновлено (опоздавший участник)")
+            
             db.session.commit()
             
             logger.info(f"Опоздавший участник '{name}' добавлен в турнир {tournament_id} без пересчета расписания")
@@ -2376,3 +2419,131 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при обновлении максимального количества токенов: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при обновлении настроек'}), 500
+
+    # Маршруты для работы со списком игроков
+    @app.route('/api/players', methods=['GET'])
+    def get_players():
+        """Получение списка всех игроков"""
+        try:
+            players = Player.query.order_by(Player.name).all()
+            players_data = []
+            for player in players:
+                players_data.append({
+                    'id': player.id,
+                    'name': player.name,
+                    'created_at': player.created_at.isoformat() if player.created_at else None,
+                    'last_used_at': player.last_used_at.isoformat() if player.last_used_at else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'players': players_data
+            })
+        except Exception as e:
+            logger.error(f"Ошибка при получении списка игроков: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении списка игроков'}), 500
+
+    @app.route('/api/players', methods=['POST'])
+    def add_player():
+        """Добавление нового игрока в список"""
+        try:
+            data = request.get_json()
+            name = data.get('name', '').strip()
+            
+            if not name:
+                return jsonify({
+                    'success': False,
+                    'error': 'Имя игрока не может быть пустым'
+                }), 400
+            
+            # Проверяем, существует ли игрок с таким именем
+            existing_player = Player.query.filter_by(name=name).first()
+            if existing_player:
+                # Обновляем время последнего использования
+                existing_player.last_used_at = datetime.utcnow()
+                db.session.commit()
+                return jsonify({
+                    'success': True,
+                    'message': 'Игрок уже существует в списке',
+                    'player': {
+                        'id': existing_player.id,
+                        'name': existing_player.name,
+                        'created_at': existing_player.created_at.isoformat() if existing_player.created_at else None,
+                        'last_used_at': existing_player.last_used_at.isoformat() if existing_player.last_used_at else None
+                    }
+                })
+            
+            # Создаем нового игрока
+            new_player = Player(name=name)
+            db.session.add(new_player)
+            db.session.commit()
+            
+            logger.info(f"Добавлен новый игрок: {name}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Игрок успешно добавлен в список',
+                'player': {
+                    'id': new_player.id,
+                    'name': new_player.name,
+                    'created_at': new_player.created_at.isoformat() if new_player.created_at else None,
+                    'last_used_at': new_player.last_used_at.isoformat() if new_player.last_used_at else None
+                }
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при добавлении игрока: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при добавлении игрока'}), 500
+
+    @app.route('/api/players/<int:player_id>', methods=['DELETE'])
+    def delete_player(player_id):
+        """Удаление игрока из списка"""
+        try:
+            player = Player.query.get_or_404(player_id)
+            player_name = player.name
+            
+            db.session.delete(player)
+            db.session.commit()
+            
+            logger.info(f"Игрок удален из списка: {player_name}")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Игрок "{player_name}" удален из списка'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении игрока: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении игрока'}), 500
+
+    @app.route('/api/players/search', methods=['GET'])
+    def search_players():
+        """Поиск игроков по имени"""
+        try:
+            query = request.args.get('q', '').strip()
+            if not query:
+                return jsonify({
+                    'success': True,
+                    'players': []
+                })
+            
+            players = Player.query.filter(Player.name.ilike(f'%{query}%')).order_by(Player.name).limit(20).all()
+            players_data = []
+            for player in players:
+                players_data.append({
+                    'id': player.id,
+                    'name': player.name,
+                    'created_at': player.created_at.isoformat() if player.created_at else None,
+                    'last_used_at': player.last_used_at.isoformat() if player.last_used_at else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'players': players_data
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при поиске игроков: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при поиске игроков'}), 500

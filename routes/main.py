@@ -473,7 +473,7 @@ def send_token_email_async(email, name, token, app=None):
     logger.info(f"Асинхронная отправка email запущена для {email}")
     return True  # Возвращаем True сразу, не ждем завершения
 
-def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings):
+def create_main_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player):
     """Создает основные маршруты приложения"""
     
     def check_tournament_access(tournament_id, admin_id=None):
@@ -2423,11 +2423,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'is_late_participant': False
             })
         
-        # Сортируем участников по именам (алфавитный порядок) для режима зрителя
-        participants_with_stats.sort(key=lambda x: x['participant'].name.lower())
-        participants_with_stats_chessboard.sort(key=lambda x: x['participant'].name.lower())
+        # Сортируем участников по местам в турнире (по очкам, затем по разнице очков)
+        participants_with_stats.sort(key=lambda x: (-x['stats']['points'], -x['stats']['goal_difference'], x['participant'].name.lower()))
+        participants_with_stats_chessboard.sort(key=lambda x: (-x['stats']['points'], -x['stats']['goal_difference'], x['participant'].name.lower()))
         
-        # Обновляем позиции после сортировки (по алфавиту)
+        # Обновляем позиции после сортировки (по местам в турнире)
         for i, participant_data in enumerate(participants_with_stats):
             participant_data['position'] = i + 1
         for i, participant_data in enumerate(participants_with_stats_chessboard):

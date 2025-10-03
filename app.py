@@ -87,9 +87,10 @@ MatchLog = models['MatchLog']
 Token = models['Token']
 WaitingList = models['WaitingList']
 Settings = models['Settings']
+Player = models['Player']
 
 # Импорт и регистрация маршрутов
-register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings)
+register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player)
 
 @login_manager.user_loader
 def load_user(user_id):

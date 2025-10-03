@@ -758,7 +758,9 @@
     // Функция для получения CSRF токена
     function getCSRFToken() {
         const token = document.querySelector('meta[name="csrf-token"]');
-        return token ? token.getAttribute('content') : '';
+        const tokenValue = token ? token.getAttribute('content') : '';
+        console.log('CSRF Token из базового шаблона:', tokenValue);
+        return tokenValue;
     }
     
     // Обработка формы регистрации пользователя (глобально)
