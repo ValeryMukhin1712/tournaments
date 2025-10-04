@@ -2500,15 +2500,26 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'is_late_participant': False
             })
         
-        # Сортируем участников по местам в турнире (по очкам, затем по разнице очков)
-        participants_with_stats.sort(key=lambda x: (-x['stats']['points'], -x['stats']['goal_difference'], x['participant'].name.lower()))
-        participants_with_stats_chessboard.sort(key=lambda x: (-x['stats']['points'], -x['stats']['goal_difference'], x['participant'].name.lower()))
+        # Используем правильную функцию расчета рейтинга с учетом личных встреч
+        final_ranking = calculate_participant_ranking(participants, matches, tournament)
         
-        # Обновляем позиции после сортировки (по местам в турнире)
-        for i, participant_data in enumerate(participants_with_stats):
-            participant_data['position'] = i + 1
-        for i, participant_data in enumerate(participants_with_stats_chessboard):
-            participant_data['position'] = i + 1
+        # Создаем словарь для быстрого поиска позиций по ID участника
+        position_by_id = {}
+        for p_data in final_ranking:
+            position_by_id[p_data['participant'].id] = p_data['place']
+        
+        # Обновляем позиции в списках участников
+        for participant_data in participants_with_stats:
+            participant_id = participant_data['participant'].id
+            participant_data['position'] = position_by_id.get(participant_id, 999)
+        
+        for participant_data in participants_with_stats_chessboard:
+            participant_id = participant_data['participant'].id
+            participant_data['position'] = position_by_id.get(participant_id, 999)
+        
+        # Сортируем участников по местам
+        participants_with_stats.sort(key=lambda x: x['position'])
+        participants_with_stats_chessboard.sort(key=lambda x: x['position'])
         
         # Создаем шахматку (упрощенная версия)
         chessboard = {}
@@ -2863,5 +2874,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         except Exception as e:
             app.logger.error(f"Ошибка при экспорте турнира: {e}")
             return jsonify({'success': False, 'error': f'Ошибка при экспорте турнира: {str(e)}'}), 500
+    
+    @app.route('/badminton-referee')
+    @login_required
+    def badminton_referee():
+        """Страница судьи матча по бадминтону"""
+        return render_template('badminton_referee.html')
     
     # ===== КОНЕЦ create_main_routes =====
