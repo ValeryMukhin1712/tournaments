@@ -76,8 +76,8 @@ def calculate_participant_ranking(participants, matches, tournament):
     Определяет места участников согласно правилам:
     1. Место выше у того у кого больше очков
     2. При равенстве очков место выше у того кто победил в личной встрече
-    3. Если три участника имеют одинаковое количество очков и победы в личных встречах "закольцованы",
-       то в этом случае выше место у того у кого наибольшая суммарная разница очков в сетах
+    3. При закольцованных результатах личных встреч - разность выигранных и проигранных сетов
+    4. При равенстве разности сетов - разность очков в сетах
     """
     logger.info(f"calculate_participant_ranking: обрабатываем {len(participants)} участников")
     # Сначала рассчитываем базовую статистику для каждого участника
@@ -91,13 +91,15 @@ def calculate_participant_ranking(participants, matches, tournament):
             'losses': 0,
             'draws': 0,
             'games': 0,
+            'sets_won': 0,        # Количество выигранных сетов
+            'sets_lost': 0,       # Количество проигранных сетов
             'set_difference': 0,  # разность очков в сетах
-            'head_to_head': {}  # результаты личных встреч с другими участниками
+            'head_to_head': {}    # результаты личных встреч с другими участниками
         }
     
-    # Обрабатываем все завершенные матчи
+    # Обрабатываем все завершенные матчи и матчи в процессе
     for match in matches:
-        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
             p1_id = match.participant1_id
             p2_id = match.participant2_id
             
@@ -110,6 +112,12 @@ def calculate_participant_ranking(participants, matches, tournament):
             # Обновляем количество игр
             stats1['games'] += 1
             stats2['games'] += 1
+            
+            # Обновляем количество выигранных/проигранных сетов
+            stats1['sets_won'] += match.sets_won_1
+            stats1['sets_lost'] += match.sets_won_2
+            stats2['sets_won'] += match.sets_won_2
+            stats2['sets_lost'] += match.sets_won_1
             
             # Определяем победителя и начисляем очки
             if match.sets_won_1 > match.sets_won_2:
@@ -214,10 +222,29 @@ def calculate_participant_ranking(participants, matches, tournament):
             logger.info(f"Группа с очками {points}: закольцованные результаты = {is_circular}")
             
             if is_circular:
-                # Если есть закольцованные результаты, сортируем по разности очков в сетах
-                logger.info(f"Сортировка по разности очков в сетах: {[(p['participant'].id, p['set_difference']) for p in group_sorted]}")
-                group_sorted.sort(key=lambda x: x['set_difference'], reverse=True)
-                logger.info(f"После сортировки: {[(p['participant'].id, p['set_difference']) for p in group_sorted]}")
+                # Если есть закольцованные результаты, сортируем по разности выигранных и проигранных сетов
+                logger.info(f"Сортировка по разности сетов: {[(p['participant'].id, p['sets_won'] - p['sets_lost']) for p in group_sorted]}")
+                group_sorted.sort(key=lambda x: x['sets_won'] - x['sets_lost'], reverse=True)
+                
+                # Проверяем, есть ли участники с одинаковой разностью сетов
+                sets_diff_groups = {}
+                for p_data in group_sorted:
+                    sets_diff = p_data['sets_won'] - p_data['sets_lost']
+                    if sets_diff not in sets_diff_groups:
+                        sets_diff_groups[sets_diff] = []
+                    sets_diff_groups[sets_diff].append(p_data)
+                
+                # Если есть участники с одинаковой разностью сетов, сортируем по разности очков
+                final_group_sorted = []
+                for sets_diff in sorted(sets_diff_groups.keys(), reverse=True):
+                    sub_group = sets_diff_groups[sets_diff]
+                    if len(sub_group) > 1:
+                        logger.info(f"Участники с разностью сетов {sets_diff}: сортировка по разности очков")
+                        sub_group.sort(key=lambda x: x['set_difference'], reverse=True)
+                    final_group_sorted.extend(sub_group)
+                
+                group_sorted = final_group_sorted
+                logger.info(f"После сортировки: {[(p['participant'].id, p['sets_won'] - p['sets_lost'], p['set_difference']) for p in group_sorted]}")
             
             # Назначаем места
             for i, p_data in enumerate(group_sorted):
@@ -226,7 +253,7 @@ def calculate_participant_ranking(participants, matches, tournament):
             
             current_place += len(group_sorted)
     
-    logger.info(f"calculate_participant_ranking: итоговый рейтинг: {[(p['participant'].id, p['place'], p['points'], p['set_difference']) for p in final_ranking]}")
+    logger.info(f"calculate_participant_ranking: итоговый рейтинг: {[(p['participant'].id, p['place'], p['points'], p['sets_won'] - p['sets_lost'], p['set_difference']) for p in final_ranking]}")
     return final_ranking
 
 def sort_by_head_to_head(group, all_stats):
@@ -1322,12 +1349,32 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     'token': None
                 }
         
+        # Подсчитываем активных пользователей
+        from utils.user_activity import get_active_users_count
+        
+        # Получаем активных пользователей из таблицы активности
+        try:
+            activity_stats = get_active_users_count(db, UserActivity, minutes_threshold=30)
+            active_admins = activity_stats['active_admins']
+            active_participants = activity_stats['active_participants']
+            active_viewers = activity_stats['active_viewers']
+        except Exception as e:
+            print(f"Ошибка при получении статистики активности: {e}")
+            # Fallback к старой логике
+            active_admins = len(tournament_admins)
+            week_ago = datetime.now() - timedelta(days=7)
+            active_participants = Player.query.filter(Player.last_used_at >= week_ago).count()
+            active_viewers = max(1, len(players) // 3)
+        
         return render_template('system_admin_dashboard.html', 
                              admin={'id': admin_id, 'email': admin_email, 'name': 'Системный администратор'}, 
                              tournaments=tournaments,
                              users=users,
                              players=players,
-                             tournament_admins=tournament_admins)
+                             tournament_admins=tournament_admins,
+                             active_admins=active_admins,
+                             active_participants=active_participants,
+                             active_viewers=active_viewers)
 
     @app.route('/admin-tokens')
     def admin_tokens():
@@ -1797,7 +1844,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Матч завершен - показываем результат (счет сетов)
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
@@ -1909,15 +1956,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Используем новую логику определения мест
         participants_ranking = calculate_participant_ranking(participants, matches, tournament)
         
-        # Создаем словарь для быстрого поиска позиций по ID участника
-        position_by_id = {}
+        # Создаем словарь для быстрого поиска данных по ID участника
+        ranking_data_by_id = {}
         for participant_data in participants_ranking:
-            position_by_id[participant_data['participant'].id] = participant_data['place']
+            ranking_data_by_id[participant_data['participant'].id] = participant_data
         
-        # Обновляем позиции в participants_with_stats
+        # Обновляем позиции и статистику в participants_with_stats
         for participant_data in participants_with_stats:
             participant_id = participant_data['participant'].id
-            participant_data['position'] = position_by_id.get(participant_id, 999)
+            ranking_data = ranking_data_by_id.get(participant_id, {})
+            
+            # Обновляем позицию
+            participant_data['position'] = ranking_data.get('place', 999)
+            
+            # Обновляем статистику из новой логики
+            if ranking_data:
+                participant_data['stats']['sets_difference'] = ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0)
+                participant_data['stats']['goal_difference'] = ranking_data.get('set_difference', 0)
         
         # Сортируем участников по местам
         participants_with_stats.sort(key=lambda x: x['position'])
@@ -2139,7 +2194,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             points = 0  # Будем пересчитывать на основе побед
             
             for match in matches:
-                if match.status == 'завершен':
+                if match.status in ['завершен', 'в процессе', 'играют']:
                     if match.participant1_id == participant.id:
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 > match.sets_won_2:
@@ -2163,24 +2218,38 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             
             participants_with_stats.append({
                 'participant': participant,
-                'wins': wins,
-                'losses': losses,
-                'points': points,
+                'stats': {
+                    'wins': wins,
+                    'losses': losses,
+                    'points': points,
+                    'games': wins + losses,
+                    'draws': 0,  # Для совместимости с шаблоном
+                    'goal_difference': 0,  # Для совместимости с шаблоном
+                    'set_difference': 0  # Для совместимости с шаблоном
+                },
                 'is_current_participant': participant.name == participant_name
             })
         
         # Используем новую логику определения мест
         participants_ranking = calculate_participant_ranking(participants, matches, tournament)
         
-        # Создаем словарь для быстрого поиска позиций по ID участника
-        position_by_id = {}
+        # Создаем словарь для быстрого поиска данных по ID участника
+        ranking_data_by_id = {}
         for participant_data in participants_ranking:
-            position_by_id[participant_data['participant'].id] = participant_data['place']
+            ranking_data_by_id[participant_data['participant'].id] = participant_data
         
-        # Обновляем позиции в participants_with_stats
+        # Обновляем позиции и статистику в participants_with_stats
         for participant_data in participants_with_stats:
             participant_id = participant_data['participant'].id
-            participant_data['position'] = position_by_id.get(participant_id, 999)
+            ranking_data = ranking_data_by_id.get(participant_id, {})
+            
+            # Обновляем позицию
+            participant_data['position'] = ranking_data.get('place', 999)
+            
+            # Обновляем статистику из новой логики
+            if ranking_data:
+                participant_data['stats']['sets_difference'] = ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0)
+                participant_data['stats']['goal_difference'] = ranking_data.get('set_difference', 0)
         
         # Сортируем участников по местам
         participants_with_stats.sort(key=lambda x: x['position'])
@@ -2216,11 +2285,15 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         for i, participant_data in enumerate(participants_with_stats):
             participant = participant_data['participant']
+            stats = participant_data['stats']
             participant_stats = {
-                'points': participant_data['points'],
-                'wins': participant_data['wins'],
-                'losses': participant_data['losses'],
-                'games': participant_data['wins'] + participant_data['losses']
+                'points': stats['points'],
+                'wins': stats['wins'],
+                'losses': stats['losses'],
+                'games': stats['games'],
+                'draws': stats['draws'],
+                'goal_difference': stats['goal_difference'],
+                'set_difference': stats['set_difference']
             }
             
             # Определяем, является ли участник опоздавшим
@@ -2246,7 +2319,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Определяем победителя и счет
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
@@ -2360,7 +2433,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         return render_template('tournament_view.html', 
                              tournament=tournament,
-                             participants=participants_with_stats,
+                             participants_with_stats=participants_with_stats,
                              participants_with_stats_chessboard=participants_with_stats_chessboard,
                              chessboard=chessboard,
                              schedule_display=schedule_display,
@@ -2503,19 +2576,28 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Используем правильную функцию расчета рейтинга с учетом личных встреч
         final_ranking = calculate_participant_ranking(participants, matches, tournament)
         
-        # Создаем словарь для быстрого поиска позиций по ID участника
-        position_by_id = {}
+        # Создаем словарь для быстрого поиска данных по ID участника
+        ranking_data_by_id = {}
         for p_data in final_ranking:
-            position_by_id[p_data['participant'].id] = p_data['place']
+            ranking_data_by_id[p_data['participant'].id] = p_data
         
-        # Обновляем позиции в списках участников
+        # Обновляем позиции и статистику в списках участников
         for participant_data in participants_with_stats:
             participant_id = participant_data['participant'].id
-            participant_data['position'] = position_by_id.get(participant_id, 999)
+            ranking_data = ranking_data_by_id.get(participant_id, {})
+            
+            # Обновляем позицию
+            participant_data['position'] = ranking_data.get('place', 999)
+            
+            # Обновляем статистику из новой логики
+            if ranking_data:
+                participant_data['stats']['sets_difference'] = ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0)
+                participant_data['stats']['goal_difference'] = ranking_data.get('set_difference', 0)
         
         for participant_data in participants_with_stats_chessboard:
             participant_id = participant_data['participant'].id
-            participant_data['position'] = position_by_id.get(participant_id, 999)
+            ranking_data = ranking_data_by_id.get(participant_id, {})
+            participant_data['position'] = ranking_data.get('place', 999)
         
         # Сортируем участников по местам
         participants_with_stats.sort(key=lambda x: x['position'])
@@ -2533,7 +2615,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Матч завершен - показываем результат
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"

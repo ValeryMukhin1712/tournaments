@@ -34,3 +34,4 @@ def test_add_participant():
 if __name__ == "__main__":
     print("Тестирование добавления участника...")
     test_add_participant()
+

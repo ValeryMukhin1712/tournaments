@@ -11,6 +11,7 @@ from .token import create_token_model
 from .waiting_list import create_waiting_list_model
 from .settings import create_settings_model
 from .player import create_player_model
+from .user_activity import create_user_activity_model
 
 def create_models(db):
     """Создает все модели с переданным экземпляром db"""
@@ -24,6 +25,7 @@ def create_models(db):
     WaitingList = create_waiting_list_model(db)
     Settings = create_settings_model(db)
     Player = create_player_model(db)
+    UserActivity = create_user_activity_model(db)
     
     return {
         'User': User,
@@ -35,5 +37,6 @@ def create_models(db):
         'Token': Token,
         'WaitingList': WaitingList,
         'Settings': Settings,
-        'Player': Player
+        'Player': Player,
+        'UserActivity': UserActivity
     }

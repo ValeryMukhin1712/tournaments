@@ -16,3 +16,4 @@ def create_player_model(db):
             return f'<Player {self.name}>'
     
     return Player
+

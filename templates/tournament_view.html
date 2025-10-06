@@ -324,6 +324,9 @@
                                                 <th class="sortable" data-column="points">
                                                     Очки<br><small class="d-none d-sm-inline">в турнире</small> <i class="fas fa-sort ms-1"></i>
                                                 </th>
+                                                <th class="sortable d-none d-lg-table-cell" data-column="sets_difference">
+                                                    Разница +/-<br><small>сетов</small> <i class="fas fa-sort ms-1"></i>
+                                                </th>
                                                 <th class="sortable d-none d-md-table-cell" data-column="goal_difference">
                                                     Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
                                                 </th>
@@ -351,6 +354,9 @@
                                                 <td class="d-none d-lg-table-cell">{{ participant_stats.draws }}</td>
                                                 <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
                                                 <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
+                                                <td class="d-none d-lg-table-cell">
+                                                    {% if participant_stats.sets_difference > 0 %}+{% endif %}{{ participant_stats.sets_difference }}
+                                                </td>
                                                 <td class="d-none d-md-table-cell">
                                                     {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
                                                 </td>
@@ -386,8 +392,11 @@
                                             <th class="bg-light">Участник</th>
                                             <th class="text-center bg-light">Очки</th>
                                             <th class="text-center bg-light">Место</th>
-                                {% for participant in participants %}
-                                            <th class="text-center bg-light">{{ participant.participant.name[:15] }}{% if participant.participant.name|length > 15 %}...{% endif %}</th>
+                                {% for participant_data in participants_with_stats_chessboard %}
+                                {% set participant = participant_data.participant %}
+                                            <th class="text-center {% if participant_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %}">
+                                                {{ participant.name[:15] }}{% if participant.name|length > 15 %}...{% endif %}
+                                            </th>
                                 {% endfor %}
                             </tr>
                         </thead>
@@ -397,12 +406,14 @@
                                         {% set p1_stats = p1_data.stats %}
                                         {% set p1_position = p1_data.position %}
                                         <tr>
-                                            <td class="bg-light fw-bold">{{ p1.name[:15] }}{% if p1.name|length > 15 %}...{% endif %}</td>
-                                            <td class="text-center bg-light fw-bold text-primary">{{ p1_stats.points }}</td>
-                                            <td class="text-center bg-light fw-bold text-success">{{ p1_position }}</td>
-                                            {% for participant_data in participants %}
-                                            {% set p2 = participant_data.participant %}
-                                            <td class="text-center position-relative" style="height: 80px; width: 120px; vertical-align: middle;">
+                                            <td class="{% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold">
+                                                {{ p1.name[:15] }}{% if p1.name|length > 15 %}...{% endif %}
+                                            </td>
+                                            <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-primary">{{ p1_stats.points }}</td>
+                                            <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-success">{{ p1_position }}</td>
+                                            {% for p2_data in participants_with_stats_chessboard %}
+                                            {% set p2 = p2_data.participant %}
+                                            <td class="text-center position-relative {% if p1_data.is_late_participant or p2_data.is_late_participant %}bg-success bg-opacity-25{% endif %}" style="height: 80px; width: 120px; vertical-align: middle;">
                                                 {% if p1.id == p2.id %}
                                                     <span class="text-muted">—</span>
                                                 {% else %}

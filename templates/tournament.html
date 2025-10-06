@@ -353,6 +353,9 @@
                                 <th class="sortable" data-column="points">
                                     Очки<br><small class="d-none d-sm-inline">в турнире</small> <i class="fas fa-sort ms-1"></i>
                                 </th>
+                                <th class="sortable d-none d-lg-table-cell" data-column="sets_difference">
+                                    Разница +/-<br><small>сетов</small> <i class="fas fa-sort ms-1"></i>
+                                </th>
                                 <th class="sortable d-none d-md-table-cell" data-column="goal_difference">
                                     Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
                                 </th>
@@ -383,6 +386,9 @@
                                 {% endif %}
                                 <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
                                 <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if participant_stats.sets_difference > 0 %}+{% endif %}{{ participant_stats.sets_difference }}
+                                </td>
                                 <td class="d-none d-md-table-cell">
                                     {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
                                 </td>
