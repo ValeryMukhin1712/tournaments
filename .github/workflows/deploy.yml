@@ -3,14 +3,15 @@ name: Deploy to VDS Server
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
     - name: Deploy to server
       uses: appleboy/ssh-action@v0.1.5
       with:
@@ -19,9 +20,10 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/tournament-admin/tournaments
-          git pull origin main
           docker stop tournament-production-container || true
           docker rm tournament-production-container || true
           docker build -t tournament-production .
           docker run -d -p 5000:5000 --name tournament-production-container tournament-production
           echo "Deployment completed successfully!"
+        script_stop: true
+        envs: GITHUB_SHA
