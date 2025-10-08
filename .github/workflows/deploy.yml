@@ -20,7 +20,9 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/tournament-admin/tournaments
-          git pull origin main
+          # Копируем код напрямую из GitHub Actions
+          rm -rf /home/tournament-admin/tournaments/*
+          cp -r /github/workspace/* /home/tournament-admin/tournaments/
           docker stop tournament-production-container || true
           docker rm tournament-production-container || true
           docker build --no-cache -t tournament-production .
