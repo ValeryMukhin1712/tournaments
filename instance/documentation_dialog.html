@@ -2038,6 +2038,22 @@ class DevelopmentConfig(Config):
         </div>
     </div>
 
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="info">
+                    <h5><i class="fas fa-info-circle me-2"></i>Последние обновления (08.10.2025):</h5>
+                    <ul>
+                        <li><strong>Исправлена проблема с GitHub Actions:</strong> Убран git pull из workflow, добавлено копирование кода напрямую из GitHub Actions на сервер</li>
+                        <li><strong>Улучшен пользовательский интерфейс:</strong> Добавлена возможность кликать по строкам таблицы расписания для открытия формы ввода результата матча</li>
+                        <li><strong>Добавлены визуальные эффекты:</strong> Строки таблицы расписания теперь подсвечиваются при наведении и имеют курсор pointer</li>
+                        <li><strong>Добавлена подсказка для пользователей:</strong> Под таблицей расписания отображается текст "Кликните по строке матча для ввода результата"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Устанавливаем текущую дату
         document.getElementById('current-date').textContent = new Date().toLocaleString('ru-RU');

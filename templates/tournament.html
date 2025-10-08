@@ -204,6 +204,21 @@
     50% { transform: translateY(-20px); }
 }
 
+/* Стили для строк таблицы расписания */
+.match-row {
+    transition: all 0.3s ease;
+}
+
+.match-row:hover {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+}
+
+.match-row:hover td {
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
 /* Адаптивные размеры для мобильных устройств */
 @media (max-width: 576px) {
     .main-container {
@@ -218,6 +233,10 @@
     .table-modern thead th,
     .table-modern tbody td {
         padding: 0.5rem;
+    }
+    
+    .match-row:hover {
+        transform: none; /* Отключаем масштабирование на мобильных */
     }
 }
 </style>
@@ -653,7 +672,14 @@
                                     </td>
                                 </tr>
                                 {% for match in day_data.matches %}
-                                <tr>
+                                <tr class="match-row" 
+                                    data-match-id="{{ match.id }}"
+                                    data-participant1="{{ match.participant1 }}"
+                                    data-participant2="{{ match.participant2 }}"
+                                    data-score1="{{ match.score1 or 0 }}"
+                                    data-score2="{{ match.score2 or 0 }}"
+                                    style="cursor: pointer;"
+                                    onclick="openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', {{ match.score1 or 0 }}, {{ match.score2 or 0 }})">
                                     <td class="text-center">
                                         <span class="badge bg-primary">{{ match.global_number }}</span>
                                     </td>
@@ -716,7 +742,7 @@
                                     <td class="text-center">
                                         {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
                                         <button class="btn btn-sm btn-outline-primary" 
-                                                onclick="openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', {{ match.score1 or 0 }}, {{ match.score2 or 0 }})"
+                                                onclick="event.stopPropagation(); openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', {{ match.score1 or 0 }}, {{ match.score2 or 0 }})"
                                                 title="Ввести результат матча">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -736,6 +762,12 @@
                         <p class="mb-0">Расписание матчей пока не составлено</p>
                         <small>Нажмите "Пересчитать расписание" для создания расписания</small>
                     </div>
+                {% endif %}
+                
+                {% if schedule_display %}
+                <div class="text-center text-muted mt-3">
+                    <small><i class="fas fa-info-circle me-1"></i>Кликните по строке матча для ввода результата</small>
+                </div>
                 {% endif %}
             </div>
         </div>

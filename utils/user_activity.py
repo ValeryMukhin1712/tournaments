@@ -163,3 +163,4 @@ def mark_user_inactive(db, UserActivity, user_type, user_id, session_id=None):
     except Exception as e:
         print(f"Ошибка при пометке пользователя как неактивного: {e}")
         db.session.rollback()
+

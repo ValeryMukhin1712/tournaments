@@ -1,0 +1,261 @@
+🌐 НАСТРОЙКА NGINX И SSL ДЛЯ ДОМЕНА tournaments.sytes.net
+============================================================
+
+📋 ОБЗОР:
+Команды для настройки Nginx как reverse proxy и получения SSL сертификата
+для домена tournaments.sytes.net
+
+🎯 ДОМЕН: tournaments.sytes.net
+🖥️ СЕРВЕР: 45.135.164.202
+
+🔧 ЭТАП 1: ПРОВЕРКА ДОМЕНА
+===========================
+
+# Проверка DNS резолвинга
+nslookup tournaments.sytes.net
+dig tournaments.sytes.net
+
+# Проверка доступности домена
+curl -I http://tournaments.sytes.net
+ping tournaments.sytes.net
+
+# Проверка что домен указывает на наш сервер
+host tournaments.sytes.net
+
+🔧 ЭТАП 2: УСТАНОВКА CERTBOT
+=============================
+
+# Установка Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Проверка установки
+certbot --version
+
+# Проверка доступности плагина nginx
+certbot plugins
+
+🔧 ЭТАП 3: НАСТРОЙКА NGINX ДЛЯ ДОМЕНА
+======================================
+
+# Создаем конфигурацию для домена
+sudo nano /etc/nginx/sites-available/tournament-app
+
+СОДЕРЖИМОЕ ФАЙЛА /etc/nginx/sites-available/tournament-app:
+----------------------------------------------------------
+server {
+    listen 80;
+    server_name tournaments.sytes.net;
+
+    # Логи
+    access_log /var/log/nginx/tournament-app.access.log;
+    error_log /var/log/nginx/tournament-app.error.log;
+
+    # Основное приложение
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        
+        # Таймауты
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # Статические файлы (если есть)
+    location /static/ {
+        alias /home/tournament-admin/tournament-app/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+}
+
+# Активируем конфигурацию
+sudo ln -s /etc/nginx/sites-available/tournament-app /etc/nginx/sites-enabled/
+
+# Удаляем дефолтную конфигурацию
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Проверяем конфигурацию
+sudo nginx -t
+
+# Перезапускаем Nginx
+sudo systemctl reload nginx
+
+# Проверяем статус
+sudo systemctl status nginx
+
+🔧 ЭТАП 4: ПОЛУЧЕНИЕ SSL СЕРТИФИКАТА
+=====================================
+
+# Получение SSL сертификата
+sudo certbot --nginx -d tournaments.sytes.net
+
+ИНСТРУКЦИИ ДЛЯ CERTBOT:
+------------------------
+1. Введите email для уведомлений о сертификате
+2. Согласитесь с условиями использования (A)
+3. Выберите redirect HTTP на HTTPS (2)
+
+# Проверка сертификата
+sudo certbot certificates
+
+# Тест автообновления
+sudo certbot renew --dry-run
+
+🔧 ЭТАП 5: ПРОВЕРКА SSL И NGINX
+================================
+
+# Проверка конфигурации Nginx
+sudo nginx -t
+
+# Проверка портов
+sudo netstat -tlnp | grep :80
+sudo netstat -tlnp | grep :443
+
+# Проверка доступности по HTTP
+curl -I http://tournaments.sytes.net
+
+# Проверка доступности по HTTPS
+curl -I https://tournaments.sytes.net
+
+# Проверка SSL сертификата
+openssl s_client -connect tournaments.sytes.net:443 -servername tournaments.sytes.net
+
+# Проверка редиректа с HTTP на HTTPS
+curl -I http://tournaments.sytes.net
+
+🔧 ЭТАП 6: НАСТРОЙКА АВТООБНОВЛЕНИЯ СЕРТИФИКАТА
+================================================
+
+# Создаем cron задачу для автообновления
+sudo crontab -e
+
+# Добавляем строку (выберите время по желанию):
+# 0 12 * * * /usr/bin/certbot renew --quiet
+
+# Или создаем systemd timer (рекомендуется)
+sudo systemctl enable certbot.timer
+sudo systemctl start certbot.timer
+
+# Проверяем статус timer
+sudo systemctl status certbot.timer
+
+🔧 ЭТАП 7: НАСТРОЙКА ФАЙРВОЛА ДЛЯ HTTPS
+========================================
+
+# Проверяем текущий статус файрвола
+sudo ufw status
+
+# Если нужно, добавляем правила для HTTPS
+sudo ufw allow 'Nginx Full'
+sudo ufw allow OpenSSH
+
+# Проверяем статус
+sudo ufw status verbose
+
+🔧 ЭТАП 8: СОЗДАНИЕ ТЕСТОВОГО ПРИЛОЖЕНИЯ
+=========================================
+
+# Создаем простой тестовый Flask сервер
+sudo nano /home/tournament-admin/test_app.py
+
+СОДЕРЖИМОЕ test_app.py:
+-----------------------
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return '<h1>Tournament App is working!</h1><p>Domain: tournaments.sytes.net</p>'
+
+@app.route('/health')
+def health():
+    return 'OK', 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
+# Устанавливаем Flask
+pip3 install flask
+
+# Запускаем тестовое приложение в фоне
+nohup python3 /home/tournament-admin/test_app.py > /dev/null 2>&1 &
+
+# Проверяем что приложение запущено
+ps aux | grep test_app
+
+# Проверяем доступность
+curl http://localhost:5000
+
+🔧 ЭТАП 9: ФИНАЛЬНАЯ ПРОВЕРКА
+==============================
+
+# Проверка доступности по HTTP (должен редиректить на HTTPS)
+curl -I http://tournaments.sytes.net
+
+# Проверка доступности по HTTPS
+curl -I https://tournaments.sytes.net
+
+# Проверка в браузере
+# Откройте https://tournaments.sytes.net в браузере
+
+# Проверка SSL сертификата в браузере
+# Должен показывать зеленый замок
+
+📋 ЧЕК-ЛИСТ ВЫПОЛНЕНИЯ:
+========================
+- ⏳ Проверка DNS резолвинга домена
+- ⏳ Установка Certbot
+- ⏳ Создание конфигурации Nginx
+- ⏳ Активация конфигурации
+- ⏳ Получение SSL сертификата
+- ⏳ Проверка работы HTTPS
+- ⏳ Настройка автообновления сертификата
+- ⏳ Тестирование приложения
+
+🚨 ВОЗМОЖНЫЕ ПРОБЛЕМЫ И РЕШЕНИЯ:
+=================================
+
+1. ДОМЕН НЕ РЕЗОЛВИТСЯ
+- Проверить настройки no-ip
+- Подождать распространения DNS (до 24 часов)
+- Проверить A-запись в no-ip
+
+2. CERTBOT НЕ МОЖЕТ ПОЛУЧИТЬ СЕРТИФИКАТ
+- Проверить что домен доступен по HTTP
+- Проверить файрвол (порт 80 должен быть открыт)
+- Проверить что Nginx работает
+
+3. NGINX НЕ ЗАПУСКАЕТСЯ
+- Проверить конфигурацию: sudo nginx -t
+- Проверить логи: sudo tail -f /var/log/nginx/error.log
+- Проверить порты: sudo netstat -tlnp | grep nginx
+
+4. SSL СЕРТИФИКАТ НЕ РАБОТАЕТ
+- Проверить сертификат: sudo certbot certificates
+- Проверить конфигурацию Nginx
+- Перезапустить Nginx: sudo systemctl restart nginx
+
+🎯 СЛЕДУЮЩИЕ ЭТАПЫ:
+===================
+После успешной настройки SSL:
+1. Создание Dockerfile для Flask приложения
+2. Создание docker-compose.yml
+3. Настройка GitHub Actions
+4. Настройка автоматического деплоя
+
+Дата создания: $(date)
+Версия: 1.0
+
