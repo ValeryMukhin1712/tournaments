@@ -1,0 +1,500 @@
+# Инструкция для прямого деплоя Flask приложения на VDS без Docker
+
+## 🎯 Преимущества прямого деплоя:
+- Меньше потребление ресурсов (нет overhead Docker)
+- Прямой доступ к системным ресурсам
+- Проще отладка и мониторинг
+- Быстрее запуск приложения
+- Экономия RAM (50-80 MB вместо 100-150 MB)
+
+## 🚀 Вариант 1: Прямая установка Python + Gunicorn + Systemd
+
+### 1. Подготовка сервера
+
+```bash
+# Обновление системы
+sudo apt update && sudo apt upgrade -y
+
+# Установка необходимых пакетов
+sudo apt install python3 python3-pip python3-venv nginx git -y
+
+# Создание пользователя (если еще не создан)
+sudo adduser tournament-admin
+sudo usermod -aG sudo tournament-admin
+```
+
+### 2. Подготовка проекта
+
+```bash
+# Создание папки проекта
+sudo mkdir -p /home/tournament-admin/tournaments
+sudo chown tournament-admin:tournament-admin /home/tournament-admin/tournaments
+
+# Переход в папку проекта
+cd /home/tournament-admin/tournaments
+
+# Клонирование репозитория
+git clone https://github.com/ValeryMukhin1712/tournaments.git .
+
+# Создание виртуального окружения
+python3 -m venv venv
+source venv/bin/activate
+
+# Установка зависимостей
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 3. Создание systemd сервиса
+
+```bash
+# Создание файла сервиса
+sudo nano /etc/systemd/system/tournament-app.service
+```
+
+### Содержимое файла /etc/systemd/system/tournament-app.service:
+
+```ini
+[Unit]
+Description=Tournament App
+After=network.target
+
+[Service]
+Type=exec
+User=tournament-admin
+Group=tournament-admin
+WorkingDirectory=/home/tournament-admin/tournaments
+Environment=PATH=/home/tournament-admin/tournaments/venv/bin
+ExecStart=/home/tournament-admin/tournaments/venv/bin/gunicorn --bind 127.0.0.1:5000 --workers 2 --timeout 120 app:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 4. Запуск сервиса
+
+```bash
+# Перезагрузка systemd
+sudo systemctl daemon-reload
+
+# Включение автозапуска
+sudo systemctl enable tournament-app
+
+# Запуск сервиса
+sudo systemctl start tournament-app
+
+# Проверка статуса
+sudo systemctl status tournament-app
+
+# Просмотр логов
+sudo journalctl -u tournament-app -f
+```
+
+## 🚀 Вариант 2: С использованием Supervisor
+
+### 1. Установка Supervisor
+
+```bash
+# Установка Supervisor
+sudo apt install supervisor -y
+
+# Создание конфигурации
+sudo nano /etc/supervisor/conf.d/tournament-app.conf
+```
+
+### Содержимое файла /etc/supervisor/conf.d/tournament-app.conf:
+
+```ini
+[program:tournament-app]
+command=/home/tournament-admin/tournaments/venv/bin/gunicorn --bind 127.0.0.1:5000 --workers 2 --timeout 120 app:app
+directory=/home/tournament-admin/tournaments
+user=tournament-admin
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/tournament-app.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3
+```
+
+### 2. Запуск через Supervisor
+
+```bash
+# Перезагрузка конфигурации
+sudo supervisorctl reread
+sudo supervisorctl update
+
+# Запуск приложения
+sudo supervisorctl start tournament-app
+
+# Проверка статуса
+sudo supervisorctl status
+
+# Просмотр логов
+sudo supervisorctl tail -f tournament-app
+```
+
+## 🌐 Настройка Nginx
+
+### 1. Создание конфигурации Nginx
+
+```bash
+# Создание конфигурации
+sudo nano /etc/nginx/sites-available/tournament-app
+```
+
+### Содержимое файла /etc/nginx/sites-available/tournament-app:
+
+```nginx
+server {
+    listen 80;
+    server_name tournaments.sytes.net;
+    
+    # Логирование
+    access_log /var/log/nginx/tournament-app.access.log;
+    error_log /var/log/nginx/tournament-app.error.log;
+    
+    # Основное приложение
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+    }
+    
+    # Статические файлы
+    location /static {
+        alias /home/tournament-admin/tournaments/static;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Файлы загрузок
+    location /uploads {
+        alias /home/tournament-admin/tournaments/uploads;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Безопасность
+    location ~ /\. {
+        deny all;
+    }
+}
+```
+
+### 2. Активация сайта
+
+```bash
+# Создание символической ссылки
+sudo ln -s /etc/nginx/sites-available/tournament-app /etc/nginx/sites-enabled/
+
+# Удаление дефолтного сайта
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Проверка конфигурации
+sudo nginx -t
+
+# Перезапуск Nginx
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
+
+## 🔒 Настройка SSL сертификата
+
+```bash
+# Установка Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Получение сертификата
+sudo certbot --nginx -d tournaments.sytes.net
+
+# Проверка автообновления
+sudo certbot renew --dry-run
+```
+
+## 🔧 Скрипты автоматизации
+
+### 1. Скрипт деплоя
+
+```bash
+# Создание скрипта деплоя
+cat > /home/tournament-admin/deploy_native.sh << 'EOF'
+#!/bin/bash
+set -e
+echo "🚀 Начинаем деплой без Docker..."
+
+cd /home/tournament-admin/tournaments
+
+# Останавливаем приложение
+sudo systemctl stop tournament-app || true
+
+# Обновляем код
+git pull origin main
+
+# Активируем виртуальное окружение
+source venv/bin/activate
+
+# Обновляем зависимости
+pip install -r requirements.txt
+
+# Запускаем приложение
+sudo systemctl start tournament-app
+
+# Проверяем статус
+sleep 5
+sudo systemctl status tournament-app --no-pager
+
+echo "🎉 Деплой завершен!"
+EOF
+
+chmod +x /home/tournament-admin/deploy_native.sh
+```
+
+### 2. Скрипт мониторинга
+
+```bash
+# Создание скрипта мониторинга
+cat > /home/tournament-admin/monitor.sh << 'EOF'
+#!/bin/bash
+echo "=== Статус сервисов ==="
+sudo systemctl status tournament-app --no-pager
+echo ""
+echo "=== Использование ресурсов ==="
+free -h
+echo ""
+echo "=== Использование диска ==="
+df -h
+echo ""
+echo "=== Логи приложения (последние 10 строк) ==="
+sudo journalctl -u tournament-app -n 10 --no-pager
+EOF
+
+chmod +x /home/tournament-admin/monitor.sh
+```
+
+### 3. Скрипт резервного копирования
+
+```bash
+# Создание скрипта резервного копирования
+cat > /home/tournament-admin/backup_native.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR="/home/tournament-admin/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+mkdir -p $BACKUP_DIR
+
+# Резервная копия базы данных
+if [ -f "/home/tournament-admin/tournaments/instance/tournament.db" ]; then
+    cp /home/tournament-admin/tournaments/instance/tournament.db $BACKUP_DIR/tournament_$DATE.db
+fi
+
+# Резервная копия конфигурации Nginx
+cp /etc/nginx/sites-available/tournament-app $BACKUP_DIR/nginx_config_$DATE
+
+# Резервная копия systemd сервиса
+cp /etc/systemd/system/tournament-app.service $BACKUP_DIR/systemd_service_$DATE
+
+# Очистка старых резервных копий (старше 7 дней)
+find $BACKUP_DIR -name "*.db" -mtime +7 -delete
+find $BACKUP_DIR -name "nginx_config_*" -mtime +7 -delete
+find $BACKUP_DIR -name "systemd_service_*" -mtime +7 -delete
+
+echo "Резервная копия создана: $DATE"
+EOF
+
+chmod +x /home/tournament-admin/backup_native.sh
+
+# Добавление в cron (ежедневно в 2:00)
+echo "0 2 * * * /home/tournament-admin/backup_native.sh" | crontab -
+```
+
+## 📊 Мониторинг и диагностика
+
+### 1. Команды для проверки статуса
+
+```bash
+# Статус приложения
+sudo systemctl status tournament-app
+
+# Логи приложения
+sudo journalctl -u tournament-app -f
+
+# Проверка портов
+sudo netstat -tlnp | grep :5000
+
+# Проверка процессов
+ps aux | grep gunicorn
+
+# Использование ресурсов
+htop
+free -h
+df -h
+```
+
+### 2. Команды для отладки
+
+```bash
+# Тестовый запуск приложения
+cd /home/tournament-admin/tournaments
+source venv/bin/activate
+python app.py
+
+# Проверка конфигурации Nginx
+sudo nginx -t
+
+# Перезапуск всех сервисов
+sudo systemctl restart tournament-app
+sudo systemctl restart nginx
+
+# Проверка логов Nginx
+sudo tail -f /var/log/nginx/tournament-app.error.log
+sudo tail -f /var/log/nginx/tournament-app.access.log
+```
+
+## 🚨 Экстренное восстановление
+
+### 1. Команды для восстановления
+
+```bash
+# Остановка всех сервисов
+sudo systemctl stop tournament-app
+sudo systemctl stop nginx
+
+# Очистка и переустановка зависимостей
+cd /home/tournament-admin/tournaments
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Восстановление из резервной копии
+cp /home/tournament-admin/backups/tournament_YYYYMMDD_HHMMSS.db /home/tournament-admin/tournaments/instance/tournament.db
+
+# Запуск сервисов
+sudo systemctl start tournament-app
+sudo systemctl start nginx
+```
+
+### 2. Команды для очистки системы
+
+```bash
+# Очистка логов
+sudo journalctl --vacuum-time=7d
+
+# Очистка пакетов
+sudo apt autoremove -y
+sudo apt autoclean
+
+# Очистка временных файлов
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+```
+
+## 🔄 Настройка GitHub Actions для прямого деплоя
+
+### Обновленный .github/workflows/deploy.yml:
+
+```yaml
+name: Deploy to VDS Server (Native)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /home/tournament-admin/tournaments
+          # Копируем код напрямую из GitHub Actions
+          rm -rf /home/tournament-admin/tournaments/*
+          cp -r /github/workspace/* /home/tournament-admin/tournaments/
+          # Останавливаем приложение
+          sudo systemctl stop tournament-app || true
+          # Активируем виртуальное окружение и обновляем зависимости
+          source venv/bin/activate
+          pip install -r requirements.txt
+          # Запускаем приложение
+          sudo systemctl start tournament-app
+          # Проверяем статус
+          sleep 5
+          sudo systemctl status tournament-app --no-pager
+          echo "Deployment completed successfully!"
+        script_stop: true
+        envs: GITHUB_SHA
+```
+
+## 📋 Чек-лист для деплоя
+
+- [ ] Установлен Python 3 и pip
+- [ ] Создан пользователь tournament-admin
+- [ ] Клонирован репозиторий
+- [ ] Создано виртуальное окружение
+- [ ] Установлены зависимости
+- [ ] Создан systemd сервис
+- [ ] Настроен Nginx
+- [ ] Получен SSL сертификат
+- [ ] Созданы скрипты автоматизации
+- [ ] Настроен GitHub Actions
+- [ ] Протестирован деплой
+- [ ] Настроено резервное копирование
+
+## 🎯 Рекомендации по оптимизации
+
+### 1. Оптимизация Gunicorn
+
+```bash
+# Создание конфигурационного файла Gunicorn
+cat > /home/tournament-admin/tournaments/gunicorn.conf.py << 'EOF'
+bind = "127.0.0.1:5000"
+workers = 2
+worker_class = "sync"
+worker_connections = 1000
+timeout = 120
+keepalive = 2
+max_requests = 1000
+max_requests_jitter = 100
+preload_app = True
+EOF
+```
+
+### 2. Оптимизация Nginx
+
+```nginx
+# Добавить в конфигурацию Nginx
+gzip on;
+gzip_vary on;
+gzip_min_length 1024;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+# Кэширование статических файлов
+location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}
+```
+
+---
+*Создано: 08.10.2025*
+*Версия: 1.0*
+*Для проекта: Турнирный Ассистент v2.1*
+*Тип деплоя: Прямой (без Docker)*
+
+

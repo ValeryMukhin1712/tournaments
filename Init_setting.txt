@@ -1,0 +1,300 @@
+# Полный список команд для настройки нового сервера
+
+## 🔐 1. Настройка безопасности сервера
+
+```bash
+# Создание нового пользователя
+sudo adduser tournament-admin
+sudo usermod -aG sudo tournament-admin
+
+# Настройка SSH ключей
+sudo mkdir -p /home/tournament-admin/.ssh
+sudo chmod 700 /home/tournament-admin/.ssh
+sudo chown tournament-admin:tournament-admin /home/tournament-admin/.ssh
+
+# Добавление публичного ключа
+echo "YOUR_PUBLIC_KEY_HERE" | sudo tee /home/tournament-admin/.ssh/authorized_keys
+sudo chmod 600 /home/tournament-admin/.ssh/authorized_keys
+sudo chown tournament-admin:tournament-admin /home/tournament-admin/.ssh/authorized_keys
+
+# Настройка SSH (отключение root, изменение порта)
+sudo nano /etc/ssh/sshd_config
+# Добавить/изменить:
+# Port 2222
+# PermitRootLogin no
+# PasswordAuthentication no
+# PubkeyAuthentication yes
+
+# Перезапуск SSH
+sudo systemctl restart sshd
+
+# Настройка файрвола
+sudo ufw enable
+sudo ufw allow 2222/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw status
+
+# Установка Fail2ban
+sudo apt update
+sudo apt install fail2ban -y
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+```
+
+## 🐳 2. Установка Docker и Docker Compose
+
+```bash
+# Установка Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker tournament-admin
+
+# Перелогиниться или выполнить:
+newgrp docker
+
+# Установка Docker Compose
+sudo apt install docker-compose-plugin -y
+
+# Проверка установки
+docker --version
+docker compose version
+```
+
+## 🌐 3. Установка и настройка Nginx
+
+```bash
+# Установка Nginx
+sudo apt update
+sudo apt install nginx -y
+
+# Создание конфигурации для домена
+sudo nano /etc/nginx/sites-available/tournament-app
+
+# Содержимое файла:
+server {
+    listen 80;
+    server_name tournaments.sytes.net;
+    
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Активация сайта
+sudo ln -s /etc/nginx/sites-available/tournament-app /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
+
+## 🔒 4. Настройка SSL сертификата (Let's Encrypt)
+
+```bash
+# Установка Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Получение сертификата
+sudo certbot --nginx -d tournaments.sytes.net
+
+# Проверка автообновления
+sudo certbot renew --dry-run
+```
+
+## 📁 5. Подготовка проекта
+
+```bash
+# Создание папки проекта
+sudo mkdir -p /home/tournament-admin/tournaments
+sudo chown tournament-admin:tournament-admin /home/tournament-admin/tournaments
+
+# Клонирование репозитория
+cd /home/tournament-admin/tournaments
+git clone https://github.com/ValeryMukhin1712/tournaments.git .
+
+# Создание необходимых файлов
+cat > Dockerfile << 'EOF'
+FROM python:3.11-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN mkdir -p /app/instance
+RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
+USER app
+EXPOSE 5000
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "app:app"]
+EOF
+
+cat > requirements.txt << 'EOF'
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-Login==0.6.3
+Flask-WTF==1.1.1
+Flask-Mail==0.9.1
+WTForms==3.0.1
+python-dotenv==1.0.0
+email-validator==2.0.0
+Werkzeug==2.3.7
+gunicorn==21.2.0
+requests==2.31.0
+openpyxl==3.1.2
+EOF
+```
+
+## 🚀 6. Настройка GitHub Actions
+
+```bash
+# Создание SSH ключей для GitHub Actions
+ssh-keygen -t rsa -b 4096 -f /home/tournament-admin/.ssh/github_actions -N ""
+
+# Добавление публичного ключа в authorized_keys
+cat /home/tournament-admin/.ssh/github_actions.pub >> /home/tournament-admin/.ssh/authorized_keys
+
+# Показ приватного ключа для добавления в GitHub Secrets
+cat /home/tournament-admin/.ssh/github_actions
+```
+
+## 🔧 7. Создание скрипта деплоя
+
+```bash
+# Создание скрипта автоматического деплоя
+cat > /home/tournament-admin/deploy.sh << 'EOF'
+#!/bin/bash
+set -e
+echo "🚀 Начинаем деплой..."
+cd /home/tournament-admin/tournaments
+docker stop tournament-production-container || true
+docker rm tournament-production-container || true
+git pull origin main
+docker build --no-cache -t tournament-production .
+docker run -d -p 5000:5000 --name tournament-production-container tournament-production
+echo "🎉 Деплой завершен!"
+EOF
+
+# Делаем скрипт исполняемым
+chmod +x /home/tournament-admin/deploy.sh
+```
+
+## ✅ 8. Проверка готовности
+
+```bash
+# Проверка всех сервисов
+sudo systemctl status docker
+sudo systemctl status nginx
+sudo systemctl status fail2ban
+
+# Проверка портов
+sudo netstat -tlnp | grep -E ':(80|443|5000)'
+
+# Проверка SSL сертификата
+sudo certbot certificates
+
+# Тест сборки Docker образа
+cd /home/tournament-admin/tournaments
+docker build -t tournament-test .
+```
+
+## 📊 9. Мониторинг и логирование
+
+```bash
+# Установка htop для мониторинга
+sudo apt install htop -y
+
+# Настройка логирования Docker
+sudo nano /etc/docker/daemon.json
+# Добавить:
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+
+# Перезапуск Docker
+sudo systemctl restart docker
+```
+
+## 🔄 10. Настройка резервного копирования
+
+```bash
+# Создание скрипта резервного копирования
+cat > /home/tournament-admin/backup.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR="/home/tournament-admin/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+mkdir -p $BACKUP_DIR
+
+# Резервная копия базы данных
+cp /home/tournament-admin/tournaments/instance/tournament.db $BACKUP_DIR/tournament_$DATE.db
+
+# Резервная копия конфигурации Nginx
+cp /etc/nginx/sites-available/tournament-app $BACKUP_DIR/nginx_config_$DATE
+
+# Очистка старых резервных копий (старше 7 дней)
+find $BACKUP_DIR -name "*.db" -mtime +7 -delete
+find $BACKUP_DIR -name "nginx_config_*" -mtime +7 -delete
+
+echo "Резервная копия создана: $DATE"
+EOF
+
+chmod +x /home/tournament-admin/backup.sh
+
+# Добавление в cron (ежедневно в 2:00)
+echo "0 2 * * * /home/tournament-admin/backup.sh" | crontab -
+```
+
+## 🎯 GitHub Secrets для настройки:
+
+- **SERVER_HOST:** IP адрес нового сервера
+- **SERVER_USER:** tournament-admin
+- **SSH_PRIVATE_KEY:** содержимое файла `/home/tournament-admin/.ssh/github_actions`
+
+## 📝 Дополнительные команды для диагностики:
+
+```bash
+# Проверка использования ресурсов
+free -h
+df -h
+htop
+
+# Проверка логов
+sudo journalctl -u docker -f
+sudo journalctl -u nginx -f
+docker logs tournament-production-container
+
+# Очистка системы
+docker system prune -a
+sudo apt autoremove -y
+sudo apt autoclean
+```
+
+## 🚨 Команды для экстренного восстановления:
+
+```bash
+# Перезапуск всех сервисов
+sudo systemctl restart docker
+sudo systemctl restart nginx
+sudo systemctl restart fail2ban
+
+# Очистка Docker
+docker stop $(docker ps -q) 2>/dev/null || true
+docker container prune -f
+docker image prune -a -f
+
+# Восстановление из резервной копии
+cp /home/tournament-admin/backups/tournament_YYYYMMDD_HHMMSS.db /home/tournament-admin/tournaments/instance/tournament.db
+```
+
+---
+*Создано: 08.10.2025*
+*Версия: 1.0*
+*Для проекта: Турнирный Ассистент v2.1*
+
+

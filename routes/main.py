@@ -1162,7 +1162,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         username = data.get('username')
         password = data.get('password')
         
-        if username == 'admin' and password == 'adm444':
+        if username == 'admin' and password == 'adm555':
             # Простая заглушка для системного админа
             system_admin = type('Admin', (), {
                 'id': 1,

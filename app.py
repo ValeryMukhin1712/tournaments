@@ -107,15 +107,15 @@ def init_db():
             # Создание/обновление администратора по умолчанию
             admin = User.query.filter_by(username='admin').first()
             if not admin:
-                admin = User(username='admin', password_hash=generate_password_hash('adm444'), role='администратор')
+                admin = User(username='admin', password_hash=generate_password_hash('adm555'), role='администратор')
                 db.session.add(admin)
                 db.session.commit()
-                logger.info("Администратор создан: admin/adm444")
+                logger.info("Администратор создан: admin/adm555")
             else:
                 # Обновляем пароль администратора на случай, если он был изменен
-                admin.password_hash = generate_password_hash('adm444')
+                admin.password_hash = generate_password_hash('adm555')
                 db.session.commit()
-                logger.info("Пароль администратора обновлен: admin/adm444")
+                logger.info("Пароль администратора обновлен: admin/adm555")
             
             # Инициализация настроек по умолчанию
             Settings.set_setting('max_tokens', '10', 'Максимальное количество паролей для создания турниров')

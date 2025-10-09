@@ -39,3 +39,4 @@ def create_user_activity_model(db):
     
     return UserActivity
 
+

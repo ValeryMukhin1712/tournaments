@@ -259,3 +259,5 @@ curl -I https://tournaments.sytes.net
 Дата создания: $(date)
 Версия: 1.0
 
+
+

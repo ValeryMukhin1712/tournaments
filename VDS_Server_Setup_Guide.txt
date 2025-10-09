@@ -1,0 +1,826 @@
+# Полная инструкция по первичной настройке VDS сервера для Flask приложения
+
+## 🎯 Цель инструкции
+Настройка нового VDS сервера с Ubuntu для развертывания Flask приложения "Турнирный Ассистент" с максимальной безопасностью и производительностью.
+
+## 📋 Предварительные требования
+- VDS сервер с Ubuntu 20.04+ или 22.04+
+- Root доступ к серверу
+- Домен (например, через no-ip.com)
+- SSH клиент (PuTTY для Windows или встроенный SSH)
+
+## 🚀 Этап 1: Первоначальное подключение и обновление
+
+### 1.1 Подключение к серверу
+```bash
+# Через SSH (Linux/Mac)
+ssh root@YOUR_SERVER_IP
+
+# Через PuTTY (Windows)
+# Введите IP адрес сервера и подключитесь как root
+```
+
+### 1.2 Обновление системы
+```bash
+# Обновление списка пакетов
+apt update
+
+# Обновление всех пакетов
+apt upgrade -y
+
+# Установка дополнительных утилит
+apt install -y curl wget git nano htop ufw fail2ban
+```
+
+## 🔐 Этап 2: Настройка безопасности
+
+### 2.1 Создание нового пользователя
+```bash
+# Создание пользователя tournament-admin
+adduser tournament-admin
+
+# Добавление пользователя в группу sudo
+usermod -aG sudo tournament-admin
+
+# Проверка создания пользователя
+id tournament-admin
+```
+
+### 2.2 Настройка SSH ключей
+```bash
+# Переключение на нового пользователя
+su - tournament-admin
+
+# Создание директории для SSH ключей
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+
+# Создание файла authorized_keys
+touch ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+# Выход из пользователя
+exit
+```
+
+### 2.3 Генерация SSH ключей на локальной машине
+
+#### Для Windows (PuTTY):
+1. Запустите PuTTYgen
+2. Выберите RSA, 2048 бит
+3. Нажмите "Generate" и двигайте мышью
+4. Сохраните приватный ключ (tournament-admin.ppk)
+5. Скопируйте публичный ключ из окна
+
+#### Для Linux/Mac:
+```bash
+# Генерация SSH ключа
+ssh-keygen -t rsa -b 2048 -C "tournament-admin@yourdomain.com"
+
+# Копирование публичного ключа
+cat ~/.ssh/id_rsa.pub
+```
+
+### 2.4 Добавление публичного ключа на сервер
+```bash
+# На сервере, под пользователем tournament-admin
+nano ~/.ssh/authorized_keys
+
+# Вставьте публичный ключ (одна строка)
+# Сохраните файл (Ctrl+X, Y, Enter)
+```
+
+### 2.5 Настройка SSH сервера
+```bash
+# Резервная копия конфигурации
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+
+# Редактирование конфигурации SSH
+nano /etc/ssh/sshd_config
+```
+
+#### Настройки в /etc/ssh/sshd_config:
+```bash
+# Отключение входа под root
+PermitRootLogin no
+
+# Разрешение только ключей (без паролей)
+PasswordAuthentication no
+PubkeyAuthentication yes
+
+# Отключение пустых паролей
+PermitEmptyPasswords no
+
+# Настройка порта (опционально, для дополнительной безопасности)
+Port 22
+
+# Разрешение только определенного пользователя
+AllowUsers tournament-admin
+
+# Отключение X11 forwarding
+X11Forwarding no
+
+# Настройка таймаутов
+ClientAliveInterval 300
+ClientAliveCountMax 2
+```
+
+### 2.6 Перезапуск SSH сервера
+```bash
+# Проверка конфигурации
+sshd -t
+
+# Перезапуск SSH сервера
+systemctl restart sshd
+
+# Проверка статуса
+systemctl status sshd
+```
+
+## 🛡️ Этап 3: Настройка файрвола
+
+### 3.1 Настройка UFW (Uncomplicated Firewall)
+```bash
+# Сброс правил
+ufw --force reset
+
+# Настройка политик по умолчанию
+ufw default deny incoming
+ufw default allow outgoing
+
+# Разрешение SSH
+ufw allow ssh
+# Или если изменили порт SSH:
+# ufw allow 22/tcp
+
+# Разрешение HTTP и HTTPS
+ufw allow 80/tcp
+ufw allow 443/tcp
+
+# Включение файрвола
+ufw --force enable
+
+# Проверка статуса
+ufw status verbose
+```
+
+### 3.2 Настройка Fail2ban
+```bash
+# Создание конфигурации для SSH
+nano /etc/fail2ban/jail.local
+```
+
+#### Содержимое /etc/fail2ban/jail.local:
+```ini
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 3
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 3600
+
+[nginx-http-auth]
+enabled = true
+filter = nginx-http-auth
+port = http,https
+logpath = /var/log/nginx/error.log
+
+[nginx-limit-req]
+enabled = true
+filter = nginx-limit-req
+port = http,https
+logpath = /var/log/nginx/error.log
+maxretry = 10
+```
+
+```bash
+# Перезапуск Fail2ban
+systemctl restart fail2ban
+systemctl enable fail2ban
+
+# Проверка статуса
+fail2ban-client status
+```
+
+## 🐍 Этап 4: Установка Python и зависимостей
+
+### 4.1 Установка Python
+```bash
+# Переключение на пользователя tournament-admin
+su - tournament-admin
+
+# Проверка версии Python
+python3 --version
+
+# Установка pip (если не установлен)
+sudo apt install -y python3-pip python3-venv
+
+# Обновление pip
+python3 -m pip install --upgrade pip
+
+# Проверка установки
+pip3 --version
+```
+
+### 4.2 Установка дополнительных пакетов
+```bash
+# Установка системных зависимостей
+sudo apt install -y build-essential libssl-dev libffi-dev python3-dev
+
+# Установка утилит для разработки
+sudo apt install -y git curl wget unzip
+```
+
+## 🌐 Этап 5: Установка и настройка Nginx
+
+### 5.1 Установка Nginx
+```bash
+# Установка Nginx
+sudo apt install -y nginx
+
+# Запуск и включение автозапуска
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# Проверка статуса
+sudo systemctl status nginx
+
+# Проверка доступности
+curl -I http://localhost
+```
+
+### 5.2 Базовая настройка Nginx
+```bash
+# Создание конфигурации для приложения
+sudo nano /etc/nginx/sites-available/tournament-app
+```
+
+#### Содержимое /etc/nginx/sites-available/tournament-app:
+```nginx
+server {
+    listen 80;
+    server_name tournaments.sytes.net;  # Замените на ваш домен
+    
+    # Логирование
+    access_log /var/log/nginx/tournament-app.access.log;
+    error_log /var/log/nginx/tournament-app.error.log;
+    
+    # Основное приложение
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+    }
+    
+    # Статические файлы
+    location /static {
+        alias /home/tournament-admin/tournaments/static;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Файлы загрузок
+    location /uploads {
+        alias /home/tournament-admin/tournaments/uploads;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Безопасность
+    location ~ /\. {
+        deny all;
+    }
+    
+    # Скрытие версии Nginx
+    server_tokens off;
+}
+```
+
+### 5.3 Активация сайта
+```bash
+# Создание символической ссылки
+sudo ln -s /etc/nginx/sites-available/tournament-app /etc/nginx/sites-enabled/
+
+# Удаление дефолтного сайта
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Проверка конфигурации
+sudo nginx -t
+
+# Перезапуск Nginx
+sudo systemctl restart nginx
+```
+
+## 🔒 Этап 6: Настройка SSL сертификата
+
+### 6.1 Установка Certbot
+```bash
+# Установка Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# Проверка установки
+certbot --version
+```
+
+### 6.2 Получение SSL сертификата
+```bash
+# Получение сертификата для домена
+sudo certbot --nginx -d tournaments.sytes.net
+
+# Следовать инструкциям:
+# 1. Ввести email для уведомлений
+# 2. Согласиться с условиями
+# 3. Выбрать опцию 2 (Redirect HTTP to HTTPS)
+```
+
+### 6.3 Настройка автообновления
+```bash
+# Проверка автообновления
+sudo certbot renew --dry-run
+
+# Добавление в cron (если не добавлено автоматически)
+echo "0 12 * * * /usr/bin/certbot renew --quiet" | sudo crontab -
+```
+
+## 📁 Этап 7: Подготовка проекта
+
+### 7.1 Создание директории проекта
+```bash
+# Создание директории
+sudo mkdir -p /home/tournament-admin/tournaments
+sudo chown tournament-admin:tournament-admin /home/tournament-admin/tournaments
+
+# Переход в директорию
+cd /home/tournament-admin/tournaments
+```
+
+### 7.2 Клонирование репозитория
+```bash
+# Клонирование проекта
+git clone https://github.com/ValeryMukhin1712/tournaments.git .
+
+# Проверка содержимого
+ls -la
+```
+
+### 7.3 Создание виртуального окружения
+```bash
+# Создание виртуального окружения
+python3 -m venv venv
+
+# Активация окружения
+source venv/bin/activate
+
+# Проверка активации
+which python
+which pip
+
+# Обновление pip
+pip install --upgrade pip
+```
+
+### 7.4 Установка зависимостей
+```bash
+# Установка зависимостей
+pip install -r requirements.txt
+
+# Проверка установленных пакетов
+pip list
+```
+
+## ⚙️ Этап 8: Настройка systemd сервиса
+
+### 8.1 Создание сервиса
+```bash
+# Создание файла сервиса
+sudo nano /etc/systemd/system/tournament-app.service
+```
+
+#### Содержимое /etc/systemd/system/tournament-app.service:
+```ini
+[Unit]
+Description=Tournament App
+After=network.target
+
+[Service]
+Type=exec
+User=tournament-admin
+Group=tournament-admin
+WorkingDirectory=/home/tournament-admin/tournaments
+Environment=PATH=/home/tournament-admin/tournaments/venv/bin
+ExecStart=/home/tournament-admin/tournaments/venv/bin/gunicorn --bind 127.0.0.1:5000 --workers 2 --timeout 120 app:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 8.2 Запуск сервиса
+```bash
+# Перезагрузка systemd
+sudo systemctl daemon-reload
+
+# Включение автозапуска
+sudo systemctl enable tournament-app
+
+# Запуск сервиса
+sudo systemctl start tournament-app
+
+# Проверка статуса
+sudo systemctl status tournament-app
+
+# Просмотр логов
+sudo journalctl -u tournament-app -f
+```
+
+## 🔧 Этап 9: Создание скриптов автоматизации
+
+### 9.1 Скрипт деплоя
+```bash
+# Создание скрипта деплоя
+cat > /home/tournament-admin/deploy.sh << 'EOF'
+#!/bin/bash
+set -e
+echo "🚀 Начинаем деплой..."
+
+cd /home/tournament-admin/tournaments
+
+# Останавливаем приложение
+sudo systemctl stop tournament-app || true
+
+# Обновляем код
+git pull origin main
+
+# Активируем виртуальное окружение
+source venv/bin/activate
+
+# Обновляем зависимости
+pip install -r requirements.txt
+
+# Запускаем приложение
+sudo systemctl start tournament-app
+
+# Проверяем статус
+sleep 5
+sudo systemctl status tournament-app --no-pager
+
+echo "🎉 Деплой завершен!"
+EOF
+
+chmod +x /home/tournament-admin/deploy.sh
+```
+
+### 9.2 Скрипт мониторинга
+```bash
+# Создание скрипта мониторинга
+cat > /home/tournament-admin/monitor.sh << 'EOF'
+#!/bin/bash
+echo "=== Статус сервисов ==="
+sudo systemctl status tournament-app --no-pager
+echo ""
+echo "=== Использование ресурсов ==="
+free -h
+echo ""
+echo "=== Использование диска ==="
+df -h
+echo ""
+echo "=== Логи приложения (последние 10 строк) ==="
+sudo journalctl -u tournament-app -n 10 --no-pager
+EOF
+
+chmod +x /home/tournament-admin/monitor.sh
+```
+
+### 9.3 Скрипт резервного копирования
+```bash
+# Создание скрипта резервного копирования
+cat > /home/tournament-admin/backup.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR="/home/tournament-admin/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+mkdir -p $BACKUP_DIR
+
+# Резервная копия базы данных
+if [ -f "/home/tournament-admin/tournaments/instance/tournament.db" ]; then
+    cp /home/tournament-admin/tournaments/instance/tournament.db $BACKUP_DIR/tournament_$DATE.db
+fi
+
+# Резервная копия конфигурации Nginx
+cp /etc/nginx/sites-available/tournament-app $BACKUP_DIR/nginx_config_$DATE
+
+# Резервная копия systemd сервиса
+cp /etc/systemd/system/tournament-app.service $BACKUP_DIR/systemd_service_$DATE
+
+# Очистка старых резервных копий (старше 7 дней)
+find $BACKUP_DIR -name "*.db" -mtime +7 -delete
+find $BACKUP_DIR -name "nginx_config_*" -mtime +7 -delete
+find $BACKUP_DIR -name "systemd_service_*" -mtime +7 -delete
+
+echo "Резервная копия создана: $DATE"
+EOF
+
+chmod +x /home/tournament-admin/backup.sh
+
+# Добавление в cron (ежедневно в 2:00)
+echo "0 2 * * * /home/tournament-admin/backup.sh" | crontab -
+```
+
+## 🔑 Этап 10: Настройка GitHub Actions
+
+### 10.1 Создание SSH ключей для GitHub Actions
+```bash
+# Создание SSH ключей для GitHub Actions
+ssh-keygen -t rsa -b 2048 -f /home/tournament-admin/.ssh/github_actions -N ""
+
+# Просмотр публичного ключа
+cat /home/tournament-admin/.ssh/github_actions.pub
+
+# Добавление публичного ключа в authorized_keys
+cat /home/tournament-admin/.ssh/github_actions.pub >> /home/tournament-admin/.ssh/authorized_keys
+```
+
+### 10.2 Настройка GitHub Secrets
+В репозитории GitHub перейдите в Settings → Secrets and variables → Actions и добавьте:
+
+- `SERVER_HOST`: IP адрес вашего сервера
+- `SERVER_USER`: tournament-admin
+- `SSH_PRIVATE_KEY`: содержимое файла `/home/tournament-admin/.ssh/github_actions`
+
+### 10.3 Создание GitHub Actions workflow
+```bash
+# Создание директории для workflow
+mkdir -p /home/tournament-admin/tournaments/.github/workflows
+
+# Создание файла workflow
+cat > /home/tournament-admin/tournaments/.github/workflows/deploy.yml << 'EOF'
+name: Deploy to VDS Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /home/tournament-admin/tournaments
+          # Копируем код напрямую из GitHub Actions
+          rm -rf /home/tournament-admin/tournaments/*
+          cp -r /github/workspace/* /home/tournament-admin/tournaments/
+          # Останавливаем приложение
+          sudo systemctl stop tournament-app || true
+          # Активируем виртуальное окружение и обновляем зависимости
+          source venv/bin/activate
+          pip install -r requirements.txt
+          # Запускаем приложение
+          sudo systemctl start tournament-app
+          # Проверяем статус
+          sleep 5
+          sudo systemctl status tournament-app --no-pager
+          echo "Deployment completed successfully!"
+        script_stop: true
+        envs: GITHUB_SHA
+EOF
+```
+
+## 🧪 Этап 11: Тестирование
+
+### 11.1 Проверка всех сервисов
+```bash
+# Проверка статуса всех сервисов
+sudo systemctl status nginx
+sudo systemctl status tournament-app
+sudo systemctl status fail2ban
+
+# Проверка портов
+sudo netstat -tlnp | grep -E ':(22|80|443|5000)'
+
+# Проверка файрвола
+sudo ufw status verbose
+```
+
+### 11.2 Тестирование приложения
+```bash
+# Тест локального доступа
+curl -I http://127.0.0.1:5000
+
+# Тест через домен
+curl -I https://tournaments.sytes.net
+
+# Проверка SSL сертификата
+openssl s_client -connect tournaments.sytes.net:443 -servername tournaments.sytes.net
+```
+
+### 11.3 Проверка логов
+```bash
+# Логи приложения
+sudo journalctl -u tournament-app -n 20
+
+# Логи Nginx
+sudo tail -n 20 /var/log/nginx/tournament-app.access.log
+sudo tail -n 20 /var/log/nginx/tournament-app.error.log
+
+# Логи системы
+sudo tail -n 20 /var/log/syslog
+```
+
+## 📊 Этап 12: Мониторинг и оптимизация
+
+### 12.1 Установка инструментов мониторинга
+```bash
+# Установка htop для мониторинга процессов
+sudo apt install -y htop iotop nethogs
+
+# Установка утилит для мониторинга сети
+sudo apt install -y netstat-nat ss
+```
+
+### 12.2 Настройка логирования
+```bash
+# Настройка ротации логов
+sudo nano /etc/logrotate.d/tournament-app
+```
+
+#### Содержимое /etc/logrotate.d/tournament-app:
+```
+/var/log/nginx/tournament-app.*.log {
+    daily
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    create 644 www-data www-data
+    postrotate
+        systemctl reload nginx
+    endscript
+}
+```
+
+### 12.3 Оптимизация системы
+```bash
+# Настройка swappiness
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+
+# Настройка файловых дескрипторов
+echo '* soft nofile 65536' | sudo tee -a /etc/security/limits.conf
+echo '* hard nofile 65536' | sudo tee -a /etc/security/limits.conf
+
+# Применение изменений
+sudo sysctl -p
+```
+
+## 🔍 Этап 13: Финальная проверка
+
+### 13.1 Чек-лист безопасности
+- [ ] Root доступ отключен
+- [ ] SSH ключи настроены
+- [ ] Файрвол активен
+- [ ] Fail2ban работает
+- [ ] SSL сертификат установлен
+- [ ] Автообновление SSL настроено
+
+### 13.2 Чек-лист приложения
+- [ ] Приложение запущено
+- [ ] Nginx работает как reverse proxy
+- [ ] Домен доступен по HTTPS
+- [ ] Статические файлы отдаются корректно
+- [ ] Логирование работает
+- [ ] Автозапуск настроен
+
+### 13.3 Чек-лист автоматизации
+- [ ] Скрипт деплоя создан
+- [ ] Скрипт мониторинга создан
+- [ ] Скрипт резервного копирования создан
+- [ ] GitHub Actions настроен
+- [ ] Cron задачи добавлены
+
+## 🚨 Этап 14: Экстренные процедуры
+
+### 14.1 Команды для восстановления
+```bash
+# Остановка всех сервисов
+sudo systemctl stop tournament-app
+sudo systemctl stop nginx
+
+# Восстановление из резервной копии
+cp /home/tournament-admin/backups/tournament_YYYYMMDD_HHMMSS.db /home/tournament-admin/tournaments/instance/tournament.db
+
+# Перезапуск сервисов
+sudo systemctl start tournament-app
+sudo systemctl start nginx
+```
+
+### 14.2 Команды для диагностики
+```bash
+# Проверка использования ресурсов
+htop
+free -h
+df -h
+
+# Проверка сетевых соединений
+ss -tuln
+netstat -tuln
+
+# Проверка логов
+sudo journalctl -u tournament-app -f
+sudo tail -f /var/log/nginx/error.log
+```
+
+### 14.3 Команды для очистки
+```bash
+# Очистка логов
+sudo journalctl --vacuum-time=7d
+
+# Очистка пакетов
+sudo apt autoremove -y
+sudo apt autoclean
+
+# Очистка временных файлов
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+```
+
+## 📋 Итоговый чек-лист
+
+### ✅ Безопасность
+- [ ] Создан пользователь tournament-admin
+- [ ] SSH ключи настроены
+- [ ] Root доступ отключен
+- [ ] Файрвол UFW настроен
+- [ ] Fail2ban активен
+- [ ] SSL сертификат установлен
+
+### ✅ Приложение
+- [ ] Python 3 установлен
+- [ ] Виртуальное окружение создано
+- [ ] Зависимости установлены
+- [ ] systemd сервис настроен
+- [ ] Приложение запущено
+
+### ✅ Веб-сервер
+- [ ] Nginx установлен и настроен
+- [ ] Reverse proxy работает
+- [ ] SSL перенаправление настроено
+- [ ] Статические файлы отдаются
+
+### ✅ Автоматизация
+- [ ] Скрипты деплоя созданы
+- [ ] GitHub Actions настроен
+- [ ] Резервное копирование настроено
+- [ ] Мониторинг настроен
+
+### ✅ Мониторинг
+- [ ] Логирование работает
+- [ ] Инструменты мониторинга установлены
+- [ ] Ротация логов настроена
+- [ ] Система оптимизирована
+
+## 🎯 Рекомендации по обслуживанию
+
+### Еженедельно:
+- Проверка логов на ошибки
+- Мониторинг использования ресурсов
+- Проверка статуса сертификатов
+
+### Ежемесячно:
+- Обновление системы
+- Проверка резервных копий
+- Анализ производительности
+
+### При необходимости:
+- Обновление зависимостей
+- Оптимизация конфигурации
+- Масштабирование ресурсов
+
+---
+*Создано: 08.10.2025*
+*Версия: 1.0*
+*Для проекта: Турнирный Ассистент v2.1*
+*Тип сервера: VDS Ubuntu*
+*Статус: Полная инструкция готова к использованию*
+
+

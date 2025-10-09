@@ -168,3 +168,5 @@ groups tournament-admin
 Дата создания лога: $(date)
 Версия: 1.0
 
+
+
