@@ -19,21 +19,60 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          # 1. Создание промежуточной папки если её нет
+          mkdir -p /home/tournament-admin/tournaments-temp
+          
+          # 2. Push в промежуточную папку
+          rm -rf /home/tournament-admin/tournaments-temp/*
+          cp -r $GITHUB_WORKSPACE/* /home/tournament-admin/tournaments-temp/
+          
+          # 3. Проверка пуша
+          echo "Проверка файлов в промежуточной папке:"
+          ls -la /home/tournament-admin/tournaments-temp/
+          echo "Проверка размера промежуточной папки:"
+          du -sh /home/tournament-admin/tournaments-temp/
+          echo "Проверка ключевых файлов:"
+          ls -la /home/tournament-admin/tournaments-temp/app.py
+          ls -la /home/tournament-admin/tournaments-temp/requirements.txt
+          
+          # 4. Остановка приложения
+          sudo systemctl stop tournament-app || true
+          echo "Приложение остановлено"
+          
+          # 4.5. Сохранение копии рабочей папки в backup (только 1 копия)
+          echo "Создание backup рабочей папки..."
+          mkdir -p /home/tournament-admin/backups
+          
+          # Удаление старого backup (если есть)
+          rm -rf /home/tournament-admin/backups/tournaments-backup
+          
+          # Создание нового backup
+          cp -r /home/tournament-admin/tournaments /home/tournament-admin/backups/tournaments-backup
+          echo "Backup создан: /home/tournament-admin/backups/tournaments-backup"
+          echo "Размер backup: $(du -sh /home/tournament-admin/backups/tournaments-backup)"
+          
+          # 5. Копирование в рабочую папку
+          rm -rf /home/tournament-admin/tournaments/*
+          cp -r /home/tournament-admin/tournaments-temp/* /home/tournament-admin/tournaments/
+          echo "Файлы скопированы в рабочую папку"
+          
+          # 6. Активация окружения и установка зависимостей
           cd /home/tournament-admin/tournaments
-          # Очистка локальных временных файлов (без sudo)
-          rm -rf /home/tournament-admin/tournaments/__pycache__ || true
-          rm -rf /home/tournament-admin/tournaments/*/__pycache__ || true
-          rm -rf /home/tournament-admin/tournaments/.pytest_cache || true
-          # Очистка git кэша
-          git gc --prune=now || true
-          git remote prune origin || true
-          # Получаем последние изменения из GitHub
-          git pull origin main
-          # Активируем виртуальное окружение и обновляем зависимости
           source venv/bin/activate
           pip install -r requirements.txt
-          # Перезапуск приложения через systemctl (требует sudo)
-          # Если sudo не работает, приложение продолжит работать со старой версией
+          echo "Зависимости обновлены"
+          
+          # 7. Запуск приложения
+          sudo systemctl start tournament-app
+          echo "Приложение запущено"
+          
+          # 8. Проверка статуса
+          sleep 5
+          sudo systemctl status tournament-app --no-pager
+          
+          # 9. Проверка работы
+          curl -I http://127.0.0.1:5000 || echo "Локальная проверка не удалась"
+          
           echo "Deployment completed successfully!"
         script_stop: true
         envs: GITHUB_SHA
