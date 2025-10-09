@@ -20,11 +20,10 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/tournament-admin/tournaments
-          # Копируем код напрямую из GitHub Actions
-          rm -rf /home/tournament-admin/tournaments/*
-          cp -r $GITHUB_WORKSPACE/* /home/tournament-admin/tournaments/
           # Останавливаем приложение
           sudo systemctl stop tournament-app || true
+          # Получаем последние изменения из GitHub
+          git pull origin main
           # Активируем виртуальное окружение и обновляем зависимости
           source venv/bin/activate
           pip install -r requirements.txt
