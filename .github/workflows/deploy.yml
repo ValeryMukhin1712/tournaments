@@ -23,7 +23,7 @@ jobs:
           mkdir -p /home/tournament-admin/tournaments-temp
           
           # 2. Клонирование проекта в промежуточную папку
-          sudo rm -rf /home/tournament-admin/tournaments-temp
+          rm -rf /home/tournament-admin/tournaments-temp
           mkdir -p /home/tournament-admin/tournaments-temp
           cd /home/tournament-admin/tournaments-temp
           git clone https://github.com/ValeryMukhin1712/tournaments.git .
@@ -35,7 +35,7 @@ jobs:
           du -sh /home/tournament-admin/tournaments-temp/
           
           # 4. Остановка приложения
-          sudo systemctl stop tournament-app || true
+          systemctl --user stop tournament-app || true
           echo "Приложение остановлено"
           
           # 4.5. Сохранение копии рабочей папки в backup (только 1 копия)
@@ -69,12 +69,12 @@ jobs:
           echo "Зависимости обновлены"
           
           # 7. Запуск приложения
-          sudo systemctl start tournament-app || echo "Не удалось запустить через systemctl, приложение будет запущено вручную"
+          systemctl --user start tournament-app || echo "Не удалось запустить через systemctl, приложение будет запущено вручную"
           echo "Приложение запущено"
           
           # 8. Проверка статуса
           sleep 5
-          sudo systemctl status tournament-app --no-pager || echo "Проверка статуса не удалась"
+          systemctl --user status tournament-app --no-pager || echo "Проверка статуса не удалась"
           
           # 9. Проверка работы
           curl -I http://127.0.0.1:5000 || echo "Локальная проверка не удалась"
