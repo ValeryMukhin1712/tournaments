@@ -22,7 +22,7 @@ jobs:
           cd /home/tournament-admin/tournaments
           # Копируем код напрямую из GitHub Actions
           rm -rf /home/tournament-admin/tournaments/*
-          cp -r /github/workspace/* /home/tournament-admin/tournaments/
+          cp -r $GITHUB_WORKSPACE/* /home/tournament-admin/tournaments/
           # Останавливаем приложение
           sudo systemctl stop tournament-app || true
           # Активируем виртуальное окружение и обновляем зависимости
