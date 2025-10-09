@@ -34,9 +34,6 @@ jobs:
           ls -la /home/tournament-admin/tournaments-temp/
           echo "Проверка размера промежуточной папки:"
           du -sh /home/tournament-admin/tournaments-temp/
-          echo "Проверка ключевых файлов:"
-          ls -la /home/tournament-admin/tournaments-temp/app.py
-          ls -la /home/tournament-admin/tournaments-temp/requirements.txt
           
           # 4. Остановка приложения
           sudo systemctl stop tournament-app || true
