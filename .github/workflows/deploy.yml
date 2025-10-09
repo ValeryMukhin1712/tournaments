@@ -1,4 +1,4 @@
-name: Deploy to VDS Server
+name: Deploy to VDS Server (Native)
 
 on:
   push:
@@ -23,8 +23,16 @@ jobs:
           # Копируем код напрямую из GitHub Actions
           rm -rf /home/tournament-admin/tournaments/*
           cp -r /github/workspace/* /home/tournament-admin/tournaments/
-          docker stop tournament-production-container || true
-          docker rm tournament-production-container || true
-          docker build --no-cache -t tournament-production .
-          docker run -d -p 5000:5000 --name tournament-production-container tournament-production
+          # Останавливаем приложение
+          sudo systemctl stop tournament-app || true
+          # Активируем виртуальное окружение и обновляем зависимости
+          source venv/bin/activate
+          pip install -r requirements.txt
+          # Запускаем приложение
+          sudo systemctl start tournament-app
+          # Проверяем статус
+          sleep 5
+          sudo systemctl status tournament-app --no-pager
           echo "Deployment completed successfully!"
+        script_stop: true
+        envs: GITHUB_SHA
