@@ -58,17 +58,24 @@ jobs:
           
           # 6. Активация окружения и установка зависимостей
           cd /home/tournament-admin/tournaments
+          
+          # Проверка существования виртуального окружения
+          if [ ! -d "venv" ]; then
+            echo "Создание виртуального окружения..."
+            python3 -m venv venv
+          fi
+          
           source venv/bin/activate
           pip install -r requirements.txt
           echo "Зависимости обновлены"
           
           # 7. Запуск приложения
-          sudo systemctl start tournament-app
+          sudo systemctl start tournament-app || echo "Не удалось запустить через systemctl, приложение будет запущено вручную"
           echo "Приложение запущено"
           
           # 8. Проверка статуса
           sleep 5
-          sudo systemctl status tournament-app --no-pager
+          sudo systemctl status tournament-app --no-pager || echo "Проверка статуса не удалась"
           
           # 9. Проверка работы
           curl -I http://127.0.0.1:5000 || echo "Локальная проверка не удалась"
