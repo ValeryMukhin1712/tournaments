@@ -22,11 +22,10 @@ jobs:
           # 1. Создание промежуточной папки если её нет
           mkdir -p /home/tournament-admin/tournaments-temp
           
-          # 2. Push в промежуточную папку (исправлено - исключаем системные директории)
+          # 2. Клонирование проекта в промежуточную папку
           rm -rf /home/tournament-admin/tournaments-temp/*
-          
-          # Копирование всех файлов проекта
-          cp -r $GITHUB_WORKSPACE/* /home/tournament-admin/tournaments-temp/
+          cd /home/tournament-admin/tournaments-temp
+          git clone https://github.com/ValeryMukhin1712/tournaments.git .
           
           # 3. Проверка пуша
           echo "Проверка файлов в промежуточной папке:"
