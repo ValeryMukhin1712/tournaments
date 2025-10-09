@@ -20,18 +20,25 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/tournament-admin/tournaments
+          # Очистка дискового пространства
+          sudo -n apt clean || true
+          sudo -n rm -rf /tmp/* || true
+          sudo -n rm -rf /var/tmp/* || true
           # Останавливаем приложение
-          sudo systemctl stop tournament-app || true
+          sudo -n systemctl stop tournament-app || true
+          # Очистка git кэша
+          git gc --prune=now || true
+          git remote prune origin || true
           # Получаем последние изменения из GitHub
           git pull origin main
           # Активируем виртуальное окружение и обновляем зависимости
           source venv/bin/activate
           pip install -r requirements.txt
           # Запускаем приложение
-          sudo systemctl start tournament-app
+          sudo -n systemctl start tournament-app
           # Проверяем статус
           sleep 5
-          sudo systemctl status tournament-app --no-pager
+          sudo -n systemctl status tournament-app --no-pager
           echo "Deployment completed successfully!"
         script_stop: true
         envs: GITHUB_SHA
