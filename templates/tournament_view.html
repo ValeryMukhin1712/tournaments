@@ -347,11 +347,6 @@
                                             <th class="sortable" data-column="wins">
                                                 Побед <i class="fas fa-sort ms-1"></i>
                                             </th>
-                                            {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
-                                            <th class="sortable" data-column="draws">
-                                                Ничьих <i class="fas fa-sort ms-1"></i>
-                                            </th>
-                                            {% endif %}
                                             <th class="sortable" data-column="losses">
                                                 Поражений <i class="fas fa-sort ms-1"></i>
                                             </th>
@@ -381,9 +376,6 @@
                                             </td>
                                             <td>{{ participant_stats.games }}</td>
                                             <td>{{ participant_stats.wins }}</td>
-                                            {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
-                                            <td>{{ participant_stats.draws }}</td>
-                                            {% endif %}
                                             <td>{{ participant_stats.losses }}</td>
                                             <td>{{ participant_stats.points }}</td>
                                             <td>
