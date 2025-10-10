@@ -239,6 +239,222 @@
         transform: none; /* Отключаем масштабирование на мобильных */
     }
 }
+
+/* Оптимизация турнирной таблицы для мобильных устройств (ширина > 500px) */
+@media (min-width: 501px) and (max-width: 768px) {
+    /* Уменьшаем размер шрифта таблицы */
+    .table-modern {
+        font-size: 0.7rem;
+    }
+    
+    /* Уменьшаем отступы в ячейках */
+    .table-modern thead th,
+    .table-modern tbody td {
+        padding: 0.2rem 0.1rem;
+    }
+    
+    /* Специальные стили для колонок "Очки" и "Место" */
+    .table-modern th:nth-child(2), /* Колонка "Очки" */
+    .table-modern td:nth-child(2) {
+        width: 35px !important;
+        min-width: 35px !important;
+        max-width: 35px !important;
+        padding: 0.2rem 0.1rem !important;
+        font-size: 0.7rem;
+        text-align: center;
+    }
+    
+    .table-modern th:nth-child(3), /* Колонка "Место" */
+    .table-modern td:nth-child(3) {
+        width: 35px !important;
+        min-width: 35px !important;
+        max-width: 35px !important;
+        padding: 0.2rem 0.1rem !important;
+        font-size: 0.7rem;
+        text-align: center;
+    }
+    
+    /* Уменьшаем ширину ячеек с результатами матчей */
+    .table-modern td[style*="width: 120px"] {
+        width: 50px !important;
+        min-width: 50px !important;
+        max-width: 50px !important;
+        height: 45px !important;
+    }
+    
+    /* Уменьшаем размер бейджей в ячейках */
+    .table-modern .badge {
+        font-size: 0.55rem;
+        padding: 0.1rem 0.2rem;
+        line-height: 1;
+    }
+    
+    /* Уменьшаем размер текста в ячейках */
+    .table-modern small {
+        font-size: 0.5rem;
+        line-height: 1;
+    }
+    
+    /* Оптимизируем колонку "Участник" */
+    .table-modern th:first-child,
+    .table-modern td:first-child {
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.1rem !important;
+    }
+    
+    /* Вертикальные заголовки для колонок участников */
+    .table-modern th:nth-child(n+4) {
+        transform: rotate(-90deg);
+        width: 30px !important;
+        min-width: 30px !important;
+        max-width: 30px !important;
+        padding: 0.1rem 0.05rem !important;
+        font-size: 0.6rem;
+        line-height: 1.2;
+        height: 80px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    
+    /* Уменьшаем ширину ячеек участников */
+    .table-modern td:nth-child(n+4) {
+        width: 50px !important;
+        min-width: 50px !important;
+        max-width: 50px !important;
+        height: 45px !important;
+        padding: 0.1rem 0.05rem !important;
+    }
+    
+    /* Специальные стили для flex-контейнеров в ячейках */
+    .table-modern .d-flex {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    
+    /* Убираем отступы между элементами в ячейках */
+    .table-modern .d-flex .badge {
+        margin-bottom: 0.1rem;
+    }
+}
+
+/* Ультра-агрессивная оптимизация для очень маленьких экранов (550px и меньше) */
+@media (max-width: 550px) {
+    /* Уменьшаем размер шрифта таблицы до минимума */
+    .table-modern {
+        font-size: 0.6rem;
+    }
+    
+    /* Минимальные отступы в ячейках */
+    .table-modern thead th,
+    .table-modern tbody td {
+        padding: 0.1rem 0.05rem;
+    }
+    
+    /* Поворачиваем заголовки колонок "Очки" и "Место" на 90° против часовой стрелки */
+    .table-modern th:nth-child(2), /* Колонка "Очки" */
+    .table-modern th:nth-child(3) { /* Колонка "Место" */
+        transform: rotate(-90deg);
+        width: 25px !important;
+        min-width: 25px !important;
+        max-width: 25px !important;
+        padding: 0.1rem 0.05rem !important;
+        font-size: 0.6rem;
+        text-align: center;
+        white-space: nowrap;
+        height: 60px;
+        vertical-align: middle;
+    }
+    
+    /* Уменьшаем ячейки "Очки" и "Место" */
+    .table-modern td:nth-child(2), /* Колонка "Очки" */
+    .table-modern td:nth-child(3) { /* Колонка "Место" */
+        width: 25px !important;
+        min-width: 25px !important;
+        max-width: 25px !important;
+        padding: 0.1rem 0.05rem !important;
+        font-size: 0.6rem;
+        text-align: center;
+    }
+    
+    /* Еще больше уменьшаем ячейки с результатами матчей */
+    .table-modern td[style*="width: 120px"] {
+        width: 35px !important;
+        min-width: 35px !important;
+        max-width: 35px !important;
+        height: 35px !important;
+    }
+    
+    /* Минимальный размер бейджей */
+    .table-modern .badge {
+        font-size: 0.5rem;
+        padding: 0.05rem 0.1rem;
+        line-height: 1;
+    }
+    
+    /* Минимальный размер текста */
+    .table-modern small {
+        font-size: 0.45rem;
+        line-height: 1;
+    }
+    
+    /* Максимально сжимаем колонку "Участник" */
+    .table-modern th:first-child,
+    .table-modern td:first-child {
+        width: 50px !important;
+        min-width: 50px !important;
+        max-width: 50px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.6rem;
+        padding: 0.1rem 0.05rem !important;
+    }
+    
+    /* Еще больше уменьшаем заголовки колонок участников */
+    .table-modern th:nth-child(n+4) {
+        transform: rotate(-90deg);
+        width: 25px !important;
+        min-width: 25px !important;
+        max-width: 25px !important;
+        padding: 0.05rem 0.02rem !important;
+        font-size: 0.5rem;
+        line-height: 1.1;
+        height: 60px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    
+    /* Еще больше уменьшаем ячейки участников */
+    .table-modern td:nth-child(n+4) {
+        width: 35px !important;
+        min-width: 35px !important;
+        max-width: 35px !important;
+        height: 35px !important;
+        padding: 0.05rem 0.02rem !important;
+    }
+    
+    /* Оптимизируем flex-контейнеры */
+    .table-modern .d-flex {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 0.05rem;
+    }
+    
+    /* Убираем все отступы между элементами */
+    .table-modern .d-flex .badge {
+        margin-bottom: 0.05rem;
+    }
+}
 </style>
 
 <div class="floating-elements">
