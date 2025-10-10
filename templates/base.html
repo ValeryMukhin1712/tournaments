@@ -492,32 +492,32 @@
         }
         
         .nav-btn-inline.nav-btn-home {
-            background-color: rgba(40, 167, 69, 0.8);
+            background-color: rgba(40, 167, 69, 0.4);
             color: white;
         }
         
         .nav-btn-inline.nav-btn-back {
-            background-color: rgba(108, 117, 125, 0.8);
+            background-color: rgba(108, 117, 125, 0.4);
             color: white;
         }
         
         .nav-btn-inline.nav-btn-help {
-            background-color: rgba(0, 123, 255, 0.8);
+            background-color: rgba(0, 123, 255, 0.4);
             color: white;
         }
         
         .nav-btn-inline.nav-btn-home:hover {
-            background-color: rgba(33, 136, 56, 0.9);
+            background-color: rgba(33, 136, 56, 0.7);
             color: white;
         }
         
         .nav-btn-inline.nav-btn-back:hover {
-            background-color: rgba(90, 98, 104, 0.9);
+            background-color: rgba(90, 98, 104, 0.7);
             color: white;
         }
         
         .nav-btn-inline.nav-btn-help:hover {
-            background-color: rgba(0, 105, 217, 0.9);
+            background-color: rgba(0, 105, 217, 0.7);
             color: white;
         }
         
@@ -580,11 +580,26 @@
             }
         }
         
+        /* Стили для плавающих кнопок навигации */
+        .floating-nav-buttons {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        
+        .floating-nav-buttons .nav-buttons-inline {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
+        
         /* Стили для номера страницы (отладка) */
         .page-number-debug {
             position: fixed;
             top: 10px;
-            left: 10px;
+            right: 10px;
             background-color: rgba(220, 53, 69, 0.9);
             color: white;
             padding: 8px 12px;
@@ -607,7 +622,7 @@
         @media (max-width: 768px) {
             .page-number-debug {
                 top: 5px;
-                left: 5px;
+                right: 5px;
                 padding: 6px 10px;
                 font-size: 12px;
                 min-width: 35px;
@@ -620,14 +635,15 @@
     <!-- Номер страницы для отладки -->
     <div class="page-number-debug" id="pageNumberDebug">--</div>
     
+    {% if request.endpoint == 'index' %}
+    <!-- Полный navbar только на главной странице -->
     <nav class="navbar navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-trophy me-2"></i>Турнирный Ассистент
+                <i class="fas fa-trophy me-2"></i>Quick Score
             </a>
             
             <!-- Кнопки выбора темы (только на главной странице) -->
-            {% if request.endpoint == 'index' %}
             <div class="theme-selector">
                 <div class="theme-options">
                     <div class="theme-option theme-gray">
@@ -664,7 +680,6 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
             
             <!-- Кнопки навигации в навбаре -->
             <div class="navbar-nav nav-buttons-inline">
@@ -698,8 +713,24 @@
             </div>
         </div>
     </nav>
+    {% else %}
+    <!-- Только кнопки навигации на остальных страницах -->
+    <div class="floating-nav-buttons">
+        <div class="nav-buttons-inline">
+            <a href="{{ url_for('index') }}" class="nav-btn-inline nav-btn-home" title="На главную">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="javascript:history.back()" class="nav-btn-inline nav-btn-back" title="Назад">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="#" class="nav-btn-inline nav-btn-help" title="Помощь" onclick="showHelp()">
+                <i class="fas fa-question"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
 
-    <main class="container mt-4">
+    <main class="container {% if request.endpoint != 'index' %}mt-2{% else %}mt-4{% endif %}">
 
         {% block content %}{% endblock %}
     </main>
@@ -810,12 +841,12 @@
             '/': 1,
             '/index': 1,
             '/request-token': 2,
-            '/admin-tournament': 3,
-            '/admin-dashboard': 4,
-            '/admin-create-tournament': 5,
-            '/admin-edit-tournament': 6,
-            '/admin-tokens': 7,
-            '/admin-tournament': 8,
+            '/create-tournament': 3,
+            '/admin-tournament': 4,
+            '/admin-dashboard': 5,
+            '/admin-create-tournament': 6,
+            '/admin-edit-tournament': 7,
+            '/admin-tokens': 8,
             '/system-admin-dashboard': 9,
             '/users': 10,
             '/login': 11,
@@ -827,8 +858,15 @@
             '/participant-tournament': 17,
             '/tournament-view': 18,
             '/tournament-spectator': 18,
-            '/my-tournaments-login': 19,
-            '/token-generated': 20
+            '/my-tournaments': 19,
+            '/my-tournaments-login': 20,
+            '/token-generated': 21,
+            '/badminton-referee': 22,
+            '/bg-variant1': 23,
+            '/bg-variant2': 24,
+            '/bg-variant3': 25,
+            '/bg-variant4': 26,
+            '/test-green-colors': 27
         };
         
         // Проверяем точное совпадение
@@ -841,16 +879,20 @@
             return 12; // Страница турнира
         }
         
-        if (path.startsWith('/admin-edit-tournament/')) {
-            return 6; // Редактирование турнира
+        if (path.startsWith('/admin/edit-tournament/')) {
+            return 7; // Редактирование турнира
         }
         
         if (path.startsWith('/admin-tournament/')) {
-            return 8; // Админ турнира
+            return 4; // Админ турнира
         }
         
         if (path.startsWith('/tournament-spectator/')) {
             return 18; // Информация о турнире для зрителей
+        }
+        
+        if (path.startsWith('/tournament-view/')) {
+            return 18; // Просмотр турнира участником
         }
         
         // Если не найдено, возвращаем 0
@@ -1066,7 +1108,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="help-content">
-                        <h4><i class="fas fa-trophy me-2"></i>Турнирный Ассистент</h4>
+                        <h4><i class="fas fa-trophy me-2"></i>Система управления турнирами</h4>
                         <p class="lead">Предназначен для создания и администрирования любительских турниров видов спорта, в которых победитель матча определяется по итогам 3-х сетов.</p>
                         
                         <h5><i class="fas fa-users me-2"></i>Роли пользователей</h5>

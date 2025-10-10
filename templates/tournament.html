@@ -5,6 +5,54 @@
 
 {% block content %}
 <style>
+/* Стили для фиксации первого столбца при горизонтальном скролле */
+#tournament-table {
+    position: relative;
+}
+
+#tournament-table thead th:first-child,
+#tournament-table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background-color: #f8f9fa !important;
+    border-right: 2px solid #dee2e6;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+/* Для мобильных устройств - более агрессивная фиксация */
+@media (max-width: 768px) {
+    #tournament-table thead th:first-child,
+    #tournament-table tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 15;
+        background-color: #f8f9fa !important;
+        border-right: 2px solid #dee2e6;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        min-width: 80px;
+        max-width: 120px;
+    }
+    
+    /* Убеждаемся, что фиксированный столбец не перекрывается */
+    #tournament-table thead th:nth-child(2),
+    #tournament-table tbody td:nth-child(2) {
+        position: relative;
+        z-index: 5;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 550px) {
+    #tournament-table thead th:first-child,
+    #tournament-table tbody td:first-child {
+        min-width: 60px;
+        max-width: 100px;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
 .main-container {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -311,6 +359,7 @@
     /* Вертикальные заголовки для колонок участников */
     .table-modern th:nth-child(n+4) {
         transform: rotate(-90deg);
+        background-color: transparent !important;
         width: 30px !important;
         min-width: 30px !important;
         max-width: 30px !important;
@@ -362,6 +411,7 @@
     .table-modern th:nth-child(2), /* Колонка "Очки" */
     .table-modern th:nth-child(3) { /* Колонка "Место" */
         transform: rotate(-90deg);
+        background-color: transparent !important;
         width: 25px !important;
         min-width: 25px !important;
         max-width: 25px !important;
@@ -421,6 +471,7 @@
     /* Еще больше уменьшаем заголовки колонок участников */
     .table-modern th:nth-child(n+4) {
         transform: rotate(-90deg);
+        background-color: transparent !important;
         width: 25px !important;
         min-width: 25px !important;
         max-width: 25px !important;
@@ -453,6 +504,88 @@
     /* Убираем все отступы между элементами */
     .table-modern .d-flex .badge {
         margin-bottom: 0.05rem;
+    }
+}
+
+/* Стили для таблицы статистики на маленьких экранах */
+@media (max-width: 550px) {
+    #statisticsTable thead th,
+    #statisticsTable tbody td {
+        background-color: transparent !important;
+        color: black !important;
+    }
+    
+    #statisticsTable thead th.bg-light,
+    #statisticsTable tbody td.bg-light {
+        background-color: transparent !important;
+    }
+    
+    /* Более специфичные селекторы для заголовков */
+    #statisticsTable.table thead th,
+    #statisticsTable.table-modern thead th {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    
+    /* Переопределяем все возможные Bootstrap классы */
+    #statisticsTable thead th[class*="bg-"],
+    #statisticsTable tbody td[class*="bg-"] {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+}
+
+/* Дополнительный медиа-запрос для экранов меньше 551px */
+@media (max-width: 550px) {
+    #statisticsTable thead th,
+    #statisticsTable tbody td {
+        background-color: transparent !important;
+        background: transparent !important;
+        color: black !important;
+    }
+    
+    /* Максимально специфичные селекторы */
+    table#statisticsTable.table.table-modern thead th,
+    table#statisticsTable.table.table-modern tbody td {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    
+    /* Переопределяем все Bootstrap фоновые классы */
+    #statisticsTable thead th.bg-light,
+    #statisticsTable thead th.bg-secondary,
+    #statisticsTable thead th.bg-primary,
+    #statisticsTable tbody td.bg-light,
+    #statisticsTable tbody td.bg-secondary,
+    #statisticsTable tbody td.bg-primary {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    
+    /* Стили для турнирной таблицы на маленьких экранах */
+    #tournament-table thead th,
+    #tournament-table tbody td {
+        background-color: transparent !important;
+        background: transparent !important;
+        color: black !important;
+    }
+    
+    /* Максимально специфичные селекторы для турнирной таблицы */
+    table#tournament-table.table.table-modern.table-bordered.table-sm thead th,
+    table#tournament-table.table.table-modern.table-bordered.table-sm tbody td {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    
+    /* Переопределяем все Bootstrap фоновые классы для турнирной таблицы */
+    #tournament-table thead th.bg-light,
+    #tournament-table thead th.bg-secondary,
+    #tournament-table thead th.bg-primary,
+    #tournament-table tbody td.bg-light,
+    #tournament-table tbody td.bg-secondary,
+    #tournament-table tbody td.bg-primary {
+        background-color: transparent !important;
+        background: transparent !important;
     }
 }
 </style>
@@ -554,91 +687,74 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-modern" id="statisticsTable">
-                                                 <thead>
-                             <tr>
-                                 <th class="sortable d-none d-sm-table-cell" data-column="position">
-                                     Место <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 <th class="sortable d-table-cell d-sm-none" data-column="position">
-                                     № <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 <th class="sortable" data-column="name">
-                                     Участник <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 <th class="sortable d-none d-md-table-cell" data-column="games">
-                                     Игр <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 <th class="sortable d-none d-lg-table-cell" data-column="wins">
-                                     Побед <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
-                                 <th class="sortable d-none d-lg-table-cell" data-column="draws">
-                                     Ничьих <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                 {% endif %}
-                                 <th class="sortable d-none d-lg-table-cell" data-column="losses">
-                                     Поражений <i class="fas fa-sort ms-1"></i>
-                                 </th>
-                                <th class="sortable" data-column="points">
-                                    Очки<br><small class="d-none d-sm-inline">в турнире</small> <i class="fas fa-sort ms-1"></i>
-                                </th>
-                                <th class="sortable d-none d-lg-table-cell" data-column="sets_difference">
-                                    Разница +/-<br><small>сетов</small> <i class="fas fa-sort ms-1"></i>
-                                </th>
-                                <th class="sortable d-none d-md-table-cell" data-column="goal_difference">
-                                    Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
-                                </th>
-                                 <th>Действия</th>
-                             </tr>
-                         </thead>
-                        <tbody>
-                            {% for p1_data in participants_with_stats %}
-                            {% set participant = p1_data.participant %}
-                            {% set participant_stats = p1_data.stats %}
-                            {% set participant_position = p1_data.position %}
-                            <tr class="{% if p1_data.is_late_participant %}table-warning{% endif %}">
-                                <td class="d-none d-sm-table-cell">{{ participant_position }}</td>
-                                <td class="d-table-cell d-sm-none">{{ participant_position }}</td>
-                                <td>
-                                    <strong>{{ participant.name }}</strong>
-                                    {% if participant.is_team %}
-                                        <span class="badge bg-info ms-2">Команда</span>
-                                    {% endif %}
-                                    <div class="d-sm-none mt-1">
-                                        <small class="text-muted">Очки: {{ participant_stats.points }}</small>
-                                    </div>
-                                </td>
-                                <td class="d-none d-md-table-cell">{{ participant_stats.games }}</td>
-                                <td class="d-none d-lg-table-cell">{{ participant_stats.wins }}</td>
-                                {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
-                                <td class="d-none d-lg-table-cell">{{ participant_stats.draws }}</td>
-                                {% endif %}
-                                <td class="d-none d-lg-table-cell">{{ participant_stats.losses }}</td>
-                                <td class="d-none d-sm-table-cell">{{ participant_stats.points }}</td>
-                                <td class="d-none d-lg-table-cell">
-                                    {% if participant_stats.sets_difference > 0 %}+{% endif %}{{ participant_stats.sets_difference }}
-                                </td>
-                                <td class="d-none d-md-table-cell">
-                                    {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
-                                </td>
-                                <td>
-                                    {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')" title="Удалить участника">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    {% else %}
-                                    <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-column="position">
+                                            Место <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-column="name">
+                                            Участник <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-column="games">
+                                            Игр <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-column="wins">
+                                            Побед <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
+                                        <th class="sortable" data-column="draws">
+                                            Ничьих <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        {% endif %}
+                                        <th class="sortable" data-column="losses">
+                                            Поражений <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-column="points">
+                                            Очки<br><small>в турнире</small> <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-column="sets_difference">
+                                            Разница +/-<br><small>сетов</small> <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-column="goal_difference">
+                                            Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p1_data in participants_with_stats %}
+                                    {% set participant = p1_data.participant %}
+                                    {% set participant_stats = p1_data.stats %}
+                                    {% set participant_position = p1_data.position %}
+                                    <tr class="{% if p1_data.is_late_participant %}table-warning{% endif %}">
+                                        <td>{{ participant_position }}</td>
+                                        <td>
+                                            <strong>{{ participant.name }}</strong>
+                                            {% if participant.is_team %}
+                                                <span class="badge bg-info ms-2">Команда</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ participant_stats.games }}</td>
+                                        <td>{{ participant_stats.wins }}</td>
+                                        {% if tournament.sport_type not in ['пинг-понг', 'бадминтон', 'волейбол'] %}
+                                        <td>{{ participant_stats.draws }}</td>
+                                        {% endif %}
+                                        <td>{{ participant_stats.losses }}</td>
+                                        <td>{{ participant_stats.points }}</td>
+                                        <td>
+                                            {% if participant_stats.sets_difference > 0 %}+{% endif %}{{ participant_stats.sets_difference }}
+                                        </td>
+                                        <td>
+                                            {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
         <!-- Турнирная таблица -->
         <div class="row">
@@ -651,7 +767,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-modern table-bordered table-sm">
+                            <table class="table table-modern table-bordered table-sm" id="tournament-table">
                         <thead>
                             <tr>
                                 <th class="bg-light">Участник</th>
