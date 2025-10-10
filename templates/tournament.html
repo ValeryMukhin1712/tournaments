@@ -184,8 +184,8 @@
 }
 
 .table-modern thead th {
-    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
-    color: white;
+    background: transparent;
+    color: black;
     border: none;
     font-weight: 600;
     padding: 1rem;
@@ -507,60 +507,6 @@
     }
 }
 
-/* Стили для таблицы статистики на маленьких экранах */
-@media (max-width: 550px) {
-    #statisticsTable thead th,
-    #statisticsTable tbody td {
-        background-color: transparent !important;
-        color: black !important;
-    }
-    
-    #statisticsTable thead th.bg-light,
-    #statisticsTable tbody td.bg-light {
-        background-color: transparent !important;
-    }
-    
-    /* Более специфичные селекторы для заголовков */
-    #statisticsTable.table thead th,
-    #statisticsTable.table-modern thead th {
-        background-color: transparent !important;
-        background: transparent !important;
-    }
-    
-    /* Переопределяем все возможные Bootstrap классы */
-    #statisticsTable thead th[class*="bg-"],
-    #statisticsTable tbody td[class*="bg-"] {
-        background-color: transparent !important;
-        background: transparent !important;
-    }
-}
-
-/* Дополнительный медиа-запрос для экранов меньше 551px */
-@media (max-width: 550px) {
-    #statisticsTable thead th,
-    #statisticsTable tbody td {
-        background-color: transparent !important;
-        background: transparent !important;
-        color: black !important;
-    }
-    
-    /* Максимально специфичные селекторы */
-    table#statisticsTable.table.table-modern thead th,
-    table#statisticsTable.table.table-modern tbody td {
-        background-color: transparent !important;
-        background: transparent !important;
-    }
-    
-    /* Переопределяем все Bootstrap фоновые классы */
-    #statisticsTable thead th.bg-light,
-    #statisticsTable thead th.bg-secondary,
-    #statisticsTable thead th.bg-primary,
-    #statisticsTable tbody td.bg-light,
-    #statisticsTable tbody td.bg-secondary,
-    #statisticsTable tbody td.bg-primary {
-        background-color: transparent !important;
-        background: transparent !important;
-    }
     
     /* Стили для турнирной таблицы на маленьких экранах */
     #tournament-table thead th,
