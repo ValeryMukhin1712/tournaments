@@ -2940,15 +2940,15 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             csv_data = '\ufeff' + csv_content
             csv_data = csv_data.encode('utf-8')
             
-            # Создаем имя файла
-            filename = f'tournament_{tournament.name}_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
+            # Создаем имя файла только с латинскими символами
+            safe_name = f'tournament_{tournament_id}_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
             
             # Возвращаем файл для скачивания
             return Response(
                 csv_data,
                 mimetype='text/csv',
                 headers={
-                    'Content-Disposition': f'attachment; filename="{filename}"',
+                    'Content-Disposition': f'attachment; filename="{safe_name}"',
                     'Content-Type': 'text/csv; charset=utf-8'
                 }
             )

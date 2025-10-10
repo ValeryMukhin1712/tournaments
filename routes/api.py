@@ -1978,11 +1978,13 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
             
             if matches_created > 0:
+                # Изменяем статус турнира на "Регистрация участников"
+                tournament.status = 'Регистрация участников'
                 db.session.commit()
-                logger.info(f"Расписание составлено для турнира {tournament.name}: создано {matches_created} матчей")
+                logger.info(f"Расписание составлено для турнира {tournament.name}: создано {matches_created} матчей, статус изменен на 'Регистрация участников'")
                 return jsonify({
                     'success': True, 
-                    'message': f'Расписание успешно составлено! Создано {matches_created} матчей.'
+                    'message': f'Расписание успешно составлено! Создано {matches_created} матчей. Статус турнира изменен на "Регистрация участников".'
                 })
             else:
                 return jsonify({'success': False, 'error': 'Не удалось создать расписание'}), 500
