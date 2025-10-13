@@ -403,7 +403,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         # Проверяем, что турнир с таким именем не существует
         existing_tournament = Tournament.query.filter_by(name=data['name']).first()
         if existing_tournament:
-            return jsonify({'error': f'Турнир с названием "{data["name"]}" уже существует'}), 400
+            return jsonify({'error': f'⚠️ Турнир с названием "{data["name"]}" уже существует в системе. Пожалуйста, выберите другое уникальное название.'}), 400
         
         try:
             tournament = Tournament(

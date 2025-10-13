@@ -1609,7 +1609,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             # Проверяем, что турнир с таким именем не существует
             existing_tournament = Tournament.query.filter_by(name=name).first()
             if existing_tournament:
-                flash(f'Турнир с названием "{name}" уже существует. Пожалуйста, выберите другое название.', 'error')
+                flash(f'⚠️ Турнир с названием "{name}" уже существует в системе. Пожалуйста, выберите другое уникальное название для вашего турнира.', 'error')
                 return render_template('admin_create_tournament.html', admin=admin)
             
             if not start_date:
