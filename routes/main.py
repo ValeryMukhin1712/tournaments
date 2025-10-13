@@ -1606,6 +1606,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 flash('Пожалуйста, введите название турнира', 'error')
                 return render_template('admin_create_tournament.html', admin=admin)
             
+            # Проверяем, что турнир с таким именем не существует
+            existing_tournament = Tournament.query.filter_by(name=name).first()
+            if existing_tournament:
+                flash(f'Турнир с названием "{name}" уже существует. Пожалуйста, выберите другое название.', 'error')
+                return render_template('admin_create_tournament.html', admin=admin)
+            
             if not start_date:
                 flash('Пожалуйста, выберите дату начала турнира', 'error')
                 return render_template('admin_create_tournament.html', admin=admin)

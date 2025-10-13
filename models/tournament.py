@@ -9,7 +9,7 @@ class Tournament(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text, nullable=True)  # описание турнира
     sport_type = db.Column(db.String(50), nullable=False, default='пинг-понг')  # пинг-понг, бадминтон, волейбол
     start_date = db.Column(db.Date, nullable=True)
