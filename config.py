@@ -35,6 +35,14 @@ class Config:
     EMAILJS_SERVICE_ID = os.environ.get('EMAILJS_SERVICE_ID')
     EMAILJS_TEMPLATE_ID = os.environ.get('EMAILJS_TEMPLATE_ID')
     EMAILJS_USER_ID = os.environ.get('EMAILJS_USER_ID')
+    
+    # Настройки управления сессиями
+    SESSION_TIMEOUT_HOURS = int(os.environ.get('SESSION_TIMEOUT_HOURS', 2))  # Время жизни сессии
+    SESSION_CHECK_INTERVAL = int(os.environ.get('SESSION_CHECK_INTERVAL', 300))  # Интервал проверки сессий (5 минут)
+    FORCE_SINGLE_SESSION = os.environ.get('FORCE_SINGLE_SESSION', 'true').lower() in ['true', 'on', '1']  # Строгий режим одной сессии
+    ADMIN_SESSION_MANAGEMENT = os.environ.get('ADMIN_SESSION_MANAGEMENT', 'true').lower() in ['true', 'on', '1']  # Включить управление сессиями для админа
+    SESSION_HISTORY_RETENTION_DAYS = int(os.environ.get('SESSION_HISTORY_RETENTION_DAYS', 90))  # Хранение истории сессий (дни)
+    ENABLE_PAGE_TRACKING = os.environ.get('ENABLE_PAGE_TRACKING', 'true').lower() in ['true', 'on', '1']  # Включить отслеживание страниц
 
 class DevelopmentConfig(Config):
     """Конфигурация для разработки"""

@@ -853,12 +853,15 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     match.sets_won_1 = sets_won_1
                     match.sets_won_2 = sets_won_2
                     
-                    if sets_won_1 > sets_won_2:
+                    # Определяем победителя матча (нужно выиграть 2 сета)
+                    sets_to_win = tournament.sets_to_win if tournament else 2
+                    
+                    if sets_won_1 >= sets_to_win:
                         match.winner_id = match.participant1_id
-                    elif sets_won_2 > sets_won_1:
+                    elif sets_won_2 >= sets_to_win:
                         match.winner_id = match.participant2_id
                     else:
-                        match.winner_id = None  # Ничья
+                        match.winner_id = None  # Матч не завершен
                 
                 # Получаем настройки турнира для проверки правил
                 tournament = Tournament.query.get(match.tournament_id)
@@ -949,8 +952,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     # Если нет данных о выигранных сетах, считаем матч завершённым
                     match.status = 'завершен'
                 
-                # Начисляем очки участникам матча только если матч завершён
-                if match.status == 'завершен':
+                # Начисляем очки участникам матча только если матч завершён (кто-то выиграл 2 сета)
+                if match.status == 'завершен' and match.winner_id is not None:
                     tournament = Tournament.query.get(match.tournament_id)
                     if tournament:
                         # Получаем участников конкретного матча
@@ -2651,3 +2654,259 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при удалении игрока: {str(e)}")
             return jsonify({'success': False, 'error': f'Ошибка при удалении игрока: {str(e)}'}), 500
+
+    # ===== УПРАВЛЕНИЕ СЕССИЯМИ =====
+    
+    @app.route('/api/admin/sessions', methods=['GET'])
+    def get_active_sessions():
+        """Получение списка активных сессий"""
+        from flask import session
+        from utils.session_manager import create_session_manager
+        from models import create_models
+        
+        # Проверяем авторизацию системного администратора
+        logger.info(f"API get_active_sessions: session.get('is_system_admin') = {session.get('is_system_admin')}")
+        logger.info(f"API get_active_sessions: session keys = {list(session.keys())}")
+        
+        if not session.get('is_system_admin'):
+            logger.warning("API get_active_sessions: доступ запрещен - пользователь не системный администратор")
+            return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+        
+        try:
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            session_manager = create_session_manager(db, UserActivity)
+            
+            active_sessions = session_manager.get_all_active_sessions()
+            
+            sessions_data = []
+            for session_record in active_sessions:
+                sessions_data.append({
+                    'id': session_record.id,
+                    'email': session_record.email,
+                    'ip_address': session_record.ip_address,
+                    'user_agent': session_record.user_agent,
+                    'created_at': session_record.created_at.isoformat(),
+                    'last_activity': session_record.last_activity.isoformat(),
+                    'last_page': session_record.last_page,
+                    'pages_visited_count': session_record.pages_visited_count,
+                    'login_token': session_record.login_token
+                })
+            
+            return jsonify({
+                'success': True,
+                'sessions': sessions_data
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении активных сессий: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/sessions/terminate', methods=['POST'])
+    def terminate_session():
+        """Завершение сессии администратором"""
+        from flask import session
+        from utils.session_manager import create_session_manager
+        from models import create_models
+        
+        # Проверяем авторизацию системного администратора
+        if not session.get('is_system_admin'):
+            return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+        
+        data = request.get_json()
+        if not data or not data.get('email'):
+            return jsonify({'success': False, 'error': 'Не указан email пользователя'}), 400
+        
+        try:
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            session_manager = create_session_manager(db, UserActivity)
+            
+            admin_email = session.get('admin_email', 'admin@system')
+            success = session_manager.terminate_session_by_admin(data['email'], admin_email, 'forced')
+            
+            if success:
+                logger.info(f"Сессия пользователя {data['email']} завершена администратором {admin_email}")
+                return jsonify({
+                    'success': True,
+                    'message': f'Сессия пользователя {data["email"]} успешно завершена'
+                })
+            else:
+                return jsonify({'success': False, 'error': 'Ошибка при завершении сессии'}), 500
+                
+        except Exception as e:
+            logger.error(f"Ошибка при завершении сессии: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/sessions/history', methods=['GET'])
+    def get_session_history():
+        """Получение истории сессий"""
+        from flask import session
+        from utils.session_manager import create_session_manager
+        from models import create_models
+        from datetime import datetime, timedelta
+        
+        # Проверяем авторизацию системного администратора
+        if not session.get('is_system_admin'):
+            return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+        
+        try:
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            session_manager = create_session_manager(db, UserActivity)
+            
+            # Получаем параметры фильтрации
+            email = request.args.get('email')
+            date_from_str = request.args.get('date_from')
+            date_to_str = request.args.get('date_to')
+            limit = int(request.args.get('limit', 100))
+            
+            date_from = None
+            date_to = None
+            
+            if date_from_str:
+                date_from = datetime.fromisoformat(date_from_str)
+            if date_to_str:
+                date_to = datetime.fromisoformat(date_to_str)
+            
+            # Если не указаны даты, берем последние 30 дней
+            if not date_from:
+                date_from = datetime.utcnow() - timedelta(days=30)
+            if not date_to:
+                date_to = datetime.utcnow()
+            
+            history = session_manager.get_session_history(email, date_from, date_to, limit)
+            
+            sessions_data = []
+            for session_record in history:
+                sessions_data.append({
+                    'id': session_record.id,
+                    'email': session_record.email,
+                    'ip_address': session_record.ip_address,
+                    'created_at': session_record.created_at.isoformat(),
+                    'terminated_at': session_record.terminated_at.isoformat() if session_record.terminated_at else None,
+                    'session_duration': session_record.session_duration,
+                    'logout_reason': session_record.logout_reason,
+                    'pages_visited_count': session_record.pages_visited_count,
+                    'last_page': session_record.last_page,
+                    'is_terminated': session_record.is_terminated,
+                    'terminated_by': session_record.terminated_by
+                })
+            
+            return jsonify({
+                'success': True,
+                'sessions': sessions_data
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении истории сессий: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/sessions/statistics', methods=['GET'])
+    def get_session_statistics():
+        """Получение статистики по сессиям"""
+        from flask import session
+        from utils.session_analytics import create_session_analytics
+        from models import create_models
+        from datetime import datetime, timedelta
+        from sqlalchemy import or_
+        
+        # Проверяем авторизацию системного администратора
+        if not session.get('is_system_admin'):
+            return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+        
+        try:
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            analytics = create_session_analytics(db, UserActivity)
+            
+            # Получаем параметры фильтрации
+            date_from_str = request.args.get('date_from')
+            date_to_str = request.args.get('date_to')
+            
+            date_from = None
+            date_to = None
+            
+            if date_from_str:
+                date_from = datetime.fromisoformat(date_from_str)
+            if date_to_str:
+                date_to = datetime.fromisoformat(date_to_str)
+            
+            # Если не указаны даты, берем последние 30 дней
+            if not date_from:
+                date_from = datetime.utcnow() - timedelta(days=30)
+            if not date_to:
+                date_to = datetime.utcnow()
+            
+            # Получаем различные виды статистики
+            overall_stats = analytics.get_overall_statistics(date_from, date_to)
+            hourly_stats = analytics.get_peak_hours_stats(date_from, date_to)
+            termination_stats = analytics.get_termination_reasons_stats(date_from, date_to)
+            duration_stats = analytics.get_session_duration_stats(date_from, date_to)
+            
+            # Получаем количество активных сессий (используем те же критерии, что и в таблице)
+            active_sessions_count = UserActivity.query.filter(
+                UserActivity.user_type == 'admin',
+                UserActivity.is_active == True,
+                UserActivity.is_terminated == False,
+                or_(
+                    UserActivity.expires_at.is_(None),
+                    UserActivity.expires_at > datetime.utcnow()
+                )
+            ).count()
+            
+            # Получаем количество подключенных администраторов турниров (исключая системного администратора)
+            tournament_admins_count = UserActivity.query.filter(
+                UserActivity.user_type == 'admin',
+                UserActivity.is_active == True,
+                UserActivity.is_terminated == False,
+                UserActivity.email != 'admin@system',
+                or_(
+                    UserActivity.expires_at.is_(None),
+                    UserActivity.expires_at > datetime.utcnow()
+                )
+            ).count()
+            
+            # Добавляем количество активных сессий в статистику
+            overall_stats['active_sessions'] = active_sessions_count
+            overall_stats['tournament_admins_online'] = tournament_admins_count
+            
+            return jsonify({
+                'success': True,
+                'stats': overall_stats,
+                'hourly_stats': hourly_stats,
+                'termination_stats': termination_stats,
+                'duration_stats': duration_stats
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении статистики сессий: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/sessions/cleanup', methods=['POST'])
+    def cleanup_sessions():
+        """Принудительная очистка истекших сессий"""
+        from flask import session
+        from utils.session_manager import create_session_manager
+        from models import create_models
+        
+        # Проверяем авторизацию системного администратора
+        if not session.get('is_system_admin'):
+            return jsonify({'success': False, 'error': 'Доступ запрещен'}), 403
+        
+        try:
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            session_manager = create_session_manager(db, UserActivity)
+            
+            cleaned_count = session_manager.cleanup_expired_sessions()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Очищено {cleaned_count} истекших сессий',
+                'cleaned_count': cleaned_count
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при очистке сессий: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500

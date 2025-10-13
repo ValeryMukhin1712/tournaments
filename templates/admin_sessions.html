@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Управление сессиями - Турнирная система</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .session-card {
+            transition: transform 0.2s;
+        }
+        .session-card:hover {
+            transform: translateY(-2px);
+        }
+        .status-active {
+            color: #28a745;
+        }
+        .status-terminated {
+            color: #dc3545;
+        }
+        .status-expired {
+            color: #ffc107;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .chart-container {
+            height: 300px !important;
+            max-height: 300px !important;
+            min-height: 300px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .table-responsive {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('system_admin_dashboard') }}">
+                <i class="fas fa-trophy"></i> Турнирная система
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-hashtag"></i> Страница #SES-001
+                </span>
+                <a class="nav-link" href="{{ url_for('system_admin_dashboard') }}">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> Выход
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2><i class="fas fa-users-cog"></i> Управление сессиями</h2>
+                <p class="text-muted">Мониторинг и управление активными сессиями администраторов</p>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h4 id="total-sessions">-</h4>
+                        <p class="mb-0">Активных сессий</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user fa-2x mb-2"></i>
+                        <h4 id="unique-users">-</h4>
+                        <p class="mb-0">Уникальных пользователей</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-tie fa-2x mb-2"></i>
+                        <h4 id="tournament-admins">-</h4>
+                        <p class="mb-0">Администраторов турниров</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h4 id="avg-duration">-</h4>
+                        <p class="mb-0">Средняя длительность</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-ban fa-2x mb-2"></i>
+                        <h4 id="terminated-sessions">-</h4>
+                        <p class="mb-0">Завершенных сессий</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Навигация по вкладкам -->
+        <ul class="nav nav-tabs" id="sessionsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                    <i class="fas fa-play-circle"></i> Активные сессии
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                    <i class="fas fa-history"></i> История сессий
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="statistics-tab" data-bs-toggle="tab" data-bs-target="#statistics" type="button" role="tab">
+                    <i class="fas fa-chart-bar"></i> Статистика
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="sessionsTabContent">
+            <!-- Активные сессии -->
+            <div class="tab-pane fade show active" id="active" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-play-circle"></i> Активные сессии</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshActiveSessions()">
+                            <i class="fas fa-sync-alt"></i> Обновить
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="activeSessionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>IP адрес</th>
+                                        <th>Время входа</th>
+                                        <th>Последняя активность</th>
+                                        <th>User Agent</th>
+                                        <th>Последняя страница</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activeSessionsBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- История сессий -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> История сессий</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Фильтры -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="emailFilter" class="form-label">Email:</label>
+                                <input type="text" class="form-control" id="emailFilter" placeholder="Фильтр по email">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dateFromFilter" class="form-label">С даты:</label>
+                                <input type="date" class="form-control" id="dateFromFilter">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dateToFilter" class="form-label">По дату:</label>
+                                <input type="date" class="form-control" id="dateToFilter">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-primary d-block" onclick="loadSessionHistory()">
+                                    <i class="fas fa-search"></i> Применить фильтр
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="historySessionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Время входа</th>
+                                        <th>Время выхода</th>
+                                        <th>Длительность</th>
+                                        <th>IP адрес</th>
+                                        <th>Причина завершения</th>
+                                        <th>Страниц посещено</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historySessionsBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="tab-pane fade" id="statistics" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Статистика</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Активность по часам</h6>
+                                <canvas id="hourlyChart" class="chart-container"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Причины завершения сессий</h6>
+                                <canvas id="terminationChart" class="chart-container"></canvas>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6>Топ пользователей</h6>
+                                <div id="topUsersList"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Длительность сессий</h6>
+                                <div id="durationStats"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Подтверждение действия</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmButton">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let currentSessionToTerminate = null;
+
+        // Загрузка данных при инициализации
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            loadActiveSessions();
+            loadSessionHistory();
+        });
+
+        // Загрузка статистики
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/admin/sessions/statistics');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('total-sessions').textContent = data.stats.active_sessions || 0;
+                    document.getElementById('unique-users').textContent = data.stats.unique_users;
+                    document.getElementById('tournament-admins').textContent = data.stats.tournament_admins_online || 0;
+                    document.getElementById('avg-duration').textContent = formatDuration(data.stats.avg_duration);
+                    document.getElementById('terminated-sessions').textContent = data.stats.terminated_sessions;
+                    
+                    // Обновляем графики
+                    updateHourlyChart(data.hourly_stats);
+                    updateTerminationChart(data.termination_stats);
+                    updateTopUsers(data.stats.top_users);
+                    updateDurationStats(data.duration_stats);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+
+        // Загрузка активных сессий
+        async function loadActiveSessions() {
+            try {
+                const response = await fetch('/api/admin/sessions');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('activeSessionsBody');
+                    tbody.innerHTML = '';
+                    
+                    if (data.sessions.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Нет активных сессий</td></tr>';
+                        return;
+                    }
+                    
+                    data.sessions.forEach(session => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${session.email}</td>
+                            <td>${session.ip_address || '-'}</td>
+                            <td>${formatDateTime(session.created_at)}</td>
+                            <td>${formatDateTime(session.last_activity)}</td>
+                            <td title="${session.user_agent || ''}">${truncateText(session.user_agent || '-', 50)}</td>
+                            <td>${session.last_page || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="terminateSession('${session.email}')">
+                                    <i class="fas fa-ban"></i> Завершить
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки активных сессий:', error);
+            }
+        }
+
+        // Загрузка истории сессий
+        async function loadSessionHistory() {
+            try {
+                const email = document.getElementById('emailFilter').value;
+                const dateFrom = document.getElementById('dateFromFilter').value;
+                const dateTo = document.getElementById('dateToFilter').value;
+                
+                let url = '/api/admin/sessions/history?';
+                const params = new URLSearchParams();
+                if (email) params.append('email', email);
+                if (dateFrom) params.append('date_from', dateFrom);
+                if (dateTo) params.append('date_to', dateTo);
+                
+                const response = await fetch(url + params.toString());
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('historySessionsBody');
+                    tbody.innerHTML = '';
+                    
+                    if (data.sessions.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Нет данных</td></tr>';
+                        return;
+                    }
+                    
+                    data.sessions.forEach(session => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${session.email}</td>
+                            <td>${formatDateTime(session.created_at)}</td>
+                            <td>${session.terminated_at ? formatDateTime(session.terminated_at) : '-'}</td>
+                            <td>${formatDuration(session.session_duration || 0)}</td>
+                            <td>${session.ip_address || '-'}</td>
+                            <td><span class="badge bg-${getReasonColor(session.logout_reason)}">${getReasonText(session.logout_reason)}</span></td>
+                            <td>${session.pages_visited_count || 0}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки истории сессий:', error);
+            }
+        }
+
+        // Завершение сессии
+        function terminateSession(email) {
+            currentSessionToTerminate = email;
+            document.getElementById('confirmMessage').textContent = 
+                `Вы уверены, что хотите завершить сессию для пользователя ${email}?`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Подтверждение завершения сессии
+        document.getElementById('confirmButton').addEventListener('click', async function() {
+            if (!currentSessionToTerminate) return;
+            
+            try {
+                const response = await fetch('/api/admin/sessions/terminate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        email: currentSessionToTerminate
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Сессия успешно завершена', 'success');
+                    loadActiveSessions();
+                    loadStatistics();
+                } else {
+                    showAlert('Ошибка при завершении сессии: ' + data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка завершения сессии:', error);
+                showAlert('Ошибка при завершении сессии', 'danger');
+            }
+            
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            currentSessionToTerminate = null;
+        });
+
+        // Обновление активных сессий
+        function refreshActiveSessions() {
+            loadActiveSessions();
+        }
+
+        // Вспомогательные функции
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('ru-RU');
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '0 сек';
+            // Округляем до 1 секунды
+            const roundedSeconds = Math.round(seconds);
+            const hours = Math.floor(roundedSeconds / 3600);
+            const minutes = Math.floor((roundedSeconds % 3600) / 60);
+            const secs = roundedSeconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}ч ${minutes}м ${secs}с`;
+            } else if (minutes > 0) {
+                return `${minutes}м ${secs}с`;
+            } else {
+                return `${secs}с`;
+            }
+        }
+
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        function getReasonColor(reason) {
+            const colors = {
+                'normal': 'success',
+                'forced': 'danger',
+                'timeout': 'warning',
+                'duplicate_login': 'info'
+            };
+            return colors[reason] || 'secondary';
+        }
+
+        function getReasonText(reason) {
+            const texts = {
+                'normal': 'Обычный выход',
+                'forced': 'Принудительно',
+                'timeout': 'Истекла',
+                'duplicate_login': 'Повторный вход'
+            };
+            return texts[reason] || reason || 'Неизвестно';
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Обновление графиков
+        function updateHourlyChart(data) {
+            const ctx = document.getElementById('hourlyChart').getContext('2d');
+            
+            // Уничтожаем существующий график, если он есть
+            if (window.hourlyChartInstance) {
+                window.hourlyChartInstance.destroy();
+            }
+            
+            // Создаем новый график
+            window.hourlyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.label),
+                    datasets: [{
+                        label: 'Количество сессий',
+                        data: data.map(item => item.count),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 1,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTerminationChart(data) {
+            const ctx = document.getElementById('terminationChart').getContext('2d');
+            
+            // Уничтожаем существующий график, если он есть
+            if (window.terminationChartInstance) {
+                window.terminationChartInstance.destroy();
+            }
+            
+            // Создаем новый график
+            window.terminationChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => getReasonText(item.reason)),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545',
+                            '#ffc107',
+                            '#17a2b8'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 1,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTopUsers(users) {
+            const container = document.getElementById('topUsersList');
+            container.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const div = document.createElement('div');
+                div.className = 'd-flex justify-content-between align-items-center mb-2';
+                div.innerHTML = `
+                    <span>${index + 1}. ${user.email}</span>
+                    <span class="badge bg-primary">${user.total_sessions} сессий</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateDurationStats(stats) {
+            const container = document.getElementById('durationStats');
+            container.innerHTML = `
+                <div class="mb-2">
+                    <strong>Средняя:</strong> ${formatDuration(stats.avg_duration)}
+                </div>
+                <div class="mb-2">
+                    <strong>Минимальная:</strong> ${formatDuration(stats.min_duration)}
+                </div>
+                <div class="mb-2">
+                    <strong>Максимальная:</strong> ${formatDuration(stats.max_duration)}
+                </div>
+                <div class="mb-2">
+                    <strong>Медианная:</strong> ${formatDuration(stats.median_duration)}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+

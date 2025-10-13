@@ -2,26 +2,22 @@
 Модель для хранения паролей доступа
 """
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from . import db
 
-def create_token_model(db):
-    """Создает модель Token для базы данных (пароли доступа)"""
+class Token(db.Model):
+    __tablename__ = 'tokens'
+    __table_args__ = {'extend_existing': True}
     
-    class Token(db.Model):
-        __tablename__ = 'tokens'
-        
-        id = Column(Integer, primary_key=True)
-        email = Column(String(255), nullable=False, index=True)
-        token = Column(Integer, nullable=False, unique=True, index=True)
-        name = Column(String(255), nullable=False)
-        created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-        is_used = Column(Boolean, default=False, nullable=False)
-        used_at = Column(DateTime, nullable=True)
-        email_sent = Column(Boolean, default=False, nullable=False)
-        email_sent_at = Column(DateTime, nullable=True)
-        email_status = Column(String(50), default='pending', nullable=False)  # pending, sent, failed, manual
-        
-        def __repr__(self):
-            return f'<Password {self.token} for {self.email}>'
-    
-    return Token
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False, index=True)
+    token = db.Column(db.Integer, nullable=False, unique=True, index=True)
+    name = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    is_used = db.Column(db.Boolean, default=False, nullable=False)
+    used_at = db.Column(db.DateTime, nullable=True)
+    email_sent = db.Column(db.Boolean, default=False, nullable=False)
+    email_sent_at = db.Column(db.DateTime, nullable=True)
+    email_status = db.Column(db.String(50), default='pending', nullable=False)
+
+    def __repr__(self):
+        return f'<Token {self.token} for {self.email}>'

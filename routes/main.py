@@ -119,9 +119,14 @@ def calculate_participant_ranking(participants, matches, tournament):
             stats2['sets_won'] += match.sets_won_2
             stats2['sets_lost'] += match.sets_won_1
             
-            # Определяем победителя и начисляем очки
-            if match.sets_won_1 > match.sets_won_2:
-                # Участник 1 победил
+            # Определяем победителя матча (нужно выиграть 2 сета)
+            sets_to_win = tournament.sets_to_win or 2
+            
+            # Проверяем, завершен ли матч (кто-то выиграл 2 сета)
+            match_completed = False
+            if match.sets_won_1 >= sets_to_win:
+                # Участник 1 победил матч
+                match_completed = True
                 stats1['wins'] += 1
                 stats2['losses'] += 1
                 stats1['points'] += (tournament.points_win or 1)
@@ -131,8 +136,9 @@ def calculate_participant_ranking(participants, matches, tournament):
                 stats1['head_to_head'][p2_id] = 'win'
                 stats2['head_to_head'][p1_id] = 'loss'
                 
-            elif match.sets_won_1 < match.sets_won_2:
-                # Участник 2 победил
+            elif match.sets_won_2 >= sets_to_win:
+                # Участник 2 победил матч
+                match_completed = True
                 stats2['wins'] += 1
                 stats1['losses'] += 1
                 stats2['points'] += (tournament.points_win or 1)
@@ -141,17 +147,9 @@ def calculate_participant_ranking(participants, matches, tournament):
                 # Записываем результат личной встречи
                 stats2['head_to_head'][p1_id] = 'win'
                 stats1['head_to_head'][p2_id] = 'loss'
-                
-            else:
-                # Ничья
-                stats1['draws'] += 1
-                stats2['draws'] += 1
-                stats1['points'] += (tournament.points_draw or 1)
-                stats2['points'] += (tournament.points_draw or 1)
-                
-                # Записываем результат личной встречи
-                stats1['head_to_head'][p2_id] = 'draw'
-                stats2['head_to_head'][p1_id] = 'draw'
+            
+            # Если матч не завершен (никто не выиграл 2 сета), очки не начисляются
+            # Но статистика сетов все равно учитывается для отображения
             
             # Рассчитываем разность очков в сетах (по реальным очкам, а не по количеству сетов)
             # Суммируем все очки участника во всех сетах
@@ -760,6 +758,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 db.session.commit()
                 
                 # Сохраняем в сессии для быстрого доступа
+                from flask import session
                 session['token_request'] = {
                     'name': name,
                     'email': email,
@@ -1093,7 +1092,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     from datetime import timedelta
                     if datetime.utcnow() - token_obj.created_at > timedelta(days=30):
                         app.logger.warning(f'Токен истек: создан {token_obj.created_at}')
-                        flash('Пароль истек. Получите новый пароль.', 'error')
+                        flash(f'Пароль для пользователя "{email}" истек. Получите новый пароль через форму запроса.', 'error')
                         return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
                     
                     # Обновляем время последнего использования (но не помечаем как использованный)
@@ -1113,6 +1112,31 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         'is_active': True
                     })()
                     
+                    # Создаем запись UserActivity для администратора турнира
+                    try:
+                        from models import create_models
+                        models = create_models(db)
+                        UserActivity = models['UserActivity']
+                        from utils.session_manager import create_session_manager
+                        
+                        session_manager = create_session_manager(db, UserActivity)
+                        
+                        # Создаем данные сессии
+                        session_data = {
+                            'page_visited': '/admin-tournament',
+                            'user_agent': request.headers.get('User-Agent', ''),
+                            'ip_address': request.remote_addr
+                        }
+                        
+                        # Создаем сессию для администратора турнира
+                        success, session_token, error = session_manager.create_admin_session(email, session_data)
+                        if success:
+                            app.logger.info(f'Создана сессия для администратора турнира {email}')
+                        else:
+                            app.logger.warning(f'Не удалось создать сессию для {email}: {error}')
+                    except Exception as e:
+                        app.logger.error(f'Ошибка создания сессии для администратора турнира: {e}')
+                    
                     # Сохраняем админа в сессии
                     session['admin_id'] = admin.id
                     session['admin_name'] = admin.name
@@ -1126,7 +1150,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     tokens_with_email = Token.query.filter_by(email=email).all()
                     app.logger.warning(f'Токен не найден: email={email}, token={token}')
                     app.logger.warning(f'Токены с таким email: {[(t.token, t.is_used) for t in tokens_with_email]}')
-                    flash('Неверный email или токен. Убедитесь, что вы получили токен через форму запроса.', 'error')
+                    
+                    # Более информативное сообщение об ошибке
+                    if not tokens_with_email:
+                        flash(f'Пользователь с email "{email}" не найден. Получите пароль доступа через форму запроса.', 'error')
+                    else:
+                        flash(f'Неверный пароль для пользователя "{email}". Проверьте правильность введенного пароля.', 'error')
+                    
                     return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
                     
             except Exception as e:
@@ -1141,6 +1171,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         """Авторизация системного администратора"""
         from flask import session, jsonify
         from flask_wtf.csrf import validate_csrf
+        from utils.session_manager import create_session_manager
         
         # Проверяем CSRF токен (упрощенная проверка для Railway)
         csrf_token = request.headers.get('X-CSRFToken')
@@ -1163,12 +1194,39 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         password = data.get('password')
         
         if username == 'admin' and password == 'adm555':
+            # Создаем менеджер сессий
+            from models import create_models
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            session_manager = create_session_manager(db, UserActivity)
+            
+            # Убираем проверку активной сессии для системного администратора
+            # Системный администратор может входить несколько раз
+            
+            # Создаем новую сессию
+            session_data = {
+                'page_visited': '/admin-system-login',
+                'user_agent': request.headers.get('User-Agent', ''),
+                'ip_address': request.remote_addr
+            }
+            
+            logger.info(f"Вызываем create_admin_session для admin@system")
+            success, session_token, error = session_manager.create_admin_session('admin@system', session_data)
+            logger.info(f"Результат create_admin_session: success={success}, error={error}")
+            
+            if not success:
+                logger.error(f"Ошибка создания сессии для admin@system: {error}")
+                return jsonify({
+                    'success': False,
+                    'message': 'Ошибка создания сессии. Попробуйте снова.'
+                }), 500
+            
             # Простая заглушка для системного админа
             system_admin = type('Admin', (), {
                 'id': 1,
                 'name': 'Системный администратор',
                 'email': 'admin@system',
-                'token': 'system_admin_token',
+                'token': session_token,
                 'is_active': True
             })()
             
@@ -1177,8 +1235,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             session['admin_name'] = system_admin.name
             session['admin_email'] = system_admin.email
             session['is_system_admin'] = True
+            session['session_token'] = session_token
             
-            logger.info(f"Системный администратор успешно авторизован")
+            logger.info(f"Системный администратор успешно авторизован с токеном: {session_token}")
             return jsonify({
                 'success': True,
                 'message': 'Авторизация успешна',
@@ -1191,7 +1250,58 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 'message': 'Неверный логин или пароль'
             }), 401
     
+    def check_session_status(admin_email):
+        """Проверяет, активна ли сессия администратора в UserActivity"""
+        try:
+            from models import create_models
+            from datetime import datetime
+            from sqlalchemy import or_
+            
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            
+            # Проверяем, есть ли активная сессия
+            active_session = UserActivity.query.filter(
+                UserActivity.email == admin_email,
+                UserActivity.is_active == True,
+                UserActivity.is_terminated == False,
+                or_(
+                    UserActivity.expires_at.is_(None),
+                    UserActivity.expires_at > datetime.utcnow()
+                )
+            ).first()
+            
+            return active_session is not None
+        except Exception as e:
+            app.logger.error(f'Ошибка проверки статуса сессии: {e}')
+            return True  # В случае ошибки считаем сессию активной
+    
+    def require_active_session(f):
+        """Декоратор для проверки активности сессии"""
+        from functools import wraps
+        from flask import session, redirect, url_for, flash
+        
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            admin_email = session.get('admin_email', '')
+            app.logger.info(f'Декоратор require_active_session: проверяем сессию для {admin_email}')
+            
+            if admin_email and admin_email != 'admin@system':
+                is_active = check_session_status(admin_email)
+                app.logger.info(f'Статус сессии для {admin_email}: {is_active}')
+                
+                if not is_active:
+                    app.logger.info(f'Сессия для {admin_email} неактивна, очищаем Flask-сессию')
+                    session.clear()
+                    flash('Ваша сессия была завершена администратором. Необходима повторная авторизация.', 'warning')
+                    return redirect(url_for('admin_tournament'))
+            
+            app.logger.info(f'Сессия для {admin_email} активна, разрешаем доступ')
+            return f(*args, **kwargs)
+        return decorated_function
+    
     @app.route('/admin-dashboard')
+    @require_active_session
     def admin_dashboard():
         """Панель управления админа турниров"""
         from flask import session
@@ -1354,6 +1464,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         
         # Получаем активных пользователей из таблицы активности
         try:
+            from models import create_models
+            models = create_models(db)
+            UserActivity = models['UserActivity']
             activity_stats = get_active_users_count(db, UserActivity, minutes_threshold=30)
             active_admins = activity_stats['active_admins']
             active_participants = activity_stats['active_participants']
@@ -1396,6 +1509,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         return render_template('admin_tokens.html')
     
     @app.route('/admin/edit-tournament/<int:tournament_id>')
+    @require_active_session
     def admin_edit_tournament(tournament_id):
         """Страница редактирования турнира"""
         from flask import session
@@ -1434,6 +1548,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              admin=admin)
     
     @app.route('/admin-create-tournament', methods=['GET', 'POST'])
+    @require_active_session
     def admin_create_tournament():
         """Создание турнира админом"""
         from flask import session
@@ -1557,6 +1672,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     
     
     @app.route('/tournament/<int:tournament_id>')
+    @require_active_session
     def tournament_detail(tournament_id):
         """Полная страница турнира с функционалом (Страница 10)"""
         from flask import session, flash, redirect, url_for
@@ -1845,7 +1961,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     
                     if match:
                         if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
-                            # Матч завершен - показываем результат (счет сетов)
+                            # Проверяем, действительно ли матч завершен (кто-то выиграл 2+ сета)
+                            sets_to_win = tournament.sets_to_win or 2
+                            is_match_completed = match.sets_won_1 >= sets_to_win or match.sets_won_2 >= sets_to_win
+                            
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
                                 is_winner = match.sets_won_1 > match.sets_won_2
@@ -1876,13 +1995,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 if sets_list:
                                     sets_details = ", ".join(sets_list)
                             
-                            chessboard[participant.id][other_participant.id] = {
-                                'type': 'result',
-                                'value': score,
-                                'match_id': match.id,
-                                'is_winner': is_winner,
-                                'sets_details': sets_details
-                            }
+                            if is_match_completed:
+                                # Матч действительно завершен - показываем результат
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'result',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'is_winner': is_winner,
+                                    'sets_details': sets_details
+                                }
+                            else:
+                                # Матч в процессе (например, 1:0) - показываем как in_progress
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'sets_details': sets_details
+                                }
                         elif match.status in ['в процессе', 'играют']:
                             # Матч в процессе - показываем счет если есть
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -2320,6 +2449,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     
                     if match:
                         if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                            # Проверяем, действительно ли матч завершен (кто-то выиграл 2+ сета)
+                            sets_to_win = tournament.sets_to_win or 2
+                            is_match_completed = match.sets_won_1 >= sets_to_win or match.sets_won_2 >= sets_to_win
+                            
                             # Определяем победителя и счет
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
@@ -2351,13 +2484,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             if sets_list:
                                 sets_details = ", ".join(sets_list)
                             
-                            chessboard[participant.id][other_participant.id] = {
-                                'type': 'result',
-                                'value': score,
-                                'match_id': match.id,
-                                'is_winner': is_winner,
-                                'sets_details': sets_details
-                            }
+                            if is_match_completed:
+                                # Матч действительно завершен - показываем результат
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'result',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'is_winner': is_winner,
+                                    'sets_details': sets_details
+                                }
+                            else:
+                                # Матч в процессе (например, 1:0) - показываем как in_progress
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'sets_details': sets_details
+                                }
                         elif match.status in ['в процессе', 'играют']:
                             # Матч в процессе
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -2509,31 +2652,26 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     participant_stats_dict[participant2_id]['games'] += 1
                     participant_stats_dict[participant2_id]['matches_played'] += 1
                     
-                    # Определяем победителя
-                    if match.sets_won_1 > match.sets_won_2:
-                        # Участник 1 выиграл
+                    # Определяем победителя матча (нужно выиграть 2 сета)
+                    sets_to_win = tournament.sets_to_win or 2
+                    
+                    if match.sets_won_1 >= sets_to_win:
+                        # Участник 1 выиграл матч
                         participant_stats_dict[participant1_id]['wins'] += 1
                         participant_stats_dict[participant1_id]['matches_won'] += 1
                         participant_stats_dict[participant1_id]['points'] += tournament.points_win
                         participant_stats_dict[participant2_id]['losses'] += 1
                         participant_stats_dict[participant2_id]['matches_lost'] += 1
                         participant_stats_dict[participant2_id]['points'] += tournament.points_loss
-                    elif match.sets_won_2 > match.sets_won_1:
-                        # Участник 2 выиграл
+                    elif match.sets_won_2 >= sets_to_win:
+                        # Участник 2 выиграл матч
                         participant_stats_dict[participant2_id]['wins'] += 1
                         participant_stats_dict[participant2_id]['matches_won'] += 1
                         participant_stats_dict[participant2_id]['points'] += tournament.points_win
                         participant_stats_dict[participant1_id]['losses'] += 1
                         participant_stats_dict[participant1_id]['matches_lost'] += 1
                         participant_stats_dict[participant1_id]['points'] += tournament.points_loss
-                    else:
-                        # Ничья
-                        participant_stats_dict[participant1_id]['draws'] += 1
-                        participant_stats_dict[participant1_id]['matches_drawn'] += 1
-                        participant_stats_dict[participant1_id]['points'] += tournament.points_draw
-                        participant_stats_dict[participant2_id]['draws'] += 1
-                        participant_stats_dict[participant2_id]['matches_drawn'] += 1
-                        participant_stats_dict[participant2_id]['points'] += tournament.points_draw
+                    # Если никто не выиграл 2 сета, очки не начисляются
                     
                     # Обновляем разницу очков в сетах
                     # Считаем разницу в очках внутри сетов, а не количество выигранных сетов
@@ -2616,7 +2754,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     
                     if match:
                         if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
-                            # Матч завершен - показываем результат
+                            # Проверяем, действительно ли матч завершен (кто-то выиграл 2+ сета)
+                            sets_to_win = tournament.sets_to_win or 2
+                            is_match_completed = match.sets_won_1 >= sets_to_win or match.sets_won_2 >= sets_to_win
+                            
+                            # Определяем победителя и счет
                             if match.participant1_id == participant.id:
                                 score = f"{match.sets_won_1}:{match.sets_won_2}"
                                 is_winner = match.sets_won_1 > match.sets_won_2
@@ -2637,13 +2779,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 if sets_list:
                                     sets_details = ", ".join(sets_list)
                             
-                            chessboard[participant.id][other_participant.id] = {
-                                'type': 'result',
-                                'value': score,
-                                'match_id': match.id,
-                                'is_winner': is_winner,
-                                'sets_details': sets_details
-                            }
+                            if is_match_completed:
+                                # Матч действительно завершен - показываем результат
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'result',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'is_winner': is_winner,
+                                    'sets_details': sets_details
+                                }
+                            else:
+                                # Матч в процессе (например, 1:0) - показываем как in_progress
+                                chessboard[participant.id][other_participant.id] = {
+                                    'type': 'in_progress',
+                                    'value': score,
+                                    'match_id': match.id,
+                                    'sets_details': sets_details
+                                }
                         elif match.status in ['в процессе', 'играют']:
                             # Матч в процессе
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -2766,11 +2918,42 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     def admin_logout():
         """Выход админа"""
         from flask import session
+        from utils.session_manager import create_session_manager
+        
+        # Получаем токен сессии
+        session_token = session.get('session_token')
+        admin_email = session.get('admin_email')
+        
+        # Завершаем сессию в базе данных
+        if session_token and admin_email:
+            from models import create_models
+            models = create_models(db)
+            UserActivity = models['UserActivity']
+            session_manager = create_session_manager(db, UserActivity)
+            session_manager.logout_session(session_token, 'normal')
+            logger.info(f"Сессия {session_token} завершена пользователем {admin_email}")
+        
+        # Очищаем сессию
         session.pop('admin_id', None)
         session.pop('admin_name', None)
         session.pop('admin_email', None)
+        session.pop('is_system_admin', None)
+        session.pop('session_token', None)
+        
         flash('Вы вышли из системы', 'info')
         return redirect(url_for('admin_tournament'))
+    
+    @app.route('/admin/sessions')
+    def admin_sessions():
+        """Страница управления сессиями (только для системного администратора)"""
+        from flask import session
+        
+        # Проверяем авторизацию системного администратора
+        if not session.get('is_system_admin'):
+            flash('Доступ запрещен. Требуются права системного администратора.', 'error')
+            return redirect(url_for('admin_tournament'))
+        
+        return render_template('admin_sessions.html')
     
     @app.route('/my-tournaments', methods=['GET', 'POST'])
     def my_tournaments():

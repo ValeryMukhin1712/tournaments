@@ -13,7 +13,7 @@ import logging
 import secrets
 
 # Импорт моделей из модулей
-from models import create_models
+from models import db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player, UserActivity
 
 # Импорт и регистрация маршрутов
 from routes import register_routes
@@ -70,24 +70,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Инициализация базы данных
-db = SQLAlchemy(app)
+db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
-# Создание моделей с текущим экземпляром db
-models = create_models(db)
-User = models['User']
-Tournament = models['Tournament']
-Participant = models['Participant']
-Match = models['Match']
-Notification = models['Notification']
-MatchLog = models['MatchLog']
-Token = models['Token']
-WaitingList = models['WaitingList']
-Settings = models['Settings']
-Player = models['Player']
 
 # Импорт и регистрация маршрутов
 register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player)
