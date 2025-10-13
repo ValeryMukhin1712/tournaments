@@ -95,7 +95,7 @@
                 </p>
             </div>
                                 <div class="col-md-6">
-                                    <p><strong>Участников:</strong> {{ participants|length }}</p>
+                                    <p><strong>Участников:</strong> {{ participants_with_stats_chessboard|length }}</p>
                                     <p><strong>Статус:</strong> 
                                         {% if tournament.status == 'завершен' %}
                                             <span class="badge bg-success">
@@ -185,7 +185,7 @@
                                                 <td>
                                                     <strong>{{ match.participant1 }}</strong> vs <strong>{{ match.participant2 }}</strong>
                                                     {% if match.is_participant_match and not is_viewer_mode %}
-                                                        <span class="badge bg-primary ms-2">Ваш матч</span>
+                                                        <span class="badge bg-primary ms-2 rounded-pill">Ваш матч</span>
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-center">
@@ -212,7 +212,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td class="d-none d-md-table-cell text-center">
-                                                    <span class="badge 
+                                                    <span class="badge rounded-pill
                                                         {% if match.status == 'завершен' %}bg-success
                                                         {% elif match.status == 'запланирован' %}bg-info
                                                         {% else %}bg-secondary{% endif %}"

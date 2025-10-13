@@ -267,10 +267,10 @@
                             {% endif %}
                         </td>
                         <td>
-                            <span class="badge bg-info">{{ tournament.sport_type }}</span>
+                            <span class="badge bg-info rounded-pill">{{ tournament.sport_type }}</span>
                         </td>
                         <td>
-                            <span class="badge bg-primary participants-badge" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#participantsModal{{ tournament.id }}">
+                            <span class="badge bg-primary participants-badge rounded-pill" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#participantsModal{{ tournament.id }}">
                                 игроков {{ tournament.participants|length }}
                             </span>
                         </td>
@@ -279,7 +279,7 @@
                             {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'ne', None)|list|length > 0 %}
                             
                             {% if tournament.status == 'завершен' %}
-                                <span class="badge bg-secondary">завершён</span>
+                                <span class="badge bg-secondary rounded-pill">завершён</span>
                             {% elif tournament.status == 'активен' %}
                                 {% if has_matches_with_scores %}
                                     <span class="badge bg-success">начался</span>
@@ -292,7 +292,7 @@
                                 {% if has_matches_with_scores or has_matches_with_results %}
                                     <span class="badge bg-success">начался</span>
                                 {% else %}
-                                    <span class="badge bg-warning">Регистрация</span>
+                                    <span class="badge bg-warning rounded-pill">Регистрация</span>
                                 {% endif %}
                             {% else %}
                                 <span class="badge bg-info">{{ tournament.status }}</span>
@@ -304,7 +304,7 @@
                                 <div class="d-flex gap-2 flex-wrap">
                                     {% if tournament.status == 'регистрация' and not has_matches_with_scores and not has_matches_with_results %}
                                         <button type="button" class="btn btn-gradient btn-sm apply-btn" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
-                                            <i class="fas fa-user-plus me-1"></i>Подать заявку
+                                            Подать заявку
                                         </button>
                                     {% endif %}
                                     
