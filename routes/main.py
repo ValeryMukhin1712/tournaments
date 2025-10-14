@@ -601,6 +601,34 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Новая стартовая страница с выбором роли
         return render_template('index.html')
     
+    @app.route('/referee-test')
+    def referee_test():
+        """Тестовая страница для интеграции с Referee"""
+        return render_template('referee_test.html')
+
+    @app.route('/referee')
+    def referee_page():
+        """Отдельная страница для Referee приложения"""
+        # Получаем параметры из URL
+        clear_data = request.args.get('clear', 'false').lower() == 'true'
+        
+        if clear_data:
+            # Очищаем данные для нового матча
+            participant1 = ''
+            participant2 = ''
+            tournament_name = ''
+        else:
+            # Используем переданные данные или значения по умолчанию
+            participant1 = request.args.get('p1', 'Игрок 1')
+            participant2 = request.args.get('p2', 'Игрок 2')
+            tournament_name = request.args.get('tournament', 'Турнир')
+        
+        return render_template('referee_page.html', 
+                             participant1=participant1, 
+                             participant2=participant2, 
+                             tournament_name=tournament_name)
+
+    
     # Тестовые варианты дизайна с фоновым изображением
     @app.route('/bg-variant1')
     def index_bg_variant1():
@@ -2149,6 +2177,29 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Проверяем, есть ли незавершённые матчи
         has_unfinished = has_unfinished_matches(matches)
         
+        # Создаем сериализуемые данные для JavaScript
+        matches_data = []
+        for match in matches:
+            match_data = {
+                'id': match.id,
+                'participant1_id': match.participant1_id,
+                'participant2_id': match.participant2_id,
+                'status': match.status,
+                'sets_won_1': match.sets_won_1,
+                'sets_won_2': match.sets_won_2,
+                'set1_score1': match.set1_score1,
+                'set1_score2': match.set1_score2,
+                'set2_score1': match.set2_score1,
+                'set2_score2': match.set2_score2,
+                'set3_score1': match.set3_score1,
+                'set3_score2': match.set3_score2,
+                'match_date': match.match_date.isoformat() if match.match_date else None,
+                'match_time': match.match_time.isoformat() if match.match_time else None,
+                'court': match.court_number,  # Используем court_number вместо court
+                'match_number': match.match_number
+            }
+            matches_data.append(match_data)
+        
         return render_template('tournament.html', 
                              tournament=tournament, 
                              participants=participants, 
@@ -2156,6 +2207,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              participants_with_stats=participants_with_stats,
                              participants_with_stats_chessboard=participants_with_stats_chessboard,
                              matches=matches,
+                             matches_data=matches_data,  # Добавляем matches_data для JavaScript
                              chessboard=chessboard,
                              schedule_display=schedule_display,
                              statistics=statistics,

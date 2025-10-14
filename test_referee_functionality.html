@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Referee</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .test-button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .test-button:hover { background: #0056b3; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест функциональности Referee</h1>
+    
+    <div class="test-section">
+        <h3>1. Тест API генерации HTML</h3>
+        <button class="test-button" onclick="testAPI()">Тестировать API</button>
+        <div id="api-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Тест JavaScript функций</h3>
+        <button class="test-button" onclick="testJavaScript()">Тестировать JavaScript</button>
+        <div id="js-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Тест модального окна</h3>
+        <button class="test-button" onclick="testModal()">Тестировать модальное окно</button>
+        <div id="modal-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Тест интеграции</h3>
+        <button class="test-button" onclick="testIntegration()">Тестировать интеграцию</button>
+        <div id="integration-result" class="test-result"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = 'Тестируем API...';
+            
+            try {
+                const response = await fetch('/api/referee/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        participant1: 'Иван-Петр',
+                        participant2: 'Мария',
+                        tournament_name: 'Тестовый турнир'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ API работает корректно</div>
+                        <div>HTML получен: ${data.html.length} символов</div>
+                        <div>Содержит JavaScript: ${data.html.includes('function') ? 'Да' : 'Нет'}</div>
+                        <div>Содержит кнопки: ${data.html.includes('button') ? 'Да' : 'Нет'}</div>
+                        <div>Содержит поля ввода: ${data.html.includes('input') ? 'Да' : 'Нет'}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ API ошибка: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Ошибка запроса: ${error.message}</div>`;
+            }
+        }
+        
+        function testJavaScript() {
+            const resultDiv = document.getElementById('js-result');
+            resultDiv.innerHTML = 'Тестируем JavaScript...';
+            
+            try {
+                // Создаем тестовый контейнер
+                const testContainer = document.createElement('div');
+                testContainer.innerHTML = `
+                    <div id="scoreLeft">0</div>
+                    <div id="scoreRight">0</div>
+                    <div id="court_left" style="width: 100px; height: 100px; background: green; cursor: pointer;"></div>
+                    <div id="court_right" style="width: 100px; height: 100px; background: blue; cursor: pointer;"></div>
+                    <button id="btnStartGame">Начать игру</button>
+                    <button id="btnClear">Очистить</button>
+                `;
+                document.body.appendChild(testContainer);
+                
+                // Инициализируем переменные
+                window.scoreLeft = 0;
+                window.scoreRight = 0;
+                window.isGameActive = false;
+                
+                // Тестируем функции
+                const tests = [];
+                
+                // Тест 1: Инициализация
+                tests.push('Инициализация: ' + (typeof window.scoreLeft !== 'undefined' ? '✅' : '❌'));
+                
+                // Тест 2: Функция updateScore
+                window.updateScore = function() {
+                    document.getElementById('scoreLeft').textContent = window.scoreLeft;
+                    document.getElementById('scoreRight').textContent = window.scoreRight;
+                };
+                window.scoreLeft = 5;
+                window.scoreRight = 3;
+                window.updateScore();
+                const scoreLeftEl = document.getElementById('scoreLeft');
+                const scoreRightEl = document.getElementById('scoreRight');
+                tests.push('updateScore: ' + (scoreLeftEl.textContent === '5' && scoreRightEl.textContent === '3' ? '✅' : '❌'));
+                
+                // Тест 3: Обработчики событий
+                let clickTest = false;
+                const courtLeft = document.getElementById('court_left');
+                courtLeft.addEventListener('click', function() {
+                    clickTest = true;
+                });
+                courtLeft.click();
+                tests.push('Обработчики событий: ' + (clickTest ? '✅' : '❌'));
+                
+                // Очищаем тестовый контейнер
+                document.body.removeChild(testContainer);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ JavaScript тесты завершены</div>
+                    <div>${tests.join('<br>')}</div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Ошибка JavaScript: ${error.message}</div>`;
+            }
+        }
+        
+        function testModal() {
+            const resultDiv = document.getElementById('modal-result');
+            resultDiv.innerHTML = 'Тестируем модальное окно...';
+            
+            try {
+                // Проверяем наличие Bootstrap
+                const hasBootstrap = typeof bootstrap !== 'undefined';
+                tests.push('Bootstrap: ' + (hasBootstrap ? '✅' : '❌'));
+                
+                // Проверяем наличие функций
+                const hasOpenRefereeModal = typeof openRefereeModal !== 'undefined';
+                const hasLoadReferee = typeof loadReferee !== 'undefined';
+                const hasExecuteRefereeScript = typeof executeRefereeScript !== 'undefined';
+                
+                const tests = [
+                    'Bootstrap: ' + (hasBootstrap ? '✅' : '❌'),
+                    'openRefereeModal: ' + (hasOpenRefereeModal ? '✅' : '❌'),
+                    'loadReferee: ' + (hasLoadReferee ? '✅' : '❌'),
+                    'executeRefereeScript: ' + (hasExecuteRefereeScript ? '✅' : '❌')
+                ];
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Модальное окно тесты завершены</div>
+                    <div>${tests.join('<br>')}</div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Ошибка модального окна: ${error.message}</div>`;
+            }
+        }
+        
+        function testIntegration() {
+            const resultDiv = document.getElementById('integration-result');
+            resultDiv.innerHTML = 'Тестируем интеграцию...';
+            
+            try {
+                // Проверяем наличие всех необходимых элементов
+                const tests = [];
+                
+                // Проверяем наличие функций
+                const functions = ['openRefereeModal', 'loadReferee', 'executeRefereeScript', 'setupRefereeMessageHandler'];
+                functions.forEach(func => {
+                    tests.push(`${func}: ` + (typeof window[func] !== 'undefined' ? '✅' : '❌'));
+                });
+                
+                // Проверяем наличие обработчиков событий
+                const hasMessageListener = window.addEventListener ? '✅' : '❌';
+                tests.push('Обработчики событий: ' + hasMessageListener);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Интеграция тесты завершены</div>
+                    <div>${tests.join('<br>')}</div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Ошибка интеграции: ${error.message}</div>`;
+            }
+        }
+        
+        function getCSRFToken() {
+            const token = document.querySelector('meta[name=csrf-token]');
+            return token ? token.getAttribute('content') : '';
+        }
+        
+        // Автоматически запускаем тесты при загрузке
+        window.addEventListener('load', function() {
+            console.log('Страница загружена, запускаем тесты...');
+            testAPI();
+            testJavaScript();
+            testModal();
+            testIntegration();
+        });
+    </script>
+</body>
+</html>

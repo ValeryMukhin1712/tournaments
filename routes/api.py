@@ -2915,3 +2915,27 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при очистке сессий: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/referee/generate', methods=['POST'])
+    def generate_referee_html():
+        """Генерирует HTML для приложения Referee с заполненными именами участников"""
+        try:
+            data = request.get_json()
+            participant1_name = data.get('participant1', 'Игрок 1')
+            participant2_name = data.get('participant2', 'Игрок 2')
+            tournament_name = data.get('tournament_name', 'Турнир')
+            
+            # Импортируем утилиту для генерации HTML
+            from utils.referee_utils import generate_referee_html
+            
+            # Генерируем HTML с заполненными именами
+            html_content = generate_referee_html(participant1_name, participant2_name, tournament_name)
+            
+            return jsonify({
+                'success': True,
+                'html': html_content
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при генерации HTML для Referee: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500

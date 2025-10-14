@@ -616,9 +616,14 @@ body {
             </h1>
             <p class="lead text-muted">Выберите вашу роль для продолжения</p>
             
-            <button class="btn btn-gradient btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
-                <i class="fas fa-user-shield me-2"></i>Вход администратора
-            </button>
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                <button class="btn btn-gradient btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
+                    <i class="fas fa-user-shield me-2"></i>Вход администратора
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="openReferee()" title="Открыть приложение судейства">
+                    <i class="fas fa-whistle me-2"></i>Судейство
+                </button>
+            </div>
         </div>
         
         <div class="row g-4">
@@ -770,6 +775,11 @@ function adminLogin() {
     modal.addEventListener('hidden.bs.modal', function() {
         document.body.removeChild(modal);
     });
+}
+
+function openReferee() {
+    // Открываем страницу referee без привязки к конкретному матчу с очисткой данных
+    window.open('/referee?p1=&p2=&tournament=&clear=true', '_blank', 'width=1920,height=1080,fullscreen=yes');
 }
 
 function performAdminLogin() {

@@ -1203,6 +1203,9 @@
             <div class="modal-header">
                 <h5 class="modal-title">Результат</h5>
                 <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success btn-sm" onclick="openRefereePage()" title="Открыть судейство">
+                        🏸 Судейство
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
                     <button type="submit" form="matchResultForm" class="btn btn-primary btn-sm">Сохранить</button>
                 </div>
@@ -1616,7 +1619,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     const p2 = participants[cellIndex - 3]; // Учитываем сдвиг на 2 столбца (Очки и Место)
                     
                     if (p1 && p2 && p1.id !== p2.id) {
-                        openMatchModal(p1.id, p2.id, p1.name, p2.name);
+                        // Находим матч между этими участниками
+                        const matches = {{ matches_data|tojson }};
+                        const match = matches.find(m => 
+                            (m.participant1_id === p1.id && m.participant2_id === p2.id) ||
+                            (m.participant1_id === p2.id && m.participant2_id === p1.id)
+                        );
+                        if (match) {
+                            openMatchResultModal(match.id, p1.name, p2.name);
+                        }
                     }
                 }
             }
@@ -3534,6 +3545,1274 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Модальное окно для Referee -->
+<div class="modal fade" id="refereeModal" tabindex="-1" aria-labelledby="refereeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="refereeModalLabel">🏸 Судейство матча</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+                   <div class="modal-body p-0">
+                       <!-- Кнопка "Начать игру" в самом верху модального окна -->
+                       <div class="text-center p-3 bg-light border-bottom">
+                           <button id="refereeStartGameBtn" class="btn btn-success btn-lg">
+                               <i class="fas fa-play"></i> Начать игру
+                           </button>
+                       </div>
+                       
+                       <div id="refereeContainer" style="min-height: 600px;">
+                           <div class="text-center p-5">
+                               <div class="spinner-border text-primary" role="status">
+                                   <span class="visually-hidden">Загрузка...</span>
+                               </div>
+                               <p class="mt-3">Загрузка приложения судейства...</p>
+                           </div>
+                       </div>
+                   </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" onclick="applyRefereeResult()">Применить результат</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Переменные для хранения данных Referee
+let refereeData = null;
+
+// Функция открытия модального окна Referee
+function openRefereePage() {
+    console.log('openRefereePage вызвана');
+    
+    const participant1 = document.getElementById('participant1Name').value;
+    const participant2 = document.getElementById('participant2Name').value;
+    const tournamentName = '{{ tournament.name }}';
+    
+    console.log('Участники:', participant1, 'vs', participant2);
+    
+    if (!participant1 || !participant2) {
+        alert('Пожалуйста, сначала выберите участников матча');
+        return;
+    }
+    
+    // Формируем URL для отдельной страницы Referee
+    const params = new URLSearchParams({
+        p1: participant1,
+        p2: participant2,
+        tournament: tournamentName
+    });
+    
+    const refereeUrl = `/referee?${params.toString()}`;
+    console.log('Открываем Referee по URL:', refereeUrl);
+    
+    // Открываем в новом окне
+    const refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,fullscreen=yes');
+    
+    if (!refereeWindow) {
+        alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
+        return;
+    }
+    
+    // Слушаем сообщения от Referee
+    window.addEventListener('message', function(event) {
+        if (event.data.type === 'refereeResult') {
+            console.log('Получен результат от Referee:', event.data.result);
+            applyRefereeResult(event.data.result);
+        }
+    });
+    
+}
+
+// Функция применения результата от Referee
+function applyRefereeResult(result) {
+    console.log('Применяем результат от Referee:', result);
+    
+    // Заполняем поля формы результата матча
+    if (result.scoreLeft !== undefined && result.scoreRight !== undefined) {
+        // Определяем победителя
+        let winner = null;
+        if (result.scoreLeft > result.scoreRight) {
+            winner = 'participant1';
+        } else if (result.scoreRight > result.scoreLeft) {
+            winner = 'participant2';
+        }
+        
+        // Заполняем поля счета
+        document.getElementById('set1_score1').value = result.scoreLeft;
+        document.getElementById('set1_score2').value = result.scoreRight;
+        
+        // Устанавливаем победителя
+        if (winner) {
+            document.getElementById(winner).checked = true;
+        }
+        
+        console.log('Результат применен к форме:', {
+            scoreLeft: result.scoreLeft,
+            scoreRight: result.scoreRight,
+            winner: winner
+        });
+        
+        // Показываем уведомление
+        alert(`Результат получен от Referee: ${result.scoreLeft}:${result.scoreRight}`);
+    }
+}
+
+// Функция для восстановления скролла при закрытии модального окна
+function restorePageScroll() {
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+}
+
+// Добавляем обработчик закрытия модального окна
+document.addEventListener('DOMContentLoaded', function() {
+    const refereeModal = document.getElementById('refereeModal');
+    if (refereeModal) {
+        refereeModal.addEventListener('hidden.bs.modal', function() {
+            restorePageScroll();
+        });
+    }
+});
+
+// Функция загрузки Referee
+function loadReferee(participant1, participant2, tournamentName) {
+    console.log('loadReferee вызвана:', participant1, participant2, tournamentName);
+    
+    const container = document.getElementById('refereeContainer');
+    if (!container) {
+        console.error('Контейнер refereeContainer не найден');
+        return;
+    }
+    
+    // Показываем загрузку
+    container.innerHTML = `
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-3">Загрузка приложения судейства...</p>
+        </div>
+    `;
+    
+    console.log('Отправляем запрос на /api/referee/generate');
+    
+    // Отправляем запрос на генерацию HTML
+    fetch('/api/referee/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            participant1: participant1,
+            participant2: participant2,
+            tournament_name: tournamentName
+        })
+    })
+    .then(response => {
+        console.log('Получен ответ:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Данные ответа:', data);
+        if (data.success) {
+            console.log('HTML получен, вставляем в контейнер');
+            // Вставляем HTML в контейнер с классом referee-container
+            container.innerHTML = `<div class="referee-container">${data.html}</div>`;
+            
+    // Добавляем CSS стили для Referee
+    addRefereeStyles();
+    
+    // Принудительно отображаем все элементы
+    setTimeout(() => {
+        const refereeContainer = container.querySelector('.referee-container');
+        if (refereeContainer) {
+            // Принудительно отображаем счетчик
+            const scoreboard = refereeContainer.querySelector('.scoreboard-container');
+            if (scoreboard) {
+                scoreboard.style.display = 'flex !important';
+                scoreboard.style.visibility = 'visible !important';
+                scoreboard.style.opacity = '1 !important';
+            }
+            
+            // Принудительно отображаем очки
+            const scores = refereeContainer.querySelectorAll('.score-left, .score-right');
+            scores.forEach(score => {
+                score.style.display = 'block !important';
+                score.style.visibility = 'visible !important';
+                score.style.opacity = '1 !important';
+            });
+            
+            // Принудительно отображаем поля ввода
+            const inputs = refereeContainer.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.style.display = 'block !important';
+                input.style.visibility = 'visible !important';
+                input.style.opacity = '1 !important';
+            });
+            
+            console.log('Элементы Referee принудительно отображены');
+        }
+    }, 100);
+    
+                   // Выполняем JavaScript код из Referee
+                   executeRefereeScript();
+                   
+                   // Настраиваем обработчик сообщений от Referee
+                   setupRefereeMessageHandler();
+                   
+                   // Принудительно обновляем модальное окно
+                   setTimeout(() => {
+                       const modalElement = document.getElementById('refereeModal');
+                       if (modalElement) {
+                           // Убираем все блокировки Bootstrap
+                           modalElement.style.pointerEvents = 'auto !important';
+                           modalElement.style.zIndex = '9999 !important';
+                           
+                           const modalContent = modalElement.querySelector('.modal-content');
+                           if (modalContent) {
+                               modalContent.style.pointerEvents = 'auto !important';
+                               modalContent.style.zIndex = '9999 !important';
+                               modalContent.style.background = 'white !important';
+                               modalContent.style.opacity = '1 !important';
+                           }
+                           
+                           const modalBody = modalElement.querySelector('.modal-body');
+                           if (modalBody) {
+                               modalBody.style.pointerEvents = 'auto !important';
+                               modalBody.style.zIndex = '9999 !important';
+                               modalBody.style.background = 'white !important';
+                               modalBody.style.opacity = '1 !important';
+                           }
+                           
+                           const modalDialog = modalElement.querySelector('.modal-dialog');
+                           if (modalDialog) {
+                               modalDialog.style.pointerEvents = 'auto !important';
+                               modalDialog.style.zIndex = '9999 !important';
+                           }
+                           
+                           // Принудительно включаем все элементы
+                           const allElements = modalElement.querySelectorAll('*');
+                           allElements.forEach(el => {
+                               el.style.pointerEvents = 'auto !important';
+                               el.style.zIndex = 'auto !important';
+                               el.style.opacity = '1 !important';
+                           });
+                           
+                           // Убираем backdrop блокировку
+                           const backdrop = document.querySelector('.modal-backdrop');
+                           if (backdrop) {
+                               backdrop.style.display = 'none !important';
+                               backdrop.style.zIndex = '-1 !important';
+                           }
+                           
+                           console.log('Модальное окно принудительно разблокировано');
+                           
+                           // Проверяем состояние элементов
+                           const buttons = modalElement.querySelectorAll('button');
+                           console.log('Найдено кнопок в модальном окне:', buttons.length);
+                           buttons.forEach((btn, index) => {
+                               console.log(`Кнопка ${index}:`, btn.textContent, 'disabled:', btn.disabled, 'style:', btn.style.pointerEvents);
+                           });
+                       }
+                   }, 200);
+                   
+                   console.log('Referee загружен успешно');
+                   
+                   // Дополнительное принудительное разблокирование через 2 секунды
+                   setTimeout(() => {
+                       const modalElement = document.getElementById('refereeModal');
+                       if (modalElement) {
+                           // Убираем все возможные блокировки
+                           modalElement.classList.remove('fade');
+                           modalElement.style.display = 'block';
+                           modalElement.style.opacity = '1';
+                           
+                           // Убираем backdrop
+                           const backdrops = document.querySelectorAll('.modal-backdrop');
+                           backdrops.forEach(backdrop => {
+                               backdrop.remove();
+                           });
+                           
+                           // Принудительно активируем все элементы
+                           const allElements = modalElement.querySelectorAll('*');
+                           allElements.forEach(el => {
+                               el.style.pointerEvents = 'auto';
+                               el.style.zIndex = 'auto';
+                               el.style.opacity = '1';
+                               el.style.visibility = 'visible';
+                           });
+                           
+                           console.log('Дополнительное разблокирование выполнено');
+                       }
+                   }, 2000);
+        } else {
+            console.error('Ошибка API:', data.error);
+            container.innerHTML = `
+                <div class="alert alert-danger m-3">
+                    <h5>Ошибка загрузки</h5>
+                    <p>${data.error || 'Неизвестная ошибка'}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка запроса:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger m-3">
+                <h5>Ошибка загрузки</h5>
+                <p>Ошибка при загрузке приложения судейства: ${error.message}</p>
+            </div>
+        `;
+    });
+}
+
+// Добавление CSS стилей для Referee
+function addRefereeStyles() {
+    console.log('Добавляем CSS стили для Referee');
+    
+    // Создаем элемент style если его нет
+    let styleElement = document.getElementById('referee-styles');
+    if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = 'referee-styles';
+        document.head.appendChild(styleElement);
+    }
+    
+    // Добавляем CSS стили
+    styleElement.textContent = `
+        .referee-container * {
+            box-sizing: border-box;
+        }
+        
+        .referee-container .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .referee-container .court {
+            background: #4CAF50;
+            border: 3px solid #333;
+            border-radius: 10px;
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+            background-image: url('/static/referee/court.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+        
+        .referee-container .net {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: #fff;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .referee-container .half {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            pointer-events: auto;
+            z-index: 5;
+        }
+        
+        .referee-container .half:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .referee-container .half:active {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.98);
+        }
+        
+        .referee-container .left {
+            left: 0;
+        }
+        
+        .referee-container .right {
+            right: 0;
+        }
+        
+        .referee-container .segments {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .referee-container .segment {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .referee-container .box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .referee-container .server-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .referee-container .server-indicator img {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .referee-container input[type="text"] {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 5px;
+            font-size: 14px;
+            text-align: center;
+            width: 80%;
+        }
+        
+        .referee-container .scoreboard-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+        
+        .referee-container .score-left {
+            background: rgba(0,0,0,0.8);
+            color: #2196F3; /* Синий цвет для левой команды */
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+            min-width: 60px;
+        }
+        
+        .referee-container .score-right {
+            background: rgba(0,0,0,0.8);
+            color: #f44336; /* Красный цвет для правой команды */
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .referee-container .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .referee-container button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            pointer-events: auto;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .referee-container button:hover {
+            background: #0056b3;
+        }
+        
+        .referee-container button:active {
+            background: #004085;
+        }
+        
+        .referee-container .start-game-btn {
+            background: #28a745;
+        }
+        
+        .referee-container .start-game-btn:hover {
+            background: #218838;
+        }
+        
+        .referee-container .journal {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .referee-container .journal div {
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .referee-container .journal div:last-child {
+            border-bottom: none;
+        }
+        
+        .referee-container h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .referee-container .victory-image {
+            width: 30px;
+            height: 30px;
+            margin-left: 10px;
+        }
+        
+        /* Специальные стили для модального окна */
+        #refereeModal {
+            background: white !important;
+            z-index: 9999 !important;
+            position: relative !important;
+            pointer-events: auto !important;
+            opacity: 1 !important;
+        }
+        
+        #refereeModal.modal .modal-dialog {
+            background: white !important;
+            z-index: 9999 !important;
+            position: relative !important;
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            max-height: 100vh !important;
+            transform: none !important;
+        }
+        
+        /* Более агрессивные стили для переопределения Bootstrap */
+        .modal#refereeModal .modal-dialog {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+        
+        .modal#refereeModal.show .modal-dialog {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+        
+        #refereeModal.modal {
+            padding: 0 !important;
+        }
+        
+        #refereeModal.modal .modal-content {
+            background: white !important;
+            z-index: 9999 !important;
+            position: relative !important;
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        #refereeModal.modal .modal-body {
+            background: white !important;
+            z-index: 9999 !important;
+            position: relative !important;
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            height: calc(100vh - 60px) !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            flex: 1 1 auto !important;
+        }
+        
+        .referee-container {
+            background: white !important;
+            z-index: 9999 !important;
+            position: relative !important;
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            height: 100% !important;
+            width: 100% !important;
+        }
+        
+        /* Принудительное отображение элементов Referee */
+        .referee-container .scoreboard-container,
+        .referee-container .score-left,
+        .referee-container .score-right,
+        .referee-container input,
+        .referee-container .box,
+        .referee-container .segment {
+            visibility: visible !important;
+            opacity: 1 !important;
+            display: block !important;
+        }
+        
+        .referee-container .scoreboard-container {
+            display: flex !important;
+        }
+        
+        .modal-backdrop {
+            display: none !important;
+            z-index: -1 !important;
+        }
+        
+        /* Переопределение Bootstrap стилей для полноэкранного модального окна */
+        .modal.show .modal-dialog {
+            transform: none !important;
+            margin: 0 !important;
+        }
+        
+        .modal.fade .modal-dialog {
+            transform: none !important;
+            transition: none !important;
+        }
+        
+        /* Принудительное скрытие backdrop */
+        .modal-backdrop.show {
+            opacity: 0 !important;
+            display: none !important;
+        }
+        
+        /* Максимально агрессивные стили для полноэкранного режима */
+        body .modal#refereeModal .modal-dialog {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+        
+        body .modal#refereeModal.show .modal-dialog {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+        
+        /* Переопределение всех возможных Bootstrap классов */
+        .modal-dialog.modal-fullscreen {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            transform: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+        }
+        
+        /* Дополнительные стили для принудительного полноэкранного режима */
+        .modal#refereeModal .modal-dialog.modal-fullscreen {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            transform: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+        }
+        
+        .referee-container * {
+            z-index: auto !important;
+            pointer-events: auto !important;
+        }
+        
+        /* МАКСИМАЛЬНО АГРЕССИВНЫЕ СТИЛИ ДЛЯ ПОЛНОЭКРАННОГО РЕЖИМА */
+        html, body {
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Принудительное переопределение ВСЕХ Bootstrap стилей */
+        .modal#refereeModal {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .modal#refereeModal .modal-dialog {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            transform: none !important;
+            z-index: 99999 !important;
+        }
+        
+        .modal#refereeModal .modal-content {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            z-index: 99999 !important;
+        }
+        
+        .modal#refereeModal .modal-body {
+            position: fixed !important;
+            top: 60px !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 60px) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            z-index: 99999 !important;
+        }
+        
+        /* Скрываем backdrop полностью */
+        .modal-backdrop {
+            display: none !important;
+            opacity: 0 !important;
+            z-index: -1 !important;
+        }
+        
+        /* Переопределяем ВСЕ возможные Bootstrap классы */
+        .modal.show#refereeModal,
+        .modal.fade#refereeModal,
+        .modal#refereeModal.show,
+        .modal#refereeModal.fade {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Убираем блокировку от Bootstrap */
+        .modal.show {
+            pointer-events: auto !important;
+        }
+        
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+    `;
+    
+    console.log('CSS стили добавлены');
+}
+
+// Выполнение JavaScript кода Referee
+function executeRefereeScript() {
+    console.log('Выполняем JavaScript код Referee');
+    
+    // Инициализируем переменные Referee
+    window.scoreLeft = 0;
+    window.scoreRight = 0;
+    window.currentSet = 1;
+    window.setsWonLeft = 0;
+    window.setsWonRight = 0;
+    window.isGameActive = false;
+    window.shuttlecockPosition = 'right';
+    window.journal = [];
+    window.undoStack = [];
+    
+    // Получаем элементы из referee-container
+    const refereeContainer = document.querySelector('.referee-container');
+    if (!refereeContainer) {
+        console.error('Контейнер referee-container не найден');
+        return;
+    }
+    
+    const scoreLeftEl = refereeContainer.querySelector('#scoreLeft');
+    const scoreRightEl = refereeContainer.querySelector('#scoreRight');
+    const courtLeft = refereeContainer.querySelector('#court_left');
+    const courtRight = refereeContainer.querySelector('#court_right');
+    const btnSave = refereeContainer.querySelector('#btnSave');
+    const btnUndo = refereeContainer.querySelector('#btnUndo');
+    const btnClear = refereeContainer.querySelector('#btnClear');
+    const btnMoveShuttlecock = refereeContainer.querySelector('#btnMoveShuttlecock');
+    const btnToggleJournal = refereeContainer.querySelector('#btnToggleJournal');
+    const btnStartGame = refereeContainer.querySelector('#btnStartGame');
+    const refereeStartGameBtn = document.getElementById('refereeStartGameBtn');
+    
+    if (!scoreLeftEl || !scoreRightEl || !courtLeft || !courtRight) {
+        console.error('Не найдены основные элементы Referee');
+        return;
+    }
+    
+    console.log('Элементы Referee найдены, настраиваем обработчики');
+    console.log('scoreLeftEl:', scoreLeftEl);
+    console.log('scoreRightEl:', scoreRightEl);
+    console.log('courtLeft:', courtLeft);
+    console.log('courtRight:', courtRight);
+    console.log('btnStartGame:', btnStartGame);
+    
+    // Обработчики кликов по корту - используем оригинальные функции Referee
+    courtLeft.addEventListener('click', function(event) {
+        // Проверяем, не кликнули ли по кнопке
+        if (event.target.closest('button')) {
+            console.log('Клик по кнопке внутри левого корта, игнорируем');
+            return;
+        }
+        
+        console.log('Клик по левому корту, isGameActive:', window.isGameActive);
+        if (window.isGameActive) {
+            // Вызываем оригинальную функцию addPointLeft из Referee
+            if (typeof window.addPointLeft === 'function') {
+                window.addPointLeft();
+            } else {
+                // Fallback на простую логику
+                window.scoreLeft++;
+                updateScore();
+                addToJournal('Левый игрок забил мяч');
+            }
+        } else {
+            console.log('Игра не активна, клик игнорируется');
+        }
+    });
+    
+    courtRight.addEventListener('click', function(event) {
+        // Проверяем, не кликнули ли по кнопке
+        if (event.target.closest('button')) {
+            console.log('Клик по кнопке внутри правого корта, игнорируем');
+            return;
+        }
+        
+        console.log('Клик по правому корту, isGameActive:', window.isGameActive);
+        if (window.isGameActive) {
+            // Вызываем оригинальную функцию addPointRight из Referee
+            if (typeof window.addPointRight === 'function') {
+                window.addPointRight();
+            } else {
+                // Fallback на простую логику
+                window.scoreRight++;
+                updateScore();
+                addToJournal('Правый игрок забил мяч');
+            }
+        } else {
+            console.log('Игра не активна, клик игнорируется');
+        }
+    });
+    
+    // Обработчики кнопок
+    if (btnSave) {
+        btnSave.addEventListener('click', function(event) {
+            event.stopPropagation(); // Останавливаем всплытие события
+            saveNames();
+        });
+    }
+    
+    if (btnUndo) {
+        btnUndo.addEventListener('click', function(event) {
+            event.stopPropagation(); // Останавливаем всплытие события
+            undoLastAction();
+        });
+    }
+    
+    if (btnClear) {
+        btnClear.addEventListener('click', function(event) {
+            event.stopPropagation(); // Останавливаем всплытие события
+            clearAll();
+        });
+    }
+    
+    if (btnMoveShuttlecock) {
+        btnMoveShuttlecock.addEventListener('click', function(event) {
+            event.stopPropagation(); // Останавливаем всплытие события
+            moveShuttlecock();
+        });
+    }
+    
+    if (btnToggleJournal) {
+        btnToggleJournal.addEventListener('click', function(event) {
+            event.stopPropagation(); // Останавливаем всплытие события
+            toggleJournal();
+        });
+    }
+    
+    // Обработчик для кнопки "Начать игру" в верхней части модального окна
+    if (refereeStartGameBtn) {
+        refereeStartGameBtn.addEventListener('click', function(event) {
+            console.log('Клик по кнопке "Начать игру" в верхней части модального окна');
+            event.stopPropagation(); // Останавливаем всплытие события
+            event.preventDefault(); // Предотвращаем стандартное поведение
+            console.log('stopPropagation и preventDefault вызваны');
+            console.log('Вызываем startGame()');
+            startGame();
+            console.log('startGame() вызвана, isGameActive:', window.isGameActive);
+            
+            // Дополнительная проверка через небольшую задержку
+            setTimeout(() => {
+                console.log('Проверка через 100мс - isGameActive:', window.isGameActive);
+            }, 100);
+        });
+    } else {
+        console.error('Кнопка refereeStartGameBtn не найдена');
+    }
+    
+    // Обработчик для оригинальной кнопки "Начать игру" в Referee (если она есть)
+    if (btnStartGame) {
+        btnStartGame.addEventListener('click', function(event) {
+            console.log('Клик по оригинальной кнопке "Начать игру" в Referee');
+            event.stopPropagation(); // Останавливаем всплытие события
+            event.preventDefault(); // Предотвращаем стандартное поведение
+            console.log('stopPropagation и preventDefault вызваны');
+            console.log('Вызываем startGame()');
+            startGame();
+            console.log('startGame() вызвана, isGameActive:', window.isGameActive);
+            
+            // Дополнительная проверка через небольшую задержку
+            setTimeout(() => {
+                console.log('Проверка через 100мс - isGameActive:', window.isGameActive);
+            }, 100);
+        });
+    } else {
+        console.log('Оригинальная кнопка btnStartGame не найдена (это нормально)');
+    }
+    
+    // Функции Referee
+    window.updateScore = function() {
+        if (scoreLeftEl) scoreLeftEl.textContent = window.scoreLeft;
+        if (scoreRightEl) scoreRightEl.textContent = window.scoreRight;
+        
+        // Проверяем окончание сета (до 21 очка)
+        if (window.scoreLeft >= 21 || window.scoreRight >= 21) {
+            endSet();
+        }
+    };
+    
+    window.endSet = function() {
+        if (window.scoreLeft > window.scoreRight) {
+            window.setsWonLeft++;
+            addToJournal(`Левый игрок выиграл сет ${window.currentSet}: ${window.scoreLeft}-${window.scoreRight}`);
+        } else {
+            window.setsWonRight++;
+            addToJournal(`Правый игрок выиграл сет ${window.currentSet}: ${window.scoreLeft}-${window.scoreRight}`);
+        }
+        
+        // Проверяем окончание матча (до 2 сетов)
+        if (window.setsWonLeft >= 2 || window.setsWonRight >= 2) {
+            endGame();
+        } else {
+            // Переходим к следующему сету
+            window.currentSet++;
+            window.scoreLeft = 0;
+            window.scoreRight = 0;
+            updateScore();
+            addToJournal(`Начало сета ${window.currentSet}`);
+        }
+    };
+    
+    window.endGame = function() {
+        window.isGameActive = false;
+        const winner = window.setsWonLeft > window.setsWonRight ? 'Левый игрок' : 'Правый игрок';
+        addToJournal(`Игра окончена! Победитель: ${winner}`);
+        
+        // Отправляем результат в родительское окно
+        notifyParent({
+            type: 'refereeResult',
+            scoreLeft: window.scoreLeft,
+            scoreRight: window.scoreRight,
+            setsWonLeft: window.setsWonLeft,
+            setsWonRight: window.setsWonRight,
+            leftTop: refereeContainer.querySelector('#name_top_left')?.value || '',
+            leftBottom: refereeContainer.querySelector('#name_bottom_left')?.value || '',
+            rightTop: refereeContainer.querySelector('#name_top_right')?.value || '',
+            rightBottom: refereeContainer.querySelector('#name_bottom_right')?.value || ''
+        });
+    };
+    
+    window.addToJournal = function(action) {
+        const timestamp = new Date().toLocaleTimeString();
+        window.journal.push(`[${timestamp}] ${action}`);
+        updateJournalDisplay();
+    };
+    
+    window.updateJournalDisplay = function() {
+        const journalEl = refereeContainer.querySelector('#journal');
+        if (journalEl) {
+            journalEl.innerHTML = window.journal.map(entry => `<div>${entry}</div>`).join('');
+        }
+    };
+    
+    window.saveNames = function() {
+        addToJournal('Имена сохранены');
+    };
+    
+    window.undoLastAction = function() {
+        if (window.undoStack.length > 0) {
+            const lastAction = window.undoStack.pop();
+            // Простая отмена - сбрасываем счет
+            window.scoreLeft = 0;
+            window.scoreRight = 0;
+            updateScore();
+            addToJournal('Отменено последнее действие');
+        }
+    };
+    
+    window.clearAll = function() {
+        window.scoreLeft = 0;
+        window.scoreRight = 0;
+        window.setsWonLeft = 0;
+        window.setsWonRight = 0;
+        window.currentSet = 1;
+        window.isGameActive = false;
+        window.journal = [];
+        window.undoStack = [];
+        updateScore();
+        addToJournal('Все очищено');
+    };
+    
+    window.moveShuttlecock = function() {
+        window.shuttlecockPosition = window.shuttlecockPosition === 'right' ? 'left' : 'right';
+        addToJournal(`Подача перемещена на ${window.shuttlecockPosition === 'right' ? 'правую' : 'левую'} сторону`);
+    };
+    
+    window.toggleJournal = function() {
+        const journalEl = refereeContainer.querySelector('#journal');
+        if (journalEl) {
+            journalEl.style.display = journalEl.style.display === 'none' ? 'block' : 'none';
+        }
+    };
+    
+    window.startGame = function() {
+        console.log('startGame вызвана');
+        window.isGameActive = true;
+        window.scoreLeft = 0;
+        window.scoreRight = 0;
+        window.setsWonLeft = 0;
+        window.setsWonRight = 0;
+        window.currentSet = 1;
+        window.journal = [];
+        window.undoStack = [];
+        
+        // Обновляем состояние кнопки в верхней части модального окна
+        const refereeStartGameBtn = document.getElementById('refereeStartGameBtn');
+        if (refereeStartGameBtn) {
+            refereeStartGameBtn.disabled = true;
+            refereeStartGameBtn.innerHTML = '<i class="fas fa-pause"></i> Игра началась';
+            refereeStartGameBtn.classList.remove('btn-success');
+            refereeStartGameBtn.classList.add('btn-warning');
+        }
+        
+        updateScore();
+        addToJournal('Игра начата!');
+        console.log('Игра активирована, isGameActive:', window.isGameActive);
+        console.log('Счет сброшен: левый =', window.scoreLeft, ', правый =', window.scoreRight);
+    };
+    
+    window.notifyParent = function(data) {
+        console.log('Отправляем результат в родительское окно:', data);
+        // Отправляем сообщение в родительское окно
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage(data, '*');
+        } else {
+            // Если мы не в iframe, отправляем событие
+            window.dispatchEvent(new CustomEvent('refereeResult', { detail: data }));
+        }
+    };
+    
+    // Функция для сброса кнопки "Начать игру"
+    window.resetStartGameButton = function() {
+        const refereeStartGameBtn = document.getElementById('refereeStartGameBtn');
+        if (refereeStartGameBtn) {
+            refereeStartGameBtn.disabled = false;
+            refereeStartGameBtn.innerHTML = '<i class="fas fa-play"></i> Начать игру';
+            refereeStartGameBtn.classList.remove('btn-warning');
+            refereeStartGameBtn.classList.add('btn-success');
+        }
+    };
+    
+    console.log('JavaScript код Referee выполнен');
+}
+
+// Настройка обработчика сообщений от Referee
+function setupRefereeMessageHandler() {
+    window.addEventListener('message', function(event) {
+        if (event.data.type === 'refereeResult') {
+            refereeData = event.data;
+            console.log('Получен результат от Referee:', refereeData);
+            
+            // Показываем уведомление о получении результата
+            showRefereeResultNotification();
+        }
+    });
+    
+    // Также слушаем кастомные события
+    window.addEventListener('refereeResult', function(event) {
+        refereeData = event.detail;
+        console.log('Получен результат от Referee (событие):', refereeData);
+        showRefereeResultNotification();
+    });
+}
+
+// Показать уведомление о получении результата
+function showRefereeResultNotification() {
+    if (!refereeData) return;
+    
+    const notification = document.createElement('div');
+    notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <strong>Результат получен!</strong><br>
+        Счет: ${refereeData.scoreLeft} : ${refereeData.scoreRight}<br>
+        <small>Нажмите "Применить результат" для сохранения</small>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Автоматически скрыть через 5 секунд
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Применить результат из Referee
+function applyRefereeResult() {
+    if (!refereeData) {
+        alert('Нет данных от приложения судейства');
+        return;
+    }
+    
+    // Закрываем модальное окно Referee
+    const refereeModal = bootstrap.Modal.getInstance(document.getElementById('refereeModal'));
+    if (refereeModal) {
+        refereeModal.hide();
+    }
+    
+    // Применяем результат к форме
+    applyRefereeDataToForm(refereeData);
+    
+    // Показываем модальное окно результата
+    const resultModal = bootstrap.Modal.getInstance(document.getElementById('matchResultModal'));
+    if (resultModal) {
+        resultModal.show();
+    }
+}
+
+// Применить данные Referee к форме результата
+function applyRefereeDataToForm(data) {
+    // Парсим имена участников из Referee
+    const leftTop = data.leftTop || '';
+    const leftBottom = data.leftBottom || '';
+    const rightTop = data.rightTop || '';
+    const rightBottom = data.rightBottom || '';
+    
+    // Формируем имена участников для формы
+    const participant1Name = leftTop && leftBottom ? `${leftBottom}-${leftTop}` : (leftTop || leftBottom);
+    const participant2Name = rightTop && rightBottom ? `${rightBottom}-${rightTop}` : (rightTop || rightBottom);
+    
+    // Обновляем поля участников
+    document.getElementById('participant1Name').value = participant1Name;
+    document.getElementById('participant2Name').value = participant2Name;
+    
+    // Парсим счет из Referee
+    const scoreLeft = parseInt(data.scoreLeft) || 0;
+    const scoreRight = parseInt(data.scoreRight) || 0;
+    
+    // Определяем, кто выиграл матч (до 21 очка)
+    const pointsToWin = {{ tournament.points_to_win }};
+    const leftWon = scoreLeft >= pointsToWin;
+    const rightWon = scoreRight >= pointsToWin;
+    
+    if (leftWon && !rightWon) {
+        // Левый участник выиграл
+        setSetScore(1, pointsToWin, 0);
+        setSetScore(2, 0, 0);
+        setSetScore(3, 0, 0);
+    } else if (rightWon && !leftWon) {
+        // Правый участник выиграл
+        setSetScore(1, 0, pointsToWin);
+        setSetScore(2, 0, 0);
+        setSetScore(3, 0, 0);
+    } else {
+        // Матч не завершен или ничья - заполняем текущий счет
+        setSetScore(1, scoreLeft, scoreRight);
+        setSetScore(2, 0, 0);
+        setSetScore(3, 0, 0);
+    }
+    
+    console.log('Применен результат от Referee:', {
+        participant1: participant1Name,
+        participant2: participant2Name,
+        score: `${scoreLeft}:${scoreRight}`,
+        leftWon,
+        rightWon
+    });
+}
+
+// Вспомогательная функция для установки счета в сете
+function setSetScore(setNumber, score1, score2) {
+    const score1Input = document.getElementById(`set${setNumber}Score1`);
+    const score2Input = document.getElementById(`set${setNumber}Score2`);
+    
+    if (score1Input) score1Input.value = score1;
+    if (score2Input) score2Input.value = score2;
+}
+
+// Функция получения CSRF токена
+function getCSRFToken() {
+    const token = document.querySelector('meta[name=csrf-token]');
+    return token ? token.getAttribute('content') : '';
+}
+</script>
+
     </div>
 </div>
 {% endblock %}
