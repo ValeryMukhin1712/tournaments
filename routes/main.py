@@ -1128,12 +1128,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             'ip_address': request.remote_addr
                         }
                         
+                        # Проверяем наличие активной сессии перед созданием новой
+                        app.logger.info(f'Проверяем активные сессии для {email}')
+                        has_active, active_session = session_manager.check_active_session(email)
+                        app.logger.info(f'Результат проверки активных сессий для {email}: has_active={has_active}')
+                        if has_active:
+                            app.logger.info(f'Найдена активная сессия для {email}, блокируем повторный вход')
+                            flash(f'Пользователь {email} уже авторизован в системе. Сначала выйдите из текущей сессии.', 'error')
+                            return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
+                        
                         # Создаем сессию для администратора турнира
                         success, session_token, error = session_manager.create_admin_session(email, session_data)
                         if success:
                             app.logger.info(f'Создана сессия для администратора турнира {email}')
                         else:
                             app.logger.warning(f'Не удалось создать сессию для {email}: {error}')
+                            flash('Ошибка создания сессии. Попробуйте снова.', 'error')
+                            return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
                     except Exception as e:
                         app.logger.error(f'Ошибка создания сессии для администратора турнира: {e}')
                     
@@ -1142,6 +1153,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     session['admin_name'] = admin.name
                     session['admin_email'] = admin.email
                     session['admin_token'] = token
+                    session['session_token'] = session_token
                     
                     flash(f'Добро пожаловать, {admin.name}!', 'success')
                     return redirect(url_for('admin_dashboard'))
@@ -1200,8 +1212,14 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             UserActivity = models['UserActivity']
             session_manager = create_session_manager(db, UserActivity)
             
-            # Убираем проверку активной сессии для системного администратора
-            # Системный администратор может входить несколько раз
+            # Проверяем наличие активной сессии для системного администратора
+            logger.info(f'Проверяем активные сессии для admin@system')
+            has_active, active_session = session_manager.check_active_session('admin@system')
+            logger.info(f'Результат проверки активных сессий для admin@system: has_active={has_active}')
+            if has_active:
+                logger.info(f'Найдена активная сессия для admin@system, завершаем её')
+                terminate_result = session_manager.terminate_session_by_admin('admin@system', 'system', 'duplicate_login')
+                logger.info(f'Результат завершения сессии для admin@system: {terminate_result}')
             
             # Создаем новую сессию
             session_data = {
@@ -1286,15 +1304,19 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             admin_email = session.get('admin_email', '')
             app.logger.info(f'Декоратор require_active_session: проверяем сессию для {admin_email}')
             
-            if admin_email and admin_email != 'admin@system':
+            if admin_email:
                 is_active = check_session_status(admin_email)
                 app.logger.info(f'Статус сессии для {admin_email}: {is_active}')
                 
                 if not is_active:
                     app.logger.info(f'Сессия для {admin_email} неактивна, очищаем Flask-сессию')
                     session.clear()
-                    flash('Ваша сессия была завершена администратором. Необходима повторная авторизация.', 'warning')
-                    return redirect(url_for('admin_tournament'))
+                    if admin_email == 'admin@system':
+                        flash('Ваша сессия была завершена. Необходима повторная авторизация.', 'warning')
+                        return redirect(url_for('index'))
+                    else:
+                        flash('Ваша сессия была завершена администратором. Необходима повторная авторизация.', 'warning')
+                        return redirect(url_for('admin_tournament'))
             
             app.logger.info(f'Сессия для {admin_email} активна, разрешаем доступ')
             return f(*args, **kwargs)
@@ -1354,6 +1376,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              tournaments=tournaments)
     
     @app.route('/system-admin-dashboard')
+    @require_active_session
     def system_admin_dashboard():
         """Панель управления системного администратора"""
         from flask import session
