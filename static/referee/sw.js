@@ -89,3 +89,5 @@ self.addEventListener('notificationclick', function(event) {
     clients.openWindow('/referee')
   );
 });
+
+

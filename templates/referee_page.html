@@ -244,7 +244,7 @@
             margin-bottom: 5px; 
             position: absolute;
             transition: transform 0.2s ease-in-out;
-            z-index: 10;
+            z-index: 1000;
             width: 72px;
             height: 72px;
             background: #FFD700;
@@ -729,6 +729,9 @@
             setupEventListeners();
             
             // Показываем иконку подачи
+            document.querySelectorAll('.server-indicator').forEach(el => el.style.display = 'none');
+            const firstIndicator = document.getElementById('server_' + shuttlecockPosition) || document.getElementById('server_top_right');
+            if (firstIndicator) firstIndicator.style.display = 'block';
             updateShuttlecockDisplay();
         }
         
@@ -1185,16 +1188,23 @@
         
         function setupEventListeners() {
             // Кнопки управления
-            document.getElementById('btnSave').addEventListener('click', function() {
-                saveData();
-                alert('Имена сохранены');
-            });
+            const saveBtn = document.getElementById('btnSave');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    saveData();
+                    alert('Имена сохранены');
+                });
+            }
             
             // Обработчик кнопки "Начать игру" удален - игра активна по умолчанию
-            document.getElementById('btnUndo').addEventListener('click', undoLastAction);
-            document.getElementById('btnClear').addEventListener('click', clearAll);
-            document.getElementById('btnMoveShuttlecock').addEventListener('click', moveShuttlecockBetweenSides);
-            document.getElementById('btnSaveResult').addEventListener('click', saveResult);
+            const undoBtn = document.getElementById('btnUndo');
+            if (undoBtn) undoBtn.addEventListener('click', undoLastAction);
+            const clearBtn = document.getElementById('btnClear');
+            if (clearBtn) clearBtn.addEventListener('click', clearAll);
+            const moveBtn = document.getElementById('btnMoveShuttlecock');
+            if (moveBtn) moveBtn.addEventListener('click', moveShuttlecockBetweenSides);
+            const saveResultBtn = document.getElementById('btnSaveResult');
+            if (saveResultBtn) saveResultBtn.addEventListener('click', saveResult);
             
             // Обработчики кликов по корту
             document.getElementById('court_left').addEventListener('click', function(event) {
