@@ -1203,10 +1203,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">Результат</h5>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-success btn-sm" onclick="openRefereePage()" title="Открыть судейство">
-                        🏸 Судейство
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeMatchResultModal()">Отмена</button>
                     <button type="submit" form="matchResultForm" class="btn btn-primary btn-sm">Сохранить</button>
                 </div>
             </div>
@@ -1788,6 +1785,62 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
     new bootstrap.Modal(document.getElementById('matchResultModal')).show();
 }
 
+function closeMatchResultModal() {
+    console.log('Закрытие формы результата матча');
+    
+    // Получаем модальное окно
+    const modal = document.getElementById('matchResultModal');
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    
+    if (modalInstance) {
+        // Закрываем модальное окно
+        modalInstance.hide();
+    }
+    
+    // Принудительно удаляем backdrop и восстанавливаем прокрутку
+    setTimeout(() => {
+        // Удаляем все backdrop элементы
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        
+        // Восстанавливаем прокрутку body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // Удаляем класс modal-open с html
+        document.documentElement.classList.remove('modal-open');
+        
+        console.log('Модальное окно закрыто, backdrop удален');
+    }, 150);
+}
+
+// Обработчик события для стандартного закрытия модального окна
+document.addEventListener('DOMContentLoaded', function() {
+    const matchResultModal = document.getElementById('matchResultModal');
+    if (matchResultModal) {
+        matchResultModal.addEventListener('hidden.bs.modal', function() {
+            console.log('Модальное окно результата матча закрыто стандартным способом');
+            
+            // Принудительно удаляем backdrop и восстанавливаем прокрутку
+            setTimeout(() => {
+                // Удаляем все backdrop элементы
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+                
+                // Восстанавливаем прокрутку body
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                // Удаляем класс modal-open с html
+                document.documentElement.classList.remove('modal-open');
+                
+                console.log('Backdrop удален после стандартного закрытия');
+            }, 50);
+        });
+    }
+});
 
 function editMatch(matchId) {
     // Редактирование матча из расписания
