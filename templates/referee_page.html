@@ -258,25 +258,25 @@
         /* Позиционирование иконок подачи */
         #server_top_left {
             top: 50%;
-            right: -18px;
+            right: -25px;
             transform: translateY(-50%);
         }
         
         #server_bottom_left {
             top: 50%;
-            right: -18px;
+            right: -25px;
             transform: translateY(-50%);
         }
         
         #server_top_right {
             top: 50%;
-            left: -18px;
+            left: -25px;
             transform: translateY(-50%);
         }
         
         #server_bottom_right {
             top: 50%;
-            left: -18px;
+            left: -25px;
             transform: translateY(-50%);
         }
         
@@ -321,6 +321,37 @@
         }
         
         .controls button:hover {
+            transform: scale(1.05);
+        }
+        
+        .navigation-buttons {
+            text-align: center;
+            margin: 0;
+            padding: 8px 0;
+            background: transparent;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .navigation-buttons button {
+            margin: 0;
+            padding: 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .navigation-buttons button:hover {
             transform: scale(1.05);
         }
         
@@ -556,16 +587,22 @@
                     Сет: <span id="currentSet">1</span>
                 </div>
 
+                <!-- Кнопки навигации -->
+                <div class="navigation-buttons">
+                    <button id="btnHome" class="btn btn-primary" title="Главная страница">🏠</button>
+                    <button id="btnBack" class="btn btn-secondary" title="Назад" onclick="handleBackButton()">←</button>
+                </div>
+
                 <!-- Кнопки управления -->
                 <div class="controls">
                     <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
                     <button id="btnClear" class="btn btn-danger" title="Очистить всё">🗑️</button>
-                    <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">🏸</button>
+                    <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">↻</button>
                     <button id="btnToggleJournal" class="btn btn-secondary" title="Журнал подач">📋</button>
                     
                     <!-- Кнопка сохранения результата (только в режиме матча) -->
                     <button id="btnSaveResult" class="save-result-btn" style="display: none;" title="Сохранить счёт в форму результата">
-                        💾
+                        <img src="/static/referee/download.png" alt="Сохранить" style="width: 16px; height: 16px;">
                     </button>
                 </div>
             </div>
@@ -1186,7 +1223,56 @@
             }
         }
         
+        function handleBackButton() {
+            console.log('Обработка кнопки Back');
+            
+            if (isMatchMode) {
+                // В режиме матча просто закрываем окно (возвращаемся в форму результата)
+                console.log('Режим матча: закрываем окно');
+                if (window.opener) {
+                    window.close();
+                } else {
+                    // Если открыто не в popup, используем history.back()
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = '/';
+                    }
+                }
+            } else {
+                // В независимом режиме используем стандартное поведение
+                console.log('Независимый режим: стандартное поведение');
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/';
+                }
+            }
+        }
+        
         function setupEventListeners() {
+            console.log('Настройка обработчиков событий...');
+            
+            // Кнопки навигации
+            const homeBtn = document.getElementById('btnHome');
+            if (homeBtn) {
+                console.log('Кнопка Home найдена');
+                homeBtn.addEventListener('click', function() {
+                    console.log('Клик по кнопке Home');
+                    window.location.href = '/';
+                });
+            } else {
+                console.log('Кнопка Home НЕ найдена');
+            }
+            
+            const backBtn = document.getElementById('btnBack');
+            if (backBtn) {
+                console.log('Кнопка Back найдена');
+                backBtn.addEventListener('click', handleBackButton);
+            } else {
+                console.log('Кнопка Back НЕ найдена');
+            }
+            
             // Кнопки управления
             const saveBtn = document.getElementById('btnSave');
             if (saveBtn) {
@@ -1222,8 +1308,18 @@
             // Обработчики для полей ввода удалены - игра активна по умолчанию
         }
         
-        // Инициализация приложения
-        init();
+        // Инициализация приложения после загрузки DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM загружен, запускаем инициализацию...');
+            init();
+        });
+        
+        // Дополнительная инициализация для совместимости
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
         
         // Адаптация размеров при изменении размера окна
         function adaptToScreenSize() {

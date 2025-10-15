@@ -106,6 +106,37 @@
     text-align: center;
 }
 
+/* Стили для кнопки удаления участника */
+.btn-delete-participant {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-delete-participant:hover {
+    background-color: #c82333;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-delete-participant:active {
+    transform: scale(0.95);
+}
+
+.btn-delete-participant i {
+    font-size: 12px;
+}
+
 /* Для экранов меньше 470px - уменьшаем шрифт времени, но показываем полностью */
 @media (max-width: 470px) {
     /* Уменьшаем шрифт времени в ячейках таблицы */
@@ -816,6 +847,11 @@
                                         <th class="sortable" data-column="goal_difference">
                                             Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
                                         </th>
+                                        {% if current_user and current_user.role in ['администратор турнира', 'системный администратор'] %}
+                                        <th class="text-center">
+                                            Действия
+                                        </th>
+                                        {% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -841,6 +877,15 @@
                                         <td>
                                             {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
                                         </td>
+                                        {% if current_user and current_user.role in ['администратор турнира', 'системный администратор'] %}
+                                        <td class="text-center">
+                                            <button class="btn-delete-participant" 
+                                                    onclick="deleteParticipant({{ participant.id }}, '{{ participant.name }}')"
+                                                    title="Удалить участника">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
+                                        {% endif %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -2568,37 +2613,6 @@ function rescheduleTournament() {
     }
 }
 
-// Функция удаления участника
-function deleteParticipant(participantId, participantName) {
-    if (confirm(`Вы уверены, что хотите удалить участника "${participantName}"? Это действие нельзя отменить.`)) {
-        fetch(`/api/tournaments/{{ tournament.id }}/participants/${participantId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            }
-        })
-        .then(response => {
-            console.log('Статус ответа:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Данные ответа:', data);
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка при удалении участника:', error);
-            alert('Ошибка при удалении участника: ' + error.message);
-        });
-    }
-}
 
 // Обработка формы регистрации пользователя
 document.addEventListener('DOMContentLoaded', function() {
@@ -3606,6 +3620,48 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Функция удаления участника
+function deleteParticipant(participantId, participantName) {
+    if (!confirm(`Вы уверены, что хотите удалить участника "${participantName}"?\n\nЭто действие удалит участника и все связанные с ним матчи. Отменить это действие будет невозможно.`)) {
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    const button = event.target.closest('.btn-delete-participant');
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    
+    // Отправляем запрос на удаление (используем существующий endpoint)
+    fetch(`/api/tournaments/{{ tournament.id }}/participants/${participantId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Успешно удалено - перезагружаем страницу
+            location.reload();
+        } else {
+            // Ошибка удаления
+            alert(`Ошибка при удалении участника: ${data.error || 'Неизвестная ошибка'}`);
+            // Восстанавливаем кнопку
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при удалении участника:', error);
+        alert('Произошла ошибка при удалении участника. Попробуйте еще раз.');
+        // Восстанавливаем кнопку
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    });
+}
 </script>
 
 <!-- Модальное окно для Referee -->

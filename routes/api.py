@@ -2939,3 +2939,4 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при генерации HTML для Referee: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
+    
