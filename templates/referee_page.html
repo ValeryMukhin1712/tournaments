@@ -51,6 +51,23 @@
             flex-direction: column;
         }
         
+        .main-layout {
+            display: flex;
+            flex: 1;
+            height: 100%;
+        }
+        
+        .control-panel {
+            width: 200px;
+            min-width: 200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 2px solid #2E7D32;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+        
         .court { 
             background: rgba(76, 175, 80, 0.1); 
             border: none; 
@@ -85,15 +102,57 @@
             height: 100%; 
             cursor: pointer;
             transition: background-color 0.2s ease;
+            border: 3px dashed rgba(255, 0, 0, 0.5);
+            box-sizing: border-box;
         }
         
         .half:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
         
+        .half:hover::after {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+            animation: none;
+        }
+        
         .half:active {
             background-color: rgba(255, 255, 255, 0.3);
             transform: scale(0.98);
+        }
+        
+        .half.left {
+            border-color: rgba(33, 150, 243, 0.7);
+            background-color: rgba(33, 150, 243, 0.05);
+        }
+        
+        .half.right {
+            border-color: rgba(244, 67, 54, 0.7);
+            background-color: rgba(244, 67, 54, 0.05);
+        }
+        
+        .half::after {
+            content: attr(data-label);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
         }
         
         .half.clicked {
@@ -209,25 +268,26 @@
         .controls { 
             text-align: center; 
             margin: 0; 
-            padding: 15px; 
-            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 0; 
+            background: transparent;
             flex-shrink: 0;
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
         }
         
         .controls button { 
-            margin: 0 3px; 
-            padding: 6px 10px; 
-            font-size: 18px; 
+            margin: 0; 
+            padding: 8px 12px; 
+            font-size: 14px; 
             border: none;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 40px;
-            height: 40px;
+            width: 100%;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -296,16 +356,18 @@
         }
         
         .mode-indicator {
-            position: absolute;
-            top: 10px;
-            left: 10px;
+            position: relative;
+            top: auto;
+            left: auto;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 15px 10px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: bold;
             z-index: 100;
+            text-align: center;
+            margin-bottom: 10px;
         }
         
         .mode-indicator.standalone {
@@ -317,16 +379,18 @@
         }
         
         .set-info {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            position: relative;
+            top: auto;
+            right: auto;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
+            padding: 10px;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: bold;
             z-index: 100;
+            text-align: center;
+            margin-bottom: 10px;
         }
         
         .save-result-btn {
@@ -357,17 +421,34 @@
         
         /* Мобильная адаптация */
         @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .control-panel {
+                width: 100%;
+                min-width: auto;
+                flex-direction: row;
+                padding: 5px;
+                border-right: none;
+                border-bottom: 2px solid #2E7D32;
+            }
+            
             .controls {
-                padding: 10px;
-                gap: 8px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 4px;
+                flex: 1;
             }
             
             .controls button {
-                margin: 0 2px;
-                padding: 6px 8px;
-                font-size: 16px;
-                min-width: 35px;
-                height: 35px;
+                margin: 0;
+                padding: 4px 8px;
+                font-size: 12px;
+                width: auto;
+                height: 28px;
+                flex: 1;
+                min-width: 60px;
             }
             
             .scoreboard-container {
@@ -397,6 +478,12 @@
         }
         
         @media (max-width: 480px) {
+            .controls button {
+                width: 80px;
+                height: 24px;
+                font-size: 10px;
+            }
+            
             .scoreboard-container {
                 gap: 10vw;
             }
@@ -462,17 +549,36 @@
 </head>
 <body>
     <div class="container">
-        <!-- Индикатор режима -->
-        <div id="modeIndicator" class="mode-indicator standalone">
-            🏸 Независимый режим
-        </div>
-        
-        <!-- Информация о сете (только в режиме матча) -->
-        <div id="setInfo" class="set-info" style="display: none;">
-            Сет: <span id="currentSet">1</span>
-        </div>
+        <div class="main-layout">
+            <!-- Блок управления слева -->
+            <div class="control-panel">
+                <!-- Индикатор режима -->
+                <div id="modeIndicator" class="mode-indicator standalone">
+                    🏸 Независимый режим
+                </div>
+                
+                <!-- Информация о сете (только в режиме матча) -->
+                <div id="setInfo" class="set-info" style="display: none;">
+                    Сет: <span id="currentSet">1</span>
+                </div>
 
-        <div class="court">
+                <!-- Кнопки управления -->
+                <div class="controls">
+                    <button id="btnSave" class="btn btn-primary" title="Сохранить имена">💾</button>
+                    <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
+                    <button id="btnClear" class="btn btn-danger" title="Очистить всё">🗑️</button>
+                    <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">🏸</button>
+                    <button id="btnToggleJournal" class="btn btn-secondary" title="Журнал подач">📋</button>
+                    
+                    <!-- Кнопка сохранения результата (только в режиме матча) -->
+                    <button id="btnSaveResult" class="save-result-btn" style="display: none;" title="Сохранить счёт в форму результата">
+                        💾
+                    </button>
+                </div>
+            </div>
+
+            <!-- Корт справа -->
+            <div class="court">
             <div class="net"></div>
             
             <!-- Счет в центре корта -->
@@ -481,7 +587,7 @@
                 <div class="score-right" id="scoreRight">0</div>
             </div>
             
-            <div class="half left" id="court_left" title="Кликните для увеличения счета левой команды">
+            <div class="half left" id="court_left" title="Кликните для увеличения счета левой команды" data-label="+1 ЛЕВЫЙ">
                 <div class="segments">
                     <div class="segment" id="top_left">
                         <div class="box">
@@ -502,7 +608,7 @@
                 </div>
             </div>
 
-            <div class="half right" id="court_right" title="Кликните для увеличения счета правой команды">
+            <div class="half right" id="court_right" title="Кликните для увеличения счета правой команды" data-label="+1 ПРАВЫЙ">
                 <div class="segments">
                     <div class="segment" id="top_right">
                         <div class="box">
@@ -523,18 +629,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="controls">
-            <button id="btnSave" class="btn btn-primary" title="Сохранить имена">💾</button>
-            <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
-            <button id="btnClear" class="btn btn-danger" title="Очистить всё">🗑️</button>
-            <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">🏸</button>
-            <button id="btnToggleJournal" class="btn btn-secondary" title="Журнал подач">📋</button>
-            
-            <!-- Кнопка сохранения результата (только в режиме матча) -->
-            <button id="btnSaveResult" class="save-result-btn" style="display: none;" title="Сохранить счёт в форму результата">
-                💾
-            </button>
         </div>
     </div>
 
@@ -1139,8 +1233,10 @@
             
             const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
-            const controlsHeight = document.querySelector('.controls').offsetHeight;
-            const availableHeight = windowHeight - controlsHeight;
+            const controlPanel = document.querySelector('.control-panel');
+            const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 200;
+            const availableWidth = windowWidth - controlPanelWidth;
+            const availableHeight = windowHeight;
             
             // Адаптация размера шрифта счета (увеличен в 4 раза)
             const scoreFontSize = availableHeight * 0.6; // Было 0.15, стало 0.6 (в 4 раза больше)
@@ -1149,14 +1245,14 @@
             });
             
             // Адаптация размера полей ввода
-            const inputWidth = Math.min(windowWidth * 0.12, 200);
+            const inputWidth = Math.min(availableWidth * 0.12, 200);
             inputs.forEach(input => {
                 input.style.width = Math.max(inputWidth, 100) + 'px';
                 input.style.fontSize = Math.max(inputWidth * 0.18, 16) + 'px';
             });
             
             // Адаптация отступов для счетов
-            const scoreGap = Math.min(windowWidth * 0.1, 100);
+            const scoreGap = Math.min(availableWidth * 0.1, 100);
             if (scoreboard) {
                 scoreboard.style.gap = scoreGap + 'px';
             }
