@@ -58,13 +58,13 @@
         }
         
         .control-panel {
-            width: 200px;
-            min-width: 200px;
+            width: 120px;
+            min-width: 120px;
             background: rgba(255, 255, 255, 0.95);
             border-right: 2px solid #2E7D32;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 8px;
             box-shadow: 2px 0 4px rgba(0,0,0,0.1);
         }
         
@@ -95,14 +95,13 @@
             box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
         
-        .half { 
-            position: absolute; 
+        .half {
+            position: absolute;
             top: 0; 
             width: 50%; 
             height: 100%; 
             cursor: pointer;
             transition: background-color 0.2s ease;
-            border: 3px dashed rgba(255, 0, 0, 0.5);
             box-sizing: border-box;
         }
         
@@ -157,13 +156,6 @@
         
         .half.clicked {
             background-color: rgba(0, 255, 0, 0.3);
-            animation: clickEffect 0.3s ease-out;
-        }
-        
-        @keyframes clickEffect {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.95); background-color: rgba(0, 255, 0, 0.5); }
-            100% { transform: scale(1); }
         }
         
         .left { left: 0; }
@@ -208,7 +200,7 @@
         }
         
         #bottom_left .box, #bottom_right .box {
-            bottom: 20px;
+            bottom: 60px;
             top: auto;
         }
         
@@ -248,19 +240,50 @@
             margin-bottom: 5px; 
             position: absolute;
             transition: transform 0.2s ease-in-out;
-            top: calc(50% - 18.5px);
-            left: 50%;
-            transform: translate(-50%, -50%);
+            z-index: 10;
+            width: 72px;
+            height: 72px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* Позиционирование иконок подачи */
+        #server_top_left {
+            top: 50%;
+            right: -80px;
+            transform: translateY(-50%);
+        }
+        
+        #server_bottom_left {
+            top: 50%;
+            right: -80px;
+            transform: translateY(-50%);
+        }
+        
+        #server_top_right {
+            top: 50%;
+            left: -80px;
+            transform: translateY(-50%);
+        }
+        
+        #server_bottom_right {
+            top: 50%;
+            left: -80px;
+            transform: translateY(-50%);
         }
         
         .server-indicator img { 
-            width: 75px; 
-            height: 75px; 
-            border: 1px solid red; 
-            background-color: yellow;
+            width: 60px; 
+            height: 60px; 
+            border: none; 
+            background-color: transparent;
             display: block;
             border-radius: 50%;
-            padding: 4px;
+            padding: 0;
             box-sizing: border-box;
             object-fit: contain;
         }
@@ -280,14 +303,14 @@
         
         .controls button { 
             margin: 0; 
-            padding: 8px 12px; 
-            font-size: 14px; 
+            padding: 6px 8px; 
+            font-size: 12px; 
             border: none;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            height: 36px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -443,12 +466,12 @@
             
             .controls button {
                 margin: 0;
-                padding: 4px 8px;
-                font-size: 12px;
+                padding: 4px 6px;
+                font-size: 10px;
                 width: auto;
-                height: 28px;
+                height: 26px;
                 flex: 1;
-                min-width: 60px;
+                min-width: 50px;
             }
             
             .scoreboard-container {
@@ -479,9 +502,9 @@
         
         @media (max-width: 480px) {
             .controls button {
-                width: 80px;
-                height: 24px;
-                font-size: 10px;
+                width: 60px;
+                height: 22px;
+                font-size: 9px;
             }
             
             .scoreboard-container {
@@ -552,8 +575,8 @@
         <div class="main-layout">
             <!-- Блок управления слева -->
             <div class="control-panel">
-                <!-- Индикатор режима -->
-                <div id="modeIndicator" class="mode-indicator standalone">
+                <!-- Индикатор режима (скрыт) -->
+                <div id="modeIndicator" class="mode-indicator standalone" style="display: none;">
                     🏸 Независимый режим
                 </div>
                 
@@ -591,18 +614,18 @@
                 <div class="segments">
                     <div class="segment" id="top_left">
                         <div class="box">
-                            <div class="server-indicator" title="Подаёт" style="display: none;">
+                            <input type="text" placeholder="Имя игрока" id="name_top_left" value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}" />
+                            <div class="server-indicator" id="server_top_left" title="Подаёт" style="display: none;">
                                 <img src="/static/referee/img_01.png" alt="Подающий" />
                             </div>
-                            <input type="text" placeholder="Имя игрока" id="name_top_left" value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}" />
                         </div>
                     </div>
                     <div class="segment" id="bottom_left">
                         <div class="box">
-                            <div class="server-indicator" title="Подаёт" style="display: none;">
+                            <input type="text" placeholder="Имя игрока" id="name_bottom_left" value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}" />
+                            <div class="server-indicator" id="server_bottom_left" title="Подаёт" style="display: none;">
                                 <img src="/static/referee/img_01.png" alt="Подающий" />
                             </div>
-                            <input type="text" placeholder="Имя игрока" id="name_bottom_left" value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}" />
                         </div>
                     </div>
                 </div>
@@ -612,7 +635,7 @@
                 <div class="segments">
                     <div class="segment" id="top_right">
                         <div class="box">
-                            <div class="server-indicator" title="Подаёт">
+                            <div class="server-indicator" id="server_top_right" title="Подаёт" style="display: none;">
                                 <img src="/static/referee/img_01.png" alt="Подающий" />
                             </div>
                             <input type="text" placeholder="Имя игрока" id="name_top_right" value="{{ participant2.split('-')[0] if '-' in participant2 else participant2 }}" />
@@ -620,7 +643,7 @@
                     </div>
                     <div class="segment" id="bottom_right">
                         <div class="box">
-                            <div class="server-indicator" title="Подаёт" style="display: none;">
+                            <div class="server-indicator" id="server_bottom_right" title="Подаёт" style="display: none;">
                                 <img src="/static/referee/img_01.png" alt="Подающий" />
                             </div>
                             <input type="text" placeholder="Имя игрока" id="name_bottom_right" value="{{ participant2.split('-')[1] if '-' in participant2 and participant2.split('-')|length > 1 else participant2 }}" />
@@ -734,6 +757,9 @@
             
             // Настраиваем обработчики событий
             setupEventListeners();
+            
+            // Показываем иконку подачи
+            updateShuttlecockDisplay();
         }
         
         function fillParticipantNames() {
@@ -918,7 +944,7 @@
                 
                 const currentRect = currentIndicator.getBoundingClientRect();
                 const targetSegment = document.getElementById(shuttlecockPosition);
-                const targetIndicator = targetSegment.querySelector('.server-indicator');
+                const targetIndicator = document.getElementById('server_' + shuttlecockPosition);
                 
                 targetIndicator.style.display = 'block';
                 const targetRect = targetIndicator.getBoundingClientRect();
@@ -939,8 +965,7 @@
                 }, 200);
             } else {
                 document.querySelectorAll('.server-indicator').forEach(el => el.style.display = 'none');
-                const targetSegment = document.getElementById(shuttlecockPosition);
-                const targetIndicator = targetSegment.querySelector('.server-indicator');
+                const targetIndicator = document.getElementById('server_' + shuttlecockPosition);
                 if (targetIndicator) {
                     targetIndicator.style.display = 'block';
                 }
@@ -1204,16 +1229,12 @@
             // Обработчики кликов по корту
             document.getElementById('court_left').addEventListener('click', function(event) {
                 if (event.target.tagName !== 'INPUT') {
-                    this.classList.add('clicked');
-                    setTimeout(() => this.classList.remove('clicked'), 300);
                     addPointLeft();
                 }
             });
             
             document.getElementById('court_right').addEventListener('click', function(event) {
                 if (event.target.tagName !== 'INPUT') {
-                    this.classList.add('clicked');
-                    setTimeout(() => this.classList.remove('clicked'), 300);
                     addPointRight();
                 }
             });
@@ -1234,7 +1255,7 @@
             const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
             const controlPanel = document.querySelector('.control-panel');
-            const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 200;
+            const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 120;
             const availableWidth = windowWidth - controlPanelWidth;
             const availableHeight = windowHeight;
             
