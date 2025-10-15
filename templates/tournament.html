@@ -1230,6 +1230,9 @@
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-primary me-2">Сет 1</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
+                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="openRefereeForSet(1)" title="Открыть судейство для сета 1">
+                                🏸 Судейство
+                            </button>
                         </div>
                         <div class="row">
                             <div class="col-6">
@@ -1246,6 +1249,9 @@
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-info me-2">Сет 2</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
+                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="openRefereeForSet(2)" title="Открыть судейство для сета 2">
+                                🏸 Судейство
+                            </button>
                         </div>
                         <div class="row">
                             <div class="col-6">
@@ -1262,6 +1268,9 @@
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-warning me-2">Сет 3</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
+                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="openRefereeForSet(3)" title="Открыть судейство для сета 3">
+                                🏸 Судейство
+                            </button>
                         </div>
                         <div class="row">
                             <div class="col-6">
@@ -3625,6 +3634,87 @@ function openRefereePage() {
     });
     
 }
+
+function openRefereeForSet(setNumber) {
+    console.log('openRefereeForSet вызвана для сета:', setNumber);
+    
+    const participant1 = document.getElementById('participant1Name').value;
+    const participant2 = document.getElementById('participant2Name').value;
+    const tournamentName = '{{ tournament.name }}';
+    const matchId = document.getElementById('matchId').value;
+    
+    console.log('Участники:', participant1, 'vs', participant2, 'Сет:', setNumber);
+    
+    if (!participant1 || !participant2) {
+        alert('Пожалуйста, сначала выберите участников матча');
+        return;
+    }
+    
+    if (!matchId) {
+        alert('Ошибка: ID матча не найден');
+        return;
+    }
+    
+    // Формируем URL для режима матча
+    const params = new URLSearchParams({
+        p1: participant1,
+        p2: participant2,
+        tournament: tournamentName,
+        match: 'true',
+        set: setNumber,
+        match_id: matchId,
+        clear: 'true'
+    });
+    
+    const refereeUrl = `/referee?${params.toString()}`;
+    console.log('Открываем Referee в режиме матча для сета', setNumber, ':', refereeUrl);
+    
+    // Открываем в новом окне
+    const refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+    
+    if (!refereeWindow) {
+        alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
+        return;
+    }
+    
+    // Слушаем сообщения от Referee (только один раз)
+    if (!window.refereeMessageHandlerAdded) {
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'refereeResult') {
+                console.log('Получен результат от Referee:', event.data.result);
+                // Используем номер сета из самого результата
+                const resultSetNumber = event.data.result.setNumber || setNumber;
+                console.log('Применяем к сету:', resultSetNumber);
+                applyRefereeResultToSet(event.data.result, resultSetNumber);
+            }
+        });
+        window.refereeMessageHandlerAdded = true;
+    }
+}
+
+        // Функция применения результата от Referee к конкретному сету
+        function applyRefereeResultToSet(result, setNumber) {
+            console.log('Применяем результат от Referee к сету', setNumber, ':', result);
+            
+            if (result.scoreLeft !== undefined && result.scoreRight !== undefined) {
+                // Заполняем поля счета для конкретного сета
+                const score1Field = document.getElementById(`set${setNumber}Score1`);
+                const score2Field = document.getElementById(`set${setNumber}Score2`);
+                
+                if (score1Field && score2Field) {
+                    // Заполняем только нужный сет (НЕ очищаем другие!)
+                    score1Field.value = result.scoreLeft;
+                    score2Field.value = result.scoreRight;
+                    
+                    console.log(`Счет сета ${setNumber} обновлен: ${result.scoreLeft}:${result.scoreRight}`);
+                    
+                    // Показываем уведомление
+                    alert(`Счет сета ${setNumber} обновлен: ${result.scoreLeft}:${result.scoreRight}`);
+                } else {
+                    console.error(`Поля для сета ${setNumber} не найдены`);
+                }
+            }
+        }
 
 // Функция применения результата от Referee
 function applyRefereeResult(result) {

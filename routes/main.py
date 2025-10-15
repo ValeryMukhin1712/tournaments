@@ -608,9 +608,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
 
     @app.route('/referee')
     def referee_page():
-        """Отдельная страница для Referee приложения"""
+        """Отдельная страница для Referee приложения с поддержкой двух режимов"""
         # Получаем параметры из URL
         clear_data = request.args.get('clear', 'false').lower() == 'true'
+        match_mode = request.args.get('match', 'false').lower() == 'true'
+        set_number = request.args.get('set', '1')
+        match_id = request.args.get('match_id', '')
         
         if clear_data:
             # Очищаем данные для нового матча
@@ -626,7 +629,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         return render_template('referee_page.html', 
                              participant1=participant1, 
                              participant2=participant2, 
-                             tournament_name=tournament_name)
+                             tournament_name=tournament_name,
+                             match_mode=match_mode,
+                             set_number=set_number,
+                             match_id=match_id)
+
 
     
     # Тестовые варианты дизайна с фоновым изображением

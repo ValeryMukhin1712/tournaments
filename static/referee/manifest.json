@@ -1,0 +1,85 @@
+{
+  "name": "Судейство турниров",
+  "short_name": "Судейство",
+  "description": "Приложение для судейства матчей в турнирах",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#2E7D32",
+  "background_color": "#2E7D32",
+  "start_url": "/referee",
+  "scope": "/referee",
+  "lang": "ru",
+  "categories": ["sports", "utilities"],
+  "icons": [
+    {
+      "src": "/static/referee/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/referee/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/referee/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Новый матч",
+      "short_name": "Новый",
+      "description": "Начать судейство нового матча",
+      "url": "/referee?clear=true",
+      "icons": [
+        {
+          "src": "/static/referee/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
