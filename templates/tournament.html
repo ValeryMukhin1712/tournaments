@@ -3608,8 +3608,8 @@ function openRefereePage() {
     const refereeUrl = `/referee?${params.toString()}`;
     console.log('Открываем Referee по URL:', refereeUrl);
     
-    // Открываем в новом окне
-    const refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,fullscreen=yes');
+            // Открываем в новом окне с возможностью изменения размера
+            const refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
     
     if (!refereeWindow) {
         alert('Пожалуйста, разрешите всплывающие окна для этого сайта');

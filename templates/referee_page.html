@@ -2,8 +2,16 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Судейство: {{ tournament_name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-title" content="">
+    <meta name="application-name" content="">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -11,6 +19,64 @@
             background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
             height: 100vh;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Скрываем элементы браузера для полноэкранного режима */
+        @media screen {
+            body {
+                -webkit-app-region: no-drag;
+            }
+        }
+        
+        /* Скрываем заголовок страницы */
+        title {
+            display: none !important;
+        }
+        
+        /* Дополнительные стили для полного скрытия элементов браузера */
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            height: 100vh !important;
+            width: 100vw !important;
+        }
+        
+        /* Агрессивное скрытие всех элементов браузера */
+        * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+        
+        /* Скрываем возможные заголовки и элементы браузера */
+        head, title, meta {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+        
+        /* Принудительно устанавливаем размеры */
+        html {
+            height: 100vh !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        body {
+            height: 100vh !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
         }
         .container { 
             height: 100vh; 
@@ -156,19 +222,64 @@
             padding: 10px; 
             background: rgba(255, 255, 255, 0.9);
             flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
         }
-        .controls button { margin: 0 5px; padding: 8px 15px; font-size: 14px; }
+        .controls button { 
+            margin: 0 8px; 
+            padding: 6px 8px; 
+            font-size: 14px; 
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .controls button:hover {
+            transform: scale(1.1);
+        }
+        
+        .finish-btn {
+            background-color: #007bff !important;
+            color: white !important;
+            border: none !important;
+            padding: 6px 8px !important;
+            font-size: 14px !important;
+            font-weight: bold !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            width: 30px !important;
+            height: 30px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+        }
+        
+        .finish-btn:hover {
+            background-color: #0056b3 !important;
+            transform: scale(1.1) !important;
+        }
         .start-game-btn { margin-top: 0; }
         .start-game-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 6px 8px;
+            font-size: 14px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .start-game-btn:disabled {
             background-color: #cccccc;
@@ -502,14 +613,25 @@
             }
             
             .controls button {
-                margin: 0 2px;
-                padding: 6px 10px;
+                margin: 0 6px;
+                padding: 5px 6px;
                 font-size: 12px;
+                width: 28px;
+                height: 28px;
             }
             
             .start-game-btn {
-                padding: 8px 15px;
-                font-size: 14px;
+                padding: 5px 6px;
+                font-size: 12px;
+                width: 28px;
+                height: 28px;
+            }
+            
+            .finish-btn {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 12px !important;
+                padding: 5px 6px !important;
             }
             
             .scoreboard-container {
@@ -558,14 +680,25 @@
             }
             
             .controls button {
-                margin: 0 3px;
-                padding: 6px 12px;
-                font-size: 12px;
+                margin: 0 4px;
+                padding: 4px 5px;
+                font-size: 10px;
+                width: 24px;
+                height: 24px;
             }
             
             .start-game-btn {
-                padding: 10px 20px;
-                font-size: 14px;
+                padding: 4px 5px;
+                font-size: 10px;
+                width: 24px;
+                height: 24px;
+            }
+            
+            .finish-btn {
+                width: 24px !important;
+                height: 24px !important;
+                font-size: 10px !important;
+                padding: 4px 5px !important;
             }
         }
         
@@ -626,12 +759,12 @@
 <body>
     <div class="container">
         <div class="controls">
-            <button id="btnSave">Сохранить имена</button>
-            <button id="btnStartGame" class="start-game-btn">Начать игру</button>
-            <button id="btnUndo">Отменить</button>
-            <button id="btnClear">Очистить всё</button>
-            <button id="btnMoveShuttlecock">Переместить подачу</button>
-            <button id="btnToggleJournal">📋 Журнал подач</button>
+            <button id="btnSave" title="Сохранить имена">💾</button>
+            <button id="btnStartGame" class="start-game-btn" title="Начать игру">▶️</button>
+            <button id="btnUndo" title="Отменить">↶</button>
+            <button id="btnClear" title="Очистить всё">🗑️</button>
+            <button id="btnMoveShuttlecock" title="Переместить подачу">🏸</button>
+            <button id="btnToggleJournal" title="Журнал подач">📋</button>
         </div>
 
         <div class="court">
@@ -678,7 +811,6 @@
             </div>
         </div>
 
-        <div class="footer">Данные сохраняются в LocalStorage этого браузера. Картинка фона: background.jpg (поместите рядом с HTML).</div>
     </div>
 
     <!-- Журнал подач -->
@@ -689,7 +821,7 @@
                 <input type="number" id="matchNumberInput" placeholder="№ матча" min="1" class="match-input">
                 <button id="btnFindMatch" class="find-btn" title="Найти матч">🔍</button>
                 <button id="btnShowStats" class="stats-btn" title="Статистика">📊</button>
-                <button id="btnExpandJournal" class="expand-btn">📖</button>
+                <button id="btnExpandJournal" class="expand-btn" title="Развернуть журнал">📖</button>
             </div>
         </div>
         <div id="journalContent" class="journal-content">
@@ -1340,9 +1472,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const controls = document.querySelector('.controls');
             const finishBtn = document.createElement('button');
-            finishBtn.textContent = 'Завершить матч';
-            finishBtn.className = 'btn btn-primary';
-            finishBtn.style.marginLeft = '10px';
+            finishBtn.textContent = '✕';
+            finishBtn.className = 'btn btn-primary finish-btn';
+            finishBtn.title = 'Завершить матч';
+            finishBtn.style.marginLeft = '0px';
             finishBtn.onclick = function() {
                 sendResultToParent();
             };
@@ -1358,6 +1491,158 @@
         setTimeout(() => {
             checkGameReady();
         }, 100);
+        
+        // Попытка скрыть адресную строку браузера
+        function hideAddressBar() {
+            // Принудительно скрываем адресную строку
+            if (window.screen && window.screen.availHeight) {
+                // Для мобильных устройств
+                window.scrollTo(0, 1);
+            }
+            
+            // Для десктопных браузеров
+            if (window.chrome && window.chrome.app && window.chrome.app.isInstalled) {
+                // Chrome app mode
+                document.body.style.height = '100vh';
+            }
+            
+            // Дополнительные попытки скрытия
+            try {
+                // Скрываем заголовок страницы
+                document.title = '';
+                
+                // Принудительно устанавливаем размеры
+                document.documentElement.style.height = '100vh';
+                document.documentElement.style.width = '100vw';
+                document.documentElement.style.overflow = 'hidden';
+                
+                // Скрываем возможные элементы браузера
+                const style = document.createElement('style');
+                style.textContent = `
+                    * { 
+                        -webkit-user-select: none !important;
+                        -moz-user-select: none !important;
+                        -ms-user-select: none !important;
+                        user-select: none !important;
+                    }
+                    html, body {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        overflow: hidden !important;
+                        height: 100vh !important;
+                        width: 100vw !important;
+                    }
+                    head, title, meta {
+                        display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Дополнительные попытки скрытия заголовков
+                const titleElement = document.querySelector('title');
+                if (titleElement) {
+                    titleElement.textContent = '';
+                    titleElement.style.display = 'none';
+                }
+                
+                // Скрываем все мета-теги
+                const metaTags = document.querySelectorAll('meta');
+                metaTags.forEach(meta => {
+                    meta.style.display = 'none';
+                    meta.style.visibility = 'hidden';
+                });
+                
+            } catch (e) {
+                console.log('Не удалось скрыть элементы браузера:', e);
+            }
+        }
+        
+        // Вызываем функцию при загрузке
+        window.addEventListener('load', hideAddressBar);
+        window.addEventListener('resize', hideAddressBar);
+        
+        // Дополнительные попытки скрытия при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Скрываем заголовок страницы
+            document.title = '';
+            
+            // Принудительно скрываем адресную строку
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+                hideAddressBar();
+            }, 100);
+            
+            // Повторяем попытки скрытия
+            setInterval(() => {
+                document.title = '';
+                window.scrollTo(0, 1);
+                
+                // Дополнительные попытки скрытия заголовков
+                const titleElement = document.querySelector('title');
+                if (titleElement) {
+                    titleElement.textContent = '';
+                    titleElement.style.display = 'none';
+                }
+                
+                // Скрываем все мета-теги
+                const metaTags = document.querySelectorAll('meta');
+                metaTags.forEach(meta => {
+                    meta.style.display = 'none';
+                    meta.style.visibility = 'hidden';
+                });
+                
+            }, 1000);
+        });
+        
+        // Дополнительная функция для принудительного скрытия заголовков
+        function forceHideTitle() {
+            try {
+                // Очищаем заголовок
+                document.title = '';
+                
+                // Скрываем title элемент
+                const titleElement = document.querySelector('title');
+                if (titleElement) {
+                    titleElement.textContent = '';
+                    titleElement.style.display = 'none';
+                    titleElement.style.visibility = 'hidden';
+                    titleElement.style.opacity = '0';
+                }
+                
+                // Скрываем все мета-теги
+                const metaTags = document.querySelectorAll('meta');
+                metaTags.forEach(meta => {
+                    meta.style.display = 'none';
+                    meta.style.visibility = 'hidden';
+                    meta.style.opacity = '0';
+                });
+                
+                // Принудительно устанавливаем размеры
+                document.documentElement.style.height = '100vh';
+                document.documentElement.style.width = '100vw';
+                document.documentElement.style.overflow = 'hidden';
+                document.documentElement.style.margin = '0';
+                document.documentElement.style.padding = '0';
+                
+                document.body.style.height = '100vh';
+                document.body.style.width = '100vw';
+                document.body.style.overflow = 'hidden';
+                document.body.style.margin = '0';
+                document.body.style.padding = '0';
+                document.body.style.position = 'fixed';
+                document.body.style.top = '0';
+                document.body.style.left = '0';
+                
+            } catch (e) {
+                console.log('Ошибка при скрытии заголовков:', e);
+            }
+        }
+        
+        // Вызываем функцию принудительного скрытия
+        forceHideTitle();
+        setInterval(forceHideTitle, 500);
         
         // Функция для адаптации размеров при изменении размера окна
         function adaptToScreenSize() {

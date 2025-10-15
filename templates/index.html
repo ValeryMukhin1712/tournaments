@@ -777,10 +777,10 @@ function adminLogin() {
     });
 }
 
-function openReferee() {
-    // Открываем страницу referee без привязки к конкретному матчу с очисткой данных
-    window.open('/referee?p1=&p2=&tournament=&clear=true', '_blank', 'width=1920,height=1080,fullscreen=yes');
-}
+        function openReferee() {
+            // Открываем страницу referee без привязки к конкретному матчу с очисткой данных
+            window.open('/referee?p1=&p2=&tournament=&clear=true', '_blank', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+        }
 
 function performAdminLogin() {
     const password = document.getElementById('adminPassword').value;
