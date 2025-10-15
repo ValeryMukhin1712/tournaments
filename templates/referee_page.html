@@ -58,14 +58,34 @@
         }
         
         .control-panel {
-            width: 120px;
-            min-width: 120px;
+            width: 110px;
+            min-width: 110px;
             background: rgba(255, 255, 255, 0.95);
             border-right: 2px solid #2E7D32;
             display: flex;
             flex-direction: column;
             padding: 8px;
             box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+
+        /* Кнопки управления — всегда квадратные */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .controls button {
+            width: 56px;
+            height: 56px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            line-height: 1;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
         }
         
         .court { 
@@ -130,23 +150,7 @@
             background-color: rgba(244, 67, 54, 0.05);
         }
         
-        .half::after {
-            content: attr(data-label);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            pointer-events: none;
-            z-index: 10;
-            opacity: 0.8;
-            animation: pulse 2s infinite;
-        }
+        /* .half::after удалён */
         
         @keyframes pulse {
             0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
@@ -254,25 +258,25 @@
         /* Позиционирование иконок подачи */
         #server_top_left {
             top: 50%;
-            right: -80px;
+            right: -18px;
             transform: translateY(-50%);
         }
         
         #server_bottom_left {
             top: 50%;
-            right: -80px;
+            right: -18px;
             transform: translateY(-50%);
         }
         
         #server_top_right {
             top: 50%;
-            left: -80px;
+            left: -18px;
             transform: translateY(-50%);
         }
         
         #server_bottom_right {
             top: 50%;
-            left: -80px;
+            left: -18px;
             transform: translateY(-50%);
         }
         
@@ -303,15 +307,15 @@
         
         .controls button { 
             margin: 0; 
-            padding: 6px 8px; 
-            font-size: 12px; 
+            padding: 0; 
+            font-size: 22px; 
             border: none;
-            border-radius: 6px;
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
-            height: 32px;
-            display: flex;
+            width: 56px;
+            height: 56px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
         }
@@ -444,68 +448,35 @@
         
         /* Мобильная адаптация */
         @media (max-width: 768px) {
-            .main-layout {
-                flex-direction: column;
-            }
-            
+            /* Сохраняем панель слева от корта даже на узких экранах */
+            .main-layout { flex-direction: row; }
             .control-panel {
-                width: 100%;
-                min-width: auto;
-                flex-direction: row;
-                padding: 5px;
-                border-right: none;
-                border-bottom: 2px solid #2E7D32;
+                width: 90px;
+                min-width: 90px;
+                flex-direction: column;
+                padding: 6px;
+                border-right: 2px solid #2E7D32;
+                border-bottom: none;
             }
-            
-            .controls {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 4px;
-                flex: 1;
-            }
-            
+            .controls { gap: 6px; }
             .controls button {
-                margin: 0;
-                padding: 4px 6px;
-                font-size: 10px;
-                width: auto;
-                height: 26px;
-                flex: 1;
-                min-width: 50px;
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
             }
-            
-            .scoreboard-container {
-                gap: 8vw;
-            }
-            
+            .scoreboard-container { gap: 8vw; }
             .score-left, .score-right {
-                font-size: 20vw; /* Увеличено в 4 раза (было 12vw, стало 20vw) */
+                font-size: 18vw;
                 padding: 1vh 2vw;
                 min-width: 10vw;
             }
-            
-            input {
-                width: 150px;
-                font-size: 16px;
-                padding: 6px;
-            }
-            
-            .box {
-                width: 200px;
-            }
-            
-            .save-result-btn {
-                padding: 12px 24px;
-                font-size: 16px;
-            }
+            input { width: 150px; font-size: 16px; padding: 6px; }
+            .box { width: 200px; }
+            .save-result-btn { padding: 12px 24px; font-size: 16px; }
         }
         
         @media (max-width: 480px) {
-            .controls button {
-                width: 60px;
-                height: 22px;
-                font-size: 9px;
-            }
+            .controls button { width: 44px; height: 44px; font-size: 16px; }
             
             .scoreboard-container {
                 gap: 10vw;
@@ -587,7 +558,6 @@
 
                 <!-- Кнопки управления -->
                 <div class="controls">
-                    <button id="btnSave" class="btn btn-primary" title="Сохранить имена">💾</button>
                     <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
                     <button id="btnClear" class="btn btn-danger" title="Очистить всё">🗑️</button>
                     <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">🏸</button>
@@ -610,7 +580,7 @@
                 <div class="score-right" id="scoreRight">0</div>
             </div>
             
-            <div class="half left" id="court_left" title="Кликните для увеличения счета левой команды" data-label="+1 ЛЕВЫЙ">
+            <div class="half left" id="court_left" title="Кликните для увеличения счета левой команды">
                 <div class="segments">
                     <div class="segment" id="top_left">
                         <div class="box">
@@ -631,7 +601,7 @@
                 </div>
             </div>
 
-            <div class="half right" id="court_right" title="Кликните для увеличения счета правой команды" data-label="+1 ПРАВЫЙ">
+            <div class="half right" id="court_right" title="Кликните для увеличения счета правой команды">
                 <div class="segments">
                     <div class="segment" id="top_right">
                         <div class="box">
