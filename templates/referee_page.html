@@ -216,28 +216,47 @@
         
         input { 
             padding: 8px; 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            width: 200px; 
-            font-size: 18px;
+            border: none; /* Убираем рамку */
+            border-radius: 0; /* Убираем скругление */
+            width: auto; /* Автоматическая ширина */
+            min-width: 200px; /* Минимальная ширина */
+            max-width: 400px; /* Максимальная ширина */
+            font-size: 54px; /* Увеличиваем размер шрифта еще в 1,5 раза */
+            font-weight: bold; /* Делаем шрифт жирным */
+            font-style: italic; /* Делаем шрифт курсивом */
             text-align: center;
-            background: rgba(255, 255, 255, 0.9);
+            background: transparent; /* Прозрачный фон */
             transition: all 0.3s ease;
+            white-space: nowrap; /* Не переносить текст */
+            overflow: visible; /* Показывать весь текст */
+        }
+        
+        /* Цвета для всех полей имен игроков - более светлый серый */
+        #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+            color: #cccccc; /* Более светлый серый цвет */
+        }
+        
+        /* Фон цвета корта для всех полей ввода имен */
+        #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+            background: #0b7036 !important; /* Зеленый цвет корта */
+            border-radius: 8px !important; /* Скругленные углы */
+            padding: 12px 16px !important; /* Увеличенный padding для лучшей читаемости */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important; /* Легкая тень */
         }
         
         input:focus {
             outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            border: none; /* Убираем рамку при фокусе */
+            box-shadow: none; /* Убираем тень при фокусе */
         }
         
         /* Цветовая индикация для полей ввода имен */
         #name_top_left, #name_bottom_left {
-            border: 2px solid #2196F3 !important;
+            border: none !important; /* Убираем рамки */
         }
         
         #name_top_right, #name_bottom_right {
-            border: 2px solid #f44336 !important;
+            border: none !important; /* Убираем рамки */
         }
         
         .server-indicator { 
@@ -247,12 +266,12 @@
             z-index: 1000;
             width: 72px;
             height: 72px;
-            background: #FFD700;
-            border-radius: 50%;
+            background: transparent; /* Убираем фон */
+            border-radius: 0; /* Убираем круглую форму */
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: none; /* Убираем тень */
         }
         
         /* Позиционирование иконок подачи */
@@ -286,7 +305,7 @@
             border: none; 
             background-color: transparent;
             display: block;
-            border-radius: 50%;
+            border-radius: 0; /* Убираем круглую форму */
             padding: 0;
             box-sizing: border-box;
             object-fit: contain;
@@ -501,9 +520,14 @@
                 padding: 1vh 2vw;
                 min-width: 10vw;
             }
-            input { width: 150px; font-size: 16px; padding: 6px; }
+            input { width: auto; min-width: 120px; max-width: 300px; font-size: 16px; padding: 6px; }
             .box { width: 200px; }
             .save-result-btn { padding: 12px 24px; font-size: 16px; }
+            /* Адаптация фона для мобильных устройств */
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                padding: 8px 12px !important; /* Уменьшенный padding для мобильных */
+                border-radius: 6px !important; /* Меньшие скругления */
+            }
         }
         
         @media (max-width: 480px) {
@@ -520,9 +544,16 @@
             }
             
             input {
-                width: 120px;
+                width: auto;
+                min-width: 100px;
+                max-width: 250px;
                 font-size: 14px;
                 padding: 4px;
+            }
+            /* Адаптация фона для очень маленьких экранов */
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                padding: 6px 10px !important; /* Еще меньший padding */
+                border-radius: 4px !important; /* Меньшие скругления */
             }
             
             .box {
@@ -561,7 +592,9 @@
             }
             
             input {
-                width: 120px;
+                width: auto;
+                min-width: 80px;
+                max-width: 200px;
                 font-size: 16px;
                 padding: 4px;
             }
@@ -1025,21 +1058,20 @@
         
         window.addPointLeft = function() {
             // Игра всегда активна - убираем проверку
-            
             saveGameState();
             
             const isShuttlecockOnLeft = shuttlecockPosition.includes('left');
             
+            // Увеличиваем счет только один раз
+            window.scoreLeft += 1;
+            
             if (isShuttlecockOnLeft) {
-                window.scoreLeft += 1;
                 updateScore();
                 saveData();
                 moveShuttlecock('left');
                 swapPlayers('left');
                 checkVictory();
             } else {
-                window.scoreLeft += 1;
-                
                 if (window.scoreLeft % 2 === 0) {
                     shuttlecockPosition = 'top_left';
                 } else {
@@ -1055,21 +1087,20 @@
         
         window.addPointRight = function() {
             // Игра всегда активна - убираем проверку
-            
             saveGameState();
             
             const isShuttlecockOnRight = shuttlecockPosition.includes('right');
             
+            // Увеличиваем счет только один раз
+            window.scoreRight += 1;
+            
             if (isShuttlecockOnRight) {
-                window.scoreRight += 1;
                 updateScore();
                 saveData();
                 moveShuttlecock('right');
                 swapPlayers('right');
                 checkVictory();
             } else {
-                window.scoreRight += 1;
-                
                 if (window.scoreRight % 2 === 0) {
                     shuttlecockPosition = 'bottom_right';
                 } else {
@@ -1224,11 +1255,8 @@
         }
         
         function handleBackButton() {
-            console.log('Обработка кнопки Back');
-            
             if (isMatchMode) {
                 // В режиме матча просто закрываем окно (возвращаемся в форму результата)
-                console.log('Режим матча: закрываем окно');
                 if (window.opener) {
                     window.close();
                 } else {
@@ -1241,7 +1269,6 @@
                 }
             } else {
                 // В независимом режиме используем стандартное поведение
-                console.log('Независимый режим: стандартное поведение');
                 if (window.history.length > 1) {
                     window.history.back();
                 } else {
@@ -1251,26 +1278,23 @@
         }
         
         function setupEventListeners() {
-            console.log('Настройка обработчиков событий...');
+            // Проверяем, не были ли уже добавлены обработчики
+            if (window.eventListenersSetup) {
+                return;
+            }
+            window.eventListenersSetup = true;
             
             // Кнопки навигации
             const homeBtn = document.getElementById('btnHome');
             if (homeBtn) {
-                console.log('Кнопка Home найдена');
                 homeBtn.addEventListener('click', function() {
-                    console.log('Клик по кнопке Home');
                     window.location.href = '/';
                 });
-            } else {
-                console.log('Кнопка Home НЕ найдена');
             }
             
             const backBtn = document.getElementById('btnBack');
             if (backBtn) {
-                console.log('Кнопка Back найдена');
                 backBtn.addEventListener('click', handleBackButton);
-            } else {
-                console.log('Кнопка Back НЕ найдена');
             }
             
             // Кнопки управления
@@ -1341,11 +1365,14 @@
                 score.style.fontSize = Math.max(scoreFontSize, 120) + 'px'; // Было 30, стало 120 (в 4 раза больше)
             });
             
-            // Адаптация размера полей ввода
-            const inputWidth = Math.min(availableWidth * 0.12, 200);
+            // Адаптация размера полей ввода - убираем ограничения ширины
             inputs.forEach(input => {
-                input.style.width = Math.max(inputWidth, 100) + 'px';
-                input.style.fontSize = Math.max(inputWidth * 0.18, 16) + 'px';
+                // Позволяем полям ввода автоматически подстраиваться под содержимое
+                input.style.width = 'auto';
+                input.style.minWidth = '200px';
+                input.style.maxWidth = '400px';
+                // Убираем динамическое изменение размера шрифта - используем CSS
+                // input.style.fontSize = Math.max(inputWidth * 0.18, 16) + 'px';
             });
             
             // Адаптация отступов для счетов
