@@ -46,6 +46,16 @@
             height: 100vh;
         }
         
+        /* Разрешаем вертикальный скролл на мобильных устройствах */
+        @media screen and (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                overflow-x: hidden;
+                position: relative;
+                min-height: 100vh;
+            }
+        }
+        
         /* Принудительный горизонтальный режим для мобильных устройств */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             body {
@@ -101,10 +111,26 @@
             flex-direction: column;
         }
         
+        /* Адаптация контейнера для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .container {
+                min-height: 100vh;
+                height: auto;
+            }
+        }
+        
         .main-layout {
             display: flex;
             flex: 1;
             height: 100%;
+        }
+        
+        /* Адаптация основного макета для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .main-layout {
+                min-height: calc(100vh - 60px); /* Учитываем высоту навигационных кнопок */
+                height: auto;
+            }
         }
         
         .control-panel {
@@ -152,6 +178,14 @@
             background-position: center center;
             background-repeat: no-repeat;
             overflow: hidden;
+        }
+        
+        /* Адаптация корта для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .court {
+                min-height: 300px; /* Минимальная высота для корта */
+                height: auto;
+            }
         }
         
         .net { 
