@@ -3806,19 +3806,78 @@ function openRefereeForSet(setNumber) {
             console.log('Применяем результат от Referee к сету', setNumber, ':', result);
             
             if (result.scoreLeft !== undefined && result.scoreRight !== undefined) {
+                // Получаем имена участников из формы
+                const participant1Name = document.getElementById('participant1Name').value;
+                const participant2Name = document.getElementById('participant2Name').value;
+                
+                console.log('Участники в форме:', participant1Name, 'vs', participant2Name);
+                console.log('Игроки от Referee:', result.participant1, 'vs', result.participant2);
+                
+                // Определяем, соответствуют ли имена участников
+                let score1, score2;
+                
+                if (result.participant1 === participant1Name && result.participant2 === participant2Name) {
+                    // Имена совпадают - команды не менялись
+                    score1 = result.scoreLeft;
+                    score2 = result.scoreRight;
+                    console.log('Команды не менялись, используем прямое соответствие');
+                } else if (result.participant1 === participant2Name && result.participant2 === participant1Name) {
+                    // Имена поменялись местами - команды менялись
+                    score1 = result.scoreRight;
+                    score2 = result.scoreLeft;
+                    console.log('Команды менялись местами, меняем счёт местами');
+                } else {
+                    // Попробуем сопоставить по отдельным игрокам
+                    console.log('Пытаемся сопоставить по отдельным игрокам...');
+                    
+                    // Получаем имена игроков от Referee
+                    const refereeLeftBottom = result.player1;
+                    const refereeLeftTop = result.player2;
+                    const refereeRightBottom = result.player3;
+                    const refereeRightTop = result.player4;
+                    
+                    // Парсим имена участников из формы
+                    const formP1Parts = participant1Name.split('-');
+                    const formP2Parts = participant2Name.split('-');
+                    
+                    console.log('Игроки от Referee (левая команда):', refereeLeftBottom, refereeLeftTop);
+                    console.log('Игроки от Referee (правая команда):', refereeRightBottom, refereeRightTop);
+                    console.log('Участники в форме:', formP1Parts, formP2Parts);
+                    
+                    // Проверяем, соответствует ли левая команда от Referee участнику 1 в форме
+                    const leftMatchesP1 = (
+                        (refereeLeftBottom === formP1Parts[0] && refereeLeftTop === formP1Parts[1]) ||
+                        (refereeLeftBottom === formP1Parts[1] && refereeLeftTop === formP1Parts[0]) ||
+                        (refereeLeftBottom === formP1Parts[0] && formP1Parts.length === 1) ||
+                        (refereeLeftTop === formP1Parts[0] && formP1Parts.length === 1)
+                    );
+                    
+                    if (leftMatchesP1) {
+                        // Левая команда от Referee соответствует участнику 1 в форме
+                        score1 = result.scoreLeft;
+                        score2 = result.scoreRight;
+                        console.log('Левая команда от Referee соответствует участнику 1');
+                    } else {
+                        // Левая команда от Referee соответствует участнику 2 в форме
+                        score1 = result.scoreRight;
+                        score2 = result.scoreLeft;
+                        console.log('Левая команда от Referee соответствует участнику 2');
+                    }
+                }
+                
                 // Заполняем поля счета для конкретного сета
                 const score1Field = document.getElementById(`set${setNumber}Score1`);
                 const score2Field = document.getElementById(`set${setNumber}Score2`);
                 
                 if (score1Field && score2Field) {
                     // Заполняем только нужный сет (НЕ очищаем другие!)
-                    score1Field.value = result.scoreLeft;
-                    score2Field.value = result.scoreRight;
+                    score1Field.value = score1;
+                    score2Field.value = score2;
                     
-                    console.log(`Счет сета ${setNumber} обновлен: ${result.scoreLeft}:${result.scoreRight}`);
+                    console.log(`Счет сета ${setNumber} обновлен: ${score1}:${score2}`);
                     
                     // Показываем уведомление
-                    alert(`Счет сета ${setNumber} обновлен: ${result.scoreLeft}:${result.scoreRight}`);
+                    alert(`Счет сета ${setNumber} обновлен: ${score1}:${score2}`);
                 } else {
                     console.error(`Поля для сета ${setNumber} не найдены`);
                 }

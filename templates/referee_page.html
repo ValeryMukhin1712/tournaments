@@ -126,13 +126,13 @@
             align-items: stretch;
         }
         .controls button {
-            width: 56px;
-            height: 56px;
+            width: 37px;
+            height: 37px;
             padding: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 15px;
             line-height: 1;
             aspect-ratio: 1 / 1;
             margin: 0 auto;
@@ -282,11 +282,15 @@
         }
         
         /* Яркие цвета для полей имен игроков */
-        #name_top_left, #name_bottom_left {
-            color: #0066ff !important; /* Ярко-синий цвет для синей команды */
-        }
-        #name_top_right, #name_bottom_right {
-            color: #ff3333 !important; /* Ярко-красный цвет для красной команды */
+        /* Цвета игроков теперь управляются JavaScript */
+        
+        /* Стили для счёта */
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin: 10px 0;
         }
         
         /* Прозрачный фон для всех полей ввода имен */
@@ -301,6 +305,19 @@
             outline: none;
             border: none; /* Убираем рамку при фокусе */
             box-shadow: none; /* Убираем тень при фокусе */
+        }
+        
+        /* Стили для заблокированных полей ввода в режиме матча */
+        input[readonly] {
+            background-color: #f5f5f5 !important;
+            cursor: default !important;
+            color: #666 !important;
+            opacity: 0.8;
+        }
+        
+        input[readonly]:focus {
+            background-color: #f5f5f5 !important;
+            cursor: default !important;
         }
         
         /* Цветовая индикация для полей ввода имен */
@@ -380,13 +397,13 @@
         .controls button { 
             margin: 0; 
             padding: 0; 
-            font-size: 22px; 
+            font-size: 15px; 
             border: none;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 56px;
-            height: 56px;
+            width: 37px;
+            height: 37px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -411,13 +428,13 @@
         .navigation-buttons button {
             margin: 0;
             padding: 0;
-            font-size: 18px;
+            font-size: 12px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 48px;
-            height: 48px;
+            width: 32px;
+            height: 32px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -477,13 +494,7 @@
             min-width: 12vw;
         }
         
-        .score-left {
-            color: #2196F3;
-        }
-        
-        .score-right {
-            color: #f44336;
-        }
+        /* Цвета счёта теперь управляются JavaScript */
         
         .mode-indicator {
             position: relative;
@@ -508,20 +519,7 @@
             background: rgba(33, 150, 243, 0.9);
         }
         
-        .set-info {
-            position: relative;
-            top: auto;
-            right: auto;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 100;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+        /* Стили для .set-info убраны */
         
         .save-result-btn {
             background: linear-gradient(45deg, #4CAF50, #45a049);
@@ -563,9 +561,9 @@
             }
             .controls { gap: 6px; }
             .controls button {
-                width: 48px;
-                height: 48px;
-                font-size: 18px;
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
             }
             .scoreboard-container { gap: 8vw; }
             .score-left, .score-right {
@@ -583,7 +581,7 @@
         }
         
         @media (max-width: 480px) {
-            .controls button { width: 44px; height: 44px; font-size: 16px; }
+            .controls button { width: 29px; height: 29px; font-size: 11px; }
             
             .scoreboard-container {
                 gap: 10vw;
@@ -613,10 +611,10 @@
             
             .controls button {
                 margin: 0 2px;
-                padding: 6px 10px;
-                font-size: 12px;
-                min-width: 40px;
-                height: 40px;
+                padding: 4px 7px;
+                font-size: 8px;
+                min-width: 27px;
+                height: 27px;
             }
             
             .save-result-btn {
@@ -674,10 +672,7 @@
                     🏸 Независимый режим
                 </div>
                 
-                <!-- Информация о сете (только в режиме матча) -->
-                <div id="setInfo" class="set-info" style="display: none;">
-                    Сет: <span id="currentSet">1</span>
-                </div>
+                <!-- Информация о сете убрана -->
 
                 <!-- Кнопки навигации -->
                 <div class="navigation-buttons">
@@ -690,6 +685,9 @@
                     <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
                     <button id="btnClear" class="btn btn-danger" title="Очистить всё">🗑️</button>
                     <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">↻</button>
+                    <button id="btnSwapTeams" class="btn btn-success" title="Поменять команды местами">⇄</button>
+                    <button id="btnSwapLeftTeam" class="btn btn-info" title="Поменять игроков в левой команде">⇅</button>
+                    <button id="btnSwapRightTeam" class="btn btn-danger" title="Поменять игроков в правой команде">⇅</button>
                     <button id="btnToggleJournal" class="btn btn-secondary" title="Журнал подач">📋</button>
                     
                     <!-- Кнопка сохранения результата (только в режиме матча) -->
@@ -808,7 +806,7 @@
         window.matchId = urlParams.get('match_id');
         
         // Получаем режим из шаблона (глобальные переменные)
-        window.templateMatchMode = {{ 'true' if match_mode else 'false' }};
+        window.templateMatchMode = {% if match_mode %}true{% else %}false{% endif %};
         window.templateSetNumber = '{{ set_number }}';
         
         // Инициализация переменных
@@ -825,6 +823,36 @@
         // Режим работы
         let isMatchMode = false;
         
+        // Цвета команд (привязаны к командам, а не к позициям)
+        let leftTeamColor = 'blue';   // Команда слева всегда синяя
+        let rightTeamColor = 'red';   // Команда справа всегда красная
+        
+        // Функция для обновления цветов игроков и счёта
+        function updatePlayerColors() {
+            const leftColor = leftTeamColor === 'blue' ? '#0066ff' : '#ff3333';
+            const rightColor = rightTeamColor === 'blue' ? '#0066ff' : '#ff3333';
+            
+            // Левые игроки (верхний и нижний)
+            const topLeft = document.getElementById('name_top_left');
+            const bottomLeft = document.getElementById('name_bottom_left');
+            topLeft.style.setProperty('color', leftColor, 'important');
+            bottomLeft.style.setProperty('color', leftColor, 'important');
+            
+            // Правые игроки (верхний и нижний)
+            const topRight = document.getElementById('name_top_right');
+            const bottomRight = document.getElementById('name_bottom_right');
+            topRight.style.setProperty('color', rightColor, 'important');
+            bottomRight.style.setProperty('color', rightColor, 'important');
+            
+            // Обновляем цвета счёта
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (scoreLeft) scoreLeft.style.setProperty('color', leftColor, 'important');
+            if (scoreRight) scoreRight.style.setProperty('color', rightColor, 'important');
+            
+            console.log('Цвета обновлены:', {leftTeamColor, rightTeamColor, leftColor, rightColor});
+        }
+        
         // Инициализация
         function init() {
             // Определяем режим работы (приоритет у параметров шаблона)
@@ -833,6 +861,10 @@
             
             // Обновляем UI в зависимости от режима
             updateModeUI();
+            
+            // Устанавливаем начальные цвета игроков
+            console.log('Инициализация цветов:', {leftTeamColor, rightTeamColor});
+            updatePlayerColors();
             
             // Очищаем данные если нужно
             if (clearData) {
@@ -917,20 +949,63 @@
         
         function updateModeUI() {
             const modeIndicator = document.getElementById('modeIndicator');
-            const setInfo = document.getElementById('setInfo');
             const saveResultBtn = document.getElementById('btnSaveResult');
+            const swapTeamsBtn = document.getElementById('btnSwapTeams');
+            const swapLeftTeamBtn = document.getElementById('btnSwapLeftTeam');
+            const swapRightTeamBtn = document.getElementById('btnSwapRightTeam');
             
             if (isMatchMode) {
                 modeIndicator.textContent = '🏆 Режим матча';
                 modeIndicator.className = 'mode-indicator match-mode';
-                setInfo.style.display = 'block';
-                document.getElementById('currentSet').textContent = window.templateSetNumber || window.setNumber;
+                // Поле "Сет" убрано
                 saveResultBtn.style.display = 'inline-block';
+                
+                // Показываем кнопки обмена в режиме матча
+                if (swapTeamsBtn) swapTeamsBtn.style.display = 'inline-block';
+                if (swapLeftTeamBtn) swapLeftTeamBtn.style.display = 'inline-block';
+                if (swapRightTeamBtn) swapRightTeamBtn.style.display = 'inline-block';
+                
+                // Блокируем поля ввода имен в режиме матча
+                const nameInputs = [
+                    'name_top_left', 'name_bottom_left', 
+                    'name_top_right', 'name_bottom_right'
+                ];
+                
+                nameInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.readOnly = true;
+                        input.style.cursor = 'default';
+                        input.style.backgroundColor = '#f5f5f5';
+                        input.title = 'Имена игроков нельзя изменить в режиме матча';
+                    }
+                });
             } else {
                 modeIndicator.textContent = '🏸 Независимый режим';
                 modeIndicator.className = 'mode-indicator standalone';
-                setInfo.style.display = 'none';
+                // Поле "Сет" убрано
                 saveResultBtn.style.display = 'none';
+                
+                // Показываем кнопки обмена в независимом режиме
+                if (swapTeamsBtn) swapTeamsBtn.style.display = 'inline-block';
+                if (swapLeftTeamBtn) swapLeftTeamBtn.style.display = 'inline-block';
+                if (swapRightTeamBtn) swapRightTeamBtn.style.display = 'inline-block';
+                
+                // Разблокируем поля ввода имен в независимом режиме
+                const nameInputs = [
+                    'name_top_left', 'name_bottom_left', 
+                    'name_top_right', 'name_bottom_right'
+                ];
+                
+                nameInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.readOnly = false;
+                        input.style.cursor = 'text';
+                        input.style.backgroundColor = 'transparent';
+                        input.title = '';
+                    }
+                });
             }
         }
         
@@ -1098,6 +1173,90 @@
             }
             
             updateShuttlecockDisplay();
+            saveData();
+        }
+        
+        function swapTeams() {
+            console.log('Функция swapTeams вызвана!');
+            saveGameState();
+            
+            // Сохраняем текущие значения
+            const topLeftName = document.getElementById('name_top_left').value;
+            const bottomLeftName = document.getElementById('name_bottom_left').value;
+            const topRightName = document.getElementById('name_top_right').value;
+            const bottomRightName = document.getElementById('name_bottom_right').value;
+            
+            // Меняем команды местами по диагонали:
+            // Левый нижний -> Правый верхний
+            // Левый верхний -> Правый нижний
+            // Правый верхний -> Левый нижний
+            // Правый нижний -> Левый верхний
+            document.getElementById('name_top_left').value = bottomRightName;
+            document.getElementById('name_bottom_left').value = topRightName;
+            document.getElementById('name_top_right').value = bottomLeftName;
+            document.getElementById('name_bottom_right').value = topLeftName;
+            
+            // Меняем счёт местами
+            const tempScore = window.scoreLeft;
+            window.scoreLeft = window.scoreRight;
+            window.scoreRight = tempScore;
+            
+            // Обновляем отображение счёта
+            document.getElementById('scoreLeft').textContent = window.scoreLeft;
+            document.getElementById('scoreRight').textContent = window.scoreRight;
+            
+            // Меняем цвета команд местами
+            console.log('До смены цветов:', {leftTeamColor, rightTeamColor});
+            const tempColor = leftTeamColor;
+            leftTeamColor = rightTeamColor;
+            rightTeamColor = tempColor;
+            console.log('После смены цветов:', {leftTeamColor, rightTeamColor});
+            
+            // Обновляем цвета игроков
+            updatePlayerColors();
+            
+            // Меняем позицию воланчика (зеркально)
+            if (shuttlecockPosition === 'top_left') {
+                shuttlecockPosition = 'top_right';
+            } else if (shuttlecockPosition === 'top_right') {
+                shuttlecockPosition = 'top_left';
+            } else if (shuttlecockPosition === 'bottom_left') {
+                shuttlecockPosition = 'bottom_right';
+            } else if (shuttlecockPosition === 'bottom_right') {
+                shuttlecockPosition = 'bottom_left';
+            }
+            
+            updateShuttlecockDisplay();
+            saveData();
+        }
+        
+        function swapLeftTeam() {
+            console.log('Функция swapLeftTeam вызвана!');
+            saveGameState();
+            
+            // Меняем местами верхнего и нижнего игрока в левой команде
+            const topLeftName = document.getElementById('name_top_left').value;
+            const bottomLeftName = document.getElementById('name_bottom_left').value;
+            
+            document.getElementById('name_top_left').value = bottomLeftName;
+            document.getElementById('name_bottom_left').value = topLeftName;
+            
+            console.log('Игроки левой команды поменялись местами:', {topLeftName, bottomLeftName});
+            saveData();
+        }
+        
+        function swapRightTeam() {
+            console.log('Функция swapRightTeam вызвана!');
+            saveGameState();
+            
+            // Меняем местами верхнего и нижнего игрока в правой команде
+            const topRightName = document.getElementById('name_top_right').value;
+            const bottomRightName = document.getElementById('name_bottom_right').value;
+            
+            document.getElementById('name_top_right').value = bottomRightName;
+            document.getElementById('name_bottom_right').value = topRightName;
+            
+            console.log('Игроки правой команды поменялись местами:', {topRightName, bottomRightName});
             saveData();
         }
         
@@ -1372,6 +1531,12 @@
             if (clearBtn) clearBtn.addEventListener('click', clearAll);
             const moveBtn = document.getElementById('btnMoveShuttlecock');
             if (moveBtn) moveBtn.addEventListener('click', moveShuttlecockBetweenSides);
+            const swapTeamsBtn = document.getElementById('btnSwapTeams');
+            if (swapTeamsBtn) swapTeamsBtn.addEventListener('click', swapTeams);
+            const swapLeftTeamBtn = document.getElementById('btnSwapLeftTeam');
+            if (swapLeftTeamBtn) swapLeftTeamBtn.addEventListener('click', swapLeftTeam);
+            const swapRightTeamBtn = document.getElementById('btnSwapRightTeam');
+            if (swapRightTeamBtn) swapRightTeamBtn.addEventListener('click', swapRightTeam);
             const saveResultBtn = document.getElementById('btnSaveResult');
             if (saveResultBtn) saveResultBtn.addEventListener('click', saveResult);
             
