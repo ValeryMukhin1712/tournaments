@@ -134,8 +134,8 @@
         }
         
         .control-panel {
-            width: 110px;
-            min-width: 110px;
+            width: 80px;
+            min-width: 80px;
             background: rgba(255, 255, 255, 0.95);
             border-right: 2px solid #2E7D32;
             display: flex;
@@ -152,8 +152,8 @@
             align-items: stretch;
         }
         .controls button {
-            width: 37px;
-            height: 37px;
+            width: 25px;
+            height: 25px;
             padding: 0;
             display: inline-flex;
             align-items: center;
@@ -431,13 +431,13 @@
         .controls button { 
             margin: 0; 
             padding: 0; 
-            font-size: 15px; 
+            font-size: 10px; 
             border: none;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 37px;
-            height: 37px;
+            width: 25px;
+            height: 25px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -462,13 +462,13 @@
         .navigation-buttons button {
             margin: 0;
             padding: 0;
-            font-size: 12px;
+            font-size: 8px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 32px;
-            height: 32px;
+            width: 21px;
+            height: 21px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -559,14 +559,19 @@
             background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 0;
+            font-size: 10px;
             font-weight: bold;
-            border-radius: 25px;
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-            margin: 10px;
+            margin: 0;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .save-result-btn:hover {
@@ -586,8 +591,8 @@
             /* Сохраняем панель слева от корта даже на узких экранах */
             .main-layout { flex-direction: row; }
             .control-panel {
-                width: 90px;
-                min-width: 90px;
+                width: 65px;
+                min-width: 65px;
                 flex-direction: column;
                 padding: 6px;
                 border-right: 2px solid #2E7D32;
@@ -595,9 +600,9 @@
             }
             .controls { gap: 6px; }
             .controls button {
-                width: 32px;
-                height: 32px;
-                font-size: 12px;
+                width: 21px;
+                height: 21px;
+                font-size: 8px;
             }
             .scoreboard-container { gap: 8vw; }
             .score-left, .score-right {
@@ -607,7 +612,7 @@
             }
             input { width: auto; min-width: 120px; max-width: 300px; font-size: 16px; padding: 6px; }
             .box { width: 200px; }
-            .save-result-btn { padding: 12px 24px; font-size: 16px; }
+            .save-result-btn { width: 21px; height: 21px; font-size: 8px; }
             /* Адаптация для мобильных устройств */
             #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
                 padding: 6px !important; /* Уменьшенный padding для мобильных */
@@ -615,7 +620,7 @@
         }
         
         @media (max-width: 480px) {
-            .controls button { width: 29px; height: 29px; font-size: 11px; }
+            .controls button { width: 19px; height: 19px; font-size: 7px; }
             
             .scoreboard-container {
                 gap: 10vw;
@@ -645,15 +650,16 @@
             
             .controls button {
                 margin: 0 2px;
-                padding: 4px 7px;
-                font-size: 8px;
-                min-width: 27px;
-                height: 27px;
+                padding: 3px 5px;
+                font-size: 5px;
+                min-width: 18px;
+                height: 18px;
             }
             
             .save-result-btn {
-                padding: 10px 20px;
-                font-size: 14px;
+                width: 19px;
+                height: 19px;
+                font-size: 7px;
             }
         }
         
@@ -710,14 +716,12 @@
 
                 <!-- Кнопки навигации -->
                 <div class="navigation-buttons">
-                    <button id="btnHome" class="btn btn-primary" title="Главная страница">🏠</button>
                     <button id="btnBack" class="btn btn-secondary" title="Назад" onclick="handleBackButton()">←</button>
                 </div>
 
                 <!-- Кнопки управления -->
                 <div class="controls">
                     <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
-                    <button id="btnClear" class="btn btn-danger" title="Очистить всё">🗑️</button>
                     <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">↻</button>
                     <button id="btnSwapTeams" class="btn btn-success" title="Поменять команды местами">⇄</button>
                     <button id="btnSwapLeftTeam" class="btn btn-info" title="Поменять игроков в левой команде">⇅</button>
@@ -726,7 +730,7 @@
                     
                     <!-- Кнопка сохранения результата (только в режиме матча) -->
                     <button id="btnSaveResult" class="save-result-btn" style="display: none;" title="Сохранить счёт в форму результата">
-                        <img src="/static/referee/download.png" alt="Сохранить" style="width: 16px; height: 16px;">
+                        <span style="font-size: 12px; font-weight: bold;">↓</span>
                     </button>
                 </div>
             </div>
@@ -1137,13 +1141,7 @@
             saveData();
         }
         
-        function clearAll() {
-            if (confirm('Вы уверены, что хотите очистить все данные?')) {
-                clearAllData();
-                updateScore();
-                updateShuttlecockDisplay();
-            }
-        }
+        // Функция clearAll удалена
         
         function updateShuttlecockDisplay() {
             if (isAnimating) return;
@@ -1495,9 +1493,7 @@
                     result: result
                 }, '*');
                 
-                // Показываем подтверждение
-                alert(`Счет сета ${currentSetNumber} сохранен: ${result.scoreLeft}:${result.scoreRight}`);
-                
+                // Закрываем окно без дублирующего сообщения
                 window.close();
             } else {
                 // Если открыто не в popup, перенаправляем обратно
@@ -1536,13 +1532,7 @@
             }
             window.eventListenersSetup = true;
             
-            // Кнопки навигации
-            const homeBtn = document.getElementById('btnHome');
-            if (homeBtn) {
-                homeBtn.addEventListener('click', function() {
-                    window.location.href = '/';
-                });
-            }
+            // Кнопки навигации удалены
             
             const backBtn = document.getElementById('btnBack');
             if (backBtn) {
@@ -1561,8 +1551,7 @@
             // Обработчик кнопки "Начать игру" удален - игра активна по умолчанию
             const undoBtn = document.getElementById('btnUndo');
             if (undoBtn) undoBtn.addEventListener('click', undoLastAction);
-            const clearBtn = document.getElementById('btnClear');
-            if (clearBtn) clearBtn.addEventListener('click', clearAll);
+            // Кнопка "Очистить" удалена
             const moveBtn = document.getElementById('btnMoveShuttlecock');
             if (moveBtn) moveBtn.addEventListener('click', moveShuttlecockBetweenSides);
             const swapTeamsBtn = document.getElementById('btnSwapTeams');
@@ -1613,7 +1602,7 @@
             const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
             const controlPanel = document.querySelector('.control-panel');
-            const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 120;
+            const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 80;
             const availableWidth = windowWidth - controlPanelWidth;
             const availableHeight = windowHeight;
             
