@@ -1074,9 +1074,9 @@
                 checkVictory();
             } else {
                 if (window.scoreLeft % 2 === 0) {
-                    shuttlecockPosition = 'top_left';
+                    shuttlecockPosition = 'bottom_left'; // Чётное - нижний левый
                 } else {
-                    shuttlecockPosition = 'bottom_left';
+                    shuttlecockPosition = 'top_left'; // Нечётное - верхний левый
                 }
                 
                 updateShuttlecockDisplay();
@@ -1103,9 +1103,9 @@
                 checkVictory();
             } else {
                 if (window.scoreRight % 2 === 0) {
-                    shuttlecockPosition = 'bottom_right';
+                    shuttlecockPosition = 'top_right'; // Чётное - верхний правый
                 } else {
-                    shuttlecockPosition = 'top_right';
+                    shuttlecockPosition = 'bottom_right'; // Нечётное - нижний правый
                 }
                 
                 updateShuttlecockDisplay();
