@@ -12,6 +12,10 @@
     <meta name="msapplication-TileColor" content="#2E7D32">
     <meta name="msapplication-tap-highlight" content="no">
     
+    <!-- Принудительный горизонтальный режим для мобильных устройств -->
+    <meta name="screen-orientation" content="landscape">
+    <meta name="orientation" content="landscape">
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="/static/referee/manifest.json">
     
@@ -40,6 +44,52 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+        }
+        
+        /* Принудительный горизонтальный режим для мобильных устройств */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            body {
+                transform: rotate(90deg);
+                transform-origin: center center;
+                width: 100vh;
+                height: 100vw;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                margin-left: -50vh;
+                margin-top: -50vw;
+            }
+            
+            .container {
+                width: 100vh;
+                height: 100vw;
+            }
+        }
+        
+        /* Скрываем элементы при вертикальной ориентации на мобильных */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            .orientation-warning {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                text-align: center;
+                z-index: 10000;
+            }
+        }
+        
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            .orientation-warning {
+                display: none;
+            }
         }
         
         .container { 
@@ -607,6 +657,14 @@
     </style>
 </head>
 <body>
+    <!-- Предупреждение о необходимости поворота устройства -->
+    <div class="orientation-warning" style="display: none;">
+        <div>
+            <h2>🔄 Поверните устройство</h2>
+            <p>Для лучшего использования страницы "Судейство"<br>поверните устройство в горизонтальное положение</p>
+        </div>
+    </div>
+    
     <div class="container">
         <div class="main-layout">
             <!-- Блок управления слева -->
@@ -1388,7 +1446,38 @@
         window.addEventListener('resize', adaptToScreenSize);
         window.addEventListener('orientationchange', function() {
             setTimeout(adaptToScreenSize, 100);
+            checkOrientation();
         });
+        
+        // Функция проверки ориентации устройства
+        function checkOrientation() {
+            const warning = document.querySelector('.orientation-warning');
+            if (!warning) return;
+            
+            // Проверяем, является ли устройство мобильным
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Проверяем ориентацию
+                const isPortrait = window.innerHeight > window.innerWidth;
+                
+                if (isPortrait) {
+                    warning.style.display = 'flex';
+                } else {
+                    warning.style.display = 'none';
+                }
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+        
+        // Проверяем ориентацию при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            checkOrientation();
+        });
+        
+        // Проверяем ориентацию при изменении размера окна
+        window.addEventListener('resize', checkOrientation);
     </script>
 </body>
 </html>
