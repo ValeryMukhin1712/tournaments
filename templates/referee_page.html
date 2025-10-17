@@ -747,14 +747,16 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80%;
-            max-width: 300px;
-            height: 50px;
-            font-size: 18px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
             font-weight: bold;
             z-index: 1000;
-            border-radius: 25px;
+            border-radius: 50%;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Увеличиваем счет в режиме просмотра */
@@ -870,9 +872,9 @@
     </div>
 
     <!-- Кнопка возврата из режима просмотра -->
-    <button id="btnReturnToReferee" class="btn btn-success return-to-referee-btn" style="display: none;" title="Вернуться к судейству">
-        Вернуться к судейству
-    </button>
+        <button id="btnReturnToReferee" class="btn btn-success return-to-referee-btn" style="display: none;" title="Вернуться к судейству">
+            ←
+        </button>
 
     <script>
         // PWA Service Worker Registration
@@ -1676,9 +1678,17 @@
         }
         
         function returnToRefereeMode() {
-            // Восстанавливаем оригинальные значения счета, цветов и имен игроков
-            window.scoreLeft = originalScoreLeft;
-            window.scoreRight = originalScoreRight;
+            // При возврате из режима просмотра нужно правильно восстановить счет
+            // В режиме просмотра счет был поменян местами, поэтому при возврате
+            // нужно поменять его обратно с учетом возможных изменений
+            const currentScoreLeft = window.scoreLeft;
+            const currentScoreRight = window.scoreRight;
+            
+            // Восстанавливаем счет (меняем местами обратно)
+            window.scoreLeft = currentScoreRight;
+            window.scoreRight = currentScoreLeft;
+            
+            // Восстанавливаем цвета команд
             leftTeamColor = originalLeftTeamColor;
             rightTeamColor = originalRightTeamColor;
             
@@ -1688,15 +1698,17 @@
             document.getElementById('name_bottom_right').value = originalPlayerNames.rightBottom;
             document.getElementById('name_top_right').value = originalPlayerNames.rightTop;
             
-            // При возврате из режима просмотра перемещаем значок подачи по диагонали
-            // Это нужно для корректного отображения после диагональной смены в режиме просмотра
-            if (originalShuttlecockPosition === 'bottom_left') {
+            // При возврате из режима просмотра применяем диагональную смену к текущей позиции значка подачи
+            // В режиме просмотра позиция могла измениться из-за изменений счета, поэтому
+            // нужно применить диагональную смену к текущей позиции, а не восстанавливать оригинальную
+            const currentShuttlecockPosition = shuttlecockPosition;
+            if (currentShuttlecockPosition === 'bottom_left') {
                 shuttlecockPosition = 'top_right';
-            } else if (originalShuttlecockPosition === 'top_left') {
+            } else if (currentShuttlecockPosition === 'top_left') {
                 shuttlecockPosition = 'bottom_right';
-            } else if (originalShuttlecockPosition === 'bottom_right') {
+            } else if (currentShuttlecockPosition === 'bottom_right') {
                 shuttlecockPosition = 'top_left';
-            } else if (originalShuttlecockPosition === 'top_right') {
+            } else if (currentShuttlecockPosition === 'top_right') {
                 shuttlecockPosition = 'bottom_left';
             }
             
