@@ -718,21 +718,54 @@
             .view-mode-btn {
                 display: inline-flex !important; /* Показываем только на мобильных */
             }
-            
-            /* Смещение полей с именами игроков влево на 50px для горизонтальной ориентации */
+        }
+        
+        /* Специальные стили для горизонтальной ориентации мобильных устройств */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            /* Уменьшаем размер шрифта для горизонтальных экранов */
             input {
-                transform: translateX(-50px);
+                font-size: 16px !important; /* Компактный размер шрифта */
+                min-width: 60px !important; /* Очень маленькая минимальная ширина */
+                max-width: 100px !important; /* Очень маленькая максимальная ширина */
+            }
+            
+            /* Убираем все сдвиги для горизонтальных экранов - центрируем поля */
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                transform: translateX(0) !important; /* Убираем все сдвиги */
+                position: relative !important;
+                left: 0 !important;
+                right: 0 !important;
+            }
+            
+            /* Уменьшаем размер счёта для горизонтальных экранов */
+            .score {
+                font-size: 8vw !important; /* Уменьшаем размер счёта */
             }
         }
         
-        /* Сдвиг левых полей максимально влево */
-        #name_top_left, #name_bottom_left {
-            transform: translateX(-300px) !important;
+        /* Дополнительные стили для очень узких горизонтальных экранов */
+        @media screen and (max-width: 568px) and (orientation: landscape) {
+            input {
+                font-size: 12px !important; /* Очень маленький шрифт */
+                min-width: 50px !important;
+                max-width: 80px !important;
+            }
+            
+            /* Уменьшаем размер счёта для узких экранов */
+            .score {
+                font-size: 6vw !important;
+            }
         }
         
-        /* Сдвиг правых полей вправо */
-        #name_top_right, #name_bottom_right {
-            transform: translateX(200px) !important;
+        /* Сдвиг левых полей максимально влево для десктопа и вертикальных мобильных */
+        @media screen and (min-width: 769px), screen and (max-width: 768px) and (orientation: portrait) {
+            #name_top_left, #name_bottom_left {
+                transform: translateX(-300px) !important;
+            }
+            
+            #name_top_right, #name_bottom_right {
+                transform: translateX(200px) !important;
+            }
         }
         
         /* Режим просмотра - зеленый фон */
@@ -803,6 +836,32 @@
             font-weight: bold !important;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             border: none !important; /* Убираем рамку в режиме просмотра */
+        }
+        
+        /* Адаптивные стили для режима просмотра на горизонтальных мобильных экранах */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            .view-mode input {
+                font-size: 2.5vw !important; /* Компактный размер шрифта */
+                min-width: 50px !important;
+                max-width: 80px !important;
+            }
+            
+            .view-mode .score {
+                font-size: 6vw !important; /* Уменьшаем размер счёта в режиме просмотра */
+            }
+        }
+        
+        /* Дополнительные стили для режима просмотра на очень узких экранах */
+        @media screen and (max-width: 568px) and (orientation: landscape) {
+            .view-mode input {
+                font-size: 2vw !important; /* Очень маленький шрифт */
+                min-width: 40px !important;
+                max-width: 60px !important;
+            }
+            
+            .view-mode .score {
+                font-size: 4vw !important; /* Уменьшаем размер счёта в режиме просмотра */
+            }
         }
     </style>
 </head>
@@ -1021,6 +1080,9 @@
             // Устанавливаем начальные цвета игроков
             console.log('Инициализация цветов:', {leftTeamColor, rightTeamColor});
             updatePlayerColors();
+            
+            // Применяем стили для горизонтальных экранов
+            setTimeout(applyMobileLandscapeStyles, 200);
             
             // Очищаем данные если нужно
             if (clearData) {
@@ -1701,6 +1763,9 @@
             isViewMode = true;
             document.body.classList.add('view-mode');
             
+            // Применяем стили для горизонтальных экранов в режиме просмотра
+            setTimeout(applyMobileLandscapeStyles, 100);
+            
             // Принудительно устанавливаем горизонтальную ориентацию
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape').catch(err => {
@@ -1757,6 +1822,9 @@
             // Выключаем режим просмотра
             isViewMode = false;
             document.body.classList.remove('view-mode');
+            
+            // Применяем стили для горизонтальных экранов после выхода из режима просмотра
+            setTimeout(applyMobileLandscapeStyles, 100);
             
             // Разблокируем ориентацию
             if (screen.orientation && screen.orientation.unlock) {
@@ -1930,13 +1998,53 @@
             }
         }
         
+        // Принудительное применение стилей для горизонтальных экранов
+        function applyMobileLandscapeStyles() {
+            if (window.innerWidth <= 768 && window.innerHeight < window.innerWidth) {
+                // Горизонтальная ориентация мобильного устройства
+                const inputs = document.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.style.setProperty('transform', 'translateX(0)', 'important');
+                    input.style.setProperty('position', 'relative', 'important');
+                    input.style.setProperty('left', '0', 'important');
+                    input.style.setProperty('right', '0', 'important');
+                    
+                    if (isViewMode) {
+                        // В режиме просмотра используем более маленькие размеры
+                        input.style.setProperty('font-size', '2.5vw', 'important');
+                        input.style.setProperty('min-width', '50px', 'important');
+                        input.style.setProperty('max-width', '80px', 'important');
+                    } else {
+                        // В обычном режиме
+                        input.style.setProperty('font-size', '16px', 'important');
+                        input.style.setProperty('min-width', '60px', 'important');
+                        input.style.setProperty('max-width', '100px', 'important');
+                    }
+                });
+                
+                const scores = document.querySelectorAll('.score');
+                scores.forEach(score => {
+                    if (isViewMode) {
+                        score.style.setProperty('font-size', '6vw', 'important');
+                    } else {
+                        score.style.setProperty('font-size', '8vw', 'important');
+                    }
+                });
+            }
+        }
+        
         // Проверяем ориентацию при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             checkOrientation();
+            // Применяем стили для горизонтальных экранов
+            setTimeout(applyMobileLandscapeStyles, 100);
         });
         
         // Проверяем ориентацию при изменении размера окна
-        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('resize', function() {
+            checkOrientation();
+            applyMobileLandscapeStyles();
+        });
     </script>
 </body>
 </html>
