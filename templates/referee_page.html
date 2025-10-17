@@ -847,8 +847,8 @@
         
         /* Позиционирование для левых имён */
         #name_top_left {
-            top: 20px !important;
-            left: 20px !important;
+            top: 200px !important; /* 4-я горизонтальная линия (4 × 50 = 200px) */
+            left: 100px !important; /* 2-я вертикальная линия (2 × 50 = 100px) */
         }
         
         #name_bottom_left {
@@ -2147,34 +2147,92 @@
             gridContainer.className = 'grid-labels';
             document.body.appendChild(gridContainer);
             
-            // Добавляем номера вертикальных линий
+            // Добавляем номера вертикальных линий - по всей высоте экрана
             for (let i = 0; i < Math.ceil(window.innerWidth / 50); i++) {
-                const label = document.createElement('div');
-                label.style.position = 'absolute';
-                label.style.left = (i * 50) + 'px';
-                label.style.top = '0px';
-                label.style.fontSize = '10px';
-                label.style.color = 'red';
-                label.style.fontWeight = 'bold';
-                label.style.zIndex = '1002';
-                label.style.pointerEvents = 'none';
-                label.textContent = i;
-                gridContainer.appendChild(label);
+                // Номер в верхней части
+                const topLabel = document.createElement('div');
+                topLabel.style.position = 'absolute';
+                topLabel.style.left = (i * 50) + 'px';
+                topLabel.style.top = '0px';
+                topLabel.style.fontSize = '10px';
+                topLabel.style.color = 'red';
+                topLabel.style.fontWeight = 'bold';
+                topLabel.style.zIndex = '1002';
+                topLabel.style.pointerEvents = 'none';
+                topLabel.textContent = i;
+                gridContainer.appendChild(topLabel);
+                
+                // Номер в средней части (каждые 200px)
+                for (let j = 200; j < window.innerHeight; j += 200) {
+                    const midLabel = document.createElement('div');
+                    midLabel.style.position = 'absolute';
+                    midLabel.style.left = (i * 50) + 'px';
+                    midLabel.style.top = j + 'px';
+                    midLabel.style.fontSize = '10px';
+                    midLabel.style.color = 'red';
+                    midLabel.style.fontWeight = 'bold';
+                    midLabel.style.zIndex = '1002';
+                    midLabel.style.pointerEvents = 'none';
+                    midLabel.textContent = i;
+                    gridContainer.appendChild(midLabel);
+                }
+                
+                // Номер в нижней части
+                const bottomLabel = document.createElement('div');
+                bottomLabel.style.position = 'absolute';
+                bottomLabel.style.left = (i * 50) + 'px';
+                bottomLabel.style.top = (window.innerHeight - 20) + 'px';
+                bottomLabel.style.fontSize = '10px';
+                bottomLabel.style.color = 'red';
+                bottomLabel.style.fontWeight = 'bold';
+                bottomLabel.style.zIndex = '1002';
+                bottomLabel.style.pointerEvents = 'none';
+                bottomLabel.textContent = i;
+                gridContainer.appendChild(bottomLabel);
             }
             
-            // Добавляем номера горизонтальных линий
+            // Добавляем номера горизонтальных линий - по всей ширине экрана
             for (let i = 0; i < Math.ceil(window.innerHeight / 50); i++) {
-                const label = document.createElement('div');
-                label.style.position = 'absolute';
-                label.style.left = '0px';
-                label.style.top = (i * 50) + 'px';
-                label.style.fontSize = '10px';
-                label.style.color = 'red';
-                label.style.fontWeight = 'bold';
-                label.style.zIndex = '1002';
-                label.style.pointerEvents = 'none';
-                label.textContent = i;
-                gridContainer.appendChild(label);
+                // Номер в левой части
+                const leftLabel = document.createElement('div');
+                leftLabel.style.position = 'absolute';
+                leftLabel.style.left = '0px';
+                leftLabel.style.top = (i * 50) + 'px';
+                leftLabel.style.fontSize = '10px';
+                leftLabel.style.color = 'red';
+                leftLabel.style.fontWeight = 'bold';
+                leftLabel.style.zIndex = '1002';
+                leftLabel.style.pointerEvents = 'none';
+                leftLabel.textContent = i;
+                gridContainer.appendChild(leftLabel);
+                
+                // Номер в средней части (каждые 200px)
+                for (let j = 200; j < window.innerWidth; j += 200) {
+                    const midLabel = document.createElement('div');
+                    midLabel.style.position = 'absolute';
+                    midLabel.style.left = j + 'px';
+                    midLabel.style.top = (i * 50) + 'px';
+                    midLabel.style.fontSize = '10px';
+                    midLabel.style.color = 'red';
+                    midLabel.style.fontWeight = 'bold';
+                    midLabel.style.zIndex = '1002';
+                    midLabel.style.pointerEvents = 'none';
+                    midLabel.textContent = i;
+                    gridContainer.appendChild(midLabel);
+                }
+                
+                // Номер в правой части
+                const rightLabel = document.createElement('div');
+                rightLabel.style.position = 'absolute';
+                rightLabel.style.left = (window.innerWidth - 20) + 'px';
+                rightLabel.style.top = (i * 50) + 'px';
+                rightLabel.style.fontSize = '10px';
+                rightLabel.style.color = 'red';
+                rightLabel.style.fontWeight = 'bold';
+                rightLabel.style.zIndex = '1002';
+                rightLabel.style.pointerEvents = 'none';
+                rightLabel.textContent = i;
+                gridContainer.appendChild(rightLabel);
             }
         }
 
