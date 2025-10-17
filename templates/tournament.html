@@ -3723,7 +3723,7 @@ function openRefereePage() {
         tournament: tournamentName
     });
     
-    const refereeUrl = `/referee?${params.toString()}`;
+    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
     console.log('Открываем Referee по URL:', refereeUrl);
     
             // Открываем в новом окне с возможностью изменения размера
@@ -3775,7 +3775,7 @@ function openRefereeForSet(setNumber) {
         clear: 'true'
     });
     
-    const refereeUrl = `/referee?${params.toString()}`;
+    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
     console.log('Открываем Referee в режиме матча для сета', setNumber, ':', refereeUrl);
     
     // Открываем в новом окне
