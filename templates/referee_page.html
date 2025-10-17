@@ -305,7 +305,7 @@
             width: auto; /* Автоматическая ширина */
             min-width: 200px; /* Минимальная ширина */
             max-width: 400px; /* Максимальная ширина */
-            font-size: 54px; /* Увеличиваем размер шрифта еще в 1,5 раза */
+            font-size: 27px; /* Уменьшаем размер шрифта в 2 раза */
             font-weight: bold; /* Делаем шрифт жирным */
             font-style: italic; /* Делаем шрифт курсивом */
             text-align: center;
@@ -336,11 +336,20 @@
         
         /* Стили для счёта */
         .score {
-            font-size: 48px;
+            font-size: 12px !important; /* Уменьшаем размер шрифта в 4 раза */
             font-weight: bold;
             color: #333;
             text-align: center;
             margin: 10px 0;
+        }
+        
+        /* Дополнительные правила для гарантированного применения размера шрифта счёта */
+        #scoreLeft, #scoreRight {
+            font-size: 12.5vw !important;
+        }
+        
+        .scoreboard-container .score-left, .scoreboard-container .score-right {
+            font-size: 12.5vw !important;
         }
         
         /* Прозрачный фон для всех полей ввода имен */
@@ -536,7 +545,7 @@
         }
         
         .score-left, .score-right {
-            font-size: 25vw; /* Увеличено в 4 раза (было 15vw, стало 25vw) */
+            font-size: 12.5vw !important; /* Возвращаем обычный размер для страницы Судейство */
             font-weight: bold; 
             text-align: center; 
             text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
@@ -622,7 +631,7 @@
             }
             .scoreboard-container { gap: 8vw; }
             .score-left, .score-right {
-                font-size: 18vw;
+                font-size: 50vh !important; /* 50% от высоты экрана */
                 padding: 1vh 2vw;
                 min-width: 10vw;
             }
@@ -643,7 +652,7 @@
             }
             
             .score-left, .score-right {
-                font-size: 10vw;
+                font-size: 5vw !important; /* Увеличиваем в 2 раза (было 2.5vw, стало 5vw) */
                 padding: 0.8vh 1.5vw;
                 min-width: 8vw;
             }
@@ -691,7 +700,7 @@
             }
             
             .score-left, .score-right {
-                font-size: 8vw;
+                font-size: 4vw !important; /* Увеличиваем в 2 раза (было 2vw, стало 4vw) */
                 padding: 0.5vh 1vw;
                 min-width: 6vw;
             }
@@ -724,7 +733,7 @@
         @media screen and (max-width: 768px) and (orientation: landscape) {
             /* Уменьшаем размер шрифта для горизонтальных экранов */
             input {
-                font-size: 16px !important; /* Компактный размер шрифта */
+                font-size: 8px !important; /* Уменьшаем в 2 раза */
                 min-width: 60px !important; /* Очень маленькая минимальная ширина */
                 max-width: 100px !important; /* Очень маленькая максимальная ширина */
             }
@@ -758,21 +767,21 @@
             
             /* Уменьшаем размер счёта для горизонтальных экранов */
             .score {
-                font-size: 8vw !important; /* Уменьшаем размер счёта */
+                font-size: 4vw !important; /* Увеличиваем размер счёта в 2 раза */
             }
         }
         
         /* Дополнительные стили для очень узких горизонтальных экранов */
         @media screen and (max-width: 568px) and (orientation: landscape) {
             input {
-                font-size: 12px !important; /* Очень маленький шрифт */
+                font-size: 6px !important; /* Уменьшаем в 2 раза */
                 min-width: 50px !important;
                 max-width: 80px !important;
             }
             
             /* Уменьшаем размер счёта для узких экранов */
             .score {
-                font-size: 6vw !important;
+                font-size: 3vw !important; /* Увеличиваем в 2 раза */
             }
         }
         
@@ -931,14 +940,23 @@
         
         /* Увеличиваем счет в режиме просмотра */
         .view-mode .score {
-            font-size: 12vw !important;
+            font-size: 50vh !important; /* 50% от высоты экрана */
             font-weight: bold !important;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         
+        /* Увеличиваем счет в режиме просмотра для страницы Судейство */
+        .view-mode .score-left, .view-mode .score-right {
+            font-size: 50vh !important; /* 50% от высоты экрана */
+        }
+        
+        .view-mode #scoreLeft, .view-mode #scoreRight {
+            font-size: 50vh !important; /* 50% от высоты экрана */
+        }
+        
         /* Увеличиваем имена игроков в режиме просмотра */
         .view-mode input {
-            font-size: 6vw !important;
+            font-size: 3vw !important; /* Уменьшаем в 2 раза */
             font-weight: bold !important;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             border: none !important; /* Убираем рамку в режиме просмотра */
@@ -947,27 +965,27 @@
         /* Адаптивные стили для режима просмотра на горизонтальных мобильных экранах */
         @media screen and (max-width: 768px) and (orientation: landscape) {
             .view-mode input {
-                font-size: 2.5vw !important; /* Компактный размер шрифта */
+                font-size: 1.25vw !important; /* Уменьшаем в 2 раза */
                 min-width: 50px !important;
                 max-width: 80px !important;
                 position: absolute !important; /* Остаёмся на корте */
             }
             
             .view-mode .score {
-                font-size: 6vw !important; /* Уменьшаем размер счёта в режиме просмотра */
+                font-size: 50vh !important; /* 50% от высоты экрана */
             }
         }
         
         /* Дополнительные стили для режима просмотра на очень узких экранах */
         @media screen and (max-width: 568px) and (orientation: landscape) {
             .view-mode input {
-                font-size: 2vw !important; /* Очень маленький шрифт */
+                font-size: 1vw !important; /* Уменьшаем в 2 раза */
                 min-width: 40px !important;
                 max-width: 60px !important;
             }
             
             .view-mode .score {
-                font-size: 4vw !important; /* Уменьшаем размер счёта в режиме просмотра */
+                font-size: 50vh !important; /* 50% от высоты экрана */
             }
         }
     </style>
@@ -1191,6 +1209,14 @@
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 200);
             
+            // Принудительно применяем размер шрифта счёта
+            setTimeout(() => {
+                const scoreLeft = document.getElementById('scoreLeft');
+                const scoreRight = document.getElementById('scoreRight');
+                if (scoreLeft) scoreLeft.style.setProperty('font-size', '12.5vw', 'important');
+                if (scoreRight) scoreRight.style.setProperty('font-size', '12.5vw', 'important');
+            }, 100);
+            
             // Очищаем данные если нужно
             if (clearData) {
                 clearAllData();
@@ -1391,6 +1417,17 @@
         function updateScore() {
             document.getElementById('scoreLeft').textContent = window.scoreLeft;
             document.getElementById('scoreRight').textContent = window.scoreRight;
+            
+            // Принудительно применяем размер шрифта счёта
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (isViewMode) {
+                if (scoreLeft) scoreLeft.style.setProperty('font-size', '50vh', 'important');
+                if (scoreRight) scoreRight.style.setProperty('font-size', '50vh', 'important');
+            } else {
+                if (scoreLeft) scoreLeft.style.setProperty('font-size', '12.5vw', 'important');
+                if (scoreRight) scoreRight.style.setProperty('font-size', '12.5vw', 'important');
+            }
         }
         
         // Функция checkGameReady удалена - игра активна по умолчанию
@@ -2118,12 +2155,12 @@
                     
                     if (isViewMode) {
                         // В режиме просмотра используем более маленькие размеры
-                        input.style.setProperty('font-size', '2.5vw', 'important');
+                        input.style.setProperty('font-size', '1.25vw', 'important'); /* Уменьшаем в 2 раза */
                         input.style.setProperty('min-width', '50px', 'important');
                         input.style.setProperty('max-width', '80px', 'important');
                     } else {
                         // В обычном режиме
-                        input.style.setProperty('font-size', '16px', 'important');
+                        input.style.setProperty('font-size', '8px', 'important'); /* Уменьшаем в 2 раза */
                         input.style.setProperty('min-width', '60px', 'important');
                         input.style.setProperty('max-width', '100px', 'important');
                     }
@@ -2132,9 +2169,9 @@
                 const scores = document.querySelectorAll('.score');
                 scores.forEach(score => {
                     if (isViewMode) {
-                        score.style.setProperty('font-size', '6vw', 'important');
+                        score.style.setProperty('font-size', '50vh', 'important'); /* 50% от высоты экрана */
                     } else {
-                        score.style.setProperty('font-size', '8vw', 'important');
+                        score.style.setProperty('font-size', '12.5vw', 'important'); /* Обычный размер для страницы Судейство */
                     }
                 });
             }
