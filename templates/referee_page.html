@@ -631,7 +631,7 @@
             }
             .scoreboard-container { gap: 8vw; }
             .score-left, .score-right {
-                font-size: 50vh !important; /* 50% от высоты экрана */
+                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
                 padding: 1vh 2vw;
                 min-width: 10vw;
             }
@@ -769,9 +769,13 @@
                 transform: translateX(50%) translateY(50%) !important;
             }
             
-            /* Уменьшаем размер счёта для горизонтальных экранов */
-            .score {
-                font-size: 4vw !important; /* Увеличиваем размер счёта в 2 раза */
+            /* Размер счёта для горизонтальных экранов в режиме просмотра */
+            .view-mode .score {
+                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+            }
+            
+            .view-mode .score-left, .view-mode .score-right {
+                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
             }
         }
         
@@ -968,7 +972,7 @@
         
         /* Увеличиваем счет в режиме просмотра */
         .view-mode .score {
-            font-size: 50vh !important; /* 50% от высоты экрана */
+            font-size: 62.5vh !important; /* 62.5% от высоты экрана */
             font-weight: bold !important;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
@@ -1000,7 +1004,7 @@
             }
             
             .view-mode .score {
-                font-size: 50vh !important; /* 50% от высоты экрана */
+                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
             }
         }
         
@@ -1013,7 +1017,7 @@
             }
             
             .view-mode .score {
-                font-size: 50vh !important; /* 50% от высоты экрана */
+                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
             }
         }
     </style>
@@ -2197,7 +2201,7 @@
                 const scores = document.querySelectorAll('.score');
                 scores.forEach(score => {
                     if (isViewMode) {
-                        score.style.setProperty('font-size', '62.5vh', 'important'); /* 62.5% от высоты экрана (50% + 25%) */
+                        score.style.setProperty('font-size', '62.5vh', 'important'); /* 62.5% от высоты экрана */
                     } else {
                         score.style.setProperty('font-size', '12.5vw', 'important'); /* Обычный размер для страницы Судейство */
                     }
