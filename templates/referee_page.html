@@ -729,12 +729,31 @@
                 max-width: 100px !important; /* Очень маленькая максимальная ширина */
             }
             
-            /* Убираем все сдвиги для горизонтальных экранов - центрируем поля */
+            /* Позиционирование имён на корте для горизонтальных экранов */
             #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
-                transform: translateX(0) !important; /* Убираем все сдвиги */
-                position: relative !important;
-                left: 0 !important;
-                right: 0 !important;
+                position: absolute !important; /* Абсолютное позиционирование на корте */
+                transform: none !important; /* Убираем все трансформации */
+            }
+            
+            /* Более компактное позиционирование для горизонтальных экранов */
+            #name_top_left {
+                top: 10px !important;
+                left: 10px !important;
+            }
+            
+            #name_bottom_left {
+                bottom: 10px !important;
+                left: 10px !important;
+            }
+            
+            #name_top_right {
+                top: 10px !important;
+                right: 10px !important;
+            }
+            
+            #name_bottom_right {
+                bottom: 10px !important;
+                right: 10px !important;
             }
             
             /* Уменьшаем размер счёта для горизонтальных экранов */
@@ -757,14 +776,101 @@
             }
         }
         
-        /* Сдвиг левых полей максимально влево для десктопа и вертикальных мобильных */
+        /* ВРЕМЕННАЯ СЕТКА 50x50 ПИКСЕЛЕЙ ДЛЯ ОТЛАДКИ */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: 
+                linear-gradient(to right, rgba(255,0,0,0.3) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,0,0,0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        /* Номера линий сетки */
+        .grid-labels {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1001;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: red;
+            font-weight: bold;
+        }
+        
+        .grid-labels::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Вертикальные номера */
+                repeating-linear-gradient(
+                    to right,
+                    transparent 0,
+                    transparent 49px,
+                    rgba(255,0,0,0.8) 50px,
+                    rgba(255,0,0,0.8) 50px
+                ),
+                /* Горизонтальные номера */
+                repeating-linear-gradient(
+                    to bottom,
+                    transparent 0,
+                    transparent 49px,
+                    rgba(255,0,0,0.8) 50px,
+                    rgba(255,0,0,0.8) 50px
+                );
+        }
+        
+        /* Позиционирование имён игроков на поверхности корта */
+        #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+            position: absolute !important;
+            z-index: 10 !important;
+            background: rgba(11, 112, 54, 0.8) !important; /* Полупрозрачный фон цвета корта */
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+            transform: none !important; /* Убираем все трансформации по умолчанию */
+        }
+        
+        /* Позиционирование для левых имён */
+        #name_top_left {
+            top: 20px !important;
+            left: 20px !important;
+        }
+        
+        #name_bottom_left {
+            bottom: 20px !important;
+            left: 20px !important;
+        }
+        
+        /* Позиционирование для правых имён */
+        #name_top_right {
+            top: 20px !important;
+            right: 20px !important;
+        }
+        
+        #name_bottom_right {
+            bottom: 20px !important;
+            right: 20px !important;
+        }
+        
+        /* Убираем все трансформации для десктопа и вертикальных мобильных - имена остаются на корте */
         @media screen and (min-width: 769px), screen and (max-width: 768px) and (orientation: portrait) {
-            #name_top_left, #name_bottom_left {
-                transform: translateX(-300px) !important;
-            }
-            
-            #name_top_right, #name_bottom_right {
-                transform: translateX(200px) !important;
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                transform: none !important; /* Убираем все трансформации */
             }
         }
         
@@ -844,6 +950,7 @@
                 font-size: 2.5vw !important; /* Компактный размер шрифта */
                 min-width: 50px !important;
                 max-width: 80px !important;
+                position: absolute !important; /* Остаёмся на корте */
             }
             
             .view-mode .score {
@@ -2004,10 +2111,10 @@
                 // Горизонтальная ориентация мобильного устройства
                 const inputs = document.querySelectorAll('input');
                 inputs.forEach(input => {
-                    input.style.setProperty('transform', 'translateX(0)', 'important');
-                    input.style.setProperty('position', 'relative', 'important');
-                    input.style.setProperty('left', '0', 'important');
-                    input.style.setProperty('right', '0', 'important');
+                    input.style.setProperty('position', 'absolute', 'important');
+                    input.style.setProperty('transform', 'none', 'important');
+                    input.style.setProperty('left', 'auto', 'important');
+                    input.style.setProperty('right', 'auto', 'important');
                     
                     if (isViewMode) {
                         // В режиме просмотра используем более маленькие размеры
@@ -2034,8 +2141,47 @@
         }
         
         // Проверяем ориентацию при загрузке страницы
+        // Создание номеров линий сетки
+        function createGridLabels() {
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid-labels';
+            document.body.appendChild(gridContainer);
+            
+            // Добавляем номера вертикальных линий
+            for (let i = 0; i < Math.ceil(window.innerWidth / 50); i++) {
+                const label = document.createElement('div');
+                label.style.position = 'absolute';
+                label.style.left = (i * 50) + 'px';
+                label.style.top = '0px';
+                label.style.fontSize = '10px';
+                label.style.color = 'red';
+                label.style.fontWeight = 'bold';
+                label.style.zIndex = '1002';
+                label.style.pointerEvents = 'none';
+                label.textContent = i;
+                gridContainer.appendChild(label);
+            }
+            
+            // Добавляем номера горизонтальных линий
+            for (let i = 0; i < Math.ceil(window.innerHeight / 50); i++) {
+                const label = document.createElement('div');
+                label.style.position = 'absolute';
+                label.style.left = '0px';
+                label.style.top = (i * 50) + 'px';
+                label.style.fontSize = '10px';
+                label.style.color = 'red';
+                label.style.fontWeight = 'bold';
+                label.style.zIndex = '1002';
+                label.style.pointerEvents = 'none';
+                label.textContent = i;
+                gridContainer.appendChild(label);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             checkOrientation();
+            // Создаем сетку для отладки
+            createGridLabels();
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 100);
         });
