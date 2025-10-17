@@ -744,25 +744,29 @@
                 transform: none !important; /* Убираем все трансформации */
             }
             
-            /* Более компактное позиционирование для горизонтальных экранов */
+            /* Позиционирование для горизонтальных экранов - на 5px выше и ниже центра счёта */
             #name_top_left {
-                top: 10px !important;
-                left: 10px !important;
+                top: calc(50% - 5px) !important;
+                left: 20% !important;
+                transform: translateX(-50%) translateY(-50%) !important;
             }
             
             #name_bottom_left {
-                bottom: 10px !important;
-                left: 10px !important;
+                bottom: calc(50% - 5px) !important;
+                left: 20% !important;
+                transform: translateX(-50%) translateY(50%) !important;
             }
             
             #name_top_right {
-                top: 10px !important;
-                right: 10px !important;
+                top: calc(50% - 5px) !important;
+                right: 20% !important;
+                transform: translateX(50%) translateY(-50%) !important;
             }
             
             #name_bottom_right {
-                bottom: 10px !important;
-                right: 10px !important;
+                bottom: calc(50% - 5px) !important;
+                right: 20% !important;
+                transform: translateX(50%) translateY(50%) !important;
             }
             
             /* Уменьшаем размер счёта для горизонтальных экранов */
@@ -854,32 +858,56 @@
             transform: none !important; /* Убираем все трансформации по умолчанию */
         }
         
-        /* Позиционирование для левых имён */
+        /* Позиционирование для левых имён - на 5px выше и ниже центра счёта */
         #name_top_left {
-            top: 200px !important; /* 4-я горизонтальная линия (4 × 50 = 200px) */
-            left: 100px !important; /* 2-я вертикальная линия (2 × 50 = 100px) */
+            top: calc(50% - 5px) !important; /* 5px выше центра счёта */
+            left: 20% !important;
+            transform: translateX(-50%) translateY(-50%) !important;
         }
         
         #name_bottom_left {
-            bottom: 20px !important;
-            left: 20px !important;
+            bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
+            left: 20% !important;
+            transform: translateX(-50%) translateY(50%) !important;
         }
         
-        /* Позиционирование для правых имён */
+        /* Позиционирование для правых имён - на 5px выше и ниже центра счёта */
         #name_top_right {
-            top: 20px !important;
-            right: 20px !important;
+            top: calc(50% - 5px) !important; /* 5px выше центра счёта */
+            right: 20% !important;
+            transform: translateX(50%) translateY(-50%) !important;
         }
         
         #name_bottom_right {
-            bottom: 20px !important;
-            right: 20px !important;
+            bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
+            right: 20% !important;
+            transform: translateX(50%) translateY(50%) !important;
         }
         
-        /* Убираем все трансформации для десктопа и вертикальных мобильных - имена остаются на корте */
+        /* Для десктопа и вертикальных мобильных - применяем новое позиционирование */
         @media screen and (min-width: 769px), screen and (max-width: 768px) and (orientation: portrait) {
-            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
-                transform: none !important; /* Убираем все трансформации */
+            #name_top_left {
+                top: calc(50% - 5px) !important;
+                left: 20% !important;
+                transform: translateX(-50%) translateY(-50%) !important;
+            }
+            
+            #name_bottom_left {
+                bottom: calc(50% - 5px) !important;
+                left: 20% !important;
+                transform: translateX(-50%) translateY(50%) !important;
+            }
+            
+            #name_top_right {
+                top: calc(50% - 5px) !important;
+                right: 20% !important;
+                transform: translateX(50%) translateY(-50%) !important;
+            }
+            
+            #name_bottom_right {
+                bottom: calc(50% - 5px) !important;
+                right: 20% !important;
+                transform: translateX(50%) translateY(50%) !important;
             }
         }
         
@@ -947,11 +975,11 @@
         
         /* Увеличиваем счет в режиме просмотра для страницы Судейство */
         .view-mode .score-left, .view-mode .score-right {
-            font-size: 50vh !important; /* 50% от высоты экрана */
+            font-size: 62.5vh !important; /* 62.5% от высоты экрана (50% + 25%) */
         }
         
         .view-mode #scoreLeft, .view-mode #scoreRight {
-            font-size: 50vh !important; /* 50% от высоты экрана */
+            font-size: 62.5vh !important; /* 62.5% от высоты экрана (50% + 25%) */
         }
         
         /* Увеличиваем имена игроков в режиме просмотра */
@@ -1422,8 +1450,8 @@
             const scoreLeft = document.getElementById('scoreLeft');
             const scoreRight = document.getElementById('scoreRight');
             if (isViewMode) {
-                if (scoreLeft) scoreLeft.style.setProperty('font-size', '50vh', 'important');
-                if (scoreRight) scoreRight.style.setProperty('font-size', '50vh', 'important');
+                if (scoreLeft) scoreLeft.style.setProperty('font-size', '62.5vh', 'important');
+                if (scoreRight) scoreRight.style.setProperty('font-size', '62.5vh', 'important');
             } else {
                 if (scoreLeft) scoreLeft.style.setProperty('font-size', '12.5vw', 'important');
                 if (scoreRight) scoreRight.style.setProperty('font-size', '12.5vw', 'important');
@@ -2169,7 +2197,7 @@
                 const scores = document.querySelectorAll('.score');
                 scores.forEach(score => {
                     if (isViewMode) {
-                        score.style.setProperty('font-size', '50vh', 'important'); /* 50% от высоты экрана */
+                        score.style.setProperty('font-size', '62.5vh', 'important'); /* 62.5% от высоты экрана (50% + 25%) */
                     } else {
                         score.style.setProperty('font-size', '12.5vw', 'important'); /* Обычный размер для страницы Судейство */
                     }
