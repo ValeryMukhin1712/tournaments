@@ -793,62 +793,7 @@
             }
         }
         
-        /* ВРЕМЕННАЯ СЕТКА 50x50 ПИКСЕЛЕЙ ДЛЯ ОТЛАДКИ */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: 
-                linear-gradient(to right, rgba(255,0,0,0.3) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,0,0,0.3) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 1000;
-        }
         
-        /* Номера линий сетки */
-        .grid-labels {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1001;
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            color: red;
-            font-weight: bold;
-        }
-        
-        .grid-labels::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                /* Вертикальные номера */
-                repeating-linear-gradient(
-                    to right,
-                    transparent 0,
-                    transparent 49px,
-                    rgba(255,0,0,0.8) 50px,
-                    rgba(255,0,0,0.8) 50px
-                ),
-                /* Горизонтальные номера */
-                repeating-linear-gradient(
-                    to bottom,
-                    transparent 0,
-                    transparent 49px,
-                    rgba(255,0,0,0.8) 50px,
-                    rgba(255,0,0,0.8) 50px
-                );
-        }
         
         /* Позиционирование имён игроков на поверхности корта */
         #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
@@ -2222,105 +2167,9 @@
         }
         
         // Проверяем ориентацию при загрузке страницы
-        // Создание номеров линий сетки
-        function createGridLabels() {
-            const gridContainer = document.createElement('div');
-            gridContainer.className = 'grid-labels';
-            document.body.appendChild(gridContainer);
-            
-            // Добавляем номера вертикальных линий - по всей высоте экрана
-            for (let i = 0; i < Math.ceil(window.innerWidth / 50); i++) {
-                // Номер в верхней части
-                const topLabel = document.createElement('div');
-                topLabel.style.position = 'absolute';
-                topLabel.style.left = (i * 50) + 'px';
-                topLabel.style.top = '0px';
-                topLabel.style.fontSize = '10px';
-                topLabel.style.color = 'red';
-                topLabel.style.fontWeight = 'bold';
-                topLabel.style.zIndex = '1002';
-                topLabel.style.pointerEvents = 'none';
-                topLabel.textContent = i;
-                gridContainer.appendChild(topLabel);
-                
-                // Номер в средней части (каждые 200px)
-                for (let j = 200; j < window.innerHeight; j += 200) {
-                    const midLabel = document.createElement('div');
-                    midLabel.style.position = 'absolute';
-                    midLabel.style.left = (i * 50) + 'px';
-                    midLabel.style.top = j + 'px';
-                    midLabel.style.fontSize = '10px';
-                    midLabel.style.color = 'red';
-                    midLabel.style.fontWeight = 'bold';
-                    midLabel.style.zIndex = '1002';
-                    midLabel.style.pointerEvents = 'none';
-                    midLabel.textContent = i;
-                    gridContainer.appendChild(midLabel);
-                }
-                
-                // Номер в нижней части
-                const bottomLabel = document.createElement('div');
-                bottomLabel.style.position = 'absolute';
-                bottomLabel.style.left = (i * 50) + 'px';
-                bottomLabel.style.top = (window.innerHeight - 20) + 'px';
-                bottomLabel.style.fontSize = '10px';
-                bottomLabel.style.color = 'red';
-                bottomLabel.style.fontWeight = 'bold';
-                bottomLabel.style.zIndex = '1002';
-                bottomLabel.style.pointerEvents = 'none';
-                bottomLabel.textContent = i;
-                gridContainer.appendChild(bottomLabel);
-            }
-            
-            // Добавляем номера горизонтальных линий - по всей ширине экрана
-            for (let i = 0; i < Math.ceil(window.innerHeight / 50); i++) {
-                // Номер в левой части
-                const leftLabel = document.createElement('div');
-                leftLabel.style.position = 'absolute';
-                leftLabel.style.left = '0px';
-                leftLabel.style.top = (i * 50) + 'px';
-                leftLabel.style.fontSize = '10px';
-                leftLabel.style.color = 'red';
-                leftLabel.style.fontWeight = 'bold';
-                leftLabel.style.zIndex = '1002';
-                leftLabel.style.pointerEvents = 'none';
-                leftLabel.textContent = i;
-                gridContainer.appendChild(leftLabel);
-                
-                // Номер в средней части (каждые 200px)
-                for (let j = 200; j < window.innerWidth; j += 200) {
-                    const midLabel = document.createElement('div');
-                    midLabel.style.position = 'absolute';
-                    midLabel.style.left = j + 'px';
-                    midLabel.style.top = (i * 50) + 'px';
-                    midLabel.style.fontSize = '10px';
-                    midLabel.style.color = 'red';
-                    midLabel.style.fontWeight = 'bold';
-                    midLabel.style.zIndex = '1002';
-                    midLabel.style.pointerEvents = 'none';
-                    midLabel.textContent = i;
-                    gridContainer.appendChild(midLabel);
-                }
-                
-                // Номер в правой части
-                const rightLabel = document.createElement('div');
-                rightLabel.style.position = 'absolute';
-                rightLabel.style.left = (window.innerWidth - 20) + 'px';
-                rightLabel.style.top = (i * 50) + 'px';
-                rightLabel.style.fontSize = '10px';
-                rightLabel.style.color = 'red';
-                rightLabel.style.fontWeight = 'bold';
-                rightLabel.style.zIndex = '1002';
-                rightLabel.style.pointerEvents = 'none';
-                rightLabel.textContent = i;
-                gridContainer.appendChild(rightLabel);
-            }
-        }
 
         document.addEventListener('DOMContentLoaded', function() {
             checkOrientation();
-            // Создаем сетку для отладки
-            createGridLabels();
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 100);
         });
