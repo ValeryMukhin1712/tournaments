@@ -2116,14 +2116,22 @@
             
             // Обработчики кликов по корту
             document.getElementById('court_left').addEventListener('click', function(event) {
+                console.log('🖱️ Клик по левому корту, target:', event.target.tagName);
                 if (event.target.tagName !== 'INPUT') {
+                    console.log('✅ Вызываем addPointLeft');
                     addPointLeft();
+                } else {
+                    console.log('❌ Клик по INPUT, игнорируем');
                 }
             });
             
             document.getElementById('court_right').addEventListener('click', function(event) {
+                console.log('🖱️ Клик по правому корту, target:', event.target.tagName);
                 if (event.target.tagName !== 'INPUT') {
+                    console.log('✅ Вызываем addPointRight');
                     addPointRight();
+                } else {
+                    console.log('❌ Клик по INPUT, игнорируем');
                 }
             });
             
