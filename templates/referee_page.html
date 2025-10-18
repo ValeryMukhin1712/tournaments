@@ -173,7 +173,7 @@
             width: 100%;
             height: 100%;
             margin: 0;
-            background-image: url('/static/referee/court.jpg');
+            background-color: #90EE90; /* Светлозелёный фон */
             background-size: contain;
             background-position: center center;
             background-repeat: no-repeat;
@@ -305,7 +305,7 @@
             width: auto; /* Автоматическая ширина */
             min-width: 200px; /* Минимальная ширина */
             max-width: 400px; /* Максимальная ширина */
-            font-size: 27px; /* Уменьшаем размер шрифта в 2 раза */
+            font-size: 54px; /* Увеличиваем размер шрифта в 2 раза */
             font-weight: bold; /* Делаем шрифт жирным */
             font-style: italic; /* Делаем шрифт курсивом */
             text-align: center;
@@ -545,9 +545,9 @@
         }
         
         .score-left, .score-right {
-            font-size: 12.5vw !important; /* Возвращаем обычный размер для страницы Судейство */
-            font-weight: bold; 
-            text-align: center; 
+            font-size: 31.25vh !important; /* В 2 раза меньше чем в режиме Просмотр */
+            font-weight: bold;
+            text-align: center;
             text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
             padding: 1.5vh 3vw;
             min-width: 12vw;
@@ -771,11 +771,11 @@
             
             /* Размер счёта для горизонтальных экранов в режиме просмотра */
             .view-mode .score {
-                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+                font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
             }
             
             .view-mode .score-left, .view-mode .score-right {
-                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+                font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
             }
         }
         
@@ -787,9 +787,9 @@
                 max-width: 80px !important;
             }
             
-            /* Уменьшаем размер счёта для узких экранов */
+            /* Размер счёта в 2 раза меньше чем в режиме Просмотр */
             .score {
-                font-size: 3vw !important; /* Увеличиваем в 2 раза */
+                font-size: 31.25vh !important; /* В 2 раза меньше чем в режиме Просмотр */
             }
         }
         
@@ -972,18 +972,18 @@
         
         /* Увеличиваем счет в режиме просмотра */
         .view-mode .score {
-            font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+            font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
             font-weight: bold !important;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         
         /* Увеличиваем счет в режиме просмотра для страницы Судейство */
         .view-mode .score-left, .view-mode .score-right {
-            font-size: 62.5vh !important; /* 62.5% от высоты экрана (50% + 25%) */
+            font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
         }
         
         .view-mode #scoreLeft, .view-mode #scoreRight {
-            font-size: 62.5vh !important; /* 62.5% от высоты экрана (50% + 25%) */
+            font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
         }
         
         /* Увеличиваем имена игроков в режиме просмотра */
@@ -1004,7 +1004,7 @@
             }
             
             .view-mode .score {
-                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+                font-size: 125vh !important; /* 125% от высоты экрана (62.5vh × 2) */
             }
         }
         
@@ -1017,7 +1017,7 @@
             }
             
             .view-mode .score {
-                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+                font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
             }
         }
     </style>
@@ -1245,8 +1245,8 @@
             setTimeout(() => {
                 const scoreLeft = document.getElementById('scoreLeft');
                 const scoreRight = document.getElementById('scoreRight');
-                if (scoreLeft) scoreLeft.style.setProperty('font-size', '12.5vw', 'important');
-                if (scoreRight) scoreRight.style.setProperty('font-size', '12.5vw', 'important');
+                if (scoreLeft) scoreLeft.style.setProperty('font-size', '31.25vh', 'important');
+                if (scoreRight) scoreRight.style.setProperty('font-size', '31.25vh', 'important');
             }, 100);
             
             // Очищаем данные если нужно
@@ -1453,13 +1453,13 @@
             // Принудительно применяем размер шрифта счёта
             const scoreLeft = document.getElementById('scoreLeft');
             const scoreRight = document.getElementById('scoreRight');
-            if (isViewMode) {
-                if (scoreLeft) scoreLeft.style.setProperty('font-size', '62.5vh', 'important');
-                if (scoreRight) scoreRight.style.setProperty('font-size', '62.5vh', 'important');
-            } else {
-                if (scoreLeft) scoreLeft.style.setProperty('font-size', '12.5vw', 'important');
-                if (scoreRight) scoreRight.style.setProperty('font-size', '12.5vw', 'important');
-            }
+        if (isViewMode) {
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '79.6875vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '79.6875vh', 'important');
+        } else {
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '31.25vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '31.25vh', 'important');
+        }
         }
         
         // Функция checkGameReady удалена - игра активна по умолчанию
@@ -1939,6 +1939,12 @@
             isViewMode = true;
             document.body.classList.add('view-mode');
             
+            // Принудительно применяем размер шрифта счёта для режима просмотра
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '79.6875vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '79.6875vh', 'important');
+            
             // Применяем стили для горизонтальных экранов в режиме просмотра
             setTimeout(applyMobileLandscapeStyles, 100);
             
@@ -1998,6 +2004,12 @@
             // Выключаем режим просмотра
             isViewMode = false;
             document.body.classList.remove('view-mode');
+            
+            // Принудительно применяем размер шрифта счёта для режима судейства
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '31.25vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '31.25vh', 'important');
             
             // Применяем стили для горизонтальных экранов после выхода из режима просмотра
             setTimeout(applyMobileLandscapeStyles, 100);
@@ -2200,11 +2212,11 @@
                 
                 const scores = document.querySelectorAll('.score');
                 scores.forEach(score => {
-                    if (isViewMode) {
-                        score.style.setProperty('font-size', '62.5vh', 'important'); /* 62.5% от высоты экрана */
-                    } else {
-                        score.style.setProperty('font-size', '12.5vw', 'important'); /* Обычный размер для страницы Судейство */
-                    }
+                if (isViewMode) {
+                    score.style.setProperty('font-size', '79.6875vh', 'important'); /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+                } else {
+                    score.style.setProperty('font-size', '31.25vh', 'important'); /* В 2 раза меньше чем в режиме Просмотр */
+                }
                 });
             }
         }
