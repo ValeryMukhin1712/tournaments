@@ -1607,11 +1607,75 @@
             }
         }
         
+        // Функция для записи лога матча
+        function logMatchAction(action, previousLeft, previousRight, currentLeft, currentRight) {
+            console.log('🔍 logMatchAction вызвана:', {action, previousLeft, previousRight, currentLeft, currentRight});
+            
+            // Проверяем, что мы в режиме матча (не независимый режим)
+            const urlParams = new URLSearchParams(window.location.search);
+            const isMatchMode = urlParams.get('match') === 'true';
+            const matchId = urlParams.get('match_id');
+            const tournamentId = urlParams.get('tournament');
+            const setNumber = urlParams.get('set') || 1;
+            
+            console.log('🔍 Параметры URL:', {isMatchMode, matchId, tournamentId, setNumber});
+            
+            if (!isMatchMode || !matchId || !tournamentId) {
+                console.log('❌ logMatchAction: не в режиме матча или отсутствуют параметры');
+                return; // Не записываем логи в независимом режиме
+            }
+            
+            // Получаем имена игроков
+            const leftPlayerName = document.getElementById('name_bottom_left').value + ' + ' + document.getElementById('name_top_left').value;
+            const rightPlayerName = document.getElementById('name_bottom_right').value + ' + ' + document.getElementById('name_top_right').value;
+            
+            // Отправляем данные на сервер
+            console.log('📤 Отправляем данные в журнал:', {
+                tournament_id: parseInt(tournamentId),
+                match_id: parseInt(matchId),
+                set_number: parseInt(setNumber),
+                action: action
+            });
+            
+            fetch('/api/match-log/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tournament_id: parseInt(tournamentId),
+                    match_id: parseInt(matchId),
+                    set_number: parseInt(setNumber),
+                    previous_score_left: previousLeft,
+                    previous_score_right: previousRight,
+                    current_score_left: currentLeft,
+                    current_score_right: currentRight,
+                    serve_position: shuttlecockPosition,
+                    left_player_name: leftPlayerName,
+                    right_player_name: rightPlayerName,
+                    action: action,
+                    notes: ''
+                })
+            }).then(response => {
+                console.log('✅ Ответ сервера:', response.status);
+                return response.json();
+            }).then(data => {
+                console.log('✅ Данные ответа:', data);
+            }).catch(error => {
+                console.log('❌ Ошибка при записи лога матча:', error);
+            });
+        }
+
         window.addPointLeft = function() {
+            console.log('🎯 addPointLeft вызвана');
             // Игра всегда активна - убираем проверку
             saveGameState();
             
             const isShuttlecockOnLeft = shuttlecockPosition.includes('left');
+            
+            // Сохраняем предыдущий счёт для лога
+            const previousLeft = window.scoreLeft;
+            const previousRight = window.scoreRight;
             
             // Увеличиваем счет только один раз
             window.scoreLeft += 1;
@@ -1621,6 +1685,9 @@
                 saveData();
                 moveShuttlecock('left');
                 swapPlayers('left');
+                // Записываем лог
+                console.log('📝 Вызываем logMatchAction для +1_left (случай 1)');
+                logMatchAction('+1_left', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
                 checkVictory();
             } else {
                 if (window.scoreLeft % 2 === 0) {
@@ -1632,15 +1699,23 @@
                 updateShuttlecockDisplay();
                 saveData();
                 updateScore();
+                // Записываем лог
+                console.log('📝 Вызываем logMatchAction для +1_left (случай 2)');
+                logMatchAction('+1_left', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
                 checkVictory();
             }
         };
         
         window.addPointRight = function() {
+            console.log('🎯 addPointRight вызвана');
             // Игра всегда активна - убираем проверку
             saveGameState();
             
             const isShuttlecockOnRight = shuttlecockPosition.includes('right');
+            
+            // Сохраняем предыдущий счёт для лога
+            const previousLeft = window.scoreLeft;
+            const previousRight = window.scoreRight;
             
             // Увеличиваем счет только один раз
             window.scoreRight += 1;
@@ -1650,6 +1725,9 @@
                 saveData();
                 moveShuttlecock('right');
                 swapPlayers('right');
+                // Записываем лог
+                console.log('📝 Вызываем logMatchAction для +1_right (случай 1)');
+                logMatchAction('+1_right', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
                 checkVictory();
             } else {
                 if (window.scoreRight % 2 === 0) {
@@ -1661,6 +1739,9 @@
                 updateShuttlecockDisplay();
                 saveData();
                 updateScore();
+                // Записываем лог
+                console.log('📝 Вызываем logMatchAction для +1_right (случай 2)');
+                logMatchAction('+1_right', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
                 checkVictory();
             }
         };
