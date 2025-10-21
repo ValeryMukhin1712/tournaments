@@ -17,6 +17,9 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     
+    # Настройки CSRF
+    WTF_CSRF_TIME_LIMIT = 3600  # Время жизни CSRF токена в секундах (1 час)
+    
     # Настройки турнира
     DEFAULT_POINTS_WIN = 3
     DEFAULT_POINTS_DRAW = 1

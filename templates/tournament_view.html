@@ -68,6 +68,28 @@
                         {% else %}
                             Режим участника
                         {% endif %}
+                        <span id="autoRefreshIndicator" class="badge bg-success ms-2" style="display: none;">
+                            <i class="fas fa-sync-alt fa-spin me-1"></i>Автообновление
+                        </span>
+                        
+                        <!-- Настройки автообновления -->
+                        <div class="btn-group ms-3" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAutoRefresh()" id="toggleRefreshBtn">
+                                <i class="fas fa-pause" id="toggleIcon"></i> <span id="toggleText">Пауза</span>
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-clock me-1"></i><span id="intervalText">3 сек</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="setRefreshInterval(3)">3 секунды</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="setRefreshInterval(5)">5 секунд</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="setRefreshInterval(10)">10 секунд</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="setRefreshInterval(15)">15 секунд</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="setRefreshInterval(20)">20 секунд</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </p>
                 </div>
             </div>
@@ -508,4 +530,148 @@
         </div>
     </div>
 </div>
+
+<script>
+// Автоматическое обновление страницы с настраиваемым интервалом
+let autoRefreshInterval;
+let refreshIntervalSeconds = 3; // Интервал по умолчанию
+let isAutoRefreshActive = true;
+
+function startAutoRefresh() {
+    // Очищаем предыдущий интервал, если он был
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+    
+    // Показываем индикатор автообновления
+    const indicator = document.getElementById('autoRefreshIndicator');
+    if (indicator) {
+        indicator.style.display = 'inline-block';
+    }
+    
+    // Обновляем кнопку управления
+    updateToggleButton();
+    
+    // Устанавливаем новый интервал обновления
+    autoRefreshInterval = setInterval(function() {
+        console.log(`Автоматическое обновление страницы (каждые ${refreshIntervalSeconds} сек)...`);
+        window.location.reload();
+    }, refreshIntervalSeconds * 1000);
+    
+    console.log(`Автообновление запущено (каждые ${refreshIntervalSeconds} секунд)`);
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        
+        // Скрываем индикатор автообновления
+        const indicator = document.getElementById('autoRefreshIndicator');
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+        
+        // Обновляем кнопку управления
+        updateToggleButton();
+        
+        console.log('Автообновление остановлено');
+    }
+}
+
+// Функция для установки интервала обновления
+function setRefreshInterval(seconds) {
+    refreshIntervalSeconds = seconds;
+    
+    // Обновляем отображение интервала
+    const intervalText = document.getElementById('intervalText');
+    if (intervalText) {
+        intervalText.textContent = `${seconds} сек`;
+    }
+    
+    // Сохраняем настройки
+    saveRefreshSettings();
+    
+    // Если автообновление активно, перезапускаем с новым интервалом
+    if (isAutoRefreshActive && autoRefreshInterval) {
+        startAutoRefresh();
+    }
+    
+    console.log(`Интервал автообновления изменен на ${seconds} секунд`);
+}
+
+// Функция для переключения автообновления
+function toggleAutoRefresh() {
+    if (isAutoRefreshActive) {
+        stopAutoRefresh();
+        isAutoRefreshActive = false;
+    } else {
+        startAutoRefresh();
+        isAutoRefreshActive = true;
+    }
+    
+    // Сохраняем настройки
+    saveRefreshSettings();
+}
+
+// Функция для обновления кнопки управления
+function updateToggleButton() {
+    const toggleIcon = document.getElementById('toggleIcon');
+    const toggleText = document.getElementById('toggleText');
+    
+    if (isAutoRefreshActive && autoRefreshInterval) {
+        // Автообновление активно - показываем кнопку "Пауза"
+        if (toggleIcon) toggleIcon.className = 'fas fa-pause';
+        if (toggleText) toggleText.textContent = 'Пауза';
+    } else {
+        // Автообновление остановлено - показываем кнопку "Запуск"
+        if (toggleIcon) toggleIcon.className = 'fas fa-play';
+        if (toggleText) toggleText.textContent = 'Запуск';
+    }
+}
+
+// Запускаем автообновление при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем сохраненные настройки
+    loadRefreshSettings();
+    
+    // Запускаем автообновление только если оно было активно
+    if (isAutoRefreshActive) {
+        startAutoRefresh();
+    } else {
+        // Обновляем кнопку для отображения правильного состояния
+        updateToggleButton();
+    }
+    
+    // Останавливаем автообновление при уходе со страницы
+    window.addEventListener('beforeunload', function() {
+        stopAutoRefresh();
+    });
+});
+
+// Функция для загрузки настроек из localStorage
+function loadRefreshSettings() {
+    const savedInterval = localStorage.getItem('autoRefreshInterval');
+    const savedState = localStorage.getItem('autoRefreshActive');
+    
+    if (savedInterval) {
+        refreshIntervalSeconds = parseInt(savedInterval);
+        const intervalText = document.getElementById('intervalText');
+        if (intervalText) {
+            intervalText.textContent = `${refreshIntervalSeconds} сек`;
+        }
+    }
+    
+    if (savedState !== null) {
+        isAutoRefreshActive = savedState === 'true';
+    }
+}
+
+// Функция для сохранения настроек в localStorage
+function saveRefreshSettings() {
+    localStorage.setItem('autoRefreshInterval', refreshIntervalSeconds.toString());
+    localStorage.setItem('autoRefreshActive', isAutoRefreshActive.toString());
+}
+</script>
+
 {% endblock %}

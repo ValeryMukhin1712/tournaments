@@ -2608,11 +2608,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('Corrected sets data:', correctedSetsData);
                         
                         // Отправляем данные
+                        const csrfToken = getCSRFToken();
+                        console.log('CSRF токен:', csrfToken);
+                        console.log('Отправляем PUT запрос на:', `/api/matches/${matchId}`);
+                        console.log('Данные для отправки:', formData);
+                        
                         return fetch(`/api/matches/${matchId}`, {
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRFToken': getCSRFToken()
+                                'X-CSRFToken': csrfToken
                             },
                             body: JSON.stringify(formData)
                         });
@@ -2626,6 +2631,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Проверяем статус ответа
                     if (!response.ok) {
+                        // Если ошибка 400, возможно проблема с CSRF токеном
+                        if (response.status === 400) {
+                            console.log('Получена ошибка 400, пытаемся обновить CSRF токен...');
+                            return refreshCSRFToken().then(newToken => {
+                                console.log('CSRF токен обновлен, повторяем запрос...');
+                                // Повторяем запрос с новым токеном
+                                return fetch(`/api/matches/${matchId}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': newToken
+                                    },
+                                    body: JSON.stringify(formData)
+                                });
+                            }).then(retryResponse => {
+                                if (!retryResponse.ok) {
+                                    throw new Error(`HTTP ${retryResponse.status}: ${retryResponse.statusText}`);
+                                }
+                                return retryResponse.json();
+                            });
+                        }
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     
@@ -2647,6 +2673,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => {
                     console.error('Ошибка при сохранении результата:', error);
                     console.error('Тип ошибки:', typeof error);
+                    console.error('Стек ошибки:', error.stack);
                     console.error('Стек ошибки:', error.stack);
                     // Проверяем, не является ли это ошибкой перезагрузки страницы
                     if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
@@ -5425,6 +5452,33 @@ function setSetScore(setNumber, score1, score2) {
 function getCSRFToken() {
     const token = document.querySelector('meta[name=csrf-token]');
     return token ? token.getAttribute('content') : '';
+}
+
+// Функция для обновления CSRF токена
+function refreshCSRFToken() {
+    return fetch('/api/refresh-csrf-token', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.csrf_token) {
+            // Обновляем meta тег с новым токеном
+            const metaTag = document.querySelector('meta[name=csrf-token]');
+            if (metaTag) {
+                metaTag.setAttribute('content', data.csrf_token);
+            }
+            console.log('CSRF токен обновлен');
+            return data.csrf_token;
+        }
+        throw new Error('Не удалось обновить CSRF токен');
+    })
+    .catch(error => {
+        console.error('Ошибка обновления CSRF токена:', error);
+        throw error;
+    });
 }
 
 // ==================== Функции для работы с журналом матча ====================

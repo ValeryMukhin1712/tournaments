@@ -1419,6 +1419,52 @@
             localStorage.setItem('court_shuttlecock_position', shuttlecockPosition);
         }
         
+        // Функция автоматического сохранения счета в базу данных
+        function autoSaveScore() {
+            // Получаем параметры из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const setNumber = urlParams.get('set') || '1';
+            
+            if (!matchId) {
+                console.log('Нет match_id, пропускаем автосохранение');
+                return;
+            }
+            
+            // Получаем CSRF токен
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Подготавливаем данные для сохранения
+            const scoreData = {
+                score1: window.scoreLeft,
+                score2: window.scoreRight,
+                set_number: parseInt(setNumber)
+            };
+            
+            console.log('Автосохранение счета:', scoreData);
+            
+            // Отправляем запрос на сервер
+            fetch(`/api/matches/${matchId}/auto-save-score`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(scoreData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Счет автоматически сохранен:', data.message);
+                } else {
+                    console.error('Ошибка автосохранения:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при автосохранении счета:', error);
+            });
+        }
+        
         function updateScore() {
             document.getElementById('scoreLeft').textContent = window.scoreLeft;
             document.getElementById('scoreRight').textContent = window.scoreRight;
@@ -1713,6 +1759,7 @@
             if (isShuttlecockOnLeft) {
                 updateScore();
                 saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
                 moveShuttlecock('left');
                 swapPlayers('left');
                 // Записываем лог
@@ -1727,6 +1774,7 @@
                 
                 updateShuttlecockDisplay();
                 saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
                 updateScore();
                 // Записываем лог
                 logMatchAction('+1_left', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
@@ -1750,6 +1798,7 @@
             if (isShuttlecockOnRight) {
                 updateScore();
                 saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
                 moveShuttlecock('right');
                 swapPlayers('right');
                 // Записываем лог
@@ -1764,6 +1813,7 @@
                 
                 updateShuttlecockDisplay();
                 saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
                 updateScore();
                 // Записываем лог
                 logMatchAction('+1_right', previousLeft, previousRight, window.scoreLeft, window.scoreRight);

@@ -835,8 +835,11 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         from flask_wtf.csrf import validate_csrf
         
         # Проверяем CSRF токен
+        csrf_token = request.headers.get('X-CSRFToken')
+        logger.info(f"CSRF токен: {csrf_token}")
         try:
-            validate_csrf(request.headers.get('X-CSRFToken'))
+            validate_csrf(csrf_token)
+            logger.info("CSRF токен валиден")
         except Exception as e:
             logger.warning(f"CSRF validation failed: {e}")
             return jsonify({'error': 'Неверный CSRF токен'}), 400
@@ -861,6 +864,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'error': 'Недостаточно прав для изменения матча'}), 403
         
         data = request.get_json()
+        logger.info(f"Обновление матча {match_id}: получены данные: {data}")
         
         try:
             # Обработка новой структуры с сетами
@@ -1062,6 +1066,25 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при обновлении матча: {str(e)}")
             return jsonify({'success': False, 'error': f'Ошибка при обновлении матча: {str(e)}'}), 500
+
+    @app.route('/api/refresh-csrf-token', methods=['GET'])
+    def refresh_csrf_token():
+        """Обновление CSRF токена"""
+        from flask import session
+        from flask_wtf.csrf import generate_csrf
+        
+        # Проверяем авторизацию через сессию
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
+        
+        try:
+            # Генерируем новый CSRF токен
+            new_token = generate_csrf()
+            logger.info("CSRF токен обновлен для сессии")
+            return jsonify({'success': True, 'csrf_token': new_token})
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении CSRF токена: {str(e)}")
+            return jsonify({'success': False, 'error': 'Ошибка при обновлении токена'}), 500
 
     @app.route('/api/matches/<int:match_id>', methods=['DELETE'])
     def delete_match(match_id):
@@ -2970,6 +2993,63 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при генерации HTML для Referee: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/matches/<int:match_id>/auto-save-score', methods=['POST'])
+    def auto_save_match_score(match_id):
+        """Автоматическое сохранение счета матча (используется страницей судейства)"""
+        from flask import session
+        try:
+            # CSRF из заголовка, аналогично другим POST API
+            csrf_token = request.headers.get('X-CSRFToken')
+            if not csrf_token:
+                return jsonify({'success': False, 'error': 'Отсутствует CSRF токен'}), 400
+            
+            # Проверяем CSRF токен
+            try:
+                from flask_wtf.csrf import validate_csrf
+                validate_csrf(csrf_token)
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем данные из запроса
+            data = request.get_json()
+            if not data:
+                return jsonify({'success': False, 'error': 'Отсутствуют данные'}), 400
+            
+            score1 = data.get('score1', 0)
+            score2 = data.get('score2', 0)
+            set_number = data.get('set_number', 1)
+            
+            # Находим матч
+            match = Match.query.get(match_id)
+            if not match:
+                return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Обновляем счет в соответствующем сете
+            if set_number == 1:
+                match.set1_score1 = score1
+                match.set1_score2 = score2
+            elif set_number == 2:
+                match.set2_score1 = score1
+                match.set2_score2 = score2
+            elif set_number == 3:
+                match.set3_score1 = score1
+                match.set3_score2 = score2
+            
+            # Обновляем время последнего изменения
+            match.updated_at = datetime.utcnow()
+            
+            # Сохраняем изменения
+            db.session.commit()
+            
+            logger.info(f"Автоматически сохранен счет для матча {match_id}, сет {set_number}: {score1}:{score2}")
+            return jsonify({'success': True, 'message': f'Счет сохранен: {score1}:{score2}'})
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при автосохранении счета матча {match_id}: {str(e)}")
+            return jsonify({'success': False, 'error': f'Ошибка при сохранении счета: {str(e)}'}), 500
 
     @app.route('/api/match-log/add', methods=['POST'])
     def add_match_log_entry():
