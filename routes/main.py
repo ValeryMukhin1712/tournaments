@@ -280,10 +280,55 @@ def sort_by_head_to_head(group, all_stats):
 def is_circular_head_to_head(group, all_stats):
     """
     Проверяет, есть ли закольцованные результаты в личных встречах.
-    Упрощенная логика: если в группе 3 или более участников с одинаковыми очками,
-    то считаем, что есть закольцованные результаты и используем разность очков в сетах.
+    Если участники не играли между собой или результаты не позволяют их различить,
+    то используем разность сетов и очков.
     """
-    return len(group) >= 3
+    if len(group) < 2:
+        return False
+    
+    # Проверяем, есть ли личные встречи между участниками группы
+    group_ids = {p['participant'].id for p in group}
+    has_head_to_head = False
+    
+    for p_data in group:
+        p_id = p_data['participant'].id
+        head_to_head = p_data['head_to_head']
+        
+        # Проверяем, есть ли результаты против других участников группы
+        for opponent_id in head_to_head:
+            if opponent_id in group_ids:
+                has_head_to_head = True
+                break
+        
+        if has_head_to_head:
+            break
+    
+    # Если нет личных встреч между участниками группы, используем разность сетов
+    if not has_head_to_head:
+        return True
+    
+    # Если есть личные встречи, проверяем, можно ли различить участников
+    # Подсчитываем очки от личных встреч внутри группы
+    h2h_scores = {}
+    for p_data in group:
+        p_id = p_data['participant'].id
+        head_to_head = p_data['head_to_head']
+        h2h_points = 0
+        
+        for opponent_id, result in head_to_head.items():
+            if opponent_id in group_ids:
+                if result == 'win':
+                    h2h_points += 3
+                elif result == 'draw':
+                    h2h_points += 1
+        
+        h2h_scores[p_id] = h2h_points
+    
+    # Если все участники имеют одинаковые очки от личных встреч, используем разность сетов
+    if len(set(h2h_scores.values())) == 1:
+        return True
+    
+    return False
 
 def send_token_email_railway_fallback(email, name, token):
     """Альтернативный метод отправки email для Railway (через внешний API)"""
@@ -1163,14 +1208,14 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             'ip_address': request.remote_addr
                         }
                         
-                        # Проверяем наличие активной сессии перед созданием новой
-                        app.logger.info(f'Проверяем активные сессии для {email}')
-                        has_active, active_session = session_manager.check_active_session(email)
-                        app.logger.info(f'Результат проверки активных сессий для {email}: has_active={has_active}')
-                        if has_active:
-                            app.logger.info(f'Найдена активная сессия для {email}, блокируем повторный вход')
-                            flash(f'Пользователь {email} уже авторизован в системе. Сначала выйдите из текущей сессии.', 'error')
-                            return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
+                        # ВРЕМЕННО ОТКЛЮЧЕНО: Проверяем наличие активной сессии перед созданием новой
+                        # app.logger.info(f'Проверяем активные сессии для {email}')
+                        # has_active, active_session = session_manager.check_active_session(email)
+                        # app.logger.info(f'Результат проверки активных сессий для {email}: has_active={has_active}')
+                        # if has_active:
+                        #     app.logger.info(f'Найдена активная сессия для {email}, блокируем повторный вход')
+                        #     flash(f'Пользователь {email} уже авторизован в системе. Сначала выйдите из текущей сессии.', 'error')
+                        #     return render_template('admin_tournament.html', all_tokens=all_tokens, tournament_admins=tournament_admins, all_users=all_users, all_participants=all_participants)
                         
                         # Создаем сессию для администратора турнира
                         success, session_token, error = session_manager.create_admin_session(email, session_data)
@@ -1247,14 +1292,14 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             UserActivity = models['UserActivity']
             session_manager = create_session_manager(db, UserActivity)
             
-            # Проверяем наличие активной сессии для системного администратора
-            logger.info(f'Проверяем активные сессии для admin@system')
-            has_active, active_session = session_manager.check_active_session('admin@system')
-            logger.info(f'Результат проверки активных сессий для admin@system: has_active={has_active}')
-            if has_active:
-                logger.info(f'Найдена активная сессия для admin@system, завершаем её')
-                terminate_result = session_manager.terminate_session_by_admin('admin@system', 'system', 'duplicate_login')
-                logger.info(f'Результат завершения сессии для admin@system: {terminate_result}')
+            # ВРЕМЕННО ОТКЛЮЧЕНО: Проверяем наличие активной сессии для системного администратора
+            # logger.info(f'Проверяем активные сессии для admin@system')
+            # has_active, active_session = session_manager.check_active_session('admin@system')
+            # logger.info(f'Результат проверки активных сессий для admin@system: has_active={has_active}')
+            # if has_active:
+            #     logger.info(f'Найдена активная сессия для admin@system, завершаем её')
+            #     terminate_result = session_manager.terminate_session_by_admin('admin@system', 'system', 'duplicate_login')
+            #     logger.info(f'Результат завершения сессии для admin@system: {terminate_result}')
             
             # Создаем новую сессию
             session_data = {
@@ -2166,6 +2211,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             if ranking_data:
                 participant_data['stats']['sets_difference'] = ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0)
                 participant_data['stats']['goal_difference'] = ranking_data.get('set_difference', 0)
+                participant_data['stats']['sets_won'] = ranking_data.get('sets_won', 0)
+                participant_data['stats']['sets_lost'] = ranking_data.get('sets_lost', 0)
         
         # Сортируем участников по местам
         participants_with_stats.sort(key=lambda x: x['position'])
@@ -2467,6 +2514,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             if ranking_data:
                 participant_data['stats']['sets_difference'] = ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0)
                 participant_data['stats']['goal_difference'] = ranking_data.get('set_difference', 0)
+                participant_data['stats']['sets_won'] = ranking_data.get('sets_won', 0)
+                participant_data['stats']['sets_lost'] = ranking_data.get('sets_lost', 0)
         
         # Сортируем участников по местам
         participants_with_stats.sort(key=lambda x: x['position'])
@@ -2819,6 +2868,8 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             if ranking_data:
                 participant_data['stats']['sets_difference'] = ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0)
                 participant_data['stats']['goal_difference'] = ranking_data.get('set_difference', 0)
+                participant_data['stats']['sets_won'] = ranking_data.get('sets_won', 0)
+                participant_data['stats']['sets_lost'] = ranking_data.get('sets_lost', 0)
         
         for participant_data in participants_with_stats_chessboard:
             participant_id = participant_data['participant'].id
@@ -2964,6 +3015,20 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 elif match.status in ['в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                     score = f"{match.sets_won_1}:{match.sets_won_2}"
                 
+                # Формируем детали сетов (аналогично другим функциям)
+                sets_details = None
+                points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
+                if match.status in ['завершен', 'в процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
+                    sets_list = []
+                    if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
+                        sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                    if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
+                        sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                    if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
+                        sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                    if sets_list:
+                        sets_details = ", ".join(sets_list)
+                
                 schedule_display[date_str]['matches'].append({
                     'match_id': match.id,
                     'participant1': participant1.name if participant1 else 'Неизвестно',
@@ -2977,6 +3042,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     'time': match.match_time.strftime('%H:%M') if match.match_time else 'Время не указано',
                     'court_number': match.court_number,
                     'global_number': match.match_number or 0,
+                    'sets_details': sets_details,
                     'is_participant_match': False  # Для зрителей всегда False
                 })
         

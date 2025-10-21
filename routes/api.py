@@ -56,10 +56,28 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
         logger.info(f"Сохранено {len(existing_results)} результатов существующих матчей")
     
     # Удаляем все существующие матчи перед созданием новых
+    # Используем raw SQL для полного контроля над операциями
+    from models.match_log import MatchLog
+    from sqlalchemy import text
+    
+    # Получаем ID матчей для удаления
     existing_matches = Match.query.filter_by(tournament_id=tournament.id).all()
-    for match in existing_matches:
-        db.session.delete(match)
-    logger.info(f"Удалено {len(existing_matches)} существующих матчей")
+    match_ids = [match.id for match in existing_matches]
+    
+    # Полностью очищаем match_log для этого турнира через raw SQL
+    if match_ids:
+        db.session.execute(text("DELETE FROM match_log WHERE match_id IN :match_ids"), 
+                          {"match_ids": match_ids})
+        logger.info(f"Очищены все записи match_log для {len(match_ids)} матчей турнира {tournament.id}")
+    
+    # Удаляем матчи через raw SQL
+    if match_ids:
+        db.session.execute(text("DELETE FROM match WHERE id IN :match_ids"), 
+                          {"match_ids": match_ids})
+        logger.info(f"Удалено {len(match_ids)} существующих матчей через raw SQL")
+    
+    # Коммитим удаление, чтобы избежать проблем с autoflush
+    db.session.commit()
     
     # Создаем круговое расписание по правильному алгоритму
     rounds = create_round_robin_schedule(participants)
@@ -684,13 +702,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         
         try:
             # Удаляем все связанные данные
-            # 1. Удаляем матчи
+            # 1. Удаляем записи журнала матчей
+            from models.match_log import MatchLog
+            MatchLog.query.filter_by(tournament_id=tournament_id).delete()
+            
+            # 2. Удаляем матчи
             Match.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 2. Удаляем участников
+            # 3. Удаляем участников
             Participant.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 3. Удаляем турнир
+            # 4. Удаляем турнир
             tournament_name = tournament.name
             db.session.delete(tournament)
             
@@ -1374,6 +1396,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 tournament = Tournament.query.get(tournament_id)
                 if tournament:
                     # Удаляем связанные данные
+                    from models.match_log import MatchLog
+                    MatchLog.query.filter_by(tournament_id=tournament_id).delete()
                     Match.query.filter_by(tournament_id=tournament_id).delete()
                     Participant.query.filter_by(tournament_id=tournament_id).delete()
                     
@@ -1413,6 +1437,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         
         try:
             # Удаляем все связанные данные
+            from models.match_log import MatchLog
+            MatchLog.query.delete()
             Match.query.delete()
             Participant.query.delete()
             
@@ -1662,6 +1688,11 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Удаляем все турниры этого администратора
             for tournament in tournaments:
                 logger.info(f"Удаляем турнир: {tournament.name} (ID: {tournament.id})")
+                
+                # Удаляем записи журнала матчей
+                from models.match_log import MatchLog
+                match_logs_deleted = MatchLog.query.filter_by(tournament_id=tournament.id).delete()
+                logger.info(f"Удалено записей журнала: {match_logs_deleted}")
                 
                 # Удаляем всех участников турнира
                 participants_deleted = Participant.query.filter_by(tournament_id=tournament.id).delete()
@@ -2939,4 +2970,62 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при генерации HTML для Referee: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
-    
+
+    @app.route('/api/match-log/add', methods=['POST'])
+    def add_match_log_entry():
+        """Добавление записи в журнал матча (используется страницей судейства)"""
+        from flask import session
+        try:
+            # CSRF из заголовка, аналогично другим POST API
+            from flask_wtf.csrf import validate_csrf
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except Exception as e:
+            logger.warning(f"CSRF validation failed (match-log add): {e}")
+            return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+
+        # Простая проверка авторизации администратора турнира
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+
+        data = request.get_json() or {}
+        logger.info(f"API: Получены данные журнала: {data}")
+
+        required_fields = [
+            'tournament_id', 'match_id', 'set_number',
+            'previous_score_left', 'previous_score_right',
+            'current_score_left', 'current_score_right',
+            'serve_position', 'left_player_name', 'right_player_name',
+            'action'
+        ]
+        missing = [f for f in required_fields if f not in data]
+        if missing:
+            return jsonify({'success': False, 'error': f'Отсутствуют поля: {", ".join(missing)}'}), 400
+
+        try:
+            # Импортируем модель отложенно, чтобы избегать циклических импортов
+            from models.match_log import MatchLog
+
+            entry = MatchLog(
+                tournament_id=int(data['tournament_id']),
+                match_id=int(data['match_id']),
+                set_number=int(data['set_number']),
+                previous_score_left=int(data['previous_score_left']),
+                previous_score_right=int(data['previous_score_right']),
+                current_score_left=int(data['current_score_left']),
+                current_score_right=int(data['current_score_right']),
+                serve_position=str(data['serve_position']),
+                left_player_name=str(data['left_player_name']),
+                right_player_name=str(data['right_player_name']),
+                action=str(data['action']),
+                notes=str(data.get('notes') or '')
+            )
+
+            db.session.add(entry)
+            db.session.commit()
+            logger.info(f"API: Запись журнала создана с ID: {entry.id}")
+            return jsonify({'success': True, 'id': entry.id}), 200
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при добавлении записи журнала: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при добавлении записи журнала'}), 500

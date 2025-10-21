@@ -436,6 +436,37 @@
               margin: 2px 0;
             }
             
+            .player-info {
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 5px;
+            }
+            
+            .position-badge {
+              background-color: #4CAF50;
+              color: white;
+              padding: 2px 6px;
+              border-radius: 10px;
+              font-size: 10px;
+              font-weight: normal;
+              white-space: nowrap;
+            }
+            
+            .serving-position {
+              background-color: #FF9800;
+            }
+            
+            .receiving-position {
+              background-color: #2196F3;
+            }
+            
+            .arrow {
+              color: #666;
+              font-weight: bold;
+              margin: 0 3px;
+            }
+            
             .entry-result {
               font-weight: bold;
             }
@@ -798,9 +829,21 @@
               const receivingPlayer = getPlayerName(receivingPosition);
               const currentTime = getCurrentTime();
               
+              // Получаем названия позиций для лучшего отображения
+              const positionNames = {
+                'top_left': 'Верхний левый',
+                'bottom_left': 'Нижний левый', 
+                'top_right': 'Верхний правый',
+                'bottom_right': 'Нижний правый'
+              };
+              
               const entry = {
                 servingPlayer: servingPlayer,
                 receivingPlayer: receivingPlayer,
+                servingPosition: servingPosition,
+                receivingPosition: receivingPosition,
+                servingPositionName: positionNames[servingPosition] || servingPosition,
+                receivingPositionName: positionNames[receivingPosition] || receivingPosition,
                 isSuccess: isSuccess,
                 time: currentTime,
                 timestamp: new Date(),
@@ -824,10 +867,36 @@
                 const resultClass = entry.isSuccess ? 'success' : 'returned';
                 const resultText = entry.isSuccess ? 'Очко получено' : 'Подача отбита';
                 
+                // Обработка старых записей без информации о позициях
+                let playersHtml = '';
+                if (entry.servingPositionName && entry.receivingPositionName) {
+                  // Новый формат с позициями
+                  playersHtml = `
+                    <div class="player-info">
+                      <strong>${entry.servingPlayer}</strong> 
+                      <span class="position-badge serving-position">${entry.servingPositionName}</span>
+                      <span class="arrow">→</span>
+                      <strong>${entry.receivingPlayer}</strong>
+                      <span class="position-badge receiving-position">${entry.receivingPositionName}</span>
+                    </div>
+                  `;
+                } else {
+                  // Старый формат без позиций
+                  playersHtml = `
+                    <div class="player-info">
+                      <strong>${entry.servingPlayer}</strong> 
+                      <span class="arrow">→</span>
+                      <strong>${entry.receivingPlayer}</strong>
+                    </div>
+                  `;
+                }
+                
                 html += `
                   <div class="journal-entry ${resultClass}">
                     <div class="entry-time">${entry.time}</div>
-                    <div class="entry-players">${entry.servingPlayer} → ${entry.receivingPlayer}</div>
+                    <div class="entry-players">
+                      ${playersHtml}
+                    </div>
                     <div class="entry-result ${resultClass}">${resultText}</div>
                     <div class="entry-score">Счёт: ${entry.scoreAfter || '0:0'}</div>
                   </div>
@@ -843,6 +912,25 @@
             function clearJournal() {
               journalEntries = [];
               updateJournalDisplay();
+              console.log('Журнал очищен');
+            }
+            
+            // Добавляем функцию для очистки журнала в интерфейс
+            function addClearJournalButton() {
+              const journalHeader = document.querySelector('.journal-header');
+              if (journalHeader && !document.getElementById('btnClearJournal')) {
+                const clearBtn = document.createElement('button');
+                clearBtn.id = 'btnClearJournal';
+                clearBtn.className = 'find-btn';
+                clearBtn.title = 'Очистить журнал';
+                clearBtn.innerHTML = '🗑️';
+                clearBtn.onclick = function() {
+                  if (confirm('Очистить журнал матча?')) {
+                    clearJournal();
+                  }
+                };
+                journalHeader.querySelector('.journal-controls').appendChild(clearBtn);
+              }
             }
 
             function generateGameId() {
@@ -1130,6 +1218,7 @@
             // Дополнительная проверка готовности после загрузки
             setTimeout(() => {
               checkGameReady();
+              addClearJournalButton(); // Добавляем кнопку очистки журнала
             }, 100);
           </script>
         </body>

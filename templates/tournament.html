@@ -722,6 +722,14 @@
         background: transparent !important;
     }
 }
+
+/* Стили для меток позиций игроков в журнале */
+.badge-sm {
+    font-size: 0.6em;
+    padding: 0.25em 0.5em;
+    margin: 0 0.2em;
+    white-space: nowrap;
+}
 </style>
 
 <div class="floating-elements">
@@ -844,6 +852,9 @@
                                         <th class="sortable" data-column="sets_difference">
                                             Разница +/-<br><small>сетов</small> <i class="fas fa-sort ms-1"></i>
                                         </th>
+                                        <th class="sortable" data-column="sets_score">
+                                            Счет в сетах<br><small>выиграно:проиграно</small> <i class="fas fa-sort ms-1"></i>
+                                        </th>
                                         <th class="sortable" data-column="goal_difference">
                                             Разница очков<br><small>в сетах</small> <i class="fas fa-sort ms-1"></i>
                                         </th>
@@ -873,6 +884,9 @@
                                         <td>{{ participant_stats.points }}</td>
                                         <td>
                                             {% if participant_stats.sets_difference > 0 %}+{% endif %}{{ participant_stats.sets_difference }}
+                                        </td>
+                                        <td>
+                                            {{ participant_stats.sets_won }}:{{ participant_stats.sets_lost }}
                                         </td>
                                         <td>
                                             {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
@@ -1248,6 +1262,9 @@
             <div class="modal-header">
                 <h5 class="modal-title">Результат</h5>
                 <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-info btn-sm" onclick="showMatchLog()" id="matchLogBtn">
+                        <i class="fas fa-list-alt me-1"></i>Журнал
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="closeMatchResultModal()">Отмена</button>
                     <button type="submit" form="matchResultForm" class="btn btn-primary btn-sm">Сохранить</button>
                 </div>
@@ -1267,12 +1284,82 @@
                         </div>
                     </div>
                     
+                    <script>
+                    // Раннее определение функций открытия судейства (на случай, если нижние скрипты не исполнятся)
+                    (function(){
+                        if (!window.openRefereeForSet) {
+                            window.openRefereeForSet = function(setNumber) {
+                                try {
+                                    const participant1 = document.getElementById('participant1Name').value;
+                                    const participant2 = document.getElementById('participant2Name').value;
+                                    const tournamentName = '{{ tournament.name }}';
+                                    const matchId = document.getElementById('matchId').value;
+                                    if (!participant1 || !participant2 || !matchId) return;
+                                    const defaultScore = {{ tournament.points_to_win }};
+                                    const params = new URLSearchParams({
+                                        p1: participant1,
+                                        p2: participant2,
+                                        tournament: tournamentName,
+                                        match: 'true',
+                                        set: String(setNumber),
+                                        match_id: matchId,
+                                        clear: 'true'
+                                    });
+                                    const s1El = document.getElementById('set' + setNumber + 'Score1');
+                                    const s2El = document.getElementById('set' + setNumber + 'Score2');
+                                    const s1 = (s1El && parseInt(s1El.value)) || 0;
+                                    const s2 = (s2El && parseInt(s2El.value)) || 0;
+                                    if (s1 !== defaultScore || s2 !== defaultScore) {
+                                        params.append('score1', s1);
+                                        params.append('score2', s2);
+                                    }
+                                    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
+                                    const w = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+                                    window.refereeWindow = w;
+                                } catch(e) {
+                                    console.error('Не удалось открыть страницу судейства:', e);
+                                }
+                            };
+                        }
+
+                        if (!window.openRefereePage) {
+                            window.openRefereePage = function() {
+                                try {
+                                    const participant1 = document.getElementById('participant1Name').value;
+                                    const participant2 = document.getElementById('participant2Name').value;
+                                    const tournamentName = '{{ tournament.name }}';
+                                    if (!participant1 || !participant2) return;
+                                    const defaultScore = {{ tournament.points_to_win }};
+                                    const params = new URLSearchParams({
+                                        p1: participant1,
+                                        p2: participant2,
+                                        tournament: tournamentName
+                                    });
+                                    const s1El = document.getElementById('set1Score1');
+                                    const s2El = document.getElementById('set1Score2');
+                                    const s1 = (s1El && parseInt(s1El.value)) || 0;
+                                    const s2 = (s2El && parseInt(s2El.value)) || 0;
+                                    if (s1 !== defaultScore || s2 !== defaultScore) {
+                                        params.append('score1', s1);
+                                        params.append('score2', s2);
+                                    }
+                                    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
+                                    const w = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+                                    window.refereeWindow = w;
+                                } catch(e) {
+                                    console.error('Не удалось открыть страницу судейства:', e);
+                                }
+                            };
+                        }
+                    })();
+                    </script>
+
                     <!-- Сет 1 -->
                     <div class="mb-3" id="set1Container">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-primary me-2">Сет 1</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
-                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="openRefereeForSet(1)" title="Открыть судейство для сета 1">
+                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="window.openRefereeForSet && window.openRefereeForSet(1)" title="Открыть судейство для сета 1">
                                 🏸 Судейство
                             </button>
                         </div>
@@ -1291,7 +1378,7 @@
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-info me-2">Сет 2</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
-                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="openRefereeForSet(2)" title="Открыть судейство для сета 2">
+                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="window.openRefereeForSet && window.openRefereeForSet(2)" title="Открыть судейство для сета 2">
                                 🏸 Судейство
                             </button>
                         </div>
@@ -1310,7 +1397,7 @@
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-warning me-2">Сет 3</span>
                             <small class="text-muted">Очки для победы: {{ tournament.points_to_win }}</small>
-                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="openRefereeForSet(3)" title="Открыть судейство для сета 3">
+                            <button type="button" class="btn btn-success btn-sm ms-auto" onclick="window.openRefereeForSet && window.openRefereeForSet(3)" title="Открыть судейство для сета 3">
                                 🏸 Судейство
                             </button>
                         </div>
@@ -1332,6 +1419,43 @@
                     </div>
                     
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра журнала матча -->
+<div class="modal fade" id="matchLogModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-list-alt me-2"></i>Журнал матча
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="logSetFilter" class="form-label">Фильтр по сету:</label>
+                    <select class="form-select" id="logSetFilter" onchange="filterMatchLog()">
+                        <option value="">Все сеты</option>
+                        <option value="1">Сет 1</option>
+                        <option value="2">Сет 2</option>
+                        <option value="3">Сет 3</option>
+                    </select>
+                </div>
+                
+                <div id="matchLogContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2">Загрузка журнала...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
     </div>
@@ -1621,16 +1745,27 @@ function sortTable(table, column, direction) {
                 bValue = parseInt(b.cells[4].textContent) || 0;
                 break;
             case 'losses':
+                aValue = parseInt(a.cells[4].textContent) || 0;
+                bValue = parseInt(b.cells[4].textContent) || 0;
+                break;
+            case 'points':
                 aValue = parseInt(a.cells[5].textContent) || 0;
                 bValue = parseInt(b.cells[5].textContent) || 0;
                 break;
-            case 'points':
+            case 'sets_difference':
                 aValue = parseInt(a.cells[6].textContent) || 0;
                 bValue = parseInt(b.cells[6].textContent) || 0;
                 break;
+            case 'sets_score':
+                // Сортируем по разности выигранных и проигранных сетов
+                const aScore = a.cells[7].textContent.split(':');
+                const bScore = b.cells[7].textContent.split(':');
+                aValue = (parseInt(aScore[0]) || 0) - (parseInt(aScore[1]) || 0);
+                bValue = (parseInt(bScore[0]) || 0) - (parseInt(bScore[1]) || 0);
+                break;
             case 'goal_difference':
-                aValue = parseInt(a.cells[7].textContent) || 0;
-                bValue = parseInt(b.cells[7].textContent) || 0;
+                aValue = parseInt(a.cells[8].textContent) || 0;
+                bValue = parseInt(b.cells[8].textContent) || 0;
                 break;
             default:
                 return 0;
@@ -1737,6 +1872,10 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                     // Определяем, нужно ли менять местами счет
                     const needSwap = p1 && p2 && data.match.participant1_id !== p1.id;
                     console.log('Need to swap scores:', needSwap);
+                    
+                    // Сохраняем состояние needSwap в глобальной переменной для использования при сохранении
+                    window.matchNeedSwap = needSwap;
+                    console.log('Сохранено состояние needSwap:', window.matchNeedSwap);
                     
                     // Заполняем все сеты данными из базы с учетом порядка участников
                     if (needSwap) {
@@ -2484,19 +2623,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => {
                     console.log('Статус ответа:', response.status);
                     console.log('Заголовки ответа:', response.headers);
+                    
+                    // Проверяем статус ответа
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
                     return response.json();
                 })
                 .then(data => {
                     console.log('Данные ответа:', data);
                     if (data.success) {
                         // Результат матча сохранен
-                        location.reload();
+                        console.log('Результат успешно сохранен, обновляем страницу...');
+                        // Используем setTimeout для безопасного обновления
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 100);
                     } else {
                         alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
                     }
                 })
                 .catch(error => {
                     console.error('Ошибка при сохранении результата:', error);
+                    console.error('Тип ошибки:', typeof error);
+                    console.error('Стек ошибки:', error.stack);
+                    // Проверяем, не является ли это ошибкой перезагрузки страницы
+                    if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+                        console.log('Ошибка связана с перезагрузкой страницы, игнорируем');
+                        return;
+                    }
                     alert('Ошибка при сохранении результата: ' + error.message);
                 });
             } else {
@@ -3340,7 +3496,7 @@ async function addSelectedPlayers() {
                     console.log(`Пытаемся добавить игрока "${player.name}"...`);
                     await addPlayerToTournament(player.name);
                     results.push({ player: player.name, success: true });
-                    console.log(`✅ Игрок "${player.name}" успешно добавлен`);
+                    console.log(` Игрок "${player.name}" успешно добавлен`);
                 } catch (error) {
                     console.error(`❌ Ошибка при добавлении игрока "${player.name}":`, error);
                     errors.push({ player: player.name, error: error.message });
@@ -3375,7 +3531,7 @@ async function addSelectedPlayers() {
         
         // Перезагружаем страницу только если хотя бы один игрок был добавлен
         if (results.length > 0) {
-            console.log('🔄 Перезагружаем страницу для обновления списка участников...');
+            console.log(' Перезагружаем страницу для обновления списка участников...');
             setTimeout(() => {
                 location.reload();
             }, 1000); // Небольшая задержка для показа уведомления
@@ -3401,6 +3557,10 @@ async function addSinglePlayer(playerId, playerName) {
     try {
         await addPlayerToTournament(playerName);
         showNotification(`Игрок "${playerName}" добавлен в турнир!`, 'success');
+        // Обновляем страницу для отображения нового участника
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
     } catch (error) {
         console.error('Ошибка при добавлении игрока:', error);
         
@@ -3447,7 +3607,7 @@ function showNotification(message, type = 'info') {
 
 // Добавление игрока в турнир
 async function addPlayerToTournament(playerName) {
-    console.log(`🔄 Начинаем добавление игрока "${playerName}" в турнир {{ tournament.id }}`);
+    console.log(` Начинаем добавление игрока "${playerName}" в турнир {{ tournament.id }}`);
     
     try {
         const csrfToken = getCSRFToken();
@@ -3475,10 +3635,10 @@ async function addPlayerToTournament(playerName) {
         }
         
         const data = await response.json();
-        console.log(`✅ Данные ответа для "${playerName}":`, data);
+        console.log(` Данные ответа для "${playerName}":`, data);
         
         if (data.success) {
-            console.log(`🎉 Игрок "${playerName}" успешно добавлен!`);
+            console.log(` Игрок "${playerName}" успешно добавлен!`);
             return data; // Возвращаем данные вместо перезагрузки страницы
         } else {
             console.error(`❌ Неуспешный ответ для "${playerName}":`, data);
@@ -3702,7 +3862,7 @@ function deleteParticipant(participantId, participantName) {
 let refereeData = null;
 
 // Функция открытия модального окна Referee
-function openRefereePage() {
+window.openRefereePage = function openRefereePage() {
     console.log('openRefereePage вызвана');
     
     const participant1 = document.getElementById('participant1Name').value;
@@ -3716,41 +3876,104 @@ function openRefereePage() {
         return;
     }
     
+    // Получаем текущий счёт из формы
+    const currentScore1 = parseInt(document.getElementById('set1Score1').value) || 0;
+    const currentScore2 = parseInt(document.getElementById('set1Score2').value) || 0;
+    
+    // Получаем значение по умолчанию (очки для победы в сете)
+    const defaultScore = {{ tournament.points_to_win }};
+    
     // Формируем URL для отдельной страницы Referee
-    const params = new URLSearchParams({
+    const paramsPage = new URLSearchParams({
         p1: participant1,
         p2: participant2,
         tournament: tournamentName
     });
     
-    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
-    console.log('Открываем Referee по URL:', refereeUrl);
+    // Добавляем счёт, если он отличается от значения по умолчанию (21:21 для бадминтона)
+    // или если есть реальный счёт (больше 0)
+    if ((currentScore1 !== defaultScore || currentScore2 !== defaultScore) || 
+        (currentScore1 > 0 || currentScore2 > 0)) {
+        console.log(`Передаем счёт для первого сета: ${currentScore1}:${currentScore2}`);
+        paramsPage.append('score1', currentScore1);
+        paramsPage.append('score2', currentScore2);
+    } else {
+        console.log(`Счёт для первого сета равен значению по умолчанию (${defaultScore}:${defaultScore}), не передаем`);
+    }
+    
+    const refereeUrlPage = `/referee?${paramsPage.toString()}&v=${Date.now()}`;
+    console.log('Открываем Referee по URL:', refereeUrlPage);
     
             // Открываем в новом окне с возможностью изменения размера
-            const refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+            window.refereeWindow = window.open(refereeUrlPage, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
     
-    if (!refereeWindow) {
+    if (!window.refereeWindow) {
         alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
         return;
     }
     
-    // Слушаем сообщения от Referee
-    window.addEventListener('message', function(event) {
-        if (event.data.type === 'refereeResult') {
-            console.log('Получен результат от Referee:', event.data.result);
-            applyRefereeResult(event.data.result);
+    // Централизованный обработчик сообщений (однократно)
+    console.log('[Parent]  Проверяем setupRefereeMessageHandler...');
+    console.log('[Parent]  setupRefereeMessageHandler существует:', typeof setupRefereeMessageHandler === 'function');
+    console.log('[Parent]  refereeMessageHandlerAdded:', window.refereeMessageHandlerAdded);
+    
+    if (typeof setupRefereeMessageHandler === 'function' && !window.refereeMessageHandlerAdded) {
+        console.log('[Parent]  Вызываем setupRefereeMessageHandler...');
+        try { 
+            setupRefereeMessageHandler(); 
+            window.refereeMessageHandlerAdded = true; 
+            console.log('[Parent]  setupRefereeMessageHandler инициализирован успешно');
+        } catch(e) { 
+            console.warn('[Parent] ❌ setupRefereeMessageHandler error:', e); 
         }
-    });
+    } else {
+        console.log('[Parent] ⏭️ setupRefereeMessageHandler пропущен (уже инициализирован или не найден)');
+    }
     
 }
+// Делаем доступным как глобальный идентификатор для inline onclick
+var openRefereePage = window.openRefereePage;
 
-function openRefereeForSet(setNumber) {
+window.openRefereeForSet = function openRefereeForSet(setNumber) {
     console.log('openRefereeForSet вызвана для сета:', setNumber);
+    console.log('[Parent] 🚀 НАЧАЛО openRefereeForSet для сета:', setNumber);
+    console.log('[Parent] 🔍 Проверяем, что функция вызывается правильно');
+    console.log('[Parent] 🔍 Функция openRefereeForSet работает!');
     
-    const participant1 = document.getElementById('participant1Name').value;
-    const participant2 = document.getElementById('participant2Name').value;
-    const tournamentName = '{{ tournament.name }}';
-    const matchId = document.getElementById('matchId').value;
+    let participant1, participant2, tournamentName, matchId;
+    
+    try {
+        participant1 = document.getElementById('participant1Name').value;
+        participant2 = document.getElementById('participant2Name').value;
+        tournamentName = '{{ tournament.name }}';
+        matchId = document.getElementById('matchId').value;
+        
+        console.log('[Parent] 🎯 Участники получены:', participant1, 'vs', participant2);
+        console.log('[Parent] 🎯 MatchId:', matchId);
+    } catch (error) {
+        console.error('[Parent] ❌ Ошибка при получении участников:', error);
+        return;
+    }
+    
+    // Диагностика полей формы
+    console.log(`[Parent] 🔍 Диагностика полей формы для сета ${setNumber} (тип: ${typeof setNumber}):`);
+    if (setNumber === '1' || setNumber === 1) {
+        const set1Score1 = document.getElementById('set1Score1');
+        const set1Score2 = document.getElementById('set1Score2');
+        console.log(`[Parent] set1Score1 элемент:`, set1Score1);
+        console.log(`[Parent] set1Score1 значение:`, set1Score1 ? set1Score1.value : 'НЕ НАЙДЕН');
+        console.log(`[Parent] set1Score2 элемент:`, set1Score2);
+        console.log(`[Parent] set1Score2 значение:`, set1Score2 ? set1Score2.value : 'НЕ НАЙДЕН');
+    } else if (setNumber === '2' || setNumber === 2) {
+        const set2Score1 = document.getElementById('set2Score1');
+        const set2Score2 = document.getElementById('set2Score2');
+        console.log(`[Parent] set2Score1 элемент:`, set2Score1);
+        console.log(`[Parent] set2Score1 значение:`, set2Score1 ? set2Score1.value : 'НЕ НАЙДЕН');
+        console.log(`[Parent] set2Score2 элемент:`, set2Score2);
+        console.log(`[Parent] set2Score2 значение:`, set2Score2 ? set2Score2.value : 'НЕ НАЙДЕН');
+    } else {
+        console.log(`[Parent] ❌ Неизвестный сет: ${setNumber} (тип: ${typeof setNumber})`);
+    }
     
     console.log('Участники:', participant1, 'vs', participant2, 'Сет:', setNumber);
     
@@ -3764,8 +3987,11 @@ function openRefereeForSet(setNumber) {
         return;
     }
     
+    // Получаем значение по умолчанию (очки для победы в сете)
+    const defaultScore = {{ tournament.points_to_win }};
+    
     // Формируем URL для режима матча
-    const params = new URLSearchParams({
+    const paramsSet = new URLSearchParams({
         p1: participant1,
         p2: participant2,
         tournament: tournamentName,
@@ -3775,35 +4001,93 @@ function openRefereeForSet(setNumber) {
         clear: 'true'
     });
     
-    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
-    console.log('Открываем Referee в режиме матча для сета', setNumber, ':', refereeUrl);
+    // Получаем реальный счёт из базы данных, а не из полей формы
+    console.log(`[Parent] 🔍 Получаем реальный счёт из базы данных для сета ${setNumber}`);
     
-    // Открываем в новом окне
-    const refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
-    
-    if (!refereeWindow) {
-        alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
-        return;
-    }
-    
-    // Слушаем сообщения от Referee (только один раз)
-    if (!window.refereeMessageHandlerAdded) {
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'refereeResult') {
-                console.log('Получен результат от Referee:', event.data.result);
-                // Используем номер сета из самого результата
-                const resultSetNumber = event.data.result.setNumber || setNumber;
-                console.log('Применяем к сету:', resultSetNumber);
-                applyRefereeResultToSet(event.data.result, resultSetNumber);
+    // Получаем данные матча из базы
+    fetch(`/api/matches/${matchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.match) {
+                let currentScore1, currentScore2;
+                
+                // Получаем счёт для соответствующего сета из базы данных
+                if (setNumber === '1' || setNumber === 1) {
+                    currentScore1 = data.match.set1_score1 || 0;
+                    currentScore2 = data.match.set1_score2 || 0;
+                } else if (setNumber === '2' || setNumber === 2) {
+                    currentScore1 = data.match.set2_score1 || 0;
+                    currentScore2 = data.match.set2_score2 || 0;
+                } else if (setNumber === '3' || setNumber === 3) {
+                    currentScore1 = data.match.set3_score1 || 0;
+                    currentScore2 = data.match.set3_score2 || 0;
+                } else {
+                    currentScore1 = 0;
+                    currentScore2 = 0;
+                }
+                
+                console.log(`[Parent] Реальный счёт из базы для сета ${setNumber}: ${currentScore1}:${currentScore2}`);
+                
+                // Передаем счёт только если он реальный (не равен значению по умолчанию 21:21)
+                console.log(`[Parent] Проверяем счёт для сета ${setNumber}: ${currentScore1}:${currentScore2}, defaultScore: ${defaultScore}`);
+                
+                // Если счёт равен значению по умолчанию (21:21), это означает что матч не начался
+                // В этом случае не передаем счёт, чтобы страница Судейство открылась с 0:0
+                if (currentScore1 === defaultScore && currentScore2 === defaultScore) {
+                    console.log(`[Parent] ❌ Счёт для сета ${setNumber} равен значению по умолчанию (${defaultScore}:${defaultScore}), не передаем - откроется с 0:0`);
+                } else {
+                    console.log(`[Parent] ✅ Передаем реальный счёт для сета ${setNumber}: ${currentScore1}:${currentScore2}`);
+                    paramsSet.append('score1', currentScore1);
+                    paramsSet.append('score2', currentScore2);
+                }
+                
+                // Открываем страницу Судейство
+                const refereeUrl = `/referee?${paramsSet.toString()}&v=${Date.now()}`;
+                console.log('Открываем Referee в режиме матча для сета', setNumber, ':', refereeUrl);
+                
+                // Открываем в новом окне (однократное объявление)
+                window.refereeWindow = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+                
+                if (!window.refereeWindow) {
+                    alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
+                    return;
+                }
+                
+                // Централизованный обработчик сообщений (однократно)
+                console.log('[Parent] 🔧 Проверяем setupRefereeMessageHandler (второе место)...');
+                console.log('[Parent]  setupRefereeMessageHandler существует:', typeof setupRefereeMessageHandler === 'function');
+                console.log('[Parent]  refereeMessageHandlerAdded:', window.refereeMessageHandlerAdded);
+                
+                if (typeof setupRefereeMessageHandler === 'function' && !window.refereeMessageHandlerAdded) {
+                    console.log('[Parent] 🚀 Вызываем setupRefereeMessageHandler (второе место)...');
+                    try { 
+                        setupRefereeMessageHandler(); 
+                        window.refereeMessageHandlerAdded = true; 
+                        console.log('[Parent] ✅ setupRefereeMessageHandler инициализирован успешно (второе место)');
+                    } catch(e) { 
+                        console.warn('[Parent] ❌ setupRefereeMessageHandler error (второе место):', e); 
+                    }
+                } else {
+                    console.log('[Parent] ⏭️ setupRefereeMessageHandler пропущен (второе место) - уже инициализирован или не найден');
+                }
+            } else {
+                console.error('[Parent] ❌ Не удалось получить данные матча');
+                alert('Ошибка: не удалось получить данные матча');
             }
+        })
+        .catch(error => {
+            console.error('[Parent] ❌ Ошибка при получении данных матча:', error);
+            alert('Ошибка при получении данных матча');
         });
-        window.refereeMessageHandlerAdded = true;
-    }
+    
+    return; // Выходим из функции, так как открытие окна происходит в then()
 }
+// Делаем доступным как глобальный идентификатор для inline onclick
+var openRefereeForSet = window.openRefereeForSet;
 
         // Функция применения результата от Referee к конкретному сету
         function applyRefereeResultToSet(result, setNumber) {
-            console.log('Применяем результат от Referee к сету', setNumber, ':', result);
+            console.log('[Parent]  applyRefereeResultToSet вызвана:', { setNumber, result });
             
             if (result.scoreLeft !== undefined && result.scoreRight !== undefined) {
                 // Получаем имена участников из формы
@@ -3813,80 +4097,87 @@ function openRefereeForSet(setNumber) {
                 console.log('Участники в форме:', participant1Name, 'vs', participant2Name);
                 console.log('Игроки от Referee:', result.participant1, 'vs', result.participant2);
                 
-                // Определяем, соответствуют ли имена участников
+                // Используем логику needSwap вместо логики сопоставления по именам
+                const needSwap = window.matchNeedSwap || false;
+                console.log('[Parent] applyRefereeResultToSet: needSwap =', needSwap);
+                
                 let score1, score2;
                 
-                if (result.participant1 === participant1Name && result.participant2 === participant2Name) {
-                    // Имена совпадают - команды не менялись
-                    score1 = result.scoreLeft;
-                    score2 = result.scoreRight;
-                    console.log('Команды не менялись, используем прямое соответствие');
-                } else if (result.participant1 === participant2Name && result.participant2 === participant1Name) {
-                    // Имена поменялись местами - команды менялись
+                if (needSwap) {
+                    // Меняем местами счет согласно needSwap
                     score1 = result.scoreRight;
                     score2 = result.scoreLeft;
-                    console.log('Команды менялись местами, меняем счёт местами');
+                    console.log('[Parent] applyRefereeResultToSet: Счет поменян местами согласно needSwap:', score1, ':', score2);
                 } else {
-                    // Попробуем сопоставить по отдельным игрокам
-                    console.log('Пытаемся сопоставить по отдельным игрокам...');
-                    
-                    // Получаем имена игроков от Referee
-                    const refereeLeftBottom = result.player1;
-                    const refereeLeftTop = result.player2;
-                    const refereeRightBottom = result.player3;
-                    const refereeRightTop = result.player4;
-                    
-                    // Парсим имена участников из формы
-                    const formP1Parts = participant1Name.split('-');
-                    const formP2Parts = participant2Name.split('-');
-                    
-                    console.log('Игроки от Referee (левая команда):', refereeLeftBottom, refereeLeftTop);
-                    console.log('Игроки от Referee (правая команда):', refereeRightBottom, refereeRightTop);
-                    console.log('Участники в форме:', formP1Parts, formP2Parts);
-                    
-                    // Проверяем, соответствует ли левая команда от Referee участнику 1 в форме
-                    const leftMatchesP1 = (
-                        (refereeLeftBottom === formP1Parts[0] && refereeLeftTop === formP1Parts[1]) ||
-                        (refereeLeftBottom === formP1Parts[1] && refereeLeftTop === formP1Parts[0]) ||
-                        (refereeLeftBottom === formP1Parts[0] && formP1Parts.length === 1) ||
-                        (refereeLeftTop === formP1Parts[0] && formP1Parts.length === 1)
-                    );
-                    
-                    if (leftMatchesP1) {
-                        // Левая команда от Referee соответствует участнику 1 в форме
-                        score1 = result.scoreLeft;
-                        score2 = result.scoreRight;
-                        console.log('Левая команда от Referee соответствует участнику 1');
-                    } else {
-                        // Левая команда от Referee соответствует участнику 2 в форме
-                        score1 = result.scoreRight;
-                        score2 = result.scoreLeft;
-                        console.log('Левая команда от Referee соответствует участнику 2');
-                    }
+                    // Обычный порядок
+                    score1 = result.scoreLeft;
+                    score2 = result.scoreRight;
+                    console.log('[Parent] applyRefereeResultToSet: Счет в обычном порядке:', score1, ':', score2);
                 }
                 
-                // Заполняем поля счета для конкретного сета
-                const score1Field = document.getElementById(`set${setNumber}Score1`);
-                const score2Field = document.getElementById(`set${setNumber}Score2`);
+                // Убираем сложную логику сопоставления по именам, так как она конфликтует с needSwap
+                
+                // Заполняем поля счета для конкретного сета (поддержка двух схем id)
+                const score1FieldCamel = document.getElementById(`set${setNumber}Score1`);
+                const score2FieldCamel = document.getElementById(`set${setNumber}Score2`);
+                const score1FieldSnake = document.getElementById(`set${setNumber}_score1`);
+                const score2FieldSnake = document.getElementById(`set${setNumber}_score2`);
+                const score1Field = score1FieldCamel || score1FieldSnake;
+                const score2Field = score2FieldCamel || score2FieldSnake;
                 
                 if (score1Field && score2Field) {
-                    // Заполняем только нужный сет (НЕ очищаем другие!)
+                    console.log(`[Parent]  Обновляем поля счёта для сета ${setNumber}: ${score1}:${score2}`);
+                    console.log(`[Parent]  Поля найдены: score1Field=${score1Field.id}, score2Field=${score2Field.id}`);
+                    
+                    // Заполняем только нужный сет (НЕ очищаем другие!) и инициируем события
                     score1Field.value = score1;
                     score2Field.value = score2;
+                    console.log(`[Parent]  Значения установлены: score1Field.value=${score1Field.value}, score2Field.value=${score2Field.value}`);
                     
-                    console.log(`Счет сета ${setNumber} обновлен: ${score1}:${score2}`);
+                    try {
+                        console.log(`[Parent]  Отправляем события input и change...`);
+                        score1Field.dispatchEvent(new Event('input', { bubbles: true }));
+                        score1Field.dispatchEvent(new Event('change', { bubbles: true }));
+                        score2Field.dispatchEvent(new Event('input', { bubbles: true }));
+                        score2Field.dispatchEvent(new Event('change', { bubbles: true }));
+                        console.log(`[Parent]  События отправлены успешно`);
+                    } catch (e) {
+                        console.warn(`[Parent] ⚠️ Ошибка при отправке событий:`, e);
+                    }
                     
-                    // Показываем уведомление
-                    alert(`Счет сета ${setNumber} обновлен: ${score1}:${score2}`);
+                    console.log(`[Parent]  set${setNumber} обновлен: ${score1}:${score2}`);
+                    
+                    // Автоотправка формы результата
+                    console.log('[Parent]  Отправляем форму результата...');
+                    try {
+                        const form = document.getElementById('matchResultForm');
+                        if (form) {
+                            console.log('[Parent]  Форма найдена, отправляем через 200ms');
+                            setTimeout(() => {
+                                console.log('[Parent]  Отправляем форму результата');
+                                form.requestSubmit();
+                            }, 200);
+                        } else {
+                            console.warn('[Parent] ⚠️ Форма matchResultForm не найдена');
+                        }
+                    } catch (e) {
+                        console.warn('[Parent] ❌ Ошибка при отправке формы:', e);
+                    }
+                    
+                    // Уведомление убрано - мешает закрытию окна
                 } else {
-                    console.error(`Поля для сета ${setNumber} не найдены`);
+                    console.error(`[Parent] ❌ Поля для сета ${setNumber} не найдены`);
+                    console.error(`[Parent] 🔍 score1FieldCamel:`, score1FieldCamel);
+                    console.error(`[Parent] 🔍 score2FieldCamel:`, score2FieldCamel);
+                    console.error(`[Parent] 🔍 score1FieldSnake:`, score1FieldSnake);
+                    console.error(`[Parent] 🔍 score2FieldSnake:`, score2FieldSnake);
                 }
             }
         }
 
 // Функция применения результата от Referee
 function applyRefereeResult(result) {
-    console.log('Применяем результат от Referee:', result);
+    console.log('[Parent] applyRefereeResult:', result);
     
     // Заполняем поля формы результата матча
     if (result.scoreLeft !== undefined && result.scoreRight !== undefined) {
@@ -3898,23 +4189,38 @@ function applyRefereeResult(result) {
             winner = 'participant2';
         }
         
-        // Заполняем поля счета
-        document.getElementById('set1_score1').value = result.scoreLeft;
-        document.getElementById('set1_score2').value = result.scoreRight;
+        // Заполняем поля счета с учетом логики needSwap
+        console.log('[Parent] заполняю set1_score1/set1_score2');
+        
+        // Используем сохраненное состояние needSwap
+        const needSwap = window.matchNeedSwap || false;
+        console.log('[Parent] needSwap при сохранении:', needSwap);
+        
+        if (needSwap) {
+            // Меняем местами счет
+            document.getElementById('set1_score1').value = result.scoreRight;
+            document.getElementById('set1_score2').value = result.scoreLeft;
+            console.log('[Parent] Счет поменян местами:', result.scoreRight, ':', result.scoreLeft);
+        } else {
+            // Обычный порядок
+            document.getElementById('set1_score1').value = result.scoreLeft;
+            document.getElementById('set1_score2').value = result.scoreRight;
+            console.log('[Parent] Счет в обычном порядке:', result.scoreLeft, ':', result.scoreRight);
+        }
         
         // Устанавливаем победителя
         if (winner) {
             document.getElementById(winner).checked = true;
         }
         
-        console.log('Результат применен к форме:', {
+        console.log('[Parent] Результат применен к форме:', {
             scoreLeft: result.scoreLeft,
             scoreRight: result.scoreRight,
             winner: winner
         });
         
-        // Показываем уведомление
-        alert(`Результат получен от Referee: ${result.scoreLeft}:${result.scoreRight}`);
+        // Автосабмит формы результата
+        // Автоотправка формы убрана - теперь обрабатывается в setupRefereeMessageHandler
     }
 }
 
@@ -4018,8 +4324,17 @@ function loadReferee(participant1, participant2, tournamentName) {
                    // Выполняем JavaScript код из Referee
                    executeRefereeScript();
                    
-                   // Настраиваем обработчик сообщений от Referee
-                   setupRefereeMessageHandler();
+                   // Настраиваем обработчик сообщений от Referee (если еще не настроен)
+                   console.log('[Parent] 🔧 Проверяем setupRefereeMessageHandler (третье место)...');
+                   console.log('[Parent]  refereeMessageHandlerAdded:', window.refereeMessageHandlerAdded);
+                   if (!window.refereeMessageHandlerAdded) {
+                       console.log('[Parent] 🚀 Вызываем setupRefereeMessageHandler (третье место)...');
+                       setupRefereeMessageHandler();
+                       window.refereeMessageHandlerAdded = true;
+                       console.log('[Parent] ✅ setupRefereeMessageHandler инициализирован успешно (третье место)');
+                   } else {
+                       console.log('[Parent] ⏭️ setupRefereeMessageHandler пропущен (третье место) - уже инициализирован');
+                   }
                    
                    // Принудительно обновляем модальное окно
                    setTimeout(() => {
@@ -4939,13 +5254,55 @@ function executeRefereeScript() {
 
 // Настройка обработчика сообщений от Referee
 function setupRefereeMessageHandler() {
+    console.log('[Parent] setupRefereeMessageHandler: инициализация обработчика сообщений');
     window.addEventListener('message', function(event) {
+        // Фильтруем сообщения от React DevTools
+        if (event.data && event.data.source === 'react-devtools-content-script') {
+            return; // Игнорируем сообщения от React DevTools
+        }
+        
+        console.log('[Parent]  Получено сообщение:', event.data, 'от:', event.origin);
         if (event.data.type === 'refereeResult') {
-            refereeData = event.data;
-            console.log('Получен результат от Referee:', refereeData);
+            console.log('[Parent]  message: refereeResult получен', event.data);
+            // Унифицируем полезную нагрузку
+            const payload = event.data.result || event.data;
+            refereeData = payload;
+            console.log('[Parent] payload:', payload);
+            
+            // Сразу применяем счёт к форме, если доступна функция
+            console.log('[Parent]  Применяем результат к форме...');
+            if (typeof applyRefereeResultToSet === 'function') {
+                const setNum = payload.setNumber || '1';
+                console.log('[Parent]  Вызываем applyRefereeResultToSet с сетом:', setNum);
+                applyRefereeResultToSet(payload, setNum);
+            } else if (typeof applyRefereeResult === 'function') {
+                console.log('[Parent]  Вызываем applyRefereeResult');
+                applyRefereeResult(payload);
+            } else {
+                console.warn('[Parent] ⚠️ Функции applyRefereeResultToSet и applyRefereeResult не найдены');
+            }
             
             // Показываем уведомление о получении результата
             showRefereeResultNotification();
+            
+            // Автосохранение убрано - теперь обрабатывается в applyRefereeResultToSet
+            
+            // Отправляем ack обратно в popup, затем закрываем окно судейства
+            console.log('[Parent] 📤 Отправляем ack обратно в Судейство...');
+            try {
+                if (window.refereeWindow && !window.refereeWindow.closed) {
+                    console.log('[Parent]  Отправляем refereeAck');
+                    window.refereeWindow.postMessage({ type: 'refereeAck' }, '*');
+                } else {
+                    console.warn('[Parent] ⚠️ Окно Судейства недоступно для отправки ack');
+                }
+            } catch(e) { console.warn('[Parent] ❌ Отправка ack не удалась:', e); }
+            try { 
+                if (window.refereeWindow && !window.refereeWindow.closed) {
+                    console.log('[Parent]  Закрываем окно Судейства');
+                    window.refereeWindow.close();
+                }
+            } catch(e) { console.warn('[Parent] ❌ Закрытие окна не удалось:', e); }
         }
     });
     
@@ -5068,6 +5425,235 @@ function setSetScore(setNumber, score1, score2) {
 function getCSRFToken() {
     const token = document.querySelector('meta[name=csrf-token]');
     return token ? token.getAttribute('content') : '';
+}
+
+// ==================== Функции для работы с журналом матча ====================
+
+// Показать журнал матча
+function showMatchLog() {
+    const matchId = document.getElementById('matchId').value;
+    if (!matchId) {
+        alert('ID матча не найден');
+        return;
+    }
+    
+    // Показываем модальное окно журнала
+    const logModal = new bootstrap.Modal(document.getElementById('matchLogModal'));
+    logModal.show();
+    
+    // Загружаем журнал
+    loadMatchLog(matchId);
+}
+
+// Загрузить журнал матча
+function loadMatchLog(matchId, setNumber = null) {
+    const content = document.getElementById('matchLogContent');
+    
+    // Показываем индикатор загрузки
+    content.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2">Загрузка журнала...</p>
+        </div>
+    `;
+    
+    // Формируем URL с параметрами
+    let url = `/api/match-log/get/${matchId}`;
+    if (setNumber) {
+        url += `?set_number=${setNumber}`;
+    }
+    
+    fetch(url, {
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayMatchLog(data.logs);
+        } else {
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Ошибка загрузки журнала: ${data.error || 'Неизвестная ошибка'}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при загрузке журнала:', error);
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Ошибка загрузки журнала: ${error.message}
+            </div>
+        `;
+    });
+}
+
+// Отобразить журнал матча
+function displayMatchLog(logs) {
+    const content = document.getElementById('matchLogContent');
+    
+    if (!logs || logs.length === 0) {
+        content.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-list-alt fa-3x mb-3"></i>
+                <h5>Журнал пуст</h5>
+                <p>Записи в журнале матча отсутствуют</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Создаем таблицу журнала
+    let tableHTML = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Время</th>
+                        <th>Сет</th>
+                        <th>Действие</th>
+                        <th>Счёт</th>
+                        <th>Подача</th>
+                        <th>Игроки</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    logs.forEach(log => {
+        const time = new Date(log.timestamp).toLocaleTimeString('ru-RU');
+        const actionText = getActionText(log.action);
+        const scoreText = `${log.previous_score_left}:${log.previous_score_right} → ${log.current_score_left}:${log.current_score_right}`;
+        const serveText = getServePositionText(log.serve_position);
+        
+        // Определяем позиции игроков на основе позиции подачи
+        const servingPositions = getServingPlayerPositions(log.serve_position);
+        const receivingPositions = getReceivingPlayerPositions(log.serve_position);
+        
+        // Форматируем имена игроков с позициями
+        const leftPlayers = log.left_player_name.split(' + ');
+        const rightPlayers = log.right_player_name.split(' vs ')[1] ? log.right_player_name.split(' vs ')[1].split(' + ') : [log.right_player_name];
+        
+        let leftPlayersWithPositions = '';
+        let rightPlayersWithPositions = '';
+        
+        if (leftPlayers.length >= 2) {
+            // Команда из двух игроков
+            leftPlayersWithPositions = `${leftPlayers[0]} <span class="badge bg-warning badge-sm">${servingPositions[0]}</span> + ${leftPlayers[1]} <span class="badge bg-warning badge-sm">${servingPositions[1]}</span>`;
+        } else {
+            // Одиночный игрок
+            leftPlayersWithPositions = `${leftPlayers[0]} <span class="badge bg-warning badge-sm">${servingPositions[0]}</span>`;
+        }
+        
+        if (rightPlayers.length >= 2) {
+            // Команда из двух игроков
+            rightPlayersWithPositions = `${rightPlayers[0]} <span class="badge bg-info badge-sm">${receivingPositions[0]}</span> + ${rightPlayers[1]} <span class="badge bg-info badge-sm">${receivingPositions[1]}</span>`;
+        } else {
+            // Одиночный игрок
+            rightPlayersWithPositions = `${rightPlayers[0]} <span class="badge bg-info badge-sm">${receivingPositions[0]}</span>`;
+        }
+        
+        const playersText = `${leftPlayersWithPositions} vs ${rightPlayersWithPositions}`;
+        
+        tableHTML += `
+            <tr>
+                <td><small>${time}</small></td>
+                <td><span class="badge bg-primary">${log.set_number}</span></td>
+                <td>${actionText}</td>
+                <td><code>${scoreText}</code></td>
+                <td><small>${serveText}</small></td>
+                <td><small>${playersText}</small></td>
+            </tr>
+        `;
+    });
+    
+    tableHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    content.innerHTML = tableHTML;
+}
+
+// Получить текст действия
+function getActionText(action) {
+    const actions = {
+        '+1_left': '<span class="badge bg-success">+1 Левый</span>',
+        '+1_right': '<span class="badge bg-success">+1 Правый</span>',
+        'serve_change': '<span class="badge bg-info">Смена подачи</span>',
+        'team_swap': '<span class="badge bg-warning">Смена команд</span>'
+    };
+    return actions[action] || `<span class="badge bg-secondary">${action}</span>`;
+}
+
+// Получить текст позиции подачи
+function getServePositionText(position) {
+    const positions = {
+        'bottom_left': 'Левый нижний',
+        'top_left': 'Левый верхний',
+        'bottom_right': 'Правый нижний',
+        'top_right': 'Правый верхний'
+    };
+    return positions[position] || position;
+}
+
+// Получить позиции подающих игроков
+function getServingPlayerPositions(servePosition) {
+    const positions = {
+        'bottom_left': ['Левый нижний', 'Левый верхний'],
+        'top_left': ['Левый верхний', 'Левый нижний'],
+        'bottom_right': ['Правый нижний', 'Правый верхний'],
+        'top_right': ['Правый верхний', 'Правый нижний']
+    };
+    return positions[servePosition] || ['Неизвестно', 'Неизвестно'];
+}
+
+// Получить позиции принимающих игроков
+function getReceivingPlayerPositions(servePosition) {
+    const positions = {
+        'bottom_left': ['Правый нижний', 'Правый верхний'],
+        'top_left': ['Правый верхний', 'Правый нижний'],
+        'bottom_right': ['Левый нижний', 'Левый верхний'],
+        'top_right': ['Левый верхний', 'Левый нижний']
+    };
+    return positions[servePosition] || ['Неизвестно', 'Неизвестно'];
+}
+
+// Фильтр журнала по сету
+function filterMatchLog() {
+    const setFilter = document.getElementById('logSetFilter').value;
+    const matchId = document.getElementById('matchId').value;
+    
+    if (setFilter) {
+        loadMatchLog(matchId, parseInt(setFilter));
+    } else {
+        loadMatchLog(matchId);
+    }
+}
+
+// Показать кнопку журнала при открытии формы результата
+function showMatchLogButton() {
+    const matchId = document.getElementById('matchId').value;
+    const logBtn = document.getElementById('matchLogBtn');
+    
+    if (matchId && logBtn) {
+        logBtn.style.display = 'inline-block';
+    }
+}
+
+// Скрыть кнопку журнала при закрытии формы результата
+function hideMatchLogButton() {
+    const logBtn = document.getElementById('matchLogBtn');
+    if (logBtn) {
+        logBtn.style.display = 'none';
+    }
 }
 </script>
 

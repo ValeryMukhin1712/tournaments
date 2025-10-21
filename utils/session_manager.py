@@ -66,14 +66,14 @@ class SessionManager:
         try:
             logger.info(f"Начинаем создание сессии для {email}")
             
-            # Проверяем наличие активной сессии
-            has_active, active_session = self.check_active_session(email)
-            logger.info(f"Проверка активной сессии для {email}: has_active={has_active}")
-            
-            if has_active:
-                # Завершаем предыдущую сессию
-                logger.info(f"Завершаем предыдущую сессию для {email}")
-                self.terminate_session_by_admin(email, 'system', 'duplicate_login')
+            # ВРЕМЕННО ОТКЛЮЧЕНО: Проверяем наличие активной сессии
+            # has_active, active_session = self.check_active_session(email)
+            # logger.info(f"Проверка активной сессии для {email}: has_active={has_active}")
+            # 
+            # if has_active:
+            #     # Завершаем предыдущую сессию
+            #     logger.info(f"Завершаем предыдущую сессию для {email}")
+            #     self.terminate_session_by_admin(email, 'system', 'duplicate_login')
             
             # Генерируем новый токен
             session_token = self.generate_session_token()
