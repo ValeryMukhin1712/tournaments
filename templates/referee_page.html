@@ -2274,6 +2274,85 @@
             }
         }
         
+        function saveToTournament() {
+            if (isSaving) {
+                console.log('[Referee] saveToTournament(): уже выполняется, пропускаем');
+                return;
+            }
+            isSaving = true;
+            
+            console.log('[Referee] saveToTournament(): старт');
+            if (!isMatchMode) {
+                alert('Эта функция доступна только в режиме матча');
+                isSaving = false;
+                return;
+            }
+            
+            if (!window.matchId) {
+                alert('ID матча не найден. Убедитесь, что вы открыли страницу судейства из турнирной таблицы.');
+                isSaving = false;
+                return;
+            }
+            
+            const currentSetNumber = window.templateSetNumber || window.setNumber;
+            
+            // Формируем данные для сохранения
+            const sets = [];
+            
+            // Добавляем текущий сет
+            sets.push({
+                set_number: currentSetNumber,
+                score1: window.scoreLeft,
+                score2: window.scoreRight,
+                completed: true
+            });
+            
+            // Если есть завершенные сеты, добавляем их
+            if (window.completedSets) {
+                window.completedSets.forEach((set, index) => {
+                    sets.push({
+                        set_number: index + 1,
+                        score1: set.scoreLeft,
+                        score2: set.scoreRight,
+                        completed: true
+                    });
+                });
+            }
+            
+            const resultData = {
+                sets: sets,
+                matchId: window.matchId
+            };
+            
+            console.log('[Referee] saveToTournament(): отправляем данные', resultData);
+            
+            // Отправляем запрос на сохранение
+            fetch(`/api/matches/${window.matchId}/save-referee-result`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(resultData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Результат успешно сохранен в турнир!');
+                    // Закрываем окно судейства
+                    try { window.close(); } catch(_) {}
+                } else {
+                    alert('Ошибка при сохранении: ' + (data.error || 'Неизвестная ошибка'));
+                }
+                isSaving = false;
+            })
+            .catch(error => {
+                console.error('[Referee] Ошибка при сохранении в турнир:', error);
+                alert('Ошибка при сохранении результата в турнир');
+                isSaving = false;
+            });
+        }
+        
         // Переменная для отслеживания режима просмотра
         let isViewMode = false;
         let originalScoreLeft = 0;

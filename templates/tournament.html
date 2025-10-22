@@ -780,7 +780,7 @@
         <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mb-5">
 
                      {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
-                     {% set has_active_matches = matches | selectattr('status', 'in', ['завершен', 'в процессе', 'играют']) | list | length > 0 %}
+                     {% set has_active_matches = matches | selectattr('status', 'in', ['завершен', 'в_процессе', 'играют']) | list | length > 0 %}
                      {% if not has_active_matches %}
                      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
                          <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
@@ -971,10 +971,12 @@
                                             <div class="d-flex flex-column align-items-center" 
                                                  onclick="openMatchResultModal({{ cell_data.match_id }}, '{{ p1.name }}', '{{ p2.name }}')" 
                                                  style="cursor: pointer;" 
-                                                 title="Нажмите для редактирования результата">
+                                                 title="Нажмите для редактирования результата. Match: {{ cell_data.match_id }}, Sets: {{ cell_data.sets_details }}">
                                                 <span class="badge bg-warning text-dark mb-1" style="background-color: #ffc107 !important;">{{ cell_data.value }}</span>
                                                 {% if cell_data.sets_details %}
                                                 <small class="text-muted">{{ cell_data.sets_details }}</small>
+                                                {% else %}
+                                                <!-- DEBUG: sets_details пусто для матча {{ cell_data.match_id }} -->
                                                 {% endif %}
                                             </div>
                                         {% elif cell_data.type == 'upcoming' %}
@@ -1198,7 +1200,7 @@
                                                 {% else %}
                                                     <span class="badge bg-danger text-white">{{ match.score }}</span>
                                                 {% endif %}
-                                            {% elif match.status in ['в процессе', 'играют'] %}
+                                            {% elif match.status in ['в_процессе', 'играют'] %}
                                                 <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
                                             {% else %}
                                                 <span class="badge bg-warning text-dark">{{ match.score }}</span>
@@ -1215,7 +1217,7 @@
                                             {% if match.status == 'завершен' %}bg-success
                                             {% elif match.status == 'запланирован' %}bg-info
                                             {% else %}bg-secondary{% endif %}"
-                                            {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
+                                            {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
                                             {{ match.status }}
                                         </span>
                                     </td>
@@ -1303,7 +1305,9 @@
                                         match: 'true',
                                         set: String(setNumber),
                                         match_id: matchId,
-                                        clear: 'true'
+                                        clear: 'true',
+                                        team1_name: participant1,
+                                        team2_name: participant2
                                     });
                                     const s1El = document.getElementById('set' + setNumber + 'Score1');
                                     const s2El = document.getElementById('set' + setNumber + 'Score2');
@@ -1313,7 +1317,8 @@
                                         params.append('score1', s1);
                                         params.append('score2', s2);
                                     }
-                                    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
+                                    const refereeUrl = getRefereeUrl(params);
+                                    if (!refereeUrl) return;
                                     const w = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
                                     window.refereeWindow = w;
                                 } catch(e) {
@@ -1333,7 +1338,9 @@
                                     const params = new URLSearchParams({
                                         p1: participant1,
                                         p2: participant2,
-                                        tournament: tournamentName
+                                        tournament: tournamentName,
+                                        team1_name: participant1,
+                                        team2_name: participant2
                                     });
                                     const s1El = document.getElementById('set1Score1');
                                     const s2El = document.getElementById('set1Score2');
@@ -1343,7 +1350,8 @@
                                         params.append('score1', s1);
                                         params.append('score2', s2);
                                     }
-                                    const refereeUrl = `/referee?${params.toString()}&v=${Date.now()}`;
+                                    const refereeUrl = getRefereeUrl(params);
+                                    if (!refereeUrl) return;
                                     const w = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
                                     window.refereeWindow = w;
                                 } catch(e) {
@@ -1671,6 +1679,25 @@
         // Версия скрипта для принудительного обновления кэша
         console.log('Загружен скрипт валидации v2.5 - исправлено условие для 12:11');
 
+        // Функция для определения URL страницы судейства в зависимости от вида спорта
+        function getRefereeUrl(params) {
+            const sportType = '{{ tournament.sport_type }}'.toLowerCase();
+            let baseUrl;
+            
+            if (sportType === 'бадминтон' || sportType === 'badminton') {
+                baseUrl = '/referee-badminton';
+            } else if (sportType === 'волейбол' || sportType === 'volleyball') {
+                baseUrl = '/referee-volleyball';
+            } else if (sportType === 'пинг-понг' || sportType === 'pingpong' || sportType === 'настольный теннис') {
+                baseUrl = '/referee-pingpong';
+            } else {
+                alert('Страница в разработке');
+                return null;
+            }
+            
+            return `${baseUrl}?${params.toString()}&v=${Date.now()}`;
+        }
+
 // Инициализация сортировки таблицы статистики
 document.addEventListener('DOMContentLoaded', function() {
     initializeTableSorting();
@@ -1842,10 +1869,12 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
         return;
     }
     
-    // Получаем данные матча
-    fetch(`/api/matches/${matchId}`, {
+    // Получаем данные матча (с защитой от кеширования)
+    fetch(`/api/matches/${matchId}?_t=${Date.now()}`, {
+        cache: 'no-store',
         headers: {
-            'X-CSRFToken': getCSRFToken()
+            'X-CSRFToken': getCSRFToken(),
+            'Cache-Control': 'no-cache'
         }
     })
         .then(response => response.json())
@@ -1854,9 +1883,12 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                 // Заполняем сеты данными из матча
                 const defaultScore = {{ tournament.points_to_win }};
                 
-                // Если есть существующие результаты, заполняем их
-                if (data.match.score1 !== null && data.match.score2 !== null) {
-                    console.log('Загружаем существующие результаты:', data.match.score1, ':', data.match.score2);
+                // Если есть существующие результаты сетов, заполняем их
+                // Проверяем наличие данных хотя бы в одном сете
+                if (data.match.set1_score1 !== null || data.match.set1_score2 !== null || 
+                    data.match.set2_score1 !== null || data.match.set2_score2 !== null ||
+                    data.match.set3_score1 !== null || data.match.set3_score2 !== null) {
+                    console.log('Загружаем существующие результаты сетов');
                     console.log('Результат матча:', data.match.score);
                     console.log('Выигранные сеты:', data.match.sets_won_1, ':', data.match.sets_won_2);
                     console.log('Match participant1_id:', data.match.participant1_id, 'participant2_id:', data.match.participant2_id);
@@ -1878,10 +1910,22 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                     console.log('Сохранено состояние needSwap:', window.matchNeedSwap);
                     
                     // Заполняем все сеты данными из базы с учетом порядка участников
+                    console.log('[Form] Сет 1 из БД: set1_score1=', data.match.set1_score1, 'set1_score2=', data.match.set1_score2);
+                    console.log('[Form] Сет 2 из БД: set2_score1=', data.match.set2_score1, 'set2_score2=', data.match.set2_score2);
+                    console.log('[Form] Сет 3 из БД: set3_score1=', data.match.set3_score1, 'set3_score2=', data.match.set3_score2);
+                    
                     if (needSwap) {
                         // Участник 1 в форме = participant2 в матче, меняем местами
-                        document.getElementById('set1Score1').value = data.match.set1_score2 || data.match.score2 || defaultScore;
-                        document.getElementById('set1Score2').value = data.match.set1_score1 || data.match.score1 || defaultScore;
+                        // Используем defaultScore только если оба значения null
+                        if (data.match.set1_score1 !== null && data.match.set1_score2 !== null) {
+                            document.getElementById('set1Score1').value = data.match.set1_score2;
+                            document.getElementById('set1Score2').value = data.match.set1_score1;
+                            console.log('[Form] Сет 1 (swap): заполнено', data.match.set1_score2, ':', data.match.set1_score1);
+                        } else {
+                            document.getElementById('set1Score1').value = defaultScore;
+                            document.getElementById('set1Score2').value = defaultScore;
+                            console.log('[Form] Сет 1 (swap): defaultScore', defaultScore, ':', defaultScore);
+                        }
                         
                         if (data.match.set2_score1 !== null && data.match.set2_score2 !== null) {
                             document.getElementById('set2Score1').value = data.match.set2_score2;
@@ -1900,8 +1944,16 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                         }
                     } else {
                         // Участник 1 в форме = participant1 в матче, оставляем как есть
-                        document.getElementById('set1Score1').value = data.match.set1_score1 || data.match.score1 || defaultScore;
-                        document.getElementById('set1Score2').value = data.match.set1_score2 || data.match.score2 || defaultScore;
+                        // Используем defaultScore только если оба значения null (матч не начат)
+                        if (data.match.set1_score1 !== null && data.match.set1_score2 !== null) {
+                            document.getElementById('set1Score1').value = data.match.set1_score1;
+                            document.getElementById('set1Score2').value = data.match.set1_score2;
+                            console.log('[Form] Сет 1 (no swap): заполнено', data.match.set1_score1, ':', data.match.set1_score2);
+                        } else {
+                            document.getElementById('set1Score1').value = defaultScore;
+                            document.getElementById('set1Score2').value = defaultScore;
+                            console.log('[Form] Сет 1 (no swap): defaultScore', defaultScore, ':', defaultScore);
+                        }
                         
                         if (data.match.set2_score1 !== null && data.match.set2_score2 !== null) {
                             document.getElementById('set2Score1').value = data.match.set2_score1;
@@ -3914,7 +3966,9 @@ window.openRefereePage = function openRefereePage() {
     const paramsPage = new URLSearchParams({
         p1: participant1,
         p2: participant2,
-        tournament: tournamentName
+        tournament: tournamentName,
+        team1_name: participant1,
+        team2_name: participant2
     });
     
     // Добавляем счёт, если он отличается от значения по умолчанию (21:21 для бадминтона)
@@ -3928,7 +3982,8 @@ window.openRefereePage = function openRefereePage() {
         console.log(`Счёт для первого сета равен значению по умолчанию (${defaultScore}:${defaultScore}), не передаем`);
     }
     
-    const refereeUrlPage = `/referee?${paramsPage.toString()}&v=${Date.now()}`;
+    const refereeUrlPage = getRefereeUrl(paramsPage);
+    if (!refereeUrlPage) return;
     console.log('Открываем Referee по URL:', refereeUrlPage);
     
             // Открываем в новом окне с возможностью изменения размера
@@ -4025,14 +4080,21 @@ window.openRefereeForSet = function openRefereeForSet(setNumber) {
         match: 'true',
         set: setNumber,
         match_id: matchId,
-        clear: 'true'
+        clear: 'true',
+        team1_name: participant1,
+        team2_name: participant2
     });
     
     // Получаем реальный счёт из базы данных, а не из полей формы
     console.log(`[Parent] 🔍 Получаем реальный счёт из базы данных для сета ${setNumber}`);
     
-    // Получаем данные матча из базы
-    fetch(`/api/matches/${matchId}`)
+    // Получаем данные матча из базы (с защитой от кеширования)
+    fetch(`/api/matches/${matchId}?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+            'Cache-Control': 'no-cache'
+        }
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success && data.match) {
@@ -4068,8 +4130,10 @@ window.openRefereeForSet = function openRefereeForSet(setNumber) {
                     paramsSet.append('score2', currentScore2);
                 }
                 
-                // Открываем страницу Судейство
-                const refereeUrl = `/referee?${paramsSet.toString()}&v=${Date.now()}`;
+                // Определяем URL страницы судейства
+                const refereeUrl = getRefereeUrl(paramsSet);
+                if (!refereeUrl) return;
+                
                 console.log('Открываем Referee в режиме матча для сета', setNumber, ':', refereeUrl);
                 
                 // Открываем в новом окне (однократное объявление)
@@ -5485,6 +5549,10 @@ function refreshCSRFToken() {
 
 // Показать журнал матча
 function showMatchLog() {
+    // Временное сообщение о разработке
+    alert('Страница в разработке');
+    return;
+    
     const matchId = document.getElementById('matchId').value;
     if (!matchId) {
         alert('ID матча не найден');

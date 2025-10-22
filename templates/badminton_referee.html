@@ -806,6 +806,43 @@
                 newMatch();
             }
         }
+        
+        // Обработка URL параметров при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const team1Name = urlParams.get('team1_name');
+            const team2Name = urlParams.get('team2_name');
+            
+            console.log('[Badminton] URL параметры:', window.location.search);
+            console.log('[Badminton] matchId из URL:', matchId);
+            console.log('[Badminton] Команда 1:', team1Name);
+            console.log('[Badminton] Команда 2:', team2Name);
+            
+            // Обновляем названия команд, если они переданы
+            if (team1Name && team2Name) {
+                updateTeamNames(team1Name, team2Name);
+            }
+        });
+        
+        // Функция для обновления названий команд
+        function updateTeamNames(team1Name, team2Name) {
+            console.log('[Badminton] Обновляем названия команд:', team1Name, 'vs', team2Name);
+            
+            // Обновляем заголовки команд
+            const team1Title = document.querySelector('.team-a h3');
+            const team2Title = document.querySelector('.team-b h3');
+            
+            if (team1Title) {
+                team1Title.textContent = team1Name;
+                console.log('[Badminton] Обновлен заголовок команды A:', team1Name);
+            }
+            
+            if (team2Title) {
+                team2Title.textContent = team2Name;
+                console.log('[Badminton] Обновлен заголовок команды B:', team2Name);
+            }
+        }
     </script>
 </body>
 </html>

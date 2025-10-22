@@ -99,7 +99,7 @@ def calculate_participant_ranking(participants, matches, tournament):
     
     # Обрабатываем все завершенные матчи и матчи в процессе
     for match in matches:
-        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+        if match.status in ['завершен', 'в_процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
             p1_id = match.participant1_id
             p2_id = match.participant2_id
             
@@ -653,7 +653,12 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
 
     @app.route('/referee')
     def referee_page():
-        """Отдельная страница для Referee приложения с поддержкой двух режимов"""
+        """Страница выбора вида спорта для судейства"""
+        return render_template('referee_sport_selection.html')
+    
+    @app.route('/referee-badminton')
+    def referee_badminton():
+        """Страница судейства бадминтона"""
         # Получаем параметры из URL
         clear_data = request.args.get('clear', 'false').lower() == 'true'
         match_mode = request.args.get('match', 'false').lower() == 'true'
@@ -678,6 +683,16 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              match_mode=match_mode,
                              set_number=set_number,
                              match_id=match_id)
+    
+    @app.route('/referee-volleyball')
+    def referee_volleyball():
+        """Страница судейства волейбола"""
+        return render_template('referee_volleyball.html')
+    
+    @app.route('/referee-pingpong')
+    def referee_pingpong():
+        """Страница судейства пинг-понга"""
+        return render_template('referee_pingpong.html')
 
 
     
@@ -1862,37 +1877,49 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 app.logger.info(f"Матч {match.id}: статус='{match.status}', sets_won_1={match.sets_won_1}, sets_won_2={match.sets_won_2}, set1_score1={match.set1_score1}, set1_score2={match.set1_score2}")
                 
                 # Проверяем, попадает ли статус в нужные значения
-                if match.status in ['завершен', 'в процессе', 'играют']:
+                if match.status in ['завершен', 'в_процессе', 'играют']:
                     app.logger.info(f"Матч {match.id}: статус '{match.status}' попадает в условие")
                 else:
                     app.logger.info(f"Матч {match.id}: статус '{match.status}' НЕ попадает в условие")
                 
-                if match.status in ['завершен', 'в процессе', 'играют']:
+                if match.status in ['завершен', 'в_процессе', 'играют']:
                     if match.sets_won_1 is not None and match.sets_won_2 is not None:
                         score = f"{match.sets_won_1}:{match.sets_won_2}"
                     elif match.set1_score1 is not None and match.set1_score2 is not None:
                         # Если нет sets_won, но есть детали сетов, считаем выигранные сеты
+                        # с учетом правил волейбола (25+ очков и разница >= 2)
                         sets_won_1 = 0
                         sets_won_2 = 0
+                        
+                        # Проверка 1-го сета
                         if match.set1_score1 is not None and match.set1_score2 is not None:
-                            if match.set1_score1 > match.set1_score2:
+                            s1, s2 = match.set1_score1, match.set1_score2
+                            # Волейбол: сет выигран при 25+ очках и разнице >= 2
+                            if s1 >= 25 and s1 - s2 >= 2:
                                 sets_won_1 += 1
-                            elif match.set1_score2 > match.set1_score1:
+                            elif s2 >= 25 and s2 - s1 >= 2:
                                 sets_won_2 += 1
+                        
+                        # Проверка 2-го сета
                         if match.set2_score1 is not None and match.set2_score2 is not None:
-                            if match.set2_score1 > match.set2_score2:
+                            s1, s2 = match.set2_score1, match.set2_score2
+                            if s1 >= 25 and s1 - s2 >= 2:
                                 sets_won_1 += 1
-                            elif match.set2_score2 > match.set2_score1:
+                            elif s2 >= 25 and s2 - s1 >= 2:
                                 sets_won_2 += 1
+                        
+                        # Проверка 3-го сета (решающий - до 15 очков)
                         if match.set3_score1 is not None and match.set3_score2 is not None:
-                            if match.set3_score1 > match.set3_score2:
+                            s1, s2 = match.set3_score1, match.set3_score2
+                            if s1 >= 15 and s1 - s2 >= 2:
                                 sets_won_1 += 1
-                            elif match.set3_score2 > match.set3_score1:
+                            elif s2 >= 15 and s2 - s1 >= 2:
                                 sets_won_2 += 1
+                        
                         score = f"{sets_won_1}:{sets_won_2}"
                     else:
                         # Для матчей в процессе без данных - показываем "0:0"
-                        if match.status in ['в процессе', 'играют']:
+                        if match.status in ['в_процессе', 'играют']:
                             score = "0:0"
                 
                 # Отладочная информация для счета
@@ -1901,7 +1928,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 # Формируем детали сетов (без номеров сетов) - только для завершенных и в процессе
                 sets_details = None
                 points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
-                if match.status in ['завершен', 'в процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
+                if match.status in ['завершен', 'в_процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
                     sets_list = []
                     if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
@@ -2084,6 +2111,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             # Формируем детали сетов (без номеров)
                             sets_details = None
                             points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
+                            logger.info(f"[Chessboard] Матч {match.id}: points_to_win={points_to_win}, set1=({match.set1_score1}:{match.set1_score2}), set2=({match.set2_score1}:{match.set2_score2}), set3=({match.set3_score1}:{match.set3_score2})")
                             if match.set1_score1 is not None and match.set1_score2 is not None:
                                 sets_list = []
                                 if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
@@ -2091,18 +2119,22 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
                                     else:
                                         sets_list.append(f"{match.set1_score2}:{match.set1_score1}")
+                                    logger.info(f"[Chessboard] Матч {match.id}: добавлен set1")
                                 if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                                     if match.participant1_id == participant.id:
                                         sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
                                     else:
                                         sets_list.append(f"{match.set2_score2}:{match.set2_score1}")
+                                    logger.info(f"[Chessboard] Матч {match.id}: добавлен set2")
                                 if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                                     if match.participant1_id == participant.id:
                                         sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                                     else:
                                         sets_list.append(f"{match.set3_score2}:{match.set3_score1}")
+                                    logger.info(f"[Chessboard] Матч {match.id}: добавлен set3")
                                 if sets_list:
                                     sets_details = ", ".join(sets_list)
+                                    logger.info(f"[Chessboard] Матч {match.id}: sets_details='{sets_details}'")
                             
                             if is_match_completed:
                                 # Матч действительно завершен - показываем результат
@@ -2121,6 +2153,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'match_id': match.id,
                                     'sets_details': sets_details
                                 }
+                                logger.info(f"[Chessboard] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
                         elif match.status in ['в процессе', 'играют']:
                             # Матч в процессе - показываем счет если есть
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -2133,6 +2166,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 # Формируем детали сетов (без номеров)
                                 sets_details = None
                                 points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
+                                logger.info(f"[Chessboard-2] Матч {match.id}: points_to_win={points_to_win}, set1=({match.set1_score1}:{match.set1_score2}), set2=({match.set2_score1}:{match.set2_score2}), set3=({match.set3_score1}:{match.set3_score2})")
                                 if match.set1_score1 is not None and match.set1_score2 is not None:
                                     sets_list = []
                                     if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
@@ -2140,18 +2174,22 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                             sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
                                         else:
                                             sets_list.append(f"{match.set1_score2}:{match.set1_score1}")
+                                        logger.info(f"[Chessboard-2] Матч {match.id}: добавлен set1")
                                     if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                                         if match.participant1_id == participant.id:
                                             sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
                                         else:
                                             sets_list.append(f"{match.set2_score2}:{match.set2_score1}")
+                                        logger.info(f"[Chessboard-2] Матч {match.id}: добавлен set2")
                                     if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                                         if match.participant1_id == participant.id:
                                             sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                                         else:
                                             sets_list.append(f"{match.set3_score2}:{match.set3_score1}")
+                                        logger.info(f"[Chessboard-2] Матч {match.id}: добавлен set3")
                                     if sets_list:
                                         sets_details = ", ".join(sets_list)
+                                        logger.info(f"[Chessboard-2] Матч {match.id}: sets_details='{sets_details}'")
                                 
                                 chessboard[participant.id][other_participant.id] = {
                                     'type': 'in_progress',
@@ -2159,6 +2197,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'match_id': match.id,
                                     'sets_details': sets_details
                                 }
+                                logger.info(f"[Chessboard-2] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
                             else:
                                 # Нет счета - показываем "В процессе"
                                 chessboard[participant.id][other_participant.id] = {
@@ -2408,13 +2447,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         score = f"{sets_won_1}:{sets_won_2}"
                     else:
                         # Для матчей в процессе без данных - показываем "0:0"
-                        if match.status in ['в процессе', 'играют']:
+                        if match.status in ['в_процессе', 'играют']:
                             score = "0:0"
                 
                 # Формируем детали сетов (без номеров сетов) - только для завершенных и в процессе
                 sets_details = None
                 points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
-                if match.status in ['завершен', 'в процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
+                if match.status in ['завершен', 'в_процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
                     sets_list = []
                     if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
@@ -2638,6 +2677,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'match_id': match.id,
                                     'sets_details': sets_details
                                 }
+                                logger.info(f"[Chessboard] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
                         elif match.status in ['в процессе', 'играют']:
                             # Матч в процессе
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -2675,6 +2715,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'match_id': match.id,
                                     'sets_details': sets_details
                                 }
+                                logger.info(f"[Chessboard-2] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
                             else:
                                 # Нет счета - показываем "В процессе"
                                 chessboard[participant.id][other_participant.id] = {
@@ -2935,6 +2976,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'match_id': match.id,
                                     'sets_details': sets_details
                                 }
+                                logger.info(f"[Chessboard] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
                         elif match.status in ['в процессе', 'играют']:
                             # Матч в процессе
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
@@ -2962,6 +3004,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'match_id': match.id,
                                     'sets_details': sets_details
                                 }
+                                logger.info(f"[Chessboard-2] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
                             else:
                                 # Нет счета - показываем "В процессе"
                                 chessboard[participant.id][other_participant.id] = {

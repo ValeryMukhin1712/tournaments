@@ -221,13 +221,13 @@
                                                             {% else %}
                                                                 <span class="badge bg-danger text-white">{{ match.score }}</span>
                                                             {% endif %}
-                                                        {% elif match.status in ['в процессе', 'играют'] %}
+                                                        {% elif match.status in ['в_процессе', 'играют'] %}
                                                             <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
                                                         {% else %}
                                                             <span class="badge bg-warning text-dark">{{ match.score }}</span>
                                                         {% endif %}
                                                         {% if match.sets_details %}
-                                                            <br><small class="text-muted" {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
+                                                            <br><small class="text-muted" {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
                                                         {% endif %}
                                                     {% else %}
                                                         <span class="text-muted">—</span>
@@ -238,7 +238,7 @@
                                                         {% if match.status == 'завершен' %}bg-success
                                                         {% elif match.status == 'запланирован' %}bg-info
                                                         {% else %}bg-secondary{% endif %}"
-                                                        {% if match.status in ['в процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
+                                                        {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
                                                         {{ match.status }}
                                                     </span>
                                                 </td>

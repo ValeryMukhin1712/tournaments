@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, date, time
 import logging
 from flask_wtf.csrf import CSRFProtect
+from routes.main import update_tournament_status
 
 logger = logging.getLogger(__name__)
 
@@ -3109,3 +3110,127 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при добавлении записи журнала: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при добавлении записи журнала'}), 500
+
+    @app.route('/api/matches/<int:match_id>/save-referee-result', methods=['POST'])
+    def save_referee_result(match_id):
+        """Сохранение результата матча из страницы судейства"""
+        from flask import session
+        try:
+            # CSRF из заголовка
+            csrf_token = request.headers.get('X-CSRFToken')
+            if not csrf_token:
+                return jsonify({'success': False, 'error': 'Отсутствует CSRF токен'}), 400
+            
+            # Проверяем CSRF токен
+            try:
+                from flask_wtf.csrf import validate_csrf
+                validate_csrf(csrf_token)
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем данные из запроса
+            data = request.get_json()
+            if not data:
+                return jsonify({'success': False, 'error': 'Отсутствуют данные'}), 400
+            
+            # Находим матч
+            match = Match.query.get(match_id)
+            if not match:
+                return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Получаем турнир для настроек
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Обновляем результаты матча
+            sets_data = data.get('sets', [])
+            sets_won_1 = 0
+            sets_won_2 = 0
+            
+            # Логируем полученные данные для диагностики
+            logger.info(f"[save-referee-result] Матч {match_id}: получены данные sets_data = {sets_data}")
+            logger.info(f"[save-referee-result] Матч {match_id}: полный data = {data}")
+            
+            # Обрабатываем каждый сет
+            for set_data in sets_data:
+                set_number = set_data.get('set_number', 1)
+                score1 = set_data.get('score1', 0)
+                score2 = set_data.get('score2', 0)
+                completed = set_data.get('completed', False)
+                
+                logger.info(f"[save-referee-result] Обработка сета {set_number}: score1={score1}, score2={score2}, completed={completed}")
+                
+                # Сохраняем счет сета
+                if set_number == 1:
+                    match.set1_score1 = score1
+                    match.set1_score2 = score2
+                elif set_number == 2:
+                    match.set2_score1 = score1
+                    match.set2_score2 = score2
+                elif set_number == 3:
+                    match.set3_score1 = score1
+                    match.set3_score2 = score2
+                
+                # Определяем победителя сета по правилам волейбола
+                # Сет выигран при счете 25+ (или 15+ для 3-го сета) и разнице >= 2
+                min_score = 15 if (set_number == 3 and tournament.sets_to_win == 2) else 25
+                
+                logger.info(f"[save-referee-result] Сет {set_number}: min_score={min_score}, проверка победителя...")
+                
+                if score1 >= min_score and score1 - score2 >= 2:
+                    sets_won_1 += 1
+                    logger.info(f"[save-referee-result] Сет {set_number}: победила команда 1, sets_won_1={sets_won_1}")
+                elif score2 >= min_score and score2 - score1 >= 2:
+                    sets_won_2 += 1
+                    logger.info(f"[save-referee-result] Сет {set_number}: победила команда 2, sets_won_2={sets_won_2}")
+                else:
+                    logger.info(f"[save-referee-result] Сет {set_number}: не завершен (недостаточно очков или разницы)")
+            
+            # Сохраняем количество выигранных сетов
+            match.sets_won_1 = sets_won_1
+            match.sets_won_2 = sets_won_2
+            
+            # Определяем победителя матча
+            sets_to_win = tournament.sets_to_win if tournament.sets_to_win else 2
+            if sets_won_1 >= sets_to_win:
+                match.winner_id = match.participant1_id
+                match.status = 'завершен'
+            elif sets_won_2 >= sets_to_win:
+                match.winner_id = match.participant2_id
+                match.status = 'завершен'
+            else:
+                match.winner_id = None
+                match.status = 'в_процессе'
+            
+            # Сохраняем общий результат в формате "2:1"
+            match.score = f"{sets_won_1}:{sets_won_2}"
+            
+            logger.info(f"[save-referee-result] ПЕРЕД commit: set1=({match.set1_score1}:{match.set1_score2}), set2=({match.set2_score1}:{match.set2_score2}), set3=({match.set3_score1}:{match.set3_score2})")
+            
+            # Сохраняем изменения
+            db.session.commit()
+            
+            logger.info(f"[save-referee-result] ПОСЛЕ commit: set1=({match.set1_score1}:{match.set1_score2}), set2=({match.set2_score1}:{match.set2_score2}), set3=({match.set3_score1}:{match.set3_score2})")
+            
+            # Проверяем, что данные действительно сохранились
+            match_check = Match.query.get(match_id)
+            logger.info(f"[save-referee-result] Проверка из БД после commit: set1=({match_check.set1_score1}:{match_check.set1_score2}), set2=({match_check.set2_score1}:{match_check.set2_score2}), set3=({match_check.set3_score1}:{match_check.set3_score2})")
+            
+            # Обновляем статус турнира
+            participants = Participant.query.filter_by(tournament_id=tournament.id).all()
+            matches = Match.query.filter_by(tournament_id=tournament.id).all()
+            update_tournament_status(tournament, participants, matches, db)
+            
+            # Еще одна проверка ПОСЛЕ update_tournament_status
+            match_final = Match.query.get(match_id)
+            logger.info(f"[save-referee-result] Финальная проверка: set1=({match_final.set1_score1}:{match_final.set1_score2}), set2=({match_final.set2_score1}:{match_final.set2_score2}), set3=({match_final.set3_score1}:{match_final.set3_score2})")
+            
+            logger.info(f"Результат матча {match_id} сохранен из судейства: {match.score}")
+            return jsonify({'success': True, 'message': 'Результат сохранен'}), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при сохранении результата из судейства: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при сохранении результата'}), 500
