@@ -56,8 +56,8 @@ log_info "✓ Система обновлена"
 # 2. Установка необходимых пакетов
 log_info "Шаг 2/8: Установка необходимых пакетов..."
 apt install -y \
-    python3.11 \
-    python3.11-venv \
+    python3 \
+    python3-venv \
     python3-pip \
     nginx \
     git \
