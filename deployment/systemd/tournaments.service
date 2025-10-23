@@ -1,0 +1,33 @@
+[Unit]
+Description=Quick Score Tournaments - Flask Application
+After=network.target
+
+[Service]
+Type=notify
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/app
+Environment="PATH=/home/deploy/app/venv/bin"
+EnvironmentFile=/home/deploy/app/.env
+
+# Gunicorn запуск
+ExecStart=/home/deploy/app/venv/bin/gunicorn \
+    --bind 0.0.0.0:5000 \
+    --workers 4 \
+    --threads 2 \
+    --timeout 120 \
+    --access-logfile /home/deploy/logs/access.log \
+    --error-logfile /home/deploy/logs/error.log \
+    --log-level info \
+    app:app
+
+# Перезапуск при сбое
+Restart=always
+RestartSec=10
+
+# Ограничения ресурсов (опционально)
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
+
