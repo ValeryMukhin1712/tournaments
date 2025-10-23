@@ -6,16 +6,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="screen-orientation" content="landscape">
     <meta name="theme-color" content="#2E7D32">
     <meta name="apple-mobile-web-app-title" content="Судейство">
     <meta name="application-name" content="Судейство">
     <meta name="msapplication-TileColor" content="#2E7D32">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
-    <!-- Принудительный горизонтальный режим для мобильных устройств -->
-    <meta name="screen-orientation" content="landscape">
-    <meta name="orientation" content="landscape">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/static/referee/manifest.json">
@@ -25,6 +22,9 @@
     <link rel="apple-touch-icon" href="/static/referee/icon-192.png">
     
     <title>Судейство: {{ tournament_name }}</title>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
         * { 
@@ -77,29 +77,61 @@
             }
         }
         
+        /* Сообщение о необходимости повернуть устройство */
+        .orientation-warning {
+            display: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            z-index: 10000 !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: column !important;
+            color: white !important;
+            text-align: center !important;
+            padding: 20px !important;
+            writing-mode: horizontal-tb !important;
+            text-orientation: mixed !important;
+        }
+        
+        .orientation-warning i {
+            font-size: 4rem !important;
+            margin-bottom: 20px !important;
+            animation: rotate-icon 2s infinite !important;
+            display: inline-block !important;
+        }
+        
+        @keyframes rotate-icon {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        
+        .orientation-warning h2 {
+            font-size: 1.5rem !important;
+            margin-bottom: 10px !important;
+            color: white !important;
+            writing-mode: horizontal-tb !important;
+        }
+        
+        .orientation-warning p {
+            font-size: 1rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            writing-mode: horizontal-tb !important;
+        }
+        
         /* Скрываем элементы при вертикальной ориентации на мобильных */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             .orientation-warning {
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px;
-                text-align: center;
-                z-index: 10000;
+                display: flex !important;
             }
         }
         
         @media screen and (max-width: 768px) and (orientation: landscape) {
             .orientation-warning {
-                display: none;
+                display: none !important;
             }
         }
         
@@ -969,12 +1001,12 @@
     </style>
 </head>
 <body>
+    <!-- VERSION-2024-10-23-BADMINTON-UPDATED -->
     <!-- Предупреждение о необходимости поворота устройства -->
     <div class="orientation-warning" style="display: none;">
-        <div>
-            <h2>🔄 Поверните устройство</h2>
-            <p>Для лучшего использования страницы "Судейство"<br>поверните устройство в горизонтальное положение</p>
-        </div>
+        <i class="fas fa-mobile-alt"></i>
+        <h2>Поверните устройство</h2>
+        <p>Для удобства судейства используйте горизонтальную ориентацию экрана</p>
     </div>
     
     <div class="container">

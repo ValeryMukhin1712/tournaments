@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="screen-orientation" content="landscape">
     <title>Судья матча - Бадминтон</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -593,9 +596,74 @@
                 padding: 2px 3px;
             }
         }
+        
+        /* Сообщение о необходимости повернуть устройство */
+        .rotation-message {
+            display: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            z-index: 9999 !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: column !important;
+            color: white !important;
+            text-align: center !important;
+            padding: 20px !important;
+            writing-mode: horizontal-tb !important;
+            text-orientation: mixed !important;
+        }
+        
+        .rotation-message i {
+            font-size: 4rem !important;
+            margin-bottom: 20px !important;
+            animation: rotate-icon 2s infinite !important;
+            display: inline-block !important;
+        }
+        
+        @keyframes rotate-icon {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        
+        .rotation-message h2 {
+            font-size: 1.5rem !important;
+            margin-bottom: 10px !important;
+            color: white !important;
+            writing-mode: horizontal-tb !important;
+        }
+        
+        .rotation-message p {
+            font-size: 1rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            writing-mode: horizontal-tb !important;
+        }
+        
+        /* Скрываем контент и показываем сообщение в портретной ориентации на мобильных */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .rotation-message {
+                display: flex !important;
+            }
+            
+            .container-fluid,
+            .main-container {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- VERSION: 2024-10-23-12-00 UPDATED -->
+    <!-- Сообщение о необходимости повернуть устройство v2.0 -->
+    <div class="rotation-message" id="orientationMessage">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>Поверните устройство</h2>
+        <p>Для удобства судейства используйте горизонтальную ориентацию экрана</p>
+    </div>
+    
     <div class="container-fluid">
         <div class="main-container">
             <!-- Заголовок и выбор режима игры -->
