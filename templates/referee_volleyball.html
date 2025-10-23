@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="screen-orientation" content="landscape">
     <title>Судейство волейбола</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            background: linear-gradient(135deg, #2D5016 0%, #4A8234 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -26,24 +29,33 @@
         }
         
         .referee-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 107, 53, 0.3);
             max-width: 900px;
             width: 100%;
             text-align: center;
         }
         
+        h1 {
+            color: #2D5016;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
         .volleyball-court {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 3px solid #dc3545;
+            background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+            border: 4px solid #2D5016;
             border-radius: 15px;
-            padding: 30px;
+            padding: 40px;
             margin: 20px 0;
             position: relative;
+            box-shadow: 0 10px 30px rgba(45, 80, 22, 0.4);
         }
         
         .court-center-line {
@@ -57,8 +69,9 @@
             transform: translate(-50%, -50%);
             width: 4px;
             height: 60px;
-            background: #dc3545;
+            background: white;
             border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
         .team-section {
@@ -72,29 +85,69 @@
         
         .team-info {
             flex: 1;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 30px;
+            border-radius: 15px;
             margin: 0 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        /* Красная команда (A) */
-        .team-info.team-a { background: rgba(220, 53, 69, 0.1); }
-        .team-info.team-a .team-name { color: #dc3545; }
-        .team-info.team-a .score-display { color: #dc3545; }
-        /* Синяя команда (B) */
-        .team-info.team-b { background: rgba(0, 123, 255, 0.1); }
-        .team-info.team-b .team-name { color: #007bff; }
-        .team-info.team-b .score-display { color: #007bff; }
+        
+        .team-info:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .team-info:active {
+            transform: scale(0.98);
+        }
+        /* Оранжевая команда (A) */
+        .team-info.team-a { 
+            background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+            border: 3px solid #2D5016;
+        }
+        .team-info.team-a .team-name { 
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .team-info.team-a .score-display { 
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+        }
+        /* Зеленая команда (B) */
+        .team-info.team-b { 
+            background: linear-gradient(135deg, #4A8234 0%, #2D5016 100%);
+            border: 3px solid #FF6B35;
+        }
+        .team-info.team-b .team-name { 
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .team-info.team-b .score-display { 
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+        }
         
         .team-name {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .score-display {
-            font-size: 3rem;
+            font-size: 4rem;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 15px 0;
+        }
+        
+        .team-info .sets-info {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            margin-top: 10px;
         }
         
         .set-scores {
@@ -105,12 +158,21 @@
         }
         
         .set-score {
-            background: #dc3545;
+            background: linear-gradient(135deg, #FF8C42, #FF6B35);
             color: white;
             padding: 10px 20px;
             border-radius: 10px;
             font-weight: bold;
             min-width: 50px;
+            border: 2px solid #2D5016;
+            box-shadow: 0 3px 10px rgba(45, 80, 22, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .set-score.active {
+            border: 5px solid #2D5016;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(45, 80, 22, 0.5);
         }
         
         .control-buttons {
@@ -122,8 +184,8 @@
         }
         
         .btn-volleyball {
-            background: #dc3545;
-            border: none;
+            background: linear-gradient(135deg, #FF8C42, #FF6B35);
+            border: 2px solid #2D5016;
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
@@ -132,14 +194,13 @@
         }
         
         .btn-volleyball:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
         }
         
         .btn-volleyball-blue {
-            background: #0d6efd;
-            border: none;
+            background: linear-gradient(135deg, #4A8234, #2D5016);
+            border: 2px solid #FF6B35;
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
@@ -148,9 +209,8 @@
         }
         
         .btn-volleyball-blue:hover {
-            background: #0b5ed7;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(74, 130, 52, 0.4);
         }
         
         .btn-secondary-volleyball {
@@ -167,48 +227,28 @@
         }
         
         .match-info {
-            background: rgba(220, 53, 69, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
+            display: none; /* Полностью скрыли блок с заголовками */
         }
         
         .match-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #dc3545;
-            margin-bottom: 10px;
+            display: none; /* Скрыли заголовок */
         }
         
         .current-set {
-            font-size: 1.2rem;
-            color: #666;
+            display: none; /* Скрыли информацию о текущем сете */
         }
         
         .serve-indicator {
-            position: absolute;
-            top: 20px;
-            background: #28a745;
+            display: none; /* Скрываем старый индикатор, теперь используем иконку в названии команды */
+        }
+        
+        /* Иконка подачи рядом с названием команды */
+        .serve-icon {
+            display: inline-block;
+            font-size: 2.6rem;
             color: white;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
             animation: pulse 2s infinite;
-        }
-        /* Позиции индикатора подачи */
-        .serve-indicator.pos-left { left: 20px; right: auto; }
-        .serve-indicator.pos-right { right: 20px; left: auto; }
-        
-        .serve-indicator.team-a {
-            background: #dc3545;
-            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-        }
-        
-        .serve-indicator.team-b {
-            background: #007bff;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
         }
         
         @keyframes pulse {
@@ -221,19 +261,23 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #FF6B35;
             border-radius: 50px;
             padding: 10px 20px;
-            color: white;
+            color: #2D5016;
             text-decoration: none;
             transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #FF6B35;
             color: white;
             text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
         }
         
         @media (max-width: 768px) {
@@ -255,9 +299,206 @@
                 width: 200px;
             }
         }
+        
+        /* Сообщение о необходимости повернуть устройство */
+        .rotation-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2D5016 0%, #4A8234 100%);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .rotation-message i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: rotate-icon 2s infinite;
+        }
+        
+        @keyframes rotate-icon {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        
+        .rotation-message h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .rotation-message p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Скрываем контент и показываем сообщение в портретной ориентации на мобильных */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .rotation-message {
+                display: flex !important;
+            }
+            
+            .referee-container,
+            .back-button {
+                display: none !important;
+            }
+        }
+        
+        /* Оптимизация для горизонтальной ориентации смартфона */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                overflow-y: auto;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .referee-container {
+                min-height: auto;
+                padding: 5px;
+            }
+            
+            .referee-card {
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+            
+            .volleyball-court {
+                padding: 15px;
+                margin: 10px 0;
+                border-radius: 10px;
+                border: 3px solid #2D5016;
+            }
+            
+            .court-net {
+                height: 40px;
+                width: 3px;
+            }
+            
+            .team-section {
+                margin: 10px 0;
+                flex-direction: row !important;
+            }
+            
+            .team-info {
+                padding: 10px;
+                margin: 0 5px;
+                border-radius: 10px;
+                border: 2px solid #2D5016;
+            }
+            
+            .team-info.team-a {
+                border: 2px solid #2D5016;
+            }
+            
+            .team-info.team-b {
+                border: 2px solid #FF6B35;
+            }
+            
+            .team-name {
+                font-size: 0.8rem;
+                margin-bottom: 5px;
+                gap: 5px;
+            }
+            
+            .score-display {
+                font-size: 2rem;
+                margin: 5px 0;
+            }
+            
+            .team-info .sets-info {
+                font-size: 0.6rem;
+                margin-top: 5px;
+            }
+            
+            .serve-icon {
+                font-size: 1.3rem;
+            }
+            
+            .set-scores {
+                gap: 10px;
+                margin: 10px 0;
+                flex-wrap: wrap;
+            }
+            
+            .set-score {
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 0.7rem;
+                min-width: 30px;
+                border: 2px solid #2D5016;
+            }
+            
+            .set-score.active {
+                border: 3px solid #2D5016;
+                transform: scale(1.02);
+            }
+            
+            .control-buttons {
+                gap: 5px;
+                margin: 10px 0;
+                flex-wrap: wrap;
+            }
+            
+            .btn-volleyball,
+            .btn-volleyball-blue,
+            .btn-secondary-volleyball {
+                padding: 6px 10px;
+                border-radius: 6px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                border: 2px solid #2D5016;
+                white-space: nowrap;
+            }
+            
+            .btn-volleyball-blue {
+                border: 2px solid #FF6B35;
+            }
+            
+            .btn-volleyball i,
+            .btn-volleyball-blue i,
+            .btn-secondary-volleyball i {
+                font-size: 0.6rem;
+                margin-right: 3px;
+            }
+            
+            .back-button {
+                top: 5px;
+                left: 5px;
+                padding: 5px 10px;
+                border-radius: 20px;
+                font-size: 0.7rem;
+                border: 1px solid #FF6B35;
+            }
+            
+            .back-button i {
+                font-size: 0.6rem;
+                margin-right: 3px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Сообщение о необходимости повернуть устройство -->
+    <div class="rotation-message">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>Поверните устройство</h2>
+        <p>Для удобства судейства используйте горизонтальную ориентацию экрана</p>
+    </div>
+    
     <a href="/referee" class="back-button">
         <i class="fas fa-arrow-left me-2"></i>Назад
     </a>
@@ -279,13 +520,19 @@
                 <div class="court-net"></div>
                 
                 <div class="team-section">
-                    <div class="team-info team-a">
-                        <div class="team-name">Команда А</div>
+                    <div class="team-info team-a" onclick="addPoint('A')" title="Нажмите, чтобы добавить очко команде А">
+                        <div class="team-name">
+                            <span id="teamAName">Команда А</span>
+                            <i class="fas fa-volleyball-ball serve-icon" id="serveIconA" style="display: none;"></i>
+                        </div>
                         <div class="score-display" id="teamAScore">0</div>
                     </div>
                     
-                    <div class="team-info team-b">
-                        <div class="team-name">Команда Б</div>
+                    <div class="team-info team-b" onclick="addPoint('B')" title="Нажмите, чтобы добавить очко команде Б">
+                        <div class="team-name">
+                            <span id="teamBName">Команда Б</span>
+                            <i class="fas fa-volleyball-ball serve-icon" id="serveIconB" style="display: none;"></i>
+                        </div>
                         <div class="score-display" id="teamBScore">0</div>
                     </div>
                 </div>
@@ -301,23 +548,20 @@
                 <button class="btn btn-volleyball" id="btnPointA" onclick="addPoint('A')">
                     <i class="fas fa-plus me-2"></i>Очко команде А
                 </button>
+                <button class="btn btn-success" onclick="saveToTournament()" id="btnSaveToTournament" style="display: none; font-weight: bold; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);">
+                    Сохранить в турнир
+                </button>
                 <button class="btn btn-volleyball-blue" id="btnPointB" onclick="addPoint('B')">
                     <i class="fas fa-plus me-2"></i>Очко команде Б
-                </button>
-                <button class="btn btn-secondary-volleyball" onclick="undoLastPoint()">
-                    <i class="fas fa-undo me-2"></i>Отменить
-                </button>
-                <button class="btn btn-secondary-volleyball" onclick="resetMatch()">
-                    <i class="fas fa-refresh me-2"></i>Сброс
                 </button>
                 <button class="btn btn-secondary-volleyball" onclick="swapTeamsSides()">
                     <i class="fas fa-exchange-alt me-2"></i>Поменять стороны команд
                 </button>
+                <button class="btn btn-secondary-volleyball" onclick="undoLastPoint()">
+                    <i class="fas fa-undo me-2"></i>Отменить
+                </button>
                 <button class="btn btn-secondary-volleyball" onclick="swapServe()">
                     <i class="fas fa-retweet me-2"></i>Поменять подающую сторону
-                </button>
-                <button class="btn btn-success" onclick="saveToTournament()" id="btnSaveToTournament" style="display: none; font-weight: bold; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);">
-                    <i class="fas fa-trophy me-2"></i>🏆 Сохранить в турнир
                 </button>
             </div>
         </div>
@@ -367,15 +611,15 @@
         }
         
         function updateServeIndicator() {
-            const indicator = document.getElementById('serveIndicator');
-            const nameA = window.team1Name || 'Команда А';
-            const nameB = window.team2Name || 'Команда Б';
+            const iconA = document.getElementById('serveIconA');
+            const iconB = document.getElementById('serveIconB');
+            
             if (servingTeam === 'A') {
-                indicator.className = 'serve-indicator team-a ' + (sidesSwapped ? 'pos-right' : 'pos-left');
-                indicator.innerHTML = '<i class="fas fa-volleyball-ball me-2"></i>Подача: ' + nameA;
+                iconA.style.display = 'inline-block';
+                iconB.style.display = 'none';
             } else {
-                indicator.className = 'serve-indicator team-b ' + (sidesSwapped ? 'pos-left' : 'pos-right');
-                indicator.innerHTML = '<i class="fas fa-volleyball-ball me-2"></i>Подача: ' + nameB;
+                iconA.style.display = 'none';
+                iconB.style.display = 'inline-block';
             }
         }
 
@@ -421,6 +665,13 @@
             setElements.forEach((element, index) => {
                 if (index < setScores.length) {
                     element.textContent = `Сет ${index + 1}: ${setScores[index][0]}-${setScores[index][1]}`;
+                    
+                    // Добавляем класс active только для текущего сета
+                    if (index + 1 === currentSet) {
+                        element.classList.add('active');
+                    } else {
+                        element.classList.remove('active');
+                    }
                 }
             });
         }
@@ -676,29 +927,32 @@
                 currentSet = setNum;
                 document.querySelector('.current-set').textContent = `Сет ${currentSet} из 3`;
                 console.log('[Volleyball] Установлен текущий сет:', currentSet);
+                updateSetScores(); // Обновляем активный класс для сета
             }
             
             // Счет берем ТОЛЬКО из БД (уже загружен выше через fetch)
             // URL параметры score1/score2 игнорируются, так как они могут быть устаревшими
             console.log('[Volleyball] Счет будет загружен из БД через fetch');
+            
+            // Обновляем индикатор подачи при загрузке страницы
+            updateServeIndicator();
         }
         
         // Функция для обновления названий команд
         function updateTeamNames(team1Name, team2Name) {
             console.log('[Volleyball] Обновляем названия команд:', team1Name, 'vs', team2Name);
             
-            // Обновляем заголовки команд
-            const teamNameNodes = document.querySelectorAll('.team-name');
-            const team1Title = teamNameNodes && teamNameNodes[0];
-            const team2Title = teamNameNodes && teamNameNodes[1];
+            // Обновляем заголовки команд (только текстовую часть, не трогая иконки)
+            const teamAName = document.getElementById('teamAName');
+            const teamBName = document.getElementById('teamBName');
             
-            if (team1Title) {
-                team1Title.textContent = team1Name;
+            if (teamAName) {
+                teamAName.textContent = team1Name;
                 console.log('[Volleyball] Обновлен заголовок команды A:', team1Name);
             }
             
-            if (team2Title) {
-                team2Title.textContent = team2Name;
+            if (teamBName) {
+                teamBName.textContent = team2Name;
                 console.log('[Volleyball] Обновлен заголовок команды B:', team2Name);
             }
 

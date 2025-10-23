@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вариант 5: Минималистичный</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .referee-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .referee-card {
+            background: white;
+            border-radius: 0;
+            padding: 40px;
+            box-shadow: none;
+            border-left: 8px solid #FF6B35;
+            border-right: 8px solid #4A8234;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        
+        h1 i {
+            background: linear-gradient(135deg, #FF6B35 0%, #4A8234 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .volleyball-court {
+            background: white;
+            border: none;
+            border-top: 3px solid #e0e0e0;
+            border-bottom: 3px solid #e0e0e0;
+            border-radius: 0;
+            padding: 40px 20px;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .court-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1px;
+            height: 80%;
+            background: #d0d0d0;
+        }
+        
+        .team-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .team-info {
+            flex: 1;
+            padding: 30px;
+            border-radius: 0;
+            margin: 0 20px;
+            background: white;
+            border: none;
+        }
+        
+        .team-info.team-a {
+            border-bottom: 5px solid #FF6B35;
+        }
+        
+        .team-info.team-b {
+            border-bottom: 5px solid #4A8234;
+        }
+        
+        .team-info.team-a .team-name {
+            color: #FF6B35;
+        }
+        
+        .team-info.team-a .score-display {
+            color: #FF6B35;
+        }
+        
+        .team-info.team-b .team-name {
+            color: #4A8234;
+        }
+        
+        .team-info.team-b .score-display {
+            color: #4A8234;
+        }
+        
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .score-display {
+            font-size: 5rem;
+            font-weight: 100;
+            margin: 15px 0;
+            line-height: 1;
+        }
+        
+        .controls {
+            margin-top: 40px;
+        }
+        
+        .btn-score {
+            padding: 18px 50px;
+            font-size: 1rem;
+            border-radius: 0;
+            margin: 10px;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            background: white;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .btn-team-a {
+            border-color: #FF6B35;
+            color: #FF6B35;
+        }
+        
+        .btn-team-a:hover {
+            background: #FF6B35;
+            color: white;
+        }
+        
+        .btn-team-b {
+            border-color: #4A8234;
+            color: #4A8234;
+        }
+        
+        .btn-team-b:hover {
+            background: #4A8234;
+            color: white;
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 0;
+            text-decoration: none;
+            color: #333;
+            font-weight: 400;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        
+        .back-link:hover {
+            border-color: #FF6B35;
+            color: #FF6B35;
+        }
+        
+        .variant-label {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 0;
+            color: #333;
+            font-weight: 400;
+            border: 1px solid #e0e0e0;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <a href="volleyball_color_index.html" class="back-link">
+        <i class="fas fa-arrow-left me-2"></i>К выбору вариантов
+    </a>
+    
+    <div class="variant-label">Вариант 5: Минимализм</div>
+    
+    <div class="referee-container">
+        <div class="referee-card">
+            <h1><i class="fas fa-volleyball-ball me-3"></i>Судейство волейбола</h1>
+            
+            <div class="volleyball-court">
+                <div class="court-line"></div>
+                <div class="team-section">
+                    <div class="team-info team-a">
+                        <div class="team-name">Команда A</div>
+                        <div class="score-display">0</div>
+                        <div style="color: #999; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;">Сеты: 0</div>
+                    </div>
+                    
+                    <div style="font-size: 2rem; color: #d0d0d0; font-weight: 100;">VS</div>
+                    
+                    <div class="team-info team-b">
+                        <div class="team-name">Команда B</div>
+                        <div class="score-display">0</div>
+                        <div style="color: #999; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;">Сеты: 0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-score btn-team-a">
+                    <i class="fas fa-plus me-2"></i>Очко A
+                </button>
+                <button class="btn btn-score btn-team-b">
+                    <i class="fas fa-plus me-2"></i>Очко B
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

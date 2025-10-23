@@ -2096,7 +2096,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        if match.status in ['завершен', 'в_процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Проверяем, действительно ли матч завершен (кто-то выиграл 2+ сета)
                             sets_to_win = tournament.sets_to_win or 2
                             is_match_completed = match.sets_won_1 >= sets_to_win or match.sets_won_2 >= sets_to_win
@@ -2154,7 +2154,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                     'sets_details': sets_details
                                 }
                                 logger.info(f"[Chessboard] Матч {match.id}: chessboard[{participant.id}][{other_participant.id}] = type='in_progress', value='{score}', sets_details='{sets_details}'")
-                        elif match.status in ['в процессе', 'играют']:
+                        elif match.status in ['в_процессе', 'играют']:
                             # Матч в процессе - показываем счет если есть
                             if match.sets_won_1 is not None and match.sets_won_2 is not None:
                                 # Есть счет - показываем его
@@ -2422,7 +2422,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 
                 # Формируем счет матча (количество выигранных сетов) - только для завершенных и в процессе
                 score = None
-                if match.status in ['завершен', 'в процессе', 'играют']:
+                if match.status in ['завершен', 'в_процессе', 'играют']:
                     if match.sets_won_1 is not None and match.sets_won_2 is not None:
                         score = f"{match.sets_won_1}:{match.sets_won_2}"
                     elif match.set1_score1 is not None and match.set1_score2 is not None:
@@ -2497,7 +2497,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             points = 0  # Будем пересчитывать на основе побед
             
             for match in matches:
-                if match.status in ['завершен', 'в процессе', 'играют']:
+                if match.status in ['завершен', 'в_процессе', 'играют']:
                     if match.participant1_id == participant.id:
                         if match.sets_won_1 is not None and match.sets_won_2 is not None:
                             if match.sets_won_1 > match.sets_won_2:
@@ -2624,7 +2624,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        if match.status in ['завершен', 'в_процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Проверяем, действительно ли матч завершен (кто-то выиграл 2+ сета)
                             sets_to_win = tournament.sets_to_win or 2
                             is_match_completed = match.sets_won_1 >= sets_to_win or match.sets_won_2 >= sets_to_win
@@ -2933,7 +2933,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 (m.participant1_id == other_participant.id and m.participant2_id == participant.id)), None)
                     
                     if match:
-                        if match.status in ['завершен', 'в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        if match.status in ['завершен', 'в_процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                             # Проверяем, действительно ли матч завершен (кто-то выиграл 2+ сета)
                             sets_to_win = tournament.sets_to_win or 2
                             is_match_completed = match.sets_won_1 >= sets_to_win or match.sets_won_2 >= sets_to_win
@@ -3055,13 +3055,13 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 score = None
                 if match.status == 'завершен' and match.sets_won_1 is not None and match.sets_won_2 is not None:
                     score = f"{match.sets_won_1}:{match.sets_won_2}"
-                elif match.status in ['в процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
+                elif match.status in ['в_процессе', 'играют'] and match.sets_won_1 is not None and match.sets_won_2 is not None:
                     score = f"{match.sets_won_1}:{match.sets_won_2}"
                 
                 # Формируем детали сетов (аналогично другим функциям)
                 sets_details = None
                 points_to_win = tournament.points_to_win or 11  # По умолчанию 11 очков
-                if match.status in ['завершен', 'в процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
+                if match.status in ['завершен', 'в_процессе', 'играют'] and match.set1_score1 is not None and match.set1_score2 is not None:
                     sets_list = []
                     if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
