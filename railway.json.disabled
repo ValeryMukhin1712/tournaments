@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
         "deploy": {
-            "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --keep-alive 2 app:app",
+            "startCommand": "echo 'Deployment temporarily disabled'",
             "healthcheckPath": "/",
             "healthcheckTimeout": 120,
             "restartPolicyType": "ON_FAILURE",
