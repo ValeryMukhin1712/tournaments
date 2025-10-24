@@ -1058,7 +1058,7 @@
                         <div class="box">
                             <input type="text" placeholder="Имя игрока" id="name_top_left" value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}" />
                             <div class="server-indicator" id="server_top_left" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" />
+                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                             </div>
                         </div>
                     </div>
@@ -1066,7 +1066,7 @@
                         <div class="box">
                             <input type="text" placeholder="Имя игрока" id="name_bottom_left" value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}" />
                             <div class="server-indicator" id="server_bottom_left" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" />
+                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                             </div>
                         </div>
                     </div>
@@ -1078,7 +1078,7 @@
                     <div class="segment" id="top_right">
                         <div class="box">
                             <div class="server-indicator" id="server_top_right" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" />
+                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                             </div>
                             <input type="text" placeholder="Имя игрока" id="name_top_right" value="{{ participant2.split('-')[0] if '-' in participant2 else participant2 }}" />
                         </div>
@@ -1086,7 +1086,7 @@
                     <div class="segment" id="bottom_right">
                         <div class="box">
                             <div class="server-indicator" id="server_bottom_right" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" />
+                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                             </div>
                             <input type="text" placeholder="Имя игрока" id="name_bottom_right" value="{{ participant2.split('-')[1] if '-' in participant2 and participant2.split('-')|length > 1 else participant2 }}" />
                         </div>
@@ -1255,8 +1255,17 @@
             // Показываем иконку подачи
             document.querySelectorAll('.server-indicator').forEach(el => el.style.display = 'none');
             const firstIndicator = document.getElementById('server_' + shuttlecockPosition) || document.getElementById('server_top_right');
-            if (firstIndicator) firstIndicator.style.display = 'block';
-            updateShuttlecockDisplay();
+            if (firstIndicator) {
+                firstIndicator.style.display = 'block';
+                console.log('[Referee] Показываем индикатор подачи:', 'server_' + shuttlecockPosition);
+            } else {
+                console.warn('[Referee] Не найден индикатор подачи для:', shuttlecockPosition);
+            }
+            // Принудительно показываем индикатор без анимации при инициализации
+            setTimeout(() => {
+                const indicator = document.getElementById('server_' + shuttlecockPosition) || document.getElementById('server_top_right');
+                if (indicator) indicator.style.display = 'block';
+            }, 100);
         }
         
         function fillParticipantNames() {
