@@ -81,6 +81,26 @@
             font-weight: bold;
             color: #6f42c1;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .serve-icon {
+            display: none;
+            color: #ffc107;
+            font-size: 1.5rem;
+            animation: pulse 1s infinite;
+        }
+        
+        .serve-icon.active {
+            display: inline-block;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
         }
         
         .score-display {
@@ -181,17 +201,6 @@
             text-decoration: none;
         }
         
-        .serve-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #ffc107;
-            color: #000;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
         
         @media (max-width: 768px) {
             .player-section {
@@ -231,16 +240,21 @@
             <div class="pingpong-table">
                 <div class="table-center-line"></div>
                 <div class="table-net"></div>
-                <div class="serve-indicator" id="serveIndicator">Подача: Игрок 1</div>
                 
                 <div class="player-section">
                     <div class="player-info">
-                        <div class="player-name">Игрок 1</div>
+                        <div class="player-name">
+                            <i class="fas fa-table-tennis serve-icon" id="serve1"></i>
+                            <span>Игрок 1</span>
+                        </div>
                         <div class="score-display" id="player1Score">0</div>
                     </div>
                     
                     <div class="player-info">
-                        <div class="player-name">Игрок 2</div>
+                        <div class="player-name">
+                            <i class="fas fa-table-tennis serve-icon" id="serve2"></i>
+                            <span>Игрок 2</span>
+                        </div>
                         <div class="score-display" id="player2Score">0</div>
                     </div>
                 </div>
@@ -258,6 +272,12 @@
                 </button>
                 <button class="btn btn-pingpong" onclick="addPoint(2)">
                     <i class="fas fa-plus me-2"></i>Очко игроку 2
+                </button>
+                <button class="btn btn-secondary-pingpong" onclick="toggleServe()">
+                    <i class="fas fa-table-tennis me-2"></i>Переключить подачу
+                </button>
+                <button class="btn btn-secondary-pingpong" onclick="swapPlayers()">
+                    <i class="fas fa-exchange-alt me-2"></i>Поменять местами
                 </button>
                 <button class="btn btn-secondary-pingpong" onclick="undoLastPoint()">
                     <i class="fas fa-undo me-2"></i>Отменить
@@ -280,6 +300,9 @@
         let gameHistory = [];
         let servePlayer = 1;
         let serveCount = 0;
+        let player1Name = 'Игрок 1';
+        let player2Name = 'Игрок 2';
+        let manualServeControl = false;  // Флаг для ручного управления подачей
         
         function addPoint(player) {
             if (player === 1) {
@@ -319,16 +342,29 @@
         }
         
         function updateServe() {
-            const totalPoints = player1Score + player2Score;
-            const serveChange = Math.floor(totalPoints / 2);
-            
-            if (serveChange % 2 === 0) {
-                servePlayer = 1;
-            } else {
-                servePlayer = 2;
+            // Если подача установлена вручную, не пересчитываем автоматически
+            if (!manualServeControl) {
+                const totalPoints = player1Score + player2Score;
+                const serveChange = Math.floor(totalPoints / 2);
+                
+                if (serveChange % 2 === 0) {
+                    servePlayer = 1;
+                } else {
+                    servePlayer = 2;
+                }
             }
             
-            document.getElementById('serveIndicator').textContent = `Подача: Игрок ${servePlayer}`;
+            // Переключаем иконки подачи
+            const serve1 = document.getElementById('serve1');
+            const serve2 = document.getElementById('serve2');
+            
+            if (servePlayer === 1) {
+                serve1.classList.add('active');
+                serve2.classList.remove('active');
+            } else {
+                serve1.classList.remove('active');
+                serve2.classList.add('active');
+            }
         }
         
         function checkSetEnd() {
@@ -359,10 +395,52 @@
             player1Score = 0;
             player2Score = 0;
             servePlayer = 1;
+            manualServeControl = false;  // Сбрасываем ручное управление при новом сете
             
             document.querySelector('.current-set').textContent = `Сет ${currentSet} из 3`;
             updateDisplay();
             updateServe();
+        }
+        
+        function toggleServe() {
+            // Переключаем подачу на другого игрока
+            servePlayer = servePlayer === 1 ? 2 : 1;
+            // Включаем режим ручного управления подачей
+            manualServeControl = true;
+            updateServe();
+        }
+        
+        function swapPlayers() {
+            if (confirm('Поменять игроков местами?')) {
+                // Меняем местами текущий счет
+                [player1Score, player2Score] = [player2Score, player1Score];
+                
+                // Меняем местами счет во всех сетах
+                setScores = setScores.map(score => [score[1], score[0]]);
+                
+                // Меняем подачу
+                servePlayer = servePlayer === 1 ? 2 : 1;
+                
+                // Меняем местами игроков в истории
+                gameHistory = gameHistory.map(action => ({
+                    ...action,
+                    player: action.player === 1 ? 2 : 1,
+                    score: [action.score[1], action.score[0]],
+                    servePlayer: action.servePlayer === 1 ? 2 : 1
+                }));
+                
+                // Меняем местами имена игроков
+                [player1Name, player2Name] = [player2Name, player1Name];
+                
+                // Обновляем имена в DOM
+                const player1NameSpan = document.querySelector('.player-info:first-child .player-name span');
+                const player2NameSpan = document.querySelector('.player-info:last-child .player-name span');
+                player1NameSpan.textContent = player1Name;
+                player2NameSpan.textContent = player2Name;
+                
+                updateDisplay();
+                updateServe();
+            }
         }
         
         function undoLastPoint() {
@@ -376,6 +454,8 @@
                 
                 // Восстанавливаем подачу
                 servePlayer = lastAction.servePlayer;
+                // Сбрасываем ручное управление при отмене
+                manualServeControl = false;
                 updateDisplay();
                 updateServe();
             }
@@ -389,6 +469,7 @@
                 setScores = [[0, 0], [0, 0], [0, 0]];
                 gameHistory = [];
                 servePlayer = 1;
+                manualServeControl = false;  // Сбрасываем ручное управление
                 document.querySelector('.current-set').textContent = 'Сет 1 из 3';
                 updateDisplay();
                 updateServe();
@@ -477,21 +558,25 @@
         }
         
         // Функция для обновления названий команд
-        function updateTeamNames(team1Name, team2Name) {
-            console.log('[PingPong] Обновляем названия команд:', team1Name, 'vs', team2Name);
+        function updateTeamNames(team1NameParam, team2NameParam) {
+            console.log('[PingPong] Обновляем названия команд:', team1NameParam, 'vs', team2NameParam);
             
-            // Обновляем заголовки команд
-            const team1Title = document.querySelector('.team-a h3');
-            const team2Title = document.querySelector('.team-b h3');
+            // Сохраняем имена в переменные
+            player1Name = team1NameParam;
+            player2Name = team2NameParam;
             
-            if (team1Title) {
-                team1Title.textContent = team1Name;
-                console.log('[PingPong] Обновлен заголовок команды A:', team1Name);
+            // Обновляем имена в DOM
+            const player1NameSpan = document.querySelector('.player-info:first-child .player-name span');
+            const player2NameSpan = document.querySelector('.player-info:last-child .player-name span');
+            
+            if (player1NameSpan) {
+                player1NameSpan.textContent = player1Name;
+                console.log('[PingPong] Обновлено имя игрока 1:', player1Name);
             }
             
-            if (team2Title) {
-                team2Title.textContent = team2Name;
-                console.log('[PingPong] Обновлен заголовок команды B:', team2Name);
+            if (player2NameSpan) {
+                player2NameSpan.textContent = player2Name;
+                console.log('[PingPong] Обновлено имя игрока 2:', player2Name);
             }
         }
     </script>

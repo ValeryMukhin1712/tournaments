@@ -3173,11 +3173,20 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     match.set3_score1 = score1
                     match.set3_score2 = score2
                 
-                # Определяем победителя сета по правилам волейбола
-                # Сет выигран при счете 25+ (или 15+ для 3-го сета) и разнице >= 2
-                min_score = 15 if (set_number == 3 and tournament.sets_to_win == 2) else 25
+                # Определяем победителя сета в зависимости от вида спорта
+                sport_type = tournament.sport_type.lower() if tournament.sport_type else ''
                 
-                logger.info(f"[save-referee-result] Сет {set_number}: min_score={min_score}, проверка победителя...")
+                if 'пинг-понг' in sport_type or 'настольный теннис' in sport_type or 'pingpong' in sport_type:
+                    # Правила пинг-понга: 11 очков и разница >= 2
+                    min_score = 11
+                elif 'бадминтон' in sport_type or 'badminton' in sport_type:
+                    # Правила бадминтона: 21 очко и разница >= 2
+                    min_score = 21
+                else:
+                    # Правила волейбола: 25 очков (или 15 для 3-го сета) и разница >= 2
+                    min_score = 15 if (set_number == 3 and tournament.sets_to_win == 2) else 25
+                
+                logger.info(f"[save-referee-result] Сет {set_number}: sport_type={sport_type}, min_score={min_score}, проверка победителя...")
                 
                 if score1 >= min_score and score1 - score2 >= 2:
                     sets_won_1 += 1
@@ -3186,7 +3195,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     sets_won_2 += 1
                     logger.info(f"[save-referee-result] Сет {set_number}: победила команда 2, sets_won_2={sets_won_2}")
                 else:
-                    logger.info(f"[save-referee-result] Сет {set_number}: не завершен (недостаточно очков или разницы)")
+                    logger.info(f"[save-referee-result] Сет {set_number}: не завершен (score1={score1}, score2={score2}, min_score={min_score})")
             
             # Сохраняем количество выигранных сетов
             match.sets_won_1 = sets_won_1
