@@ -1,5 +1,0 @@
-# Webhook Auto-Deploy Test - SUCCESS!
-# This file confirms that automatic deployment via GitHub Webhook is working
-# Code updates automatically on git push
-# Service restarts automatically with sudo privileges
-# Test timestamp: 2025-10-24 11:30 UTC 
