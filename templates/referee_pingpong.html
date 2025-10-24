@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Судейство пинг-понга</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -164,10 +167,7 @@
         }
         
         .match-info {
-            background: rgba(111, 66, 193, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
+            display: none;
         }
         
         .match-title {
@@ -202,6 +202,148 @@
         }
         
         
+        /* Сообщение о повороте устройства */
+        .rotation-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%) !important;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .rotation-message i {
+            font-size: 80px !important;
+            color: white !important;
+            margin-bottom: 30px !important;
+            animation: rotate-phone 2s ease-in-out infinite !important;
+            display: block !important;
+        }
+        
+        .rotation-message h2 {
+            color: white !important;
+            font-size: 24px !important;
+            margin-bottom: 15px !important;
+            font-weight: bold !important;
+        }
+        
+        .rotation-message p {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 18px !important;
+            max-width: 300px !important;
+        }
+        
+        @keyframes rotate-phone {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-90deg); }
+            75% { transform: rotate(-90deg); }
+        }
+        
+        /* Показываем сообщение только в portrait режиме на мобильных */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .rotation-message {
+                display: flex !important;
+            }
+            
+            .referee-container {
+                display: none !important;
+            }
+            
+            .back-button {
+                display: none !important;
+            }
+        }
+        
+        /* Адаптация для горизонтального режима на маленьких экранах */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .referee-container {
+                padding: 10px;
+            }
+            
+            .referee-card {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            .match-info {
+                padding: 10px;
+                margin: 10px 0;
+            }
+            
+            .match-title {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .current-set {
+                font-size: 0.9rem;
+            }
+            
+            .pingpong-table {
+                padding: 15px;
+                margin: 10px 0;
+                border-width: 2px;
+            }
+            
+            .player-section {
+                margin: 10px 0;
+            }
+            
+            .player-info {
+                padding: 10px;
+            }
+            
+            .player-name {
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }
+            
+            .serve-icon {
+                font-size: 1.2rem;
+            }
+            
+            .score-display {
+                font-size: 2rem;
+                margin: 5px 0;
+            }
+            
+            .set-scores {
+                gap: 10px;
+                margin: 10px 0;
+            }
+            
+            .set-score {
+                padding: 5px 10px;
+                font-size: 0.85rem;
+                min-width: 40px;
+            }
+            
+            .control-buttons {
+                gap: 8px;
+                margin: 15px 0;
+                flex-wrap: wrap;
+            }
+            
+            .btn-pingpong, .btn-secondary-pingpong, .btn-success {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .back-button {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+                top: 10px;
+                left: 10px;
+            }
+        }
+        
         @media (max-width: 768px) {
             .player-section {
                 flex-direction: column;
@@ -224,6 +366,13 @@
     </style>
 </head>
 <body>
+    <!-- Сообщение о повороте устройства -->
+    <div class="rotation-message">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>Поверните устройство</h2>
+        <p>Для удобства работы со страницей судейства поверните устройство горизонтально</p>
+    </div>
+    
     <a href="/referee" class="back-button">
         <i class="fas fa-arrow-left me-2"></i>Назад
     </a>
