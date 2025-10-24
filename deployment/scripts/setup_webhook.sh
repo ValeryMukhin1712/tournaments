@@ -53,7 +53,7 @@ app = Flask(__name__)
 
 # Секретный токен (настройте в GitHub и здесь)
 WEBHOOK_SECRET = os.environ.get('WEBHOOK_SECRET', 'change-me-to-random-secret')
-APP_DIR = '/home/deploy/app'
+APP_DIR = '/home/deploy/quick-score'
 DEPLOY_SCRIPT = f'{APP_DIR}/deployment/scripts/deploy_app.sh'
 
 def verify_signature(payload, signature):

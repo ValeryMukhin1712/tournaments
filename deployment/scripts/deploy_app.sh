@@ -36,7 +36,7 @@ log_error() {
 }
 
 # Переменные
-APP_DIR="/home/deploy/app"
+APP_DIR="/home/deploy/quick-score"
 REPO_URL="https://github.com/ValeryMukhin1712/quick-score.git"
 BRANCH="main"
 UPDATE_MODE=false
