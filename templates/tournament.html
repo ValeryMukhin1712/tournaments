@@ -1309,14 +1309,32 @@
                                         team1_name: participant1,
                                         team2_name: participant2
                                     });
+                                    
+                                    // Добавляем счет ВСЕХ сетов в URL
+                                    console.log('[openRefereeForSet] Подготовка к открытию судейства для сета', setNumber);
+                                    for (let i = 1; i <= 3; i++) {
+                                        const s1El = document.getElementById('set' + i + 'Score1');
+                                        const s2El = document.getElementById('set' + i + 'Score2');
+                                        if (s1El && s2El) {
+                                            const s1 = parseInt(s1El.value) || 0;
+                                            const s2 = parseInt(s2El.value) || 0;
+                                            console.log(`[openRefereeForSet] Сет ${i}: form value = ${s1El.value}:${s2El.value}, parsed = ${s1}:${s2}`);
+                                            params.append('set' + i + '_score1', s1);
+                                            params.append('set' + i + '_score2', s2);
+                                        } else {
+                                            console.log(`[openRefereeForSet] Сет ${i}: элементы формы не найдены`);
+                                        }
+                                    }
+                                    console.log('[openRefereeForSet] URL params:', params.toString());
+                                    
+                                    // Добавляем текущий счет активного сета (для обратной совместимости)
                                     const s1El = document.getElementById('set' + setNumber + 'Score1');
                                     const s2El = document.getElementById('set' + setNumber + 'Score2');
                                     const s1 = (s1El && parseInt(s1El.value)) || 0;
                                     const s2 = (s2El && parseInt(s2El.value)) || 0;
-                                    if (s1 !== defaultScore || s2 !== defaultScore) {
-                                        params.append('score1', s1);
-                                        params.append('score2', s2);
-                                    }
+                                    params.append('score1', s1);
+                                    params.append('score2', s2);
+                                    
                                     const refereeUrl = getRefereeUrl(params);
                                     if (!refereeUrl) return;
                                     const w = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
@@ -1913,6 +1931,8 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                     console.log('[Form] Сет 1 из БД: set1_score1=', data.match.set1_score1, 'set1_score2=', data.match.set1_score2);
                     console.log('[Form] Сет 2 из БД: set2_score1=', data.match.set2_score1, 'set2_score2=', data.match.set2_score2);
                     console.log('[Form] Сет 3 из БД: set3_score1=', data.match.set3_score1, 'set3_score2=', data.match.set3_score2);
+                    console.log('[Form] Статус матча:', data.match.status);
+                    console.log('[Form] Сеты выиграны:', data.match.sets_won_1, ':', data.match.sets_won_2);
                     
                     if (needSwap) {
                         // Участник 1 в форме = participant2 в матче, меняем местами
@@ -1930,17 +1950,22 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                         if (data.match.set2_score1 !== null && data.match.set2_score2 !== null) {
                             document.getElementById('set2Score1').value = data.match.set2_score2;
                             document.getElementById('set2Score2').value = data.match.set2_score1;
+                            console.log('[Form] Сет 2 (swap): заполнено', data.match.set2_score2, ':', data.match.set2_score1);
                         } else {
-                            document.getElementById('set2Score1').value = defaultScore;
-                            document.getElementById('set2Score2').value = defaultScore;
+                            // Для незавершенных сетов ставим 0:0 вместо defaultScore
+                            document.getElementById('set2Score1').value = 0;
+                            document.getElementById('set2Score2').value = 0;
+                            console.log('[Form] Сет 2 (swap): 0:0 (не начат)');
                         }
                         
                         if (data.match.set3_score1 !== null && data.match.set3_score2 !== null) {
                             document.getElementById('set3Score1').value = data.match.set3_score2;
                             document.getElementById('set3Score2').value = data.match.set3_score1;
+                            console.log('[Form] Сет 3 (swap): заполнено', data.match.set3_score2, ':', data.match.set3_score1);
                         } else {
                             document.getElementById('set3Score1').value = '';
                             document.getElementById('set3Score2').value = '';
+                            console.log('[Form] Сет 3 (swap): пустой');
                         }
                     } else {
                         // Участник 1 в форме = participant1 в матче, оставляем как есть
@@ -1958,23 +1983,34 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                         if (data.match.set2_score1 !== null && data.match.set2_score2 !== null) {
                             document.getElementById('set2Score1').value = data.match.set2_score1;
                             document.getElementById('set2Score2').value = data.match.set2_score2;
+                            console.log('[Form] Сет 2 (no swap): заполнено', data.match.set2_score1, ':', data.match.set2_score2);
                         } else {
-                            document.getElementById('set2Score1').value = defaultScore;
-                            document.getElementById('set2Score2').value = defaultScore;
+                            // Для незавершенных сетов ставим 0:0 вместо defaultScore
+                            document.getElementById('set2Score1').value = 0;
+                            document.getElementById('set2Score2').value = 0;
+                            console.log('[Form] Сет 2 (no swap): 0:0 (не начат)');
                         }
                         
                         if (data.match.set3_score1 !== null && data.match.set3_score2 !== null) {
                             document.getElementById('set3Score1').value = data.match.set3_score1;
                             document.getElementById('set3Score2').value = data.match.set3_score2;
+                            console.log('[Form] Сет 3 (no swap): заполнено', data.match.set3_score1, ':', data.match.set3_score2);
                         } else {
                             document.getElementById('set3Score1').value = '';
                             document.getElementById('set3Score2').value = '';
+                            console.log('[Form] Сет 3 (no swap): пустой');
                         }
                     }
                     
                     // Показываем все сеты для редактирования
                     document.getElementById('set2Container').style.display = 'block';
                     document.getElementById('set3Container').style.display = 'block';
+                    
+                    // Логируем финальные значения в полях формы
+                    console.log('[Form] ФИНАЛЬНЫЕ значения в полях формы:');
+                    console.log('[Form] Сет 1 в форме:', document.getElementById('set1Score1').value, ':', document.getElementById('set1Score2').value);
+                    console.log('[Form] Сет 2 в форме:', document.getElementById('set2Score1').value, ':', document.getElementById('set2Score2').value);
+                    console.log('[Form] Сет 3 в форме:', document.getElementById('set3Score1').value, ':', document.getElementById('set3Score2').value);
                 } else {
                     console.log('Нет существующих результатов, используем значения по умолчанию');
                     // Иначе используем значения по умолчанию для всех сетов
@@ -4116,6 +4152,30 @@ window.openRefereeForSet = function openRefereeForSet(setNumber) {
                 }
                 
                 console.log(`[Parent] Реальный счёт из базы для сета ${setNumber}: ${currentScore1}:${currentScore2}`);
+                
+                // ✅ ИСПРАВЛЕНИЕ: Добавляем счёт ВСЕХ сетов из базы данных
+                console.log(`[Parent] 🔧 Добавляем счёт ВСЕХ сетов в URL:`);
+                
+                // Сет 1
+                const set1Score1 = data.match.set1_score1 !== null ? data.match.set1_score1 : 0;
+                const set1Score2 = data.match.set1_score2 !== null ? data.match.set1_score2 : 0;
+                paramsSet.append('set1_score1', set1Score1);
+                paramsSet.append('set1_score2', set1Score2);
+                console.log(`[Parent]   Сет 1: ${set1Score1}:${set1Score2}`);
+                
+                // Сет 2
+                const set2Score1 = data.match.set2_score1 !== null ? data.match.set2_score1 : 0;
+                const set2Score2 = data.match.set2_score2 !== null ? data.match.set2_score2 : 0;
+                paramsSet.append('set2_score1', set2Score1);
+                paramsSet.append('set2_score2', set2Score2);
+                console.log(`[Parent]   Сет 2: ${set2Score1}:${set2Score2}`);
+                
+                // Сет 3
+                const set3Score1 = data.match.set3_score1 !== null ? data.match.set3_score1 : 0;
+                const set3Score2 = data.match.set3_score2 !== null ? data.match.set3_score2 : 0;
+                paramsSet.append('set3_score1', set3Score1);
+                paramsSet.append('set3_score2', set3Score2);
+                console.log(`[Parent]   Сет 3: ${set3Score1}:${set3Score2}`);
                 
                 // Передаем счёт только если он реальный (не равен значению по умолчанию 21:21)
                 console.log(`[Parent] Проверяем счёт для сета ${setNumber}: ${currentScore1}:${currentScore2}, defaultScore: ${defaultScore}`);

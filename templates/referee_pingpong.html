@@ -74,20 +74,98 @@
         .player-info {
             flex: 1;
             padding: 20px;
-            background: rgba(111, 66, 193, 0.1);
             border-radius: 10px;
             margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 3px solid transparent;
+        }
+        
+        /* Синий игрок */
+        .player-blue {
+            background: rgba(33, 150, 243, 0.1);
+            border-color: rgba(33, 150, 243, 0.3);
+        }
+        
+        .player-blue:hover {
+            background: rgba(33, 150, 243, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+            border-color: rgba(33, 150, 243, 0.5);
+        }
+        
+        .player-blue:active {
+            transform: scale(0.98);
+            background: rgba(33, 150, 243, 0.3);
+        }
+        
+        .player-blue .player-name {
+            color: #1976D2;
+        }
+        
+        .player-blue .score-display {
+            color: #1976D2;
+        }
+        
+        /* Красный игрок */
+        .player-red {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: rgba(244, 67, 54, 0.3);
+        }
+        
+        .player-red:hover {
+            background: rgba(244, 67, 54, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+            border-color: rgba(244, 67, 54, 0.5);
+        }
+        
+        .player-red:active {
+            transform: scale(0.98);
+            background: rgba(244, 67, 54, 0.3);
+        }
+        
+        .player-red .player-name {
+            color: #D32F2F;
+        }
+        
+        .player-red .score-display {
+            color: #D32F2F;
         }
         
         .player-name {
             font-size: 1.2rem;
             font-weight: bold;
-            color: #6f42c1;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            position: relative;
+        }
+        
+        .player-info::before {
+            content: '\f067';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .player-blue::before {
+            color: #1976D2;
+        }
+        
+        .player-red::before {
+            color: #D32F2F;
+        }
+        
+        .player-info:hover::before {
+            opacity: 0.5;
         }
         
         .serve-icon {
@@ -109,7 +187,6 @@
         .score-display {
             font-size: 3rem;
             font-weight: bold;
-            color: #6f42c1;
             margin: 10px 0;
         }
         
@@ -138,7 +215,6 @@
         }
         
         .btn-pingpong {
-            background: #6f42c1;
             border: none;
             color: white;
             padding: 15px 25px;
@@ -147,11 +223,6 @@
             transition: all 0.3s ease;
         }
         
-        .btn-pingpong:hover {
-            background: #5a32a3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(111, 66, 193, 0.3);
-        }
         
         .btn-secondary-pingpong {
             background: #6c757d;
@@ -344,7 +415,8 @@
             }
         }
         
-        @media (max-width: 768px) {
+        /* Мобильные устройства в портретном режиме */
+        @media (max-width: 768px) and (orientation: portrait) {
             .player-section {
                 flex-direction: column;
                 gap: 20px;
@@ -361,6 +433,40 @@
             
             .btn-pingpong, .btn-secondary-pingpong {
                 width: 200px;
+            }
+        }
+        
+        /* Мобильные устройства в горизонтальном режиме */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .player-section {
+                flex-direction: row;
+                gap: 10px;
+            }
+            
+            .player-info {
+                margin: 0;
+                flex: 1;
+            }
+            
+            .control-buttons {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .btn-pingpong, .btn-secondary-pingpong, .btn-success {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+                flex: 0 1 auto;
+            }
+            
+            .match-info {
+                margin-bottom: 10px;
+            }
+            
+            .score-display {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -391,7 +497,7 @@
                 <div class="table-net"></div>
                 
                 <div class="player-section">
-                    <div class="player-info">
+                    <div class="player-info player-blue" id="playerArea1" onclick="addPoint(1)" style="cursor: pointer;" title="Кликните, чтобы добавить очко">
                         <div class="player-name">
                             <i class="fas fa-table-tennis serve-icon" id="serve1"></i>
                             <span>Игрок 1</span>
@@ -399,7 +505,7 @@
                         <div class="score-display" id="player1Score">0</div>
                     </div>
                     
-                    <div class="player-info">
+                    <div class="player-info player-red" id="playerArea2" onclick="addPoint(2)" style="cursor: pointer;" title="Кликните, чтобы добавить очко">
                         <div class="player-name">
                             <i class="fas fa-table-tennis serve-icon" id="serve2"></i>
                             <span>Игрок 2</span>
@@ -416,12 +522,6 @@
             </div>
             
             <div class="control-buttons">
-                <button class="btn btn-pingpong" onclick="addPoint(1)">
-                    <i class="fas fa-plus me-2"></i>Очко игроку 1
-                </button>
-                <button class="btn btn-pingpong" onclick="addPoint(2)">
-                    <i class="fas fa-plus me-2"></i>Очко игроку 2
-                </button>
                 <button class="btn btn-secondary-pingpong" onclick="toggleServe()">
                     <i class="fas fa-table-tennis me-2"></i>Переключить подачу
                 </button>
@@ -430,9 +530,6 @@
                 </button>
                 <button class="btn btn-secondary-pingpong" onclick="undoLastPoint()">
                     <i class="fas fa-undo me-2"></i>Отменить
-                </button>
-                <button class="btn btn-secondary-pingpong" onclick="resetMatch()">
-                    <i class="fas fa-refresh me-2"></i>Сброс
                 </button>
                 <button class="btn btn-success" onclick="saveToTournament()" id="btnSaveToTournament" style="display: none;">
                     <i class="fas fa-trophy me-2"></i>Сохранить в турнир
@@ -452,6 +549,7 @@
         let player1Name = 'Игрок 1';
         let player2Name = 'Игрок 2';
         let manualServeControl = false;  // Флаг для ручного управления подачей
+        let playersSwapped = false;  // Флаг: были ли игроки поменяны местами
         
         function addPoint(player) {
             if (player === 1) {
@@ -467,6 +565,8 @@
                 servePlayer: servePlayer
             });
             
+            console.log(`[PingPong] Добавлено очко игроку ${player}. Текущий счёт сета ${currentSet}: ${player1Score}:${player2Score}`);
+            
             updateDisplay();
             checkSetEnd();
             updateServe();
@@ -476,16 +576,27 @@
             document.getElementById('player1Score').textContent = player1Score;
             document.getElementById('player2Score').textContent = player2Score;
             
-            // Обновляем счет сетов
-            setScores[currentSet - 1] = [player1Score, player2Score];
+            console.log(`[PingPong] updateDisplay: currentSet=${currentSet}, player1Score=${player1Score}, player2Score=${player2Score}`);
+            console.log(`[PingPong] updateDisplay: setScores ДО обновления:`, JSON.stringify(setScores));
+            
+            // Обновляем счет ТОЛЬКО текущего сета
+            // НЕ перезаписываем завершённые сеты
+            if (currentSet <= 3) {
+                setScores[currentSet - 1] = [player1Score, player2Score];
+            }
+            
+            console.log(`[PingPong] updateDisplay: setScores ПОСЛЕ обновления:`, JSON.stringify(setScores));
             updateSetScores();
         }
         
         function updateSetScores() {
             const setElements = document.querySelectorAll('.set-score');
+            console.log('[PingPong] updateSetScores: отображаем сеты:', JSON.stringify(setScores));
             setElements.forEach((element, index) => {
                 if (index < setScores.length) {
-                    element.textContent = `Сет ${index + 1}: ${setScores[index][0]}-${setScores[index][1]}`;
+                    const displayText = `Сет ${index + 1}: ${setScores[index][0]}-${setScores[index][1]}`;
+                    element.textContent = displayText;
+                    console.log(`[PingPong] updateSetScores: Сет ${index + 1} отображается как "${displayText}"`);
                 }
             });
         }
@@ -528,14 +639,20 @@
         }
         
         function endSet() {
-            setScores[currentSet - 1] = [player1Score, player2Score];
+            // Сохраняем счёт завершённого сета
+            const completedSetIndex = currentSet - 1;
+            const completedSetScore = [player1Score, player2Score];
+            setScores[completedSetIndex] = completedSetScore;
+            
+            console.log(`[PingPong] Сет ${currentSet} завершён со счётом ${completedSetScore[0]}:${completedSetScore[1]}`);
+            console.log('[PingPong] Все сеты после завершения:', JSON.stringify(setScores));
             
             // Проверяем, закончен ли матч
             const setsWon1 = setScores.filter(score => score[0] > score[1]).length;
             const setsWon2 = setScores.filter(score => score[1] > score[0]).length;
             
             if (setsWon1 >= 2 || setsWon2 >= 2) {
-                alert(`Матч завершен! Победитель: ${setsWon1 >= 2 ? 'Игрок 1' : 'Игрок 2'}`);
+                alert(`Матч завершен! Победитель: ${setsWon1 >= 2 ? player1Name : player2Name}\n\nСчёт по сетам:\nСет 1: ${setScores[0][0]}:${setScores[0][1]}\nСет 2: ${setScores[1][0]}:${setScores[1][1]}\nСет 3: ${setScores[2][0]}:${setScores[2][1]}`);
                 return;
             }
             
@@ -545,10 +662,16 @@
             player2Score = 0;
             servePlayer = 1;
             manualServeControl = false;  // Сбрасываем ручное управление при новом сете
+            // НЕ сбрасываем playersSwapped - игроки остаются в тех же позициях между сетами
+            
+            console.log(`[PingPong] Переход к сету ${currentSet}`);
+            console.log('[PingPong] Все сеты после перехода:', JSON.stringify(setScores));
             
             document.querySelector('.current-set').textContent = `Сет ${currentSet} из 3`;
             updateDisplay();
             updateServe();
+            
+            console.log('[PingPong] Все сеты после updateDisplay:', JSON.stringify(setScores));
         }
         
         function toggleServe() {
@@ -561,6 +684,10 @@
         
         function swapPlayers() {
             if (confirm('Поменять игроков местами?')) {
+                // Переключаем флаг смены мест
+                playersSwapped = !playersSwapped;
+                console.log('[PingPong] Флаг playersSwapped:', playersSwapped);
+                
                 // Меняем местами текущий счет
                 [player1Score, player2Score] = [player2Score, player1Score];
                 
@@ -581,11 +708,33 @@
                 // Меняем местами имена игроков
                 [player1Name, player2Name] = [player2Name, player1Name];
                 
+                // Получаем области игроков
+                const playerArea1 = document.getElementById('playerArea1');
+                const playerArea2 = document.getElementById('playerArea2');
+                
+                // Меняем цвета игроков местами
+                const hasBlue1 = playerArea1.classList.contains('player-blue');
+                const hasRed1 = playerArea1.classList.contains('player-red');
+                const hasBlue2 = playerArea2.classList.contains('player-blue');
+                const hasRed2 = playerArea2.classList.contains('player-red');
+                
+                // Удаляем текущие цвета
+                playerArea1.classList.remove('player-blue', 'player-red');
+                playerArea2.classList.remove('player-blue', 'player-red');
+                
+                // Добавляем поменянные цвета
+                if (hasBlue1) playerArea2.classList.add('player-blue');
+                if (hasRed1) playerArea2.classList.add('player-red');
+                if (hasBlue2) playerArea1.classList.add('player-blue');
+                if (hasRed2) playerArea1.classList.add('player-red');
+                
                 // Обновляем имена в DOM
-                const player1NameSpan = document.querySelector('.player-info:first-child .player-name span');
-                const player2NameSpan = document.querySelector('.player-info:last-child .player-name span');
+                const player1NameSpan = playerArea1.querySelector('.player-name span');
+                const player2NameSpan = playerArea2.querySelector('.player-name span');
                 player1NameSpan.textContent = player1Name;
                 player2NameSpan.textContent = player2Name;
+                
+                console.log('[PingPong] Игроки поменяны местами, цвета также перемещены');
                 
                 updateDisplay();
                 updateServe();
@@ -619,6 +768,7 @@
                 gameHistory = [];
                 servePlayer = 1;
                 manualServeControl = false;  // Сбрасываем ручное управление
+                playersSwapped = false;  // Сбрасываем флаг смены мест
                 document.querySelector('.current-set').textContent = 'Сет 1 из 3';
                 updateDisplay();
                 updateServe();
@@ -631,20 +781,37 @@
                 return;
             }
             
+            // Сохраняем текущий счет в setScores перед сохранением
+            setScores[currentSet - 1] = [player1Score, player2Score];
+            
+            console.log('[PingPong] Флаг playersSwapped перед сохранением:', playersSwapped);
+            console.log('[PingPong] Текущий setScores (визуальный):', JSON.stringify(setScores));
+            
+            // Если игроки были поменяны местами, нужно "отменить" перестановку для сохранения в БД
+            let setsToSave = setScores;
+            if (playersSwapped) {
+                // Меняем счёт обратно для правильного сохранения в БД
+                setsToSave = setScores.map(score => [score[1], score[0]]);
+                console.log('[PingPong] Игроки были поменяны местами, корректируем счёт для сохранения:', JSON.stringify(setsToSave));
+            }
+            
             // Формируем данные для сохранения
             const sets = [];
             
-            // Добавляем все завершенные сеты
-            for (let i = 0; i < setScores.length; i++) {
-                const setScore = setScores[i];
-                if (setScore[0] > 0 || setScore[1] > 0) {
-                    sets.push({
-                        set_number: i + 1,
-                        score1: setScore[0],
-                        score2: setScore[1],
-                        completed: true
-                    });
-                }
+            // Добавляем ВСЕ сеты ВСЕГДА (чтобы обнулить неиспользованные сеты в БД)
+            for (let i = 0; i < setsToSave.length; i++) {
+                const setScore = setsToSave[i];
+                // Проверяем, завершен ли сет
+                const isCompleted = (setScore[0] >= 11 || setScore[1] >= 11) && Math.abs(setScore[0] - setScore[1]) >= 2;
+                
+                sets.push({
+                    set_number: i + 1,
+                    score1: setScore[0],
+                    score2: setScore[1],
+                    completed: isCompleted
+                });
+                
+                console.log(`[PingPong] Сет ${i+1} для отправки в БД: score1=${setScore[0]}, score2=${setScore[1]}, completed=${isCompleted}`);
             }
             
             const resultData = {
@@ -652,7 +819,7 @@
                 matchId: window.matchId
             };
             
-            console.log('[PingPong] saveToTournament(): отправляем данные', resultData);
+            console.log('[PingPong] saveToTournament(): отправляем данные в БД', resultData);
             
             // Отправляем запрос на сохранение
             fetch(`/api/matches/${window.matchId}/save-referee-result`, {
@@ -667,8 +834,30 @@
             .then(data => {
                 if (data.success) {
                     alert('Результат успешно сохранен в турнир!');
+                    
+                    // Обновляем родительское окно, если оно существует
+                    if (window.opener && !window.opener.closed) {
+                        try {
+                            // Пытаемся обновить страницу турнира
+                            window.opener.location.reload();
+                        } catch(e) {
+                            console.log('[PingPong] Не удалось обновить родительское окно:', e);
+                        }
+                    }
+                    
                     // Закрываем окно судейства
-                    try { window.close(); } catch(_) {}
+                    setTimeout(() => {
+                        try { 
+                            window.close(); 
+                        } catch(e) {
+                            console.log('[PingPong] Не удалось закрыть окно:', e);
+                            // Если окно не закрывается (например, в некоторых браузерах),
+                            // можем вернуться на страницу турнира
+                            if (window.opener && !window.opener.closed) {
+                                window.close();
+                            }
+                        }
+                    }, 500); // Небольшая задержка для показа сообщения
                 } else {
                     alert('Ошибка при сохранении: ' + (data.error || 'Неизвестная ошибка'));
                 }
@@ -704,6 +893,43 @@
         // Обновляем названия команд, если они переданы
         if (team1Name && team2Name) {
             updateTeamNames(team1Name, team2Name);
+        }
+        
+        // Загружаем счет ВСЕХ сетов из URL параметров
+        let allSetsLoaded = false;
+        for (let i = 1; i <= 3; i++) {
+            const set_score1 = urlParams.get('set' + i + '_score1');
+            const set_score2 = urlParams.get('set' + i + '_score2');
+            if (set_score1 !== null && set_score2 !== null) {
+                setScores[i - 1] = [parseInt(set_score1, 10) || 0, parseInt(set_score2, 10) || 0];
+                allSetsLoaded = true;
+                console.log('[PingPong] Загружен счет сета', i, ':', setScores[i - 1]);
+            }
+        }
+        
+        // Загружаем текущий счет из URL параметров
+        const score1Param = urlParams.get('score1');
+        const score2Param = urlParams.get('score2');
+        const setParam = urlParams.get('set');
+        
+        if (setParam !== null) {
+            currentSet = parseInt(setParam, 10) || 1;
+            console.log('[PingPong] Установлен текущий сет:', currentSet);
+        }
+        
+        if (score1Param !== null && score2Param !== null) {
+            player1Score = parseInt(score1Param, 10) || 0;
+            player2Score = parseInt(score2Param, 10) || 0;
+            console.log('[PingPong] Загружен счет текущего сета из URL:', player1Score, '-', player2Score);
+            
+            // Обновляем счет текущего сета в массиве setScores
+            setScores[currentSet - 1] = [player1Score, player2Score];
+        }
+        
+        // Если загрузили данные, обновляем отображение
+        if (allSetsLoaded || (score1Param !== null && score2Param !== null)) {
+            updateDisplay();
+            updateServe();
         }
         
         // Функция для обновления названий команд
