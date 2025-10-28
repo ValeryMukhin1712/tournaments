@@ -8,6 +8,7 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from utils.telegram_utils import send_telegram_message
 # Tournament передается как параметр в функции
 
 logger = logging.getLogger(__name__)
@@ -2935,9 +2936,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             ranking_data = ranking_data_by_id.get(participant_id, {})
             participant_data['position'] = ranking_data.get('place', 999)
         
-        # Сортируем участников по местам
+        # Сортируем участников: таблицу статистики по местам, турнирную таблицу по именам
         participants_with_stats.sort(key=lambda x: x['position'])
-        participants_with_stats_chessboard.sort(key=lambda x: x['position'])
+        participants_with_stats_chessboard.sort(key=lambda x: x['participant'].name)
         
         # Создаем шахматку (упрощенная версия)
         chessboard = {}
@@ -3365,5 +3366,54 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     def badminton_referee():
         """Страница судьи матча по бадминтону"""
         return render_template('badminton_referee.html')
+    
+    @app.route('/api/contact', methods=['POST'])
+    def contact():
+        """Обработка формы обратной связи с отправкой в Telegram"""
+        try:
+            data = request.get_json()
+            
+            if not data:
+                return jsonify({'success': False, 'error': 'Нет данных'}), 400
+            
+            name = data.get('name', '').strip()
+            email = data.get('email', 'Не указан').strip()
+            telegram_contact = data.get('telegram', 'Не указан').strip()
+            subject = data.get('subject', '').strip()
+            message = data.get('message', '').strip()
+            
+            # Валидация
+            if not name or not subject or not message:
+                return jsonify({'success': False, 'error': 'Заполните все обязательные поля'}), 400
+            
+            # Формируем сообщение для Telegram
+            telegram_message = f"""
+🔔 <b>Новое сообщение из Quick Score</b>
+
+👤 <b>Имя:</b> {name}
+📧 <b>Email:</b> {email}
+✈️ <b>Telegram:</b> {telegram_contact}
+📝 <b>Тема:</b> {subject}
+
+💬 <b>Сообщение:</b>
+{message}
+
+⏰ <b>Время:</b> {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}
+"""
+            
+            # Отправляем в Telegram
+            app.logger.info(f"Попытка отправки сообщения обратной связи от {name} ({email})")
+            success = send_telegram_message(telegram_message)
+            
+            if success:
+                app.logger.info(f"✅ Сообщение обратной связи успешно отправлено от {name} ({email})")
+                return jsonify({'success': True, 'message': 'Сообщение отправлено'})
+            else:
+                app.logger.error(f"❌ Не удалось отправить сообщение в Telegram от {name}. Проверьте логи utils.telegram_utils")
+                return jsonify({'success': False, 'error': 'Не удалось отправить сообщение. Попробуйте позже.'}), 500
+                
+        except Exception as e:
+            app.logger.exception(f"❌ Критическая ошибка при обработке формы обратной связи: {e}")
+            return jsonify({'success': False, 'error': 'Внутренняя ошибка сервера'}), 500
     
     # ===== КОНЕЦ create_main_routes =====
