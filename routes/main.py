@@ -1249,6 +1249,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     session['admin_email'] = admin.email
                     session['admin_token'] = token
                     session['session_token'] = session_token
+                    # Очищаем данные участника и зрителя при входе как админ
+                    session.pop('participant_name', None)
+                    session.pop('participant_logged_in', None)
+                    session.pop('viewer_name', None)
+                    session.pop('viewer_authenticated', None)
                     
                     flash(f'Добро пожаловать, {admin.name}!', 'success')
                     return redirect(url_for('admin_dashboard'))
@@ -1349,6 +1354,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             session['admin_email'] = system_admin.email
             session['is_system_admin'] = True
             session['session_token'] = session_token
+            # Очищаем данные участника и зрителя при входе как системный админ
+            session.pop('participant_name', None)
+            session.pop('participant_logged_in', None)
+            session.pop('viewer_name', None)
+            session.pop('viewer_authenticated', None)
             
             logger.info(f"Системный администратор успешно авторизован с токеном: {session_token}")
             return jsonify({
@@ -2323,6 +2333,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         # Сохраняем имя участника в сессии
         session['participant_name'] = name
         session['participant_logged_in'] = True
+        # Очищаем данные админа и зрителя при входе как участник
+        session.pop('admin_email', None)
+        session.pop('admin_id', None)
+        session.pop('viewer_name', None)
+        session.pop('viewer_authenticated', None)
         
         logger.info(f"Участник {name} вошел в систему")
         flash(f'Добро пожаловать, {name}!', 'success')
@@ -2768,6 +2783,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         """Просмотр турнира для зрителей (без авторизации)"""
         tournament = Tournament.query.get_or_404(tournament_id)
         
+        # Устанавливаем флаг зрителя в сессии
+        session['viewer_mode'] = True
+        
         # Получаем участников турнира
         participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
         
@@ -3177,6 +3195,11 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 # Сохраняем данные в сессии
                 session['viewer_name'] = name
                 session['viewer_authenticated'] = True
+                # Очищаем данные админа и участника при входе как зритель
+                session.pop('admin_email', None)
+                session.pop('admin_id', None)
+                session.pop('participant_name', None)
+                session.pop('participant_logged_in', None)
                 flash(f'Добро пожаловать, {name}!', 'success')
                 return redirect(url_for('tournaments_list_viewer'))
             else:

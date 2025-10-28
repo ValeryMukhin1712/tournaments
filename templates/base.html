@@ -521,6 +521,24 @@
             color: white;
         }
         
+        /* Стили для имени пользователя */
+        .user-name-display {
+            font-size: 0.75rem;
+            color: rgba(0, 0, 0, 0.4);
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.03);
+            white-space: nowrap;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .user-name-display:hover {
+            color: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
         /* Адаптивность для мобильных устройств */
         @media (max-width: 768px) {
             .theme-selector {
@@ -548,6 +566,11 @@
                 width: 32px;
                 height: 32px;
                 font-size: 12px;
+            }
+            
+            .user-name-display {
+                font-size: 0.65rem;
+                padding: 3px 6px;
             }
         }
         
@@ -692,6 +715,21 @@
                 <a href="#" class="nav-btn-inline nav-btn-help" title="Помощь" onclick="showHelp()">
                     <i class="fas fa-question"></i>
                 </a>
+                {% if request.endpoint not in ['referee_test', 'referee_page', 'referee_badminton', 'referee_volleyball', 'referee_pingpong', 'badminton_referee', 'tournaments_list', 'request_token', 'admin_tournament'] %}
+                    {% if request.endpoint == 'tournament_spectator' %}
+                        <span class="user-name-display ms-2">зритель</span>
+                    {% elif session.get('participant_name') or session.get('viewer_name') or session.get('admin_email') %}
+                        <span class="user-name-display ms-2">
+                            {% if session.get('participant_name') -%}
+                                {{ session.get('participant_name') }}
+                            {%- elif session.get('viewer_name') or session.get('viewer_authenticated') -%}
+                                зритель
+                            {%- elif session.get('admin_email') -%}
+                                {{ session.get('admin_email') }}
+                            {%- endif %}
+                        </span>
+                    {% endif %}
+                {% endif %}
             </div>
             
             <div class="d-flex w-100 justify-content-between">
@@ -726,6 +764,21 @@
             <a href="#" class="nav-btn-inline nav-btn-help" title="Помощь" onclick="showHelp()">
                 <i class="fas fa-question"></i>
             </a>
+            {% if request.endpoint not in ['referee_test', 'referee_page', 'referee_badminton', 'referee_volleyball', 'referee_pingpong', 'badminton_referee', 'tournaments_list', 'request_token', 'admin_tournament'] %}
+                {% if request.endpoint == 'tournament_spectator' %}
+                    <span class="user-name-display">зритель</span>
+                {% elif session.get('participant_name') or session.get('viewer_name') or session.get('admin_email') %}
+                    <span class="user-name-display">
+                        {% if session.get('participant_name') -%}
+                            {{ session.get('participant_name') }}
+                        {%- elif session.get('viewer_name') or session.get('viewer_authenticated') -%}
+                            зритель
+                        {%- elif session.get('admin_email') -%}
+                            {{ session.get('admin_email') }}
+                        {%- endif %}
+                    </span>
+                {% endif %}
+            {% endif %}
         </div>
     </div>
     {% endif %}
