@@ -614,13 +614,12 @@ body {
             <h1 class="hero-title display-4">
                 <i class="fas fa-trophy me-3"></i>Quick Score
             </h1>
-            <p class="lead text-muted">Выберите вашу роль для продолжения</p>
             
             <div class="d-flex gap-2 justify-content-center flex-wrap">
-                <button class="btn btn-gradient btn-sm" onclick="adminLogin()" title="Вход для администратора системы">
-                    <i class="fas fa-user-shield me-2"></i>Вход администратора
+                <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="adminLogin()" title="Вход для администратора системы" style="opacity: 0.4; border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.3);">
+                    <i class="fas fa-user-shield"></i>
                 </button>
-                <button class="btn btn-outline-primary btn-sm" onclick="openReferee()" title="Открыть приложение судейства">
+                <button class="btn btn-gradient btn-sm rounded-pill" onclick="openReferee()" title="Открыть приложение судейства">
                     <i class="fas fa-whistle me-2"></i>Судейство
                 </button>
             </div>
@@ -711,12 +710,15 @@ body {
                     <div class="card-body text-center">
                         <h5 class="card-title">
                             <i class="fas fa-info-circle me-2 icon-gradient"></i>
-                            О системе
+                            Пэт проект
                         </h5>
                         <p class="card-text mb-3">
-                            Турнирный Ассистент предназначен для круговых турниров с матчами из 3-х сетов. 
+                            Для создания любительских турниров с матчами из 3-х сетов. 
                             Например: настольного тенниса, бадминтона, волейбола и ...
                         </p>
+                        <button class="btn btn-sm rounded-pill" onclick="openContactForm()" style="border: 1px solid var(--primary-color); color: var(--primary-color);">
+                            <i class="fas fa-envelope me-2"></i>Связаться с автором
+                        </button>
                     </div>
                 </div>
             </div>
@@ -735,7 +737,7 @@ function adminLogin() {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-user-shield me-2"></i>Вход администратора системы
+                        <i class="fas fa-user-shield me-2"></i>Вход только для администратора системы
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -990,6 +992,191 @@ function changeTheme(themeName) {
         // Сохраняем выбранную тему в localStorage
         localStorage.setItem('selectedTheme', themeName);
     }
+}
+
+// Очистка модальных окон при загрузке/возврате на страницу
+document.addEventListener('DOMContentLoaded', function() {
+    // Закрываем все открытые модальные окна
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+            bsModal.hide();
+        }
+        // Удаляем модальное окно из DOM
+        if (modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+        }
+    });
+    
+    // Удаляем все backdrop'ы
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => {
+        if (backdrop.parentNode) {
+            backdrop.parentNode.removeChild(backdrop);
+        }
+    });
+    
+    // Убираем класс modal-open с body
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+});
+
+// Дополнительная очистка при событии pageshow (срабатывает при возврате назад)
+window.addEventListener('pageshow', function(event) {
+    // Если страница загружена из кэша (bfcache)
+    if (event.persisted) {
+        // Закрываем все открытые модальные окна
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            }
+            // Удаляем модальное окно из DOM
+            if (modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+        });
+        
+        // Удаляем все backdrop'ы
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => {
+            if (backdrop.parentNode) {
+                backdrop.parentNode.removeChild(backdrop);
+            }
+        });
+        
+        // Убираем класс modal-open с body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+});
+
+// Форма обратной связи
+function openContactForm() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'contactModal';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-envelope me-2"></i>Связаться с автором
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="contactName" class="form-label">Ваше имя</label>
+                            <input type="text" class="form-control" id="contactName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Email (необязательно)</label>
+                            <input type="email" class="form-control" id="contactEmail" placeholder="Для возможности ответить вам">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactTelegram" class="form-label">Telegram (необязательно)</label>
+                            <input type="text" class="form-control" id="contactTelegram" placeholder="@username или номер телефона">
+                            <small class="text-muted">Укажите ваш Telegram для быстрой связи</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactSubject" class="form-label">Тема</label>
+                            <select class="form-select" id="contactSubject" required>
+                                <option value="">Выберите тему...</option>
+                                <option value="Вопрос">Вопрос</option>
+                                <option value="Предложение">Предложение</option>
+                                <option value="Ошибка">Сообщить об ошибке</option>
+                                <option value="Благодарность">Благодарность</option>
+                                <option value="Другое">Другое</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactMessage" class="form-label">Сообщение</label>
+                            <textarea class="form-control" id="contactMessage" rows="4" required></textarea>
+                        </div>
+                        <div class="alert alert-info" style="font-size: 0.85rem;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Ваше сообщение будет отправлено разработчику. Мы ценим обратную связь!
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-gradient" onclick="sendContactForm()">
+                        <i class="fas fa-paper-plane me-2"></i>Отправить
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+
+function sendContactForm() {
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const telegram = document.getElementById('contactTelegram').value.trim();
+    const subject = document.getElementById('contactSubject').value;
+    const message = document.getElementById('contactMessage').value.trim();
+    
+    // Валидация
+    if (!name || !subject || !message) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
+    
+    // Отправка данных
+    const submitButton = document.querySelector('#contactModal .btn-gradient');
+    const originalText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Отправка...';
+    
+    // Получаем CSRF токен
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            name: name,
+            email: email || 'Не указан',
+            telegram: telegram || 'Не указан',
+            subject: subject,
+            message: message
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Спасибо! Ваше сообщение успешно отправлено.');
+            bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+        } else {
+            alert('Ошибка при отправке: ' + (data.error || 'Попробуйте позже'));
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка при отправке сообщения. Пожалуйста, попробуйте позже.');
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    });
 }
 
 </script>
