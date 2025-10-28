@@ -39,6 +39,10 @@ class Config:
     EMAILJS_TEMPLATE_ID = os.environ.get('EMAILJS_TEMPLATE_ID')
     EMAILJS_USER_ID = os.environ.get('EMAILJS_USER_ID')
     
+    # Настройки Telegram Bot для обратной связи
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN') or '8395818732:AAHwQKYFV3Fr3LOopRS3nOwvH28lhCBXEfc'
+    TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID') or '7052840972'
+    
     # Настройки управления сессиями
     SESSION_TIMEOUT_HOURS = int(os.environ.get('SESSION_TIMEOUT_HOURS', 2))  # Время жизни сессии
     SESSION_CHECK_INTERVAL = int(os.environ.get('SESSION_CHECK_INTERVAL', 300))  # Интервал проверки сессий (5 минут)
