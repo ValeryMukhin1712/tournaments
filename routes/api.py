@@ -8,8 +8,211 @@ from datetime import datetime, timedelta, date, time
 import logging
 from flask_wtf.csrf import CSRFProtect
 from routes.main import update_tournament_status
+from utils.telegram_utils import send_telegram_message
+from utils.qr_generator import generate_telegram_token, generate_qr_code, get_bot_username
 
 logger = logging.getLogger(__name__)
+
+def recalculate_schedule_after_match_completion(match_id, Tournament, Match, db):
+    """
+    Пересчитывает время начала следующих матчей на той же площадке после завершения матча.
+    Учитывает реальное время окончания матча.
+    
+    Args:
+        match_id: ID завершенного матча
+        Tournament: Модель турнира
+        Match: Модель матча
+        db: Объект базы данных
+    """
+    from datetime import datetime, timedelta
+    
+    try:
+        logger.info(f"[ПЕРЕСЧЕТ] >>> ВХОД В ФУНКЦИЮ для матча {match_id}")
+        completed_match = Match.query.get(match_id)
+        if not completed_match:
+            logger.warning(f"[ПЕРЕСЧЕТ] Матч {match_id} не найден для пересчета расписания")
+            return
+        
+        logger.info(f"[ПЕРЕСЧЕТ] Матч {match_id} найден: статус={completed_match.status}, площадка={completed_match.court_number}, match_number={completed_match.match_number}")
+        
+        # Работаем только с завершенными матчами
+        if completed_match.status != 'завершен':
+            logger.info(f"[ПЕРЕСЧЕТ] Матч {match_id} не завершен (статус: {completed_match.status}), пересчет не требуется")
+            return
+        
+        # Всегда используем текущее локальное время как время окончания последнего завершенного матча
+        # Это позволяет пересчитывать время следующих матчей от момента сохранения
+        # Используем datetime.now() вместо datetime.utcnow() для учета локального часового пояса
+        match_end_time = datetime.now()
+        
+        logger.info(f"[ПЕРЕСЧЕТ] Начало пересчета для матча {match_id} (площадка: {completed_match.court_number}, match_number: {completed_match.match_number})")
+        logger.info(f"[ПЕРЕСЧЕТ] Локальное время окончания матча: {match_end_time}")
+        
+        # Сохраняем текущее время в actual_end_time, если оно еще не установлено
+        if not completed_match.actual_end_time:
+            completed_match.actual_end_time = match_end_time
+            db.session.commit()
+        
+        # Получаем турнир для параметров
+        tournament = Tournament.query.get(completed_match.tournament_id)
+        if not tournament:
+            logger.warning(f"Турнир {completed_match.tournament_id} не найден")
+            return
+        
+        match_duration = tournament.match_duration or 15  # длительность матча в минутах
+        break_duration = tournament.break_duration or 2   # перерыв между матчами в минутах
+        end_time = tournament.end_time or None  # конец рабочего дня
+        
+        logger.info(f"[ПЕРЕСЧЕТ] Параметры турнира: длительность={match_duration} мин, перерыв={break_duration} мин")
+        
+        # Находим следующий матч на той же площадке после этого матча
+        # Используем match_number для правильного определения порядка
+        # Ищем следующий матч с большим match_number на той же площадке
+        next_match = Match.query.filter(
+            Match.tournament_id == completed_match.tournament_id,
+            Match.court_number == completed_match.court_number,
+            Match.id != match_id,
+            Match.status != 'завершен',
+            Match.match_number > completed_match.match_number
+        ).order_by(
+            Match.match_number.asc()
+        ).first()
+        
+        # Если не нашли по match_number, пробуем найти по дате и времени (для обратной совместимости)
+        if not next_match:
+            logger.info(f"[ПЕРЕСЧЕТ] Не найден следующий матч по match_number, пробуем по дате/времени")
+            next_match = Match.query.filter(
+                Match.tournament_id == completed_match.tournament_id,
+                Match.court_number == completed_match.court_number,
+                Match.id != match_id,
+                Match.status != 'завершен'
+            ).order_by(
+                Match.match_date.asc(),
+                Match.match_time.asc(),
+                Match.match_number.asc()
+            ).first()
+        
+        # Если всё ещё не нашли, пробуем найти любой незавершенный матч на той же площадке
+        if not next_match:
+            logger.info(f"[ПЕРЕСЧЕТ] Не найден следующий матч по дате/времени, пробуем любой незавершенный на площадке")
+            all_court_matches = Match.query.filter(
+                Match.tournament_id == completed_match.tournament_id,
+                Match.court_number == completed_match.court_number,
+                Match.id != match_id,
+                Match.status != 'завершен'
+            ).all()
+            logger.info(f"[ПЕРЕСЧЕТ] Найдено незавершенных матчей на площадке {completed_match.court_number}: {len(all_court_matches)}")
+            for m in all_court_matches:
+                logger.info(f"[ПЕРЕСЧЕТ]   - Матч ID={m.id}, match_number={m.match_number}, статус={m.status}, время={m.match_date} {m.match_time}")
+            
+            # Берём первый незавершенный матч на площадке после текущего по match_number или ID
+            next_match = Match.query.filter(
+                Match.tournament_id == completed_match.tournament_id,
+                Match.court_number == completed_match.court_number,
+                Match.id != match_id,
+                Match.status != 'завершен'
+            ).order_by(
+                Match.id.asc()
+            ).first()
+        
+        if not next_match:
+            logger.info(f"[ПЕРЕСЧЕТ] Нет следующих матчей на площадке {completed_match.court_number} после матча {match_id}")
+            return
+        
+        logger.info(f"[ПЕРЕСЧЕТ] Найден следующий матч: ID={next_match.id}, match_number={next_match.match_number}, текущее время={next_match.match_date} {next_match.match_time}")
+        
+        # Вычисляем новое время начала следующего матча
+        # Время окончания предыдущего матча + перерыв
+        # При динамическом пересчете используем реальное время окончания без ограничений рабочего дня
+        new_start_time = match_end_time + timedelta(minutes=break_duration)
+        
+        # Берем дату и время напрямую из вычисленного времени
+        # При динамическом пересчете не ограничиваемся рабочим временем,
+        # так как матч уже начался и должен быть завершен независимо от расписания
+        new_start_date = new_start_time.date()
+        new_start_time_only = new_start_time.time()
+        
+        logger.info(f"[ПЕРЕСЧЕТ] Вычислено новое время начала: {new_start_date} {new_start_time_only} (от {match_end_time})")
+        
+        # Обновляем запланированное время следующего матча
+        old_time = next_match.match_time
+        old_date = next_match.match_date
+        
+        next_match.match_time = new_start_time_only
+        next_match.match_date = new_start_date
+        
+        # Устанавливаем реальное время начала, если матч еще не начался
+        if not next_match.actual_start_time and next_match.status == 'запланирован':
+            # Реальное время начала = запланированное (будет обновлено при фактическом начале)
+            next_match.actual_start_time = datetime.combine(new_start_date, new_start_time_only)
+        
+        logger.info(
+            f"[ПЕРЕСЧЕТ] Матч {next_match.id} на площадке {completed_match.court_number}: "
+            f"{old_date} {old_time} -> {new_start_date} {new_start_time_only}"
+        )
+        
+        # Проверяем, что изменения сохранились
+        db.session.commit()
+        db.session.refresh(next_match)
+        
+        # Убеждаемся, что дата и время правильно сохранены
+        logger.info(f"[ПЕРЕСЧЕТ] После commit: матч {next_match.id} теперь имеет время {next_match.match_date} {next_match.match_time}")
+        logger.info(f"[ПЕРЕСЧЕТ] Проверка: match_date type={type(next_match.match_date)}, match_time type={type(next_match.match_time)}")
+        
+        # Дополнительная проверка через прямой запрос из базы
+        verify_match = Match.query.get(next_match.id)
+        if verify_match:
+            logger.info(f"[ПЕРЕСЧЕТ] Прямой запрос из БД: match_date={verify_match.match_date}, match_time={verify_match.match_time}")
+        
+        # Рекурсивно пересчитываем все последующие матчи на этой площадке
+        # Используем запланированное окончание следующего матча для расчета времени следующего
+        next_match_planned_end = datetime.combine(
+            new_start_date,
+            new_start_time_only
+        ) + timedelta(minutes=match_duration)
+        
+        # Находим следующий после next_match матч
+        next_next_match = Match.query.filter(
+            Match.tournament_id == completed_match.tournament_id,
+            Match.court_number == completed_match.court_number,
+            Match.id != match_id,
+            Match.id != next_match.id,
+            Match.status != 'завершен',
+            Match.match_number > next_match.match_number
+        ).order_by(
+            Match.match_number.asc()
+        ).first()
+        
+        if next_next_match:
+            # Пересчитываем время для следующего матча, используя запланированное окончание next_match
+            # При каскадном пересчете также не ограничиваемся рабочим временем
+            new_next_start = next_match_planned_end + timedelta(minutes=break_duration)
+            new_next_start_time = new_next_start.time()
+            new_next_start_date = new_next_start.date()
+            
+            logger.info(f"[ПЕРЕСЧЕТ КАСКАДНЫЙ] Вычислено новое время для матча {next_next_match.id}: {new_next_start_date} {new_next_start_time} (от {next_match_planned_end})")
+            
+            old_next_time = next_next_match.match_time
+            old_next_date = next_next_match.match_date
+            
+            next_next_match.match_time = new_next_start_time
+            next_next_match.match_date = new_next_start_date
+            
+            logger.info(
+                f"[ПЕРЕСЧЕТ КАСКАДНЫЙ] Матч {next_next_match.id}: "
+                f"{old_next_date} {old_next_time} -> {new_next_start_date} {new_next_start_time}"
+            )
+            
+            db.session.commit()
+            
+            # Если следующий матч уже завершен, используем его реальное время для дальнейшего пересчета
+            if next_match.status == 'завершен' and next_match.actual_end_time:
+                recalculate_schedule_after_match_completion(next_match.id, Tournament, Match, db)
+    
+    except Exception as e:
+        logger.error(f"[ОШИБКА ПЕРЕСЧЕТА] Матч {match_id}: {e}")
+        db.session.rollback()
+
 
 def create_smart_schedule(tournament, participants, Match, db, preserve_results=True):
     """
@@ -834,19 +1037,25 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         """Обновление матча"""
         from flask import session
         from flask_wtf.csrf import validate_csrf
+        from datetime import datetime
+        
+        logger.info(f"[update_match] Вызов update_match для матча {match_id}")
+        data = request.get_json()
+        logger.info(f"[update_match] Получены данные: {data}")
         
         # Проверяем CSRF токен
         csrf_token = request.headers.get('X-CSRFToken')
-        logger.info(f"CSRF токен: {csrf_token}")
+        logger.info(f"[update_match] CSRF токен: {csrf_token}")
         try:
             validate_csrf(csrf_token)
-            logger.info("CSRF токен валиден")
+            logger.info("[update_match] CSRF токен валиден")
         except Exception as e:
-            logger.warning(f"CSRF validation failed: {e}")
+            logger.warning(f"[update_match] CSRF validation failed: {e}")
             return jsonify({'error': 'Неверный CSRF токен'}), 400
         
         # Проверяем авторизацию через сессию
         if 'admin_id' not in session:
+            logger.warning(f"[update_match] Нет авторизации для матча {match_id}")
             return jsonify({'error': 'Необходима авторизация'}), 401
         
         # Простая заглушка для админа
@@ -967,9 +1176,12 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                         match.set3_score2 = score2
                 
                 # Определяем статус матча на основе выигранных сетов
+                old_status = match.status
                 if 'sets_won_1' in data and 'sets_won_2' in data:
                     sets_won_1 = data['sets_won_1']
                     sets_won_2 = data['sets_won_2']
+                    
+                    logger.info(f"[update_match] Анализ выигранных сетов для матча {match_id}: sets_won_1={sets_won_1}, sets_won_2={sets_won_2}, текущий статус={old_status}")
                     
                     # Если счёт 1:1, матч ещё не завершён
                     if sets_won_1 == 1 and sets_won_2 == 1:
@@ -977,12 +1189,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     # Если кто-то выиграл 2 сета, матч завершён
                     elif sets_won_1 >= 2 or sets_won_2 >= 2:
                         match.status = 'завершен'
+                        logger.info(f"[update_match] Матч {match_id} завершен по выигранным сетам: {sets_won_1}:{sets_won_2}")
                     # Если счёт 0:0 или 1:0/0:1, матч в процессе
                     else:
                         match.status = 'играют'
                 else:
                     # Если нет данных о выигранных сетах, считаем матч завершённым
                     match.status = 'завершен'
+                    logger.info(f"[update_match] Матч {match_id} завершен (нет данных о выигранных сетах)")
+                
+                if old_status != match.status:
+                    logger.info(f"[update_match] Статус матча {match_id} изменен: {old_status} -> {match.status}")
                 
                 # Начисляем очки участникам матча только если матч завершён (кто-то выиграл 2 сета)
                 if match.status == 'завершен' and match.winner_id is not None:
@@ -1014,6 +1231,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                             
                             db.session.commit()
                             logger.info(f"Начислены очки за матч {match_id}: участник {participant1.name} = {participant1.points}, участник {participant2.name} = {participant2.points}")
+            
             else:
                 # Обратная совместимость со старой структурой
                 if 'score1' in data:
@@ -1023,7 +1241,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 if 'winner_id' in data:
                     match.winner_id = data['winner_id']
                 if 'status' in data:
+                    old_status = match.status
                     match.status = data['status']
+                    logger.info(f"[update_match] Статус матча {match_id} изменен: {old_status} -> {match.status}")
                 
                 # Начисляем очки для старой структуры
                 if match.status == 'завершен' and match.winner_id:
@@ -1047,8 +1267,36 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                             db.session.commit()
                             logger.info(f"Начислены очки за матч {match_id} (старая структура)")
             
-            match.updated_at = datetime.utcnow()
+            # Если матч начался (статус изменился на "в_процессе" или "играют"), устанавливаем реальное время начала
+            # Используем локальное время для учета часового пояса пользователя
+            if match.status in ['в_процессе', 'играют'] and not match.actual_start_time:
+                match.actual_start_time = datetime.now()
+                db.session.commit()
+                logger.info(f"[РЕАЛЬНОЕ ВРЕМЯ] Начало матча {match_id}: {match.actual_start_time}")
+            
+            match.updated_at = datetime.now()
             db.session.commit()
+            
+            # Обновляем объект из базы для получения актуального статуса
+            db.session.refresh(match)
+            logger.info(f"[update_match] Текущий статус матча {match_id} после сохранения: '{match.status}'")
+            
+            # Если матч завершен, устанавливаем реальное время окончания и пересчитываем расписание
+            # Используем локальное время для учета часового пояса пользователя
+            if match.status == 'завершен':
+                logger.info(f"[update_match] Матч {match_id} завершен, начинаем пересчет расписания")
+                if not match.actual_end_time:
+                    match.actual_end_time = datetime.now()
+                    db.session.commit()
+                    logger.info(f"[update_match] Установлено actual_end_time для матча {match_id}: {match.actual_end_time}")
+                
+                # Пересчитываем время следующих матчей на той же площадке
+                try:
+                    logger.info(f"[update_match] Вызов функции пересчета для матча {match_id}")
+                    recalculate_schedule_after_match_completion(match_id, Tournament, Match, db)
+                    logger.info(f"[update_match] Функция пересчета завершена для матча {match_id}")
+                except Exception as e:
+                    logger.error(f"[update_match] Ошибка при пересчете расписания после завершения матча {match_id}: {e}", exc_info=True)
             
             # Проверяем завершение турнира после обновления матча
             from routes.main import update_tournament_status
@@ -1776,9 +2024,13 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             tournament_id = data.get('tournament_id')
             participant_name = data.get('participant_name', '').strip()
             skill_level = data.get('skill_level', '').strip()
+            enable_telegram = data.get('enable_telegram', False)
             
-            if not tournament_id or not participant_name or not skill_level:
-                return jsonify({'success': False, 'error': 'Необходимо указать ID турнира, имя участника и уровень навыков'}), 400
+            if not tournament_id or not skill_level:
+                return jsonify({'success': False, 'error': 'Необходимо указать ID турнира и уровень навыков'}), 400
+            # Имя обязательно только если не выбран Telegram-способ
+            if not enable_telegram and not participant_name:
+                return jsonify({'success': False, 'error': 'Необходимо указать имя участника или выбрать подачу через Telegram'}), 400
             
             # Проверяем существование турнира
             tournament = Tournament.query.get(tournament_id)
@@ -1786,7 +2038,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
             
             # Проверяем, что турнир принимает заявки
-            if tournament.status != 'регистрация':
+            allowed_registration_statuses = ['регистрация', 'Регистрация участников']
+            if tournament.status not in allowed_registration_statuses:
                 return jsonify({'success': False, 'error': 'Турнир не принимает заявки на участие'}), 400
             
             # Проверяем, не участвует ли уже участник в турнире
@@ -1808,25 +2061,94 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if existing_waiting:
                 return jsonify({'success': False, 'error': 'Вы уже подали заявку на участие в этом турнире'}), 400
             
+            # Генерируем уникальный токен для привязки к Telegram (только если пользователь выбрал Telegram)
+            telegram_token = generate_telegram_token() if enable_telegram else None
+            
             # Создаем заявку в лист ожидания
             new_waiting_list_entry = WaitingList(
                 tournament_id=tournament_id,
-                name=participant_name,
+                name=participant_name if participant_name else 'Игрок (Telegram)',
                 skill_level=skill_level,
+                telegram=None,  # Будет заполнен после сканирования QR-кода
+                telegram_token=telegram_token,
                 status='ожидает'
             )
             
             db.session.add(new_waiting_list_entry)
             db.session.commit()
             
-            logger.info(f"Участник {participant_name} (уровень: {skill_level}) подал заявку в лист ожидания турнира {tournament.name} (ID: {tournament_id})")
+            # Генерируем QR-код для подключения к боту (только если пользователь выбрал Telegram)
+            qr_code = None
+            if enable_telegram:
+                try:
+                    bot_username = get_bot_username()
+                    qr_code = generate_qr_code(telegram_token, bot_username)
+                    logger.info(f"QR-код сгенерирован для участника {participant_name} (токен: {telegram_token[:8]}...)")
+                except Exception as e:
+                    logger.error(f"Ошибка при генерации QR-кода: {e}")
+                    qr_code = None
             
-            return jsonify({'success': True, 'message': 'Заявка успешно подана в лист ожидания'})
+            telegram_status = " с подключением к Telegram боту" if enable_telegram else ""
+            logger.info(f"Участник {participant_name} (уровень: {skill_level}) подал заявку в лист ожидания турнира {tournament.name} (ID: {tournament_id}){telegram_status}")
+            
+            return jsonify({
+                'success': True, 
+                'message': 'Заявка успешно подана в лист ожидания',
+                'qr_code': qr_code,
+                'telegram_token': telegram_token
+            })
             
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при подаче заявки на участие: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при подаче заявки'}), 500
+
+    @app.route('/api/telegram/link-token', methods=['POST'])
+    @csrf.exempt  # Исключаем из CSRF защиты, так как запросы приходят от Telegram бота
+    def link_telegram_token():
+        """API для связывания Telegram Chat ID с токеном заявки"""
+        try:
+            data = request.get_json()
+            
+            if not data:
+                return jsonify({'success': False, 'error': 'Нет данных'}), 400
+            
+            token = data.get('token', '').strip()
+            chat_id = data.get('chat_id', '').strip()
+            
+            if not token or not chat_id:
+                return jsonify({'success': False, 'error': 'Необходимо указать токен и Chat ID'}), 400
+            
+            # Ищем заявку с таким токеном
+            waiting_entry = WaitingList.query.filter_by(telegram_token=token).first()
+            
+            if not waiting_entry:
+                logger.warning(f"Попытка привязать несуществующий токен: {token[:8]}...")
+                return jsonify({'success': False, 'error': 'Токен не найден или уже использован'}), 404
+            
+            # Проверяем, не привязан ли уже токен к другому Chat ID
+            if waiting_entry.telegram and waiting_entry.telegram != chat_id:
+                logger.warning(f"Токен {token[:8]}... уже привязан к Chat ID {waiting_entry.telegram}")
+                return jsonify({'success': False, 'error': 'Токен уже привязан к другому аккаунту'}), 400
+            
+            # Связываем Chat ID с заявкой
+            waiting_entry.telegram = chat_id
+            db.session.commit()
+            
+            logger.info(f"✅ Chat ID {chat_id} успешно привязан к заявке участника {waiting_entry.name} (токен: {token[:8]}...)")
+            
+            # Возвращаем информацию о заявке
+            return jsonify({
+                'success': True,
+                'message': 'Telegram успешно подключен',
+                'participant_name': waiting_entry.name,
+                'tournament_id': waiting_entry.tournament_id
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при связывании Telegram токена: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при подключении Telegram'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>/waiting-list', methods=['GET'])
     def get_waiting_list(tournament_id):
@@ -1922,6 +2244,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 new_participant = Participant(
                     tournament_id=tournament_id,
                     name=waiting_entry.name,
+                    telegram=waiting_entry.telegram,  # Переносим Telegram контакт
                     points=0,
                     registered_at=tournament.created_at  # Устанавливаем время регистрации как время создания турнира
                 )
@@ -1943,6 +2266,36 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 # Помечаем заявку как принятую
                 waiting_entry.status = 'принят'
                 accepted_count += 1
+                
+                # Отправляем уведомление в Telegram, если указан контакт
+                if waiting_entry.telegram:
+                    try:
+                        # Формируем сообщение для участника
+                        notification_message = f"""
+🎉 <b>Поздравляем, {waiting_entry.name}!</b>
+
+Ваша заявка на участие в турнире <b>"{tournament.name}"</b> одобрена!
+
+📋 <b>Информация о турнире:</b>
+🏆 Турнир: {tournament.name}
+⚽ Вид спорта: {tournament.sport_type}
+📅 Начало: {tournament.start_date.strftime('%d.%m.%Y') if tournament.start_date else 'Не указано'}
+⏰ Время матчей: {tournament.start_time.strftime('%H:%M') if tournament.start_time else 'Не указано'}
+
+Ожидайте расписание матчей. Удачи! 💪
+"""
+                        
+                        logger.info(f"Попытка отправки уведомления участнику {waiting_entry.name} (Telegram: {waiting_entry.telegram})")
+                        success = send_telegram_message(notification_message, telegram_contact=waiting_entry.telegram)
+                        
+                        if success:
+                            logger.info(f"✅ Уведомление успешно отправлено участнику {waiting_entry.name}")
+                        else:
+                            logger.warning(f"⚠️ Не удалось отправить уведомление участнику {waiting_entry.name}. Проверьте настройки Telegram")
+                    except Exception as e:
+                        logger.error(f"❌ Ошибка при отправке уведомления участнику {waiting_entry.name}: {e}")
+                else:
+                    logger.info(f"ℹ️  Telegram не указан для участника {waiting_entry.name}, уведомление не отправлено")
             
             db.session.commit()
             
@@ -3038,8 +3391,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 match.set3_score1 = score1
                 match.set3_score2 = score2
             
+            # Устанавливаем реальное время начала матча при первом сохранении счета
+            # Используем локальное время для учета часового пояса пользователя
+            if not match.actual_start_time:
+                from datetime import datetime
+                match.actual_start_time = datetime.now()
+                match.status = 'в_процессе'
+                logger.info(f"[РЕАЛЬНОЕ ВРЕМЯ] Начало матча {match_id} (первое действие): {match.actual_start_time}")
+            
             # Обновляем время последнего изменения
-            match.updated_at = datetime.utcnow()
+            match.updated_at = datetime.now()
             
             # Сохраняем изменения
             db.session.commit()
@@ -3115,6 +3476,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     def save_referee_result(match_id):
         """Сохранение результата матча из страницы судейства"""
         from flask import session
+        from datetime import datetime
         try:
             # CSRF из заголовка
             csrf_token = request.headers.get('X-CSRFToken')
@@ -3227,6 +3589,23 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             match_check = Match.query.get(match_id)
             logger.info(f"[save-referee-result] Проверка из БД после commit: set1=({match_check.set1_score1}:{match_check.set1_score2}), set2=({match_check.set2_score1}:{match_check.set2_score2}), set3=({match_check.set3_score1}:{match_check.set3_score2})")
             
+            # Если матч завершен, устанавливаем реальное время окончания и пересчитываем расписание
+            # Используем локальное время для учета часового пояса пользователя
+            if match.status == 'завершен':
+                logger.info(f"[save-referee-result] Матч {match_id} завершен, начинаем пересчет расписания")
+                if not match.actual_end_time:
+                    match.actual_end_time = datetime.now()
+                    db.session.commit()
+                
+                # Пересчитываем время следующих матчей на той же площадке
+                try:
+                    # Tournament и Match уже доступны в области видимости функции create_api_routes
+                    logger.info(f"[save-referee-result] Вызов функции пересчета для матча {match_id}")
+                    recalculate_schedule_after_match_completion(match_id, Tournament, Match, db)
+                    logger.info(f"[save-referee-result] Функция пересчета завершена для матча {match_id}")
+                except Exception as e:
+                    logger.error(f"[save-referee-result] Ошибка при пересчете расписания после завершения матча {match_id}: {e}", exc_info=True)
+            
             # Обновляем статус турнира
             participants = Participant.query.filter_by(tournament_id=tournament.id).all()
             matches = Match.query.filter_by(tournament_id=tournament.id).all()
@@ -3243,3 +3622,134 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при сохранении результата из судейства: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при сохранении результата'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/matches/<int:match_id>/invite', methods=['POST'])
+    def invite_participants_to_match(tournament_id, match_id):
+        """Отправка приглашений участникам матча в Telegram"""
+        from flask import session
+        try:
+            # Проверяем права доступа
+            session_admin_id = session.get('admin_id')
+            if not session_admin_id:
+                return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+            
+            # Проверяем CSRF токен
+            csrf_token = request.headers.get('X-CSRFToken')
+            if not csrf_token:
+                return jsonify({'success': False, 'error': 'Отсутствует CSRF токен'}), 400
+            
+            try:
+                from flask_wtf.csrf import validate_csrf
+                validate_csrf(csrf_token)
+            except Exception as e:
+                logger.warning(f"CSRF validation failed: {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем данные из запроса
+            data = request.get_json()
+            if not data:
+                return jsonify({'success': False, 'error': 'Отсутствуют данные'}), 400
+            
+            # Получаем турнир
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Получаем матч
+            match = Match.query.get(match_id)
+            if not match:
+                return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Проверяем, что матч принадлежит турниру
+            if match.tournament_id != tournament_id:
+                return jsonify({'success': False, 'error': 'Матч не принадлежит данному турниру'}), 400
+            
+            participant1_name = data.get('participant1_name', '')
+            participant2_name = data.get('participant2_name', '')
+            match_time = data.get('match_time', '')
+            match_court = data.get('match_court', 0)
+            
+            # Находим участников по именам
+            participant1 = Participant.query.filter_by(tournament_id=tournament_id, name=participant1_name).first()
+            participant2 = Participant.query.filter_by(tournament_id=tournament_id, name=participant2_name).first()
+            
+            sent = []
+            not_found = []
+            failed = []
+            
+            # Формируем информацию о площадке
+            court_info = f"Площадка {match_court}" if match_court > 0 else "Площадка не указана"
+            
+            # Отправляем приглашение первому участнику
+            if participant1:
+                if participant1.telegram:
+                    message = f"""🏓 <b>Приглашение на матч!</b>
+
+📅 Турнир: <b>{tournament.name}</b>
+⏰ Время: <b>{match_time}</b>
+📍 {court_info}
+
+🎯 <b>Ваш соперник:</b> {participant2_name}
+
+Удачи в матче! 🏆"""
+                    
+                    try:
+                        success = send_telegram_message(message, telegram_contact=participant1.telegram)
+                        if success:
+                            sent.append(participant1_name)
+                            logger.info(f"✅ Приглашение отправлено участнику {participant1_name} (Telegram: {participant1.telegram})")
+                        else:
+                            failed.append(participant1_name)
+                            logger.warning(f"⚠️ Не удалось отправить приглашение участнику {participant1_name}")
+                    except Exception as e:
+                        failed.append(participant1_name)
+                        logger.error(f"❌ Ошибка при отправке приглашения участнику {participant1_name}: {e}")
+                else:
+                    not_found.append(participant1_name)
+                    logger.info(f"ℹ️  Telegram не указан для участника {participant1_name}")
+            else:
+                not_found.append(participant1_name)
+                logger.warning(f"⚠️  Участник {participant1_name} не найден в турнире")
+            
+            # Отправляем приглашение второму участнику
+            if participant2:
+                if participant2.telegram:
+                    message = f"""🏓 <b>Приглашение на матч!</b>
+
+📅 Турнир: <b>{tournament.name}</b>
+⏰ Время: <b>{match_time}</b>
+📍 {court_info}
+
+🎯 <b>Ваш соперник:</b> {participant1_name}
+
+Удачи в матче! 🏆"""
+                    
+                    try:
+                        success = send_telegram_message(message, telegram_contact=participant2.telegram)
+                        if success:
+                            sent.append(participant2_name)
+                            logger.info(f"✅ Приглашение отправлено участнику {participant2_name} (Telegram: {participant2.telegram})")
+                        else:
+                            failed.append(participant2_name)
+                            logger.warning(f"⚠️ Не удалось отправить приглашение участнику {participant2_name}")
+                    except Exception as e:
+                        failed.append(participant2_name)
+                        logger.error(f"❌ Ошибка при отправке приглашения участнику {participant2_name}: {e}")
+                else:
+                    not_found.append(participant2_name)
+                    logger.info(f"ℹ️  Telegram не указан для участника {participant2_name}")
+            else:
+                not_found.append(participant2_name)
+                logger.warning(f"⚠️  Участник {participant2_name} не найден в турнире")
+            
+            return jsonify({
+                'success': True,
+                'sent': sent,
+                'not_found': not_found,
+                'failed': failed
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при отправке приглашений участникам матча: {e}")
+            return jsonify({'success': False, 'error': f'Ошибка при отправке приглашений: {str(e)}'}), 500

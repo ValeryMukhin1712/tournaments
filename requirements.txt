@@ -11,3 +11,5 @@ gunicorn==21.2.0
 requests==2.31.0
 # psycopg2==2.9.7  # Удалено для Railway - используем SQLite
 openpyxl==3.1.2
+qrcode==7.4.2
+Pillow==10.0.0

@@ -1223,11 +1223,20 @@
                                     </td>
                                     <td class="text-center">
                                         {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
-                                        <button class="btn btn-sm btn-outline-primary" 
-                                                onclick="event.stopPropagation(); openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', {{ match.score1 or 0 }}, {{ match.score2 or 0 }})"
-                                                title="Ввести результат матча">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="event.stopPropagation(); openMatchResultModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', {{ match.score1 or 0 }}, {{ match.score2 or 0 }})"
+                                                    title="Ввести результат матча">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% if match.status == 'запланирован' %}
+                                            <button class="btn btn-sm btn-outline-success" 
+                                                    onclick="event.stopPropagation(); inviteParticipantsToMatch({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', '{{ match.time }}', {{ match.court or 0 }})"
+                                                    title="Пригласить участников в Telegram">
+                                                <i class="fab fa-telegram"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
                                         {% else %}
                                         <span class="text-muted">—</span>
                                         {% endif %}
@@ -2142,6 +2151,58 @@ function editMatch(matchId) {
         });
 }
 
+// Функция для отправки приглашений участникам матча в Telegram
+function inviteParticipantsToMatch(matchId, participant1Name, participant2Name, matchTime, matchCourt) {
+    if (!confirm(`Отправить приглашение участникам матча "${participant1Name} vs ${participant2Name}" в Telegram?`)) {
+        return;
+    }
+    
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+    
+    fetch(`/api/tournaments/{{ tournament.id }}/matches/${matchId}/invite`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+            participant1_name: participant1Name,
+            participant2_name: participant2Name,
+            match_time: matchTime,
+            match_court: matchCourt || 0
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        
+        if (data.success) {
+            let message = 'Приглашения отправлены:\n';
+            if (data.sent && data.sent.length > 0) {
+                message += '✅ Отправлено: ' + data.sent.join(', ') + '\n';
+            }
+            if (data.not_found && data.not_found.length > 0) {
+                message += '⚠️ Не найдено Telegram: ' + data.not_found.join(', ') + '\n';
+            }
+            if (data.failed && data.failed.length > 0) {
+                message += '❌ Ошибка отправки: ' + data.failed.join(', ');
+            }
+            alert(message);
+        } else {
+            alert('Ошибка: ' + (data.error || 'Не удалось отправить приглашения'));
+        }
+    })
+    .catch(error => {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        console.error('Ошибка при отправке приглашений:', error);
+        alert('Ошибка при отправке приглашений. Попробуйте позже.');
+    });
+}
 
 // Обработка формы добавления участника
 document.addEventListener('DOMContentLoaded', function() {
@@ -2750,10 +2811,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success) {
                         // Результат матча сохранен
                         console.log('Результат успешно сохранен, обновляем страницу...');
-                        // Используем setTimeout для безопасного обновления
+                        // Увеличиваем задержку для завершения пересчета времени матчей
+                        // Пересчет расписания может занять некоторое время
                         setTimeout(() => {
                             window.location.reload();
-                        }, 100);
+                        }, 500);
                     } else {
                         alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
                     }

@@ -42,6 +42,7 @@ class Config:
     # Настройки Telegram Bot для обратной связи
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN') or '8395818732:AAHwQKYFV3Fr3LOopRS3nOwvH28lhCBXEfc'
     TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID') or '7052840972'
+    TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME') or 'Q_uickScore_bot'  # Username бота без @
     
     # Настройки управления сессиями
     SESSION_TIMEOUT_HOURS = int(os.environ.get('SESSION_TIMEOUT_HOURS', 2))  # Время жизни сессии

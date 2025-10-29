@@ -8,12 +8,14 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 
-def send_telegram_message(message: str) -> bool:
+def send_telegram_message(message: str, telegram_contact: str = None) -> bool:
     """
     Отправляет сообщение в Telegram через Bot API
     
     Args:
         message: Текст сообщения (поддерживает HTML форматирование)
+        telegram_contact: Chat ID или @username получателя. Если не указан, 
+                         отправляется на chat_id автора из конфигурации
         
     Returns:
         bool: True если отправка успешна, False в противном случае
@@ -21,11 +23,22 @@ def send_telegram_message(message: str) -> bool:
     try:
         # Получаем настройки из конфигурации
         bot_token = Config.TELEGRAM_BOT_TOKEN
-        chat_id = Config.TELEGRAM_CHAT_ID
+        
+        # Определяем получателя
+        if telegram_contact:
+            # Если указан контакт участника, отправляем ему
+            chat_id = telegram_contact
+        else:
+            # Иначе отправляем автору (для формы обратной связи)
+            chat_id = Config.TELEGRAM_CHAT_ID
         
         # Проверяем наличие настроек
-        if not bot_token or not chat_id:
-            logger.warning(f"❌ Telegram настройки не заданы. Bot token: {'задан' if bot_token else 'НЕ задан'}, Chat ID: {'задан' if chat_id else 'НЕ задан'}")
+        if not bot_token:
+            logger.warning(f"❌ Telegram bot token не задан")
+            return False
+        
+        if not chat_id:
+            logger.warning(f"❌ Telegram chat ID не указан")
             return False
         
         logger.debug(f"Telegram настройки: Chat ID={chat_id}, Token={'*****' + bot_token[-10:] if len(bot_token) > 10 else '****'}")
@@ -47,10 +60,18 @@ def send_telegram_message(message: str) -> bool:
         
         # Проверяем ответ
         if response.status_code == 200:
-            logger.info("Сообщение успешно отправлено в Telegram")
+            logger.info(f"✅ Сообщение успешно отправлено в Telegram (получатель: {chat_id})")
             return True
         else:
-            logger.error(f"Ошибка при отправке в Telegram: {response.status_code} - {response.text}")
+            error_info = response.json() if response.headers.get('content-type') == 'application/json' else response.text
+            logger.error(f"❌ Ошибка при отправке в Telegram: {response.status_code} - {error_info}")
+            
+            # Дополнительная информация для популярных ошибок
+            if response.status_code == 400:
+                logger.error(f"💡 Подсказка: Проверьте правильность chat_id ({chat_id}). Пользователь должен был написать боту первым (/start)")
+            elif response.status_code == 403:
+                logger.error(f"💡 Подсказка: Бот заблокирован пользователем или пользователь не начал диалог с ботом")
+            
             return False
             
     except requests.exceptions.Timeout:

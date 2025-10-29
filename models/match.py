@@ -24,13 +24,17 @@ class Match(db.Model):
     set3_score1 = db.Column(db.Integer)  # счет третьего сета участника 1
     set3_score2 = db.Column(db.Integer)  # счет третьего сета участника 2
     winner_id = db.Column(db.Integer, db.ForeignKey('participant.id'))
-    match_date = db.Column(db.Date)
-    match_time = db.Column(db.Time)
+    match_date = db.Column(db.Date)  # запланированная дата
+    match_time = db.Column(db.Time)  # запланированное время начала
+    actual_start_time = db.Column(db.DateTime, nullable=True)  # реальное время начала матча
+    actual_end_time = db.Column(db.DateTime, nullable=True)  # реальное время окончания матча
     court_number = db.Column(db.Integer)  # номер площадки
     match_number = db.Column(db.Integer)  # последовательный номер игры
     status = db.Column(db.String(20), default='запланирован')  # запланирован, в_процессе, завершен
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Используем datetime.now вместо datetime.utcnow для учета локального часового пояса
+    # Для совместимости с SQLAlchemy используем callable
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
     # Связи для отображения имен участников
     participant1 = db.relationship('models.participant.Participant', foreign_keys=[participant1_id], backref='matches_as_p1')

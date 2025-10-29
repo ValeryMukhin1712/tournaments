@@ -13,6 +13,7 @@ class Participant(db.Model):
     name = db.Column(db.String(100), nullable=False)
     is_team = db.Column(db.Boolean, default=False)
     points = db.Column(db.Integer, default=0)
+    telegram = db.Column(db.String(100), nullable=True)  # Telegram контакт игрока (необязательно)
     registered_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

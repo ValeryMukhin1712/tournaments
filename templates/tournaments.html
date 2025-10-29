@@ -294,6 +294,12 @@
                                 {% else %}
                                     <span class="badge bg-warning rounded-pill">Регистрация</span>
                                 {% endif %}
+                            {% elif tournament.status == 'Регистрация участников' %}
+                                {% if has_matches_with_scores or has_matches_with_results %}
+                                    <span class="badge bg-success">начался</span>
+                                {% else %}
+                                    <span class="badge bg-warning rounded-pill">Регистрация</span>
+                                {% endif %}
                             {% else %}
                                 <span class="badge bg-info">{{ tournament.status }}</span>
                             {% endif %}
@@ -302,7 +308,7 @@
                                 {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
                                 {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'ne', None)|list|length > 0 %}
                                 <div class="d-flex gap-2 flex-wrap">
-                                    {% if tournament.status == 'регистрация' and not has_matches_with_scores and not has_matches_with_results %}
+                                    {% if tournament.status in ['регистрация', 'Регистрация участников'] and not has_matches_with_scores and not has_matches_with_results %}
                                         <button type="button" class="btn btn-gradient btn-sm apply-btn" data-bs-toggle="modal" data-bs-target="#joinModal{{ tournament.id }}">
                                             Подать заявку
                                         </button>
@@ -338,7 +344,7 @@
 {% for tournament in tournaments %}
 {% set has_matches_with_results = tournament.matches|selectattr('status', 'equalto', 'играют')|list|length > 0 or tournament.matches|selectattr('status', 'equalto', 'завершен')|list|length > 0 %}
 {% set has_matches_with_scores = tournament.matches|selectattr('set1_score1', 'ne', None)|list|length > 0 %}
-{% if tournament.status == 'регистрация' and not has_matches_with_scores and not has_matches_with_results %}
+{% if tournament.status in ['регистрация', 'Регистрация участников'] and not has_matches_with_scores and not has_matches_with_results %}
 <div class="modal fade" id="joinModal{{ tournament.id }}" tabindex="-1" aria-labelledby="joinModalLabel{{ tournament.id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -360,10 +366,11 @@
                 </div>
                 <form id="joinForm{{ tournament.id }}">
                     <div class="mb-3">
-                        <label for="participantName{{ tournament.id }}" class="form-label">Введите ваше имя *</label>
+                        <label for="participantName{{ tournament.id }}" class="form-label">Введите ваше имя</label>
                         <input type="text" class="form-control" id="participantName{{ tournament.id }}" 
-                               name="participant_name" required 
-                               placeholder="Введите ваше имя">
+                               name="participant_name"
+                               placeholder="Введите ваше имя (необязательно при заявке через Telegram)">
+                        <div class="form-text"><i class="fas fa-info-circle me-1"></i>Либо введите имя, либо выберите подачу через Telegram ниже</div>
                     </div>
                     <div class="mb-3">
                         <label for="skillLevel{{ tournament.id }}" class="form-label">Оцените ваш уровень *</label>
@@ -376,6 +383,20 @@
                             <option value="адвансер">адвансер</option>
                             <option value="супер адвансер">супер адвансер</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enableTelegram{{ tournament.id }}" 
+                                   name="enable_telegram" value="true">
+                            <label class="form-check-label" for="enableTelegram{{ tournament.id }}">
+                                <i class="fab fa-telegram me-1 text-primary"></i>
+                                <strong>Подключить Telegram для уведомлений</strong>
+                            </label>
+                        </div>
+                        <div class="form-text ms-4">
+                            <i class="fas fa-bell me-1"></i>
+                            При выборе этого варианта появится QR-код. Сканируйте его или найдите бота <strong>Q_uickScore_bot</strong> и отправьте ему команду <code>/start</code>.
+                        </div>
                     </div>
                     <input type="hidden" name="tournament_id" value="{{ tournament.id }}">
                 </form>
@@ -567,14 +588,114 @@
 </style>
 
 <script>
+function showQRCodeModal(participantName, qrCode, tournamentId) {
+    // Создаем модальное окно с QR-кодом
+    const modalHtml = `
+        <div class="modal fade" id="qrCodeModal${tournamentId}" tabindex="-1" aria-labelledby="qrCodeModalLabel${tournamentId}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-gradient-primary text-white">
+                        <h5 class="modal-title" id="qrCodeModalLabel${tournamentId}">
+                            <i class="fas fa-check-circle me-2"></i>Заявка успешно подана!
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p class="mb-3">
+                            <i class="fas fa-user me-2 text-primary"></i>
+                            <strong>${participantName}</strong>, вы добавлены в лист ожидания турнира!
+                        </p>
+                        
+                        <div class="alert alert-info">
+                            <i class="fab fa-telegram me-2"></i>
+                            <strong>Подключите Telegram для уведомлений!</strong>
+                        </div>
+                        
+                        <p class="text-muted small mb-3">
+                            Отсканируйте QR-код телефоном, чтобы подключить уведомления.
+                        </p>
+                        
+                        <div class="qr-code-container mb-3">
+                            <img src="${qrCode}" alt="QR-код для подключения к Telegram боту" class="img-fluid" style="max-width: 300px; border: 2px solid #6f42c1; border-radius: 10px; padding: 10px;">
+                        </div>
+                        
+                        <div class="alert alert-light text-start">
+                            <small class="text-muted d-block mb-2">
+                                <i class="fas fa-mobile-alt me-1"></i>
+                                Откройте камеру телефона → Наведите на QR-код → Нажмите на ссылку → START в боте
+                            </small>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <a id="openBotLink${tournamentId}" class="btn btn-primary btn-sm" target="_blank">
+                                    <i class="fab fa-telegram me-1"></i>Открыть бота
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="copyCmdBtn${tournamentId}">
+                                    <i class="fas fa-copy me-1"></i>Скопировать команду
+                                </button>
+                                <code class="small text-muted" id="startCmd${tournamentId}"></code>
+                            </div>
+                            <small class="text-muted d-block mt-2">Если ищете бота вручную: <strong>Q_uickScore_bot</strong>, отправьте ему команду выше.</small>
+                        </div>
+                        
+                        <p class="text-muted small mt-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Вы можете закрыть это окно и подключить Telegram позже
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Закрыть
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Добавляем модальное окно в DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Показываем модальное окно
+    const qrModalEl = document.getElementById('qrCodeModal' + tournamentId);
+    const qrModal = new bootstrap.Modal(qrModalEl);
+    qrModal.show();
+    
+    // Настройка ссылок и команды для ручного подключения
+    try {
+        const token = (window.__lastJoinResponse && window.__lastJoinResponse.telegram_token) || '';
+        const botUsername = 'Q_uickScore_bot';
+        const deepLink = token ? `https://t.me/${botUsername}?start=${token}` : `https://t.me/${botUsername}`;
+        const cmdEl = document.getElementById('startCmd' + tournamentId);
+        const openLinkEl = document.getElementById('openBotLink' + tournamentId);
+        const copyBtnEl = document.getElementById('copyCmdBtn' + tournamentId);
+        if (openLinkEl) openLinkEl.href = deepLink;
+        if (cmdEl) cmdEl.textContent = token ? `/start ${token}` : '/start';
+        if (copyBtnEl) {
+            copyBtnEl.onclick = async () => {
+                try {
+                    const text = cmdEl ? cmdEl.textContent : '/start';
+                    await navigator.clipboard.writeText(text);
+                    copyBtnEl.innerHTML = '<i class="fas fa-check me-1"></i>Скопировано';
+                    setTimeout(() => (copyBtnEl.innerHTML = '<i class=\"fas fa-copy me-1\"></i>Скопировать команду'), 1500);
+                } catch (e) {}
+            };
+        }
+    } catch(e) {}
+    
+    // Удаляем модальное окно после закрытия
+    qrModalEl.addEventListener('hidden.bs.modal', function () {
+        this.remove();
+    });
+}
+
 function submitJoinRequest(tournamentId) {
     const form = document.getElementById('joinForm' + tournamentId);
     const formData = new FormData(form);
     const participantName = formData.get('participant_name').trim();
     const skillLevel = formData.get('skill_level');
+    const enableTelegram = document.getElementById('enableTelegram' + tournamentId).checked;
     
-    if (!participantName) {
-        alert('Пожалуйста, введите ваше имя');
+    if (!enableTelegram && !participantName) {
+        alert('Пожалуйста, введите ваше имя или выберите подачу через Telegram');
         return;
     }
     
@@ -602,16 +723,26 @@ function submitJoinRequest(tournamentId) {
         body: JSON.stringify({
             tournament_id: tournamentId,
             participant_name: participantName,
-            skill_level: skillLevel
+            skill_level: skillLevel,
+            enable_telegram: enableTelegram
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Заявка успешно подана! Вы добавлены в лист ожидания турнира.');
-            // Закрываем модальное окно
-            const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal' + tournamentId));
-            modal.hide();
+            // Закрываем модальное окно формы
+            const joinModal = bootstrap.Modal.getInstance(document.getElementById('joinModal' + tournamentId));
+            joinModal.hide();
+            
+            // Показываем модальное окно с QR-кодом ТОЛЬКО если пользователь выбрал Telegram
+            if (enableTelegram && data.qr_code) {
+                // Сохраним весь ответ, чтобы showQRCodeModal мог взять telegram_token
+                window.__lastJoinResponse = data;
+                showQRCodeModal(participantName, data.qr_code, tournamentId);
+            } else {
+                alert('Заявка успешно подана! Вы добавлены в лист ожидания турнира.');
+            }
+            
             // Очищаем форму
             form.reset();
         } else {
