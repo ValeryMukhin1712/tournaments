@@ -32,9 +32,9 @@ class Match(db.Model):
     match_number = db.Column(db.Integer)  # последовательный номер игры
     status = db.Column(db.String(20), default='запланирован')  # запланирован, в_процессе, завершен
     # Используем datetime.now вместо datetime.utcnow для учета локального часового пояса
-    # Для совместимости с SQLAlchemy используем callable
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    # Для совместимости с SQLAlchemy используем lambda для callable
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(), onupdate=lambda: datetime.now())
     
     # Связи для отображения имен участников
     participant1 = db.relationship('models.participant.Participant', foreign_keys=[participant1_id], backref='matches_as_p1')

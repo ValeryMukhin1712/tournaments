@@ -1433,53 +1433,61 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     def admin_dashboard():
         """Панель управления админа турниров"""
         from flask import session
+        import traceback
         
-        # Проверяем, что админ авторизован
-        if 'admin_id' not in session:
-            flash('Необходима авторизация', 'error')
-            return redirect(url_for('admin_tournament'))
-        
-        admin_id = session['admin_id']
-        admin_email = session.get('admin_email', '')
-        
-        # Создаем объект админа с правильным email
-        admin = type('Admin', (), {'id': admin_id, 'email': admin_email, 'is_active': True})()
-        
-        if not admin or not admin.is_active:
-            flash('Админ не найден или деактивирован', 'error')
-            return redirect(url_for('admin_tournament'))
-        
-        # Получаем турниры этого админа
-        if admin_email == 'admin@system':
-            # Системный админ видит все турниры
-            tournaments = Tournament.query.all()
-            app.logger.info(f'Системный админ видит все турниры: {len(tournaments)}')
-        else:
-            # Обычный админ видит только свои турниры (по admin_id)
-            tournaments = Tournament.query.filter_by(admin_id=admin_id).all()
-            app.logger.info(f'Админ {admin_email} (ID: {admin_id}) видит турниры: {len(tournaments)}')
+        try:
+            # Проверяем, что админ авторизован
+            if 'admin_id' not in session:
+                flash('Необходима авторизация', 'error')
+                return redirect(url_for('admin_tournament'))
             
-            # Отладочная информация: показываем все турниры и их admin_id
-            all_tournaments = Tournament.query.all()
-            app.logger.info(f'Все турниры в системе:')
-            for t in all_tournaments:
-                app.logger.info(f'  Турнир "{t.name}" (ID: {t.id}) - admin_id: {t.admin_id}')
-        
-        # Загружаем количество участников и заявок в листе ожидания для каждого турнира
-        for tournament in tournaments:
-            participant_count = Participant.query.filter_by(tournament_id=tournament.id).count()
-            tournament.participant_count = participant_count
+            admin_id = session['admin_id']
+            admin_email = session.get('admin_email', '')
             
-            # Добавляем счетчик заявок в листе ожидания
-            waiting_count = WaitingList.query.filter_by(
-                tournament_id=tournament.id, 
-                status='ожидает'
-            ).count()
-            tournament.waiting_count = waiting_count
-        
-        return render_template('admin_dashboard.html', 
-                             admin=admin, 
-                             tournaments=tournaments)
+            # Создаем объект админа с правильным email
+            admin = type('Admin', (), {'id': admin_id, 'email': admin_email, 'is_active': True})()
+            
+            if not admin or not admin.is_active:
+                flash('Админ не найден или деактивирован', 'error')
+                return redirect(url_for('admin_tournament'))
+            
+            # Получаем турниры этого админа
+            if admin_email == 'admin@system':
+                # Системный админ видит все турниры
+                tournaments = Tournament.query.all()
+                app.logger.info(f'Системный админ видит все турниры: {len(tournaments)}')
+            else:
+                # Обычный админ видит только свои турниры (по admin_id)
+                tournaments = Tournament.query.filter_by(admin_id=admin_id).all()
+                app.logger.info(f'Админ {admin_email} (ID: {admin_id}) видит турниры: {len(tournaments)}')
+                
+                # Отладочная информация: показываем все турниры и их admin_id
+                all_tournaments = Tournament.query.all()
+                app.logger.info(f'Все турниры в системе:')
+                for t in all_tournaments:
+                    app.logger.info(f'  Турнир "{t.name}" (ID: {t.id}) - admin_id: {t.admin_id}')
+            
+            # Загружаем количество участников и заявок в листе ожидания для каждого турнира
+            for tournament in tournaments:
+                participant_count = Participant.query.filter_by(tournament_id=tournament.id).count()
+                tournament.participant_count = participant_count
+                
+                # Добавляем счетчик заявок в листе ожидания
+                waiting_count = WaitingList.query.filter_by(
+                    tournament_id=tournament.id, 
+                    status='ожидает'
+                ).count()
+                tournament.waiting_count = waiting_count
+            
+            return render_template('admin_dashboard.html', 
+                                 admin=admin, 
+                                 tournaments=tournaments)
+        except Exception as e:
+            # Логируем полную информацию об ошибке
+            app.logger.error(f'Ошибка в admin_dashboard: {str(e)}')
+            app.logger.error(f'Traceback: {traceback.format_exc()}')
+            flash(f'Ошибка при загрузке панели управления: {str(e)}', 'error')
+            return redirect(url_for('admin_tournament'))
     
     @app.route('/system-admin-dashboard')
     @require_active_session
