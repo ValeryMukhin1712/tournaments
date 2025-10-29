@@ -32,8 +32,9 @@ def migrate():
             # Добавляем поле telegram в participant, если его нет
             if 'telegram' not in participant_columns:
                 print("Добавляем поле 'telegram' в таблицу participant...")
+                from sqlalchemy import text
                 with db.engine.begin() as conn:
-                    conn.execute(db.text('ALTER TABLE participant ADD COLUMN telegram VARCHAR(100)'))
+                    conn.execute(text('ALTER TABLE participant ADD COLUMN telegram VARCHAR(100)'))
                 print("✅ Поле 'telegram' успешно добавлено в таблицу participant")
             else:
                 print("ℹ️  Поле 'telegram' уже существует в таблице participant")
@@ -41,8 +42,9 @@ def migrate():
             # Добавляем поле telegram в waiting_list, если его нет
             if 'telegram' not in waiting_list_columns:
                 print("Добавляем поле 'telegram' в таблицу waiting_list...")
+                from sqlalchemy import text
                 with db.engine.begin() as conn:
-                    conn.execute(db.text('ALTER TABLE waiting_list ADD COLUMN telegram VARCHAR(100)'))
+                    conn.execute(text('ALTER TABLE waiting_list ADD COLUMN telegram VARCHAR(100)'))
                 print("✅ Поле 'telegram' успешно добавлено в таблицу waiting_list")
             else:
                 print("ℹ️  Поле 'telegram' уже существует в таблице waiting_list")
