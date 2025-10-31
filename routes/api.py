@@ -2036,11 +2036,24 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 return jsonify({'success': False, 'error': 'Вы уже участвуете в этом турнире'}), 400
             
             # Проверяем, не подал ли уже участник заявку в лист ожидания
-            existing_waiting = WaitingList.query.filter_by(
-                tournament_id=tournament_id, 
-                name=participant_name,
-                status='ожидает'
-            ).first()
+            # Безопасная проверка на случай отсутствия колонки status
+            try:
+                existing_waiting = WaitingList.query.filter_by(
+                    tournament_id=tournament_id, 
+                    name=participant_name,
+                    status='ожидает'
+                ).first()
+            except Exception as status_e:
+                logger.warning(f"Ошибка при проверке статуса заявки (возможно колонка status отсутствует): {status_e}")
+                # Если колонка status отсутствует, проверяем без фильтра по статусу
+                try:
+                    existing_waiting = WaitingList.query.filter_by(
+                        tournament_id=tournament_id, 
+                        name=participant_name
+                    ).first()
+                except Exception as e2:
+                    logger.error(f"Критическая ошибка при проверке существующей заявки: {e2}")
+                    existing_waiting = None
             
             if existing_waiting:
                 return jsonify({'success': False, 'error': 'Вы уже подали заявку на участие в этом турнире'}), 400
