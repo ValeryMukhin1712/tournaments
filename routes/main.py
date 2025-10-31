@@ -725,6 +725,23 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         """Список всех турниров для просмотра"""
         try:
             logger.info("Начало загрузки страницы 'Все турниры'")
+            
+            # Проверяем и добавляем недостающие колонки, если их нет (на случай, если миграция не сработала)
+            try:
+                from sqlalchemy import text
+                conn = db.engine.connect()
+                # Проверяем waiting_list
+                cols_waiting = conn.execute(text("PRAGMA table_info('waiting_list')")).fetchall()
+                col_names_waiting = {c[1] for c in cols_waiting}
+                if 'status' not in col_names_waiting:
+                    logger.warning("Колонка 'status' отсутствует в waiting_list, добавляем...")
+                    conn.execute(text("ALTER TABLE waiting_list ADD COLUMN status VARCHAR(20) DEFAULT 'ожидает'"))
+                    conn.commit()
+                    logger.info("Добавлен столбец 'status' в таблицу waiting_list")
+                conn.close()
+            except Exception as mig_e:
+                logger.warning(f"Ошибка при проверке миграции waiting_list: {mig_e}")
+            
             tournaments = Tournament.query.all()
             logger.info(f"Загружено турниров: {len(tournaments)}")
             
