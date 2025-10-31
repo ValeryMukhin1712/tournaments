@@ -728,7 +728,17 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         for tournament in tournaments:
             tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
             tournament.matches = Match.query.filter_by(tournament_id=tournament.id).all()
-            tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id, status='ожидает').all()
+            # Безопасная загрузка листа ожидания с обработкой возможного отсутствия колонки status
+            try:
+                tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id, status='ожидает').all()
+            except Exception as e:
+                logger.warning(f"Ошибка при загрузке листа ожидания для турнира {tournament.id}: {e}")
+                # Если колонка status еще не существует, загружаем все записи без фильтра
+                try:
+                    tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id).all()
+                except Exception as e2:
+                    logger.error(f"Критическая ошибка при загрузке листа ожидания: {e2}")
+                    tournament.waiting_list = []
         return render_template('tournaments.html', tournaments=tournaments, bot_username=Config.TELEGRAM_BOT_USERNAME)
     
     @app.route('/request-token', methods=['GET', 'POST'])
