@@ -109,6 +109,26 @@ def init_db():
             except Exception as mig_e:
                 logger.warning(f"Миграция tokens.telegram пропущена: {mig_e}")
             
+            # Лёгкая миграция: добавить столбец participant.telegram, если его нет
+            try:
+                from sqlalchemy import text
+                conn = db.engine.connect()
+                # Проверяем таблицу participant
+                cols = conn.execute(text("PRAGMA table_info('participant')")).fetchall()
+                col_names = {c[1] for c in cols}
+                if 'telegram' not in col_names:
+                    conn.execute(text("ALTER TABLE participant ADD COLUMN telegram VARCHAR(100)"))
+                    logger.info("Добавлен столбец 'telegram' в таблицу participant")
+                # Проверяем таблицу waiting_list
+                cols_waiting = conn.execute(text("PRAGMA table_info('waiting_list')")).fetchall()
+                col_names_waiting = {c[1] for c in cols_waiting}
+                if 'telegram' not in col_names_waiting:
+                    conn.execute(text("ALTER TABLE waiting_list ADD COLUMN telegram VARCHAR(100)"))
+                    logger.info("Добавлен столбец 'telegram' в таблицу waiting_list")
+                conn.close()
+            except Exception as mig_e:
+                logger.warning(f"Миграция participant.telegram пропущена: {mig_e}")
+            
             # Создание/обновление администратора по умолчанию
             admin = User.query.filter_by(username='admin').first()
             if not admin:
