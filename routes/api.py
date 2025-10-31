@@ -2058,8 +2058,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 status='ожидает'
             )
             
-            db.session.add(new_waiting_list_entry)
-            db.session.commit()
+            try:
+                db.session.add(new_waiting_list_entry)
+                db.session.commit()
+                logger.info(f"Заявка добавлена в лист ожидания: турнир={tournament_id}, имя={participant_name}")
+            except Exception as db_e:
+                db.session.rollback()
+                logger.error(f"Ошибка при добавлении заявки в БД: {db_e}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                return jsonify({'success': False, 'error': f'Ошибка базы данных: {str(db_e)}'}), 500
             
             # Генерируем QR-код для подключения к боту (только если пользователь выбрал Telegram)
             qr_code = None
@@ -2072,6 +2080,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     logger.info(f"QR-код сгенерирован для участника {participant_name} (токен: {telegram_token[:8]}...)")
                 except Exception as e:
                     logger.error(f"Ошибка при генерации QR-кода: {e}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
                     qr_code = None
             
             telegram_status = " с подключением к Telegram боту" if enable_telegram else ""
@@ -2114,7 +2124,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при подаче заявки на участие: {e}")
-            return jsonify({'success': False, 'error': 'Ошибка при подаче заявки'}), 500
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            # Всегда возвращаем JSON, даже при ошибках
+            try:
+                return jsonify({'success': False, 'error': f'Ошибка при подаче заявки: {str(e)}'}), 500
+            except Exception as json_e:
+                logger.error(f"Критическая ошибка при формировании JSON ответа: {json_e}")
+                # Fallback: возвращаем простой JSON ответ
+                from flask import Response
+                return Response('{"success": false, "error": "Критическая ошибка сервера"}', 
+                              mimetype='application/json', status=500)
 
     @app.route('/api/telegram/link-token', methods=['POST'])
     @csrf.exempt  # Исключаем из CSRF защиты, так как запросы приходят от Telegram бота
