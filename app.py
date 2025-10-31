@@ -125,6 +125,15 @@ def init_db():
                 if 'telegram' not in col_names_waiting:
                     conn.execute(text("ALTER TABLE waiting_list ADD COLUMN telegram VARCHAR(100)"))
                     logger.info("Добавлен столбец 'telegram' в таблицу waiting_list")
+                if 'telegram_token' not in col_names_waiting:
+                    conn.execute(text("ALTER TABLE waiting_list ADD COLUMN telegram_token VARCHAR(100)"))
+                    logger.info("Добавлен столбец 'telegram_token' в таблицу waiting_list")
+                if 'status' not in col_names_waiting:
+                    conn.execute(text("ALTER TABLE waiting_list ADD COLUMN status VARCHAR(20) DEFAULT 'ожидает'"))
+                    logger.info("Добавлен столбец 'status' в таблицу waiting_list")
+                if 'created_at' not in col_names_waiting:
+                    conn.execute(text("ALTER TABLE waiting_list ADD COLUMN created_at DATETIME"))
+                    logger.info("Добавлен столбец 'created_at' в таблицу waiting_list")
                 conn.close()
             except Exception as mig_e:
                 logger.warning(f"Миграция participant.telegram пропущена: {mig_e}")
