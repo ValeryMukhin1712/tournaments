@@ -21,10 +21,17 @@ if os.path.exists('.env'):
 if app_env == 'dev':
     TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_DEV')
     TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME_DEV')
+    if not TELEGRAM_BOT_USERNAME:
+        print("⚠️  WARNING: TELEGRAM_BOT_USERNAME_DEV не установлен в .env.dev!")
 else:
     # По умолчанию используем PROD настройки (для VDS)
     TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_PROD')
     TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME_PROD')
+    if not TELEGRAM_BOT_USERNAME:
+        print("⚠️  WARNING: TELEGRAM_BOT_USERNAME_PROD не установлен в .env!")
+        print("   Добавьте в .env файл:")
+        print("   TELEGRAM_BOT_TOKEN_PROD=ваш_токен")
+        print("   TELEGRAM_BOT_USERNAME_PROD=ваш_username_бота")
 
 
 class Config:
