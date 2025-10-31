@@ -138,6 +138,22 @@ def init_db():
             except Exception as mig_e:
                 logger.warning(f"Миграция participant.telegram пропущена: {mig_e}")
             
+            # Лёгкая миграция: добавить столбцы actual_start_time и actual_end_time в таблицу match, если их нет
+            try:
+                from sqlalchemy import text
+                conn = db.engine.connect()
+                cols_match = conn.execute(text("PRAGMA table_info('match')")).fetchall()
+                col_names_match = {c[1] for c in cols_match}
+                if 'actual_start_time' not in col_names_match:
+                    conn.execute(text("ALTER TABLE match ADD COLUMN actual_start_time DATETIME"))
+                    logger.info("Добавлен столбец 'actual_start_time' в таблицу match")
+                if 'actual_end_time' not in col_names_match:
+                    conn.execute(text("ALTER TABLE match ADD COLUMN actual_end_time DATETIME"))
+                    logger.info("Добавлен столбец 'actual_end_time' в таблицу match")
+                conn.close()
+            except Exception as mig_e:
+                logger.warning(f"Миграция match.actual_start_time пропущена: {mig_e}")
+            
             # Создание/обновление администратора по умолчанию
             admin = User.query.filter_by(username='admin').first()
             if not admin:
