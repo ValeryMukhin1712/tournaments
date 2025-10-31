@@ -2065,7 +2065,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             qr_code = None
             if enable_telegram:
                 try:
+                    import os
                     bot_username = get_bot_username()
+                    logger.info(f"Генерация QR-кода: используется bot_username={bot_username}, APP_ENV={os.environ.get('APP_ENV', 'не установлен')}")
                     qr_code = generate_qr_code(telegram_token, bot_username)
                     logger.info(f"QR-код сгенерирован для участника {participant_name} (токен: {telegram_token[:8]}...)")
                 except Exception as e:

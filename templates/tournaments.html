@@ -593,7 +593,10 @@ window.tgUsername = '{{ bot_username }}';
 function showQRCodeModal(participantName, qrCode, tournamentId) {
     // Создаем модальное окно с QR-кодом
     const token = (window.__lastJoinResponse && window.__lastJoinResponse.telegram_token) || '';
-    const botUsername = window.tgUsername || 'Q_uickScore_bot';
+    const botUsername = window.tgUsername;
+    if (!botUsername) {
+        console.error('bot_username не установлен! Используется пустая строка.');
+    }
     const deepLink = token ? `https://t.me/${botUsername}?start=${token}` : `https://t.me/${botUsername}`;
     const modalHtml = `
         <div class="modal fade" id="qrCodeModal${tournamentId}" tabindex="-1" aria-labelledby="qrCodeModalLabel${tournamentId}" aria-hidden="true">
@@ -667,7 +670,10 @@ function showQRCodeModal(participantName, qrCode, tournamentId) {
     // Настройка ссылок и команды для ручного подключения
     try {
         const token = (window.__lastJoinResponse && window.__lastJoinResponse.telegram_token) || '';
-        const botUsername = window.tgUsername || 'Q_uickScore_bot';
+        const botUsername = window.tgUsername;
+    if (!botUsername) {
+        console.error('bot_username не установлен! Используется пустая строка.');
+    }
         const deepLink = token ? `https://t.me/${botUsername}?start=${token}` : `https://t.me/${botUsername}`;
         const cmdEl = document.getElementById('startCmd' + tournamentId);
         const openLinkEl = document.getElementById('openBotLink' + tournamentId);

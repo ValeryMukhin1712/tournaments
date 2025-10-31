@@ -6,18 +6,23 @@ import secrets
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Всегда подгружаем .env.dev (если есть) с приоритетом, затем .env как базовый
-if os.path.exists('.env.dev'):
+# Определяем окружение ПЕРЕД загрузкой .env файлов
+# На сервере (VDS) обычно нет .env.dev, только .env с prod настройками
+app_env = os.environ.get('APP_ENV', '').lower()
+
+# Загружаем .env файлы только если не на продакшене или если явно указан dev
+# На продакшене (VDS) не должно быть .env.dev файла
+if app_env == 'dev' and os.path.exists('.env.dev'):
     load_dotenv('.env.dev', override=True)
 if os.path.exists('.env'):
-    load_dotenv('.env', override=False)
+    load_dotenv('.env', override=(app_env != 'dev'))  # Не перезаписываем .env, если dev режим
 
-app_env = os.environ.get('APP_ENV') or os.getenv('APP_ENV')
-
-if os.environ.get('APP_ENV') == 'dev':
+# Определяем какие токены использовать
+if app_env == 'dev':
     TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_DEV')
     TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME_DEV')
 else:
+    # По умолчанию используем PROD настройки (для VDS)
     TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_PROD')
     TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME_PROD')
 
@@ -68,9 +73,10 @@ class Config:
     ENABLE_PAGE_TRACKING = os.environ.get('ENABLE_PAGE_TRACKING', 'true').lower() in ['true', 'on', '1']  # Включить отслеживание страниц
 
     # Динамический username Telegram-бота (после загрузки .env/.env.dev)
-    TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME_DEV') if os.environ.get('APP_ENV') == 'dev' else os.environ.get('TELEGRAM_BOT_USERNAME_PROD')
+    # Проверяем APP_ENV еще раз после загрузки .env файлов
+    TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME_DEV') if os.environ.get('APP_ENV', '').lower() == 'dev' else os.environ.get('TELEGRAM_BOT_USERNAME_PROD')
     # Динамический токен Telegram-бота (для обработчика telegram_bot_handler)
-    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_DEV') if os.environ.get('APP_ENV') == 'dev' else os.environ.get('TELEGRAM_BOT_TOKEN_PROD')
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_DEV') if os.environ.get('APP_ENV', '').lower() == 'dev' else os.environ.get('TELEGRAM_BOT_TOKEN_PROD')
 
 class DevelopmentConfig(Config):
     """Конфигурация для разработки"""
