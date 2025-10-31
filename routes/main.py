@@ -723,23 +723,57 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     @app.route('/tournaments')
     def tournaments_list():
         """Список всех турниров для просмотра"""
-        tournaments = Tournament.query.all()
-        # Загружаем участников, матчи и лист ожидания для каждого турнира
-        for tournament in tournaments:
-            tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
-            tournament.matches = Match.query.filter_by(tournament_id=tournament.id).all()
-            # Безопасная загрузка листа ожидания с обработкой возможного отсутствия колонки status
-            try:
-                tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id, status='ожидает').all()
-            except Exception as e:
-                logger.warning(f"Ошибка при загрузке листа ожидания для турнира {tournament.id}: {e}")
-                # Если колонка status еще не существует, загружаем все записи без фильтра
+        try:
+            logger.info("Начало загрузки страницы 'Все турниры'")
+            tournaments = Tournament.query.all()
+            logger.info(f"Загружено турниров: {len(tournaments)}")
+            
+            # Загружаем участников, матчи и лист ожидания для каждого турнира
+            for tournament in tournaments:
                 try:
-                    tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id).all()
-                except Exception as e2:
-                    logger.error(f"Критическая ошибка при загрузке листа ожидания: {e2}")
-                    tournament.waiting_list = []
-        return render_template('tournaments.html', tournaments=tournaments, bot_username=Config.TELEGRAM_BOT_USERNAME)
+                    tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
+                    logger.debug(f"Турнир {tournament.id}: загружено участников: {len(tournament.participants)}")
+                except Exception as e:
+                    logger.error(f"Ошибка при загрузке участников для турнира {tournament.id}: {e}")
+                    tournament.participants = []
+                
+                try:
+                    tournament.matches = Match.query.filter_by(tournament_id=tournament.id).all()
+                    logger.debug(f"Турнир {tournament.id}: загружено матчей: {len(tournament.matches)}")
+                except Exception as e:
+                    logger.error(f"Ошибка при загрузке матчей для турнира {tournament.id}: {e}")
+                    tournament.matches = []
+                
+                # Безопасная загрузка листа ожидания с обработкой возможного отсутствия колонки status
+                try:
+                    tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id, status='ожидает').all()
+                    logger.debug(f"Турнир {tournament.id}: загружено заявок в листе ожидания: {len(tournament.waiting_list)}")
+                except Exception as e:
+                    logger.warning(f"Ошибка при загрузке листа ожидания для турнира {tournament.id}: {e}")
+                    # Если колонка status еще не существует, загружаем все записи без фильтра
+                    try:
+                        tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id).all()
+                        logger.debug(f"Турнир {tournament.id}: загружено заявок без фильтра: {len(tournament.waiting_list)}")
+                    except Exception as e2:
+                        logger.error(f"Критическая ошибка при загрузке листа ожидания: {e2}")
+                        tournament.waiting_list = []
+            
+            # Безопасное получение bot_username
+            try:
+                bot_username = Config.TELEGRAM_BOT_USERNAME
+                logger.info(f"Bot username получен: {bot_username}")
+            except Exception as e:
+                logger.error(f"Ошибка при получении bot_username: {e}")
+                bot_username = None
+            
+            logger.info("Начинаем рендеринг шаблона tournaments.html")
+            return render_template('tournaments.html', tournaments=tournaments, bot_username=bot_username)
+        except Exception as e:
+            logger.error(f"Критическая ошибка при загрузке страницы 'Все турниры': {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            flash('Ошибка при загрузке страницы турниров. Проверьте логи.', 'error')
+            return redirect(url_for('index'))
     
     @app.route('/request-token', methods=['GET', 'POST'])
     def request_token():
