@@ -164,50 +164,34 @@ def recalculate_schedule_after_match_completion(match_id, Tournament, Match, db)
         if verify_match:
             logger.info(f"[ПЕРЕСЧЕТ] Прямой запрос из БД: match_date={verify_match.match_date}, match_time={verify_match.match_time}")
         
-        # Рекурсивно пересчитываем все последующие матчи на этой площадке
-        # Используем запланированное окончание следующего матча для расчета времени следующего
-        next_match_planned_end = datetime.combine(
-            new_start_date,
-            new_start_time_only
-        ) + timedelta(minutes=match_duration)
-        
-        # Находим следующий после next_match матч
-        next_next_match = Match.query.filter(
-            Match.tournament_id == completed_match.tournament_id,
-            Match.court_number == completed_match.court_number,
-            Match.id != match_id,
-            Match.id != next_match.id,
-            Match.status != 'завершен',
-            Match.match_number > next_match.match_number
-        ).order_by(
-            Match.match_number.asc()
-        ).first()
-        
-        if next_next_match:
-            # Пересчитываем время для следующего матча, используя запланированное окончание next_match
-            # При каскадном пересчете также не ограничиваемся рабочим временем
-            new_next_start = next_match_planned_end + timedelta(minutes=break_duration)
-            new_next_start_time = new_next_start.time()
-            new_next_start_date = new_next_start.date()
-            
-            logger.info(f"[ПЕРЕСЧЕТ КАСКАДНЫЙ] Вычислено новое время для матча {next_next_match.id}: {new_next_start_date} {new_next_start_time} (от {next_match_planned_end})")
-            
-            old_next_time = next_next_match.match_time
-            old_next_date = next_next_match.match_date
-            
-            next_next_match.match_time = new_next_start_time
-            next_next_match.match_date = new_next_start_date
-            
+        # КАСКАДНЫЙ ПЕРЕСЧЕТ: обновляем ВСЕ последующие матчи на этой площадке по цепочке
+        current_planned_end = datetime.combine(new_start_date, new_start_time_only) + timedelta(minutes=match_duration)
+        cursor_match = next_match
+        while True:
+            following = Match.query.filter(
+                Match.tournament_id == completed_match.tournament_id,
+                Match.court_number == completed_match.court_number,
+                Match.id != match_id,
+                Match.id != cursor_match.id,
+                Match.status != 'завершен',
+                Match.match_number > cursor_match.match_number
+            ).order_by(Match.match_number.asc()).first()
+            if not following:
+                break
+            new_start = current_planned_end + timedelta(minutes=break_duration)
+            new_date = new_start.date()
+            new_time_only = new_start.time()
+            old_date = following.match_date
+            old_time = following.match_time
+            following.match_date = new_date
+            following.match_time = new_time_only
             logger.info(
-                f"[ПЕРЕСЧЕТ КАСКАДНЫЙ] Матч {next_next_match.id}: "
-                f"{old_next_date} {old_next_time} -> {new_next_start_date} {new_next_start_time}"
+                f"[ПЕРЕСЧЕТ КАСКАДНЫЙ] Матч {following.id}: {old_date} {old_time} -> {new_date} {new_time_only}"
             )
-            
             db.session.commit()
-            
-            # Если следующий матч уже завершен, используем его реальное время для дальнейшего пересчета
-            if next_match.status == 'завершен' and next_match.actual_end_time:
-                recalculate_schedule_after_match_completion(next_match.id, Tournament, Match, db)
+            # следующий шаг рассчитываем от конца только что сдвинутого following
+            current_planned_end = datetime.combine(new_date, new_time_only) + timedelta(minutes=match_duration)
+            cursor_match = following
     
     except Exception as e:
         logger.error(f"[ОШИБКА ПЕРЕСЧЕТА] Матч {match_id}: {e}")
@@ -2090,6 +2074,33 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             telegram_status = " с подключением к Telegram боту" if enable_telegram else ""
             logger.info(f"Участник {participant_name} (уровень: {skill_level}) подал заявку в лист ожидания турнира {tournament.name} (ID: {tournament_id}){telegram_status}")
+
+            # Уведомление администратору турнира в TG, если он ранее указывал Telegram при получении пароля
+            try:
+                import hashlib
+                from utils.telegram_utils import send_telegram_message
+                # Ищем токен администратора по соответствию admin_id = hash(email) % 1_000_000
+                admin_telegram = None
+                from models.token import Token
+                tokens = Token.query.all()
+                for t in tokens:
+                    try:
+                        if int(hashlib.md5(t.email.encode('utf-8')).hexdigest(), 16) % 1000000 == tournament.admin_id:
+                            if t.telegram:
+                                admin_telegram = t.telegram
+                                break
+                    except Exception:
+                        continue
+                if admin_telegram:
+                    msg = (
+                        f"📥 Новая заявка в лист ожидания\n"
+                        f"Турнир: {tournament.name} (ID: {tournament.id})\n"
+                        f"Игрок: {participant_name if participant_name else 'Игрок (Telegram)'}\n"
+                        f"Уровень: {skill_level}"
+                    )
+                    send_telegram_message(msg, telegram_contact=admin_telegram)
+            except Exception as notify_e:
+                logger.warning(f"Не удалось отправить уведомление админу турнира в TG: {notify_e}")
             
             return jsonify({
                 'success': True, 
@@ -2119,36 +2130,70 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if not token or not chat_id:
                 return jsonify({'success': False, 'error': 'Необходимо указать токен и Chat ID'}), 400
             
-            # Ищем заявку с таким токеном
+            # Ищем заявку с таким токеном (подача заявки)
             waiting_entry = WaitingList.query.filter_by(telegram_token=token).first()
-            
-            if not waiting_entry:
-                logger.warning(f"Попытка привязать несуществующий токен: {token[:8]}...")
-                return jsonify({'success': False, 'error': 'Токен не найден или уже использован'}), 404
-            
-            # Проверяем, не привязан ли уже токен к другому Chat ID
-            if waiting_entry.telegram and waiting_entry.telegram != chat_id:
-                logger.warning(f"Токен {token[:8]}... уже привязан к Chat ID {waiting_entry.telegram}")
-                return jsonify({'success': False, 'error': 'Токен уже привязан к другому аккаунту'}), 400
-            
-            # Связываем Chat ID с заявкой
-            waiting_entry.telegram = chat_id
-            db.session.commit()
-            
-            logger.info(f"✅ Chat ID {chat_id} успешно привязан к заявке участника {waiting_entry.name} (токен: {token[:8]}...)")
-            
-            # Возвращаем информацию о заявке
-            return jsonify({
-                'success': True,
-                'message': 'Telegram успешно подключен',
-                'participant_name': waiting_entry.name,
-                'tournament_id': waiting_entry.tournament_id
-            })
+            if waiting_entry:
+                # Проверяем, не привязан ли уже токен к другому Chat ID
+                if waiting_entry.telegram and waiting_entry.telegram != chat_id:
+                    logger.warning(f"Токен {token[:8]}... уже привязан к Chat ID {waiting_entry.telegram}")
+                    return jsonify({'success': False, 'error': 'Токен уже привязан к другому аккаунту'}), 400
+                waiting_entry.telegram = chat_id
+                db.session.commit()
+                logger.info(f"✅ Chat ID {chat_id} успешно привязан к заявке участника {waiting_entry.name} (токен: {token[:8]}...)")
+                return jsonify({'success': True, 'message': 'Telegram успешно подключен', 'participant_name': waiting_entry.name, 'tournament_id': waiting_entry.tournament_id})
+
+            # Если это не токен заявки, проверяем токен привязки админа (страница 2)
+            admin_token_row = Token.query.filter_by(telegram_link_token=token).first()
+            if admin_token_row:
+                admin_token_row.telegram_chat_id = str(chat_id)
+                # Сохраняем и как универсальное поле для совместимости с уведомлениями
+                admin_token_row.telegram = str(chat_id)
+                # Одноразовый токен можно обнулить, чтобы не использовать повторно
+                admin_token_row.telegram_link_token = None
+                db.session.commit()
+                logger.info(f"✅ Chat ID {chat_id} привязан к администратору (email={admin_token_row.email}) через deep link")
+                return jsonify({'success': True, 'message': 'Telegram администратора подключён'})
+
+            logger.warning(f"Попытка привязать несуществующий токен: {token[:8]}...")
+            return jsonify({'success': False, 'error': 'Токен не найден или уже использован'}), 404
             
         except Exception as e:
             db.session.rollback()
             logger.error(f"Ошибка при связывании Telegram токена: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при подключении Telegram'}), 500
+
+    @app.route('/api/admin/telegram/generate-link', methods=['POST'])
+    def generate_admin_telegram_link():
+        """Сгенерировать deep link токен для админа, чтобы привязать chat_id без ручного ввода.
+        Вход: email (обяз.), name (опц.)
+        Выход: deep_link, link_token
+        """
+        try:
+            data = request.get_json(silent=True) or request.form
+            email = (data.get('email') or '').strip()
+            name = (data.get('name') or '').strip() or 'Администратор'
+            if not email:
+                return jsonify({'success': False, 'error': 'Email обязателен'}), 400
+
+            # Берём последнюю запись Token по email или создаём новую черновую
+            token_row = Token.query.filter_by(email=email).order_by(Token.created_at.desc()).first()
+            if not token_row:
+                token_row = Token(email=email, token=0, name=name, created_at=datetime.utcnow(), is_used=False, email_sent=False)
+                db.session.add(token_row)
+                db.session.commit()
+
+            import secrets
+            link_token = secrets.token_urlsafe(32)
+            token_row.telegram_link_token = link_token
+            db.session.commit()
+
+            from config import Config
+            bot_username = Config.TELEGRAM_BOT_USERNAME or 'Q_uickScore_bot'
+            deep_link = f"https://t.me/{bot_username}?start={link_token}"
+            return jsonify({'success': True, 'deep_link': deep_link, 'link_token': link_token}), 200
+        except Exception as e:
+            logger.exception('Ошибка генерации admin telegram link')
+            return jsonify({'success': False, 'error': 'Не удалось сгенерировать ссылку'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>/waiting-list', methods=['GET'])
     def get_waiting_list(tournament_id):
@@ -2187,7 +2232,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     'id': entry.id,
                     'name': entry.name,
                     'skill_level': entry.skill_level,
-                    'created_at': created_at_str
+                    'created_at': created_at_str,
+                    'telegram': entry.telegram if entry.telegram else None
                 })
             
             return jsonify({'success': True, 'waiting_list': waiting_list_data})
@@ -2195,6 +2241,63 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         except Exception as e:
             logger.error(f"Ошибка при получении листа ожидания: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при получении листа ожидания'}), 500
+
+    @app.route('/api/tournaments/<int:tournament_id>/waiting-list/<int:waiting_id>', methods=['DELETE'])
+    def delete_waiting_entry(tournament_id, waiting_id):
+        """API: удалить запись из листа ожидания (или пометить как отклонена)."""
+        try:
+            from flask import session
+            session_admin_id = session.get('admin_id')
+            if not session_admin_id:
+                return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+
+            tournament = Tournament.query.get(tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+
+            if tournament.admin_id != session_admin_id:
+                return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+
+            waiting_entry = WaitingList.query.get(waiting_id)
+            if not waiting_entry or waiting_entry.tournament_id != tournament_id:
+                return jsonify({'success': False, 'error': 'Заявка не найдена'}), 404
+
+            # Получаем сообщение из тела запроса (если есть)
+            message_sent = False
+            message = None
+            try:
+                data = request.get_json()
+                message = data.get('message') if data else None
+            except:
+                pass
+
+            # Если есть Telegram и сообщение - отправляем уведомление
+            if waiting_entry.telegram and message:
+                try:
+                    telegram_message = f"📋 <b>Уведомление от администратора турнира</b>\n\n{message}"
+                    send_ok = send_telegram_message(telegram_message, telegram_contact=waiting_entry.telegram)
+                    if send_ok:
+                        message_sent = True
+                        logger.info(f"Сообщение об отклонении отправлено участнику {waiting_entry.name} (telegram: {waiting_entry.telegram})")
+                    else:
+                        logger.warning(f"Не удалось отправить сообщение об отклонении участнику {waiting_entry.name} (telegram: {waiting_entry.telegram})")
+                except Exception as e:
+                    logger.error(f"Ошибка при отправке сообщения об отклонении: {e}")
+
+            # Мягкое удаление: помечаем как отклонен, чтобы сохранялась история
+            waiting_entry.status = 'отклонен'
+            db.session.commit()
+
+            logger.info(f"Заявка из листа ожидания удалена (отклонена): id={waiting_id}, турнир={tournament_id}, имя={waiting_entry.name}")
+            return jsonify({
+                'success': True, 
+                'message': 'Заявка удалена из листа ожидания',
+                'message_sent': message_sent
+            })
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении из листа ожидания: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при удалении заявки'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>/accept-waiting', methods=['POST'])
     def accept_waiting_list(tournament_id):

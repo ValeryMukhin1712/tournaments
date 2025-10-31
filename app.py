@@ -90,6 +90,24 @@ def init_db():
             # Создаем все таблицы
             db.create_all()
             logger.info("База данных инициализирована успешно")
+            # Лёгкая миграция: добавить столбец tokens.telegram, если его нет
+            try:
+                from sqlalchemy import text
+                conn = db.engine.connect()
+                cols = conn.execute(text("PRAGMA table_info('tokens')")).fetchall()
+                col_names = {c[1] for c in cols}
+                if 'telegram' not in col_names:
+                    conn.execute(text("ALTER TABLE tokens ADD COLUMN telegram VARCHAR(100)"))
+                    logger.info("Добавлен столбец 'telegram' в таблицу tokens")
+                if 'telegram_chat_id' not in col_names:
+                    conn.execute(text("ALTER TABLE tokens ADD COLUMN telegram_chat_id VARCHAR(32)"))
+                    logger.info("Добавлен столбец 'telegram_chat_id' в таблицу tokens")
+                if 'telegram_link_token' not in col_names:
+                    conn.execute(text("ALTER TABLE tokens ADD COLUMN telegram_link_token VARCHAR(128)"))
+                    logger.info("Добавлен столбец 'telegram_link_token' в таблицу tokens")
+                conn.close()
+            except Exception as mig_e:
+                logger.warning(f"Миграция tokens.telegram пропущена: {mig_e}")
             
             # Создание/обновление администратора по умолчанию
             admin = User.query.filter_by(username='admin').first()

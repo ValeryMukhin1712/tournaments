@@ -1635,6 +1635,35 @@
     </div>
 </div>
 
+<!-- Модальное окно для отправки сообщения об отклонении заявки -->
+<div class="modal fade" id="rejectWaitingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Отклонить заявку</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="rejectMessage" class="form-label">Сообщение участнику (можно отредактировать):</label>
+                    <textarea class="form-control" id="rejectMessage" rows="4" placeholder="Введите причину отказа или оставьте стандартное сообщение"></textarea>
+                    <small class="form-text text-muted">Сообщение будет отправлено участнику в Telegram, если он подключен.</small>
+                </div>
+                <div id="rejectTelegramInfo" class="alert alert-info" style="display: none;">
+                    <i class="fab fa-telegram me-2"></i>
+                    <span id="rejectTelegramText"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" id="confirmRejectBtn" class="btn btn-danger">
+                    <i class="fas fa-times me-2"></i>Отклонить заявку
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Модальное окно добавления опоздавшего участника -->
 <div class="modal fade" id="addLateParticipantModal" tabindex="-1">
     <div class="modal-dialog">
@@ -2350,7 +2379,7 @@ function displayWaitingList(waitingList) {
             </td>
             <td>${entry.created_at}</td>
             <td>
-                <button class="btn btn-danger btn-sm" onclick="rejectSingleWaiting(${entry.id})" title="Отклонить заявку">
+                <button class="btn btn-danger btn-sm" data-waiting-id="${entry.id}" data-waiting-name="${entry.name.replace(/"/g, '&quot;')}" data-waiting-telegram="${entry.telegram || ''}" onclick="rejectSingleWaiting(this)" title="Отклонить заявку">
                     <i class="fas fa-times"></i>
                 </button>
             </td>
@@ -2443,12 +2472,96 @@ function acceptSingleWaiting(waitingId) {
 }
 
 // Отклонение одной заявки
-function rejectSingleWaiting(waitingId) {
-    if (confirm('Отклонить эту заявку?')) {
-        // Здесь можно добавить API для отклонения заявки
-        alert('Функция отклонения заявки будет добавлена позже');
+let currentRejectWaitingId = null;
+let currentRejectButton = null;
+
+function rejectSingleWaiting(button) {
+    const waitingId = button.getAttribute('data-waiting-id');
+    const participantName = button.getAttribute('data-waiting-name');
+    const telegram = button.getAttribute('data-waiting-telegram');
+    
+    currentRejectWaitingId = waitingId;
+    currentRejectButton = button;
+    
+    // Устанавливаем стандартное сообщение
+    const tournamentName = document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : 'турнир';
+    const defaultMessage = `К сожалению, ваша заявка на участие в турнире "${tournamentName}" отклонена администратором.`;
+    document.getElementById('rejectMessage').value = defaultMessage;
+    
+    // Показываем информацию о Telegram
+    const telegramInfo = document.getElementById('rejectTelegramInfo');
+    const telegramText = document.getElementById('rejectTelegramText');
+    
+    if (telegram && telegram.trim() !== '') {
+        telegramInfo.style.display = 'block';
+        telegramText.textContent = `Участник подключен к Telegram (${telegram}). Сообщение будет отправлено.`;
+    } else {
+        telegramInfo.style.display = 'none';
     }
+    
+    // Показываем модальное окно
+    const rejectModal = new bootstrap.Modal(document.getElementById('rejectWaitingModal'));
+    rejectModal.show();
 }
+
+// Обработчик подтверждения отклонения
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmRejectBtn = document.getElementById('confirmRejectBtn');
+    if (confirmRejectBtn) {
+        confirmRejectBtn.addEventListener('click', function() {
+            if (!currentRejectWaitingId) return;
+            
+            const message = document.getElementById('rejectMessage').value.trim();
+            if (!message) {
+                alert('Введите сообщение для участника');
+                return;
+            }
+            
+            // Закрываем модальное окно
+            const rejectModal = bootstrap.Modal.getInstance(document.getElementById('rejectWaitingModal'));
+            if (rejectModal) rejectModal.hide();
+            
+            // Делаем кнопку неактивной
+            if (currentRejectButton) {
+                currentRejectButton.disabled = true;
+                currentRejectButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+            
+            // Отправляем запрос на отклонение с сообщением
+            fetch(`/api/tournaments/{{ tournament.id }}/waiting-list/${currentRejectWaitingId}`, {
+                method: 'DELETE',
+                headers: { 
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadWaitingList();
+                    if (data.message_sent) {
+                        // Можно показать уведомление, что сообщение отправлено
+                    }
+                } else {
+                    alert('Ошибка: ' + (data.error || 'не удалось удалить заявку'));
+                }
+            })
+            .catch(err => {
+                console.error('Ошибка удаления заявки:', err);
+                alert('Произошла ошибка при удалении. Попробуйте ещё раз.');
+            })
+            .finally(() => { 
+                if (currentRejectButton) { 
+                    currentRejectButton.disabled = false; 
+                    currentRejectButton.innerHTML = '<i class="fas fa-times"></i>'; 
+                }
+                currentRejectWaitingId = null;
+                currentRejectButton = null;
+            });
+        });
+    }
+});
 
 // Функция для проверки осмысленности счета
 function isMeaningfulScore(score1, score2, pointsToWin) {

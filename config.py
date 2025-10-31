@@ -4,6 +4,23 @@
 import os
 import secrets
 from datetime import timedelta
+from dotenv import load_dotenv
+
+# Всегда подгружаем .env.dev (если есть) с приоритетом, затем .env как базовый
+if os.path.exists('.env.dev'):
+    load_dotenv('.env.dev', override=True)
+if os.path.exists('.env'):
+    load_dotenv('.env', override=False)
+
+app_env = os.environ.get('APP_ENV') or os.getenv('APP_ENV')
+
+if os.environ.get('APP_ENV') == 'dev':
+    TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_DEV')
+    TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME_DEV')
+else:
+    TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN_PROD')
+    TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME_PROD')
+
 
 class Config:
     """Базовая конфигурация"""
@@ -40,9 +57,7 @@ class Config:
     EMAILJS_USER_ID = os.environ.get('EMAILJS_USER_ID')
     
     # Настройки Telegram Bot для обратной связи
-    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN') or '8395818732:AAHwQKYFV3Fr3LOopRS3nOwvH28lhCBXEfc'
     TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID') or '7052840972'
-    TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME') or 'Q_uickScore_bot'  # Username бота без @
     
     # Настройки управления сессиями
     SESSION_TIMEOUT_HOURS = int(os.environ.get('SESSION_TIMEOUT_HOURS', 2))  # Время жизни сессии
@@ -51,6 +66,11 @@ class Config:
     ADMIN_SESSION_MANAGEMENT = os.environ.get('ADMIN_SESSION_MANAGEMENT', 'true').lower() in ['true', 'on', '1']  # Включить управление сессиями для админа
     SESSION_HISTORY_RETENTION_DAYS = int(os.environ.get('SESSION_HISTORY_RETENTION_DAYS', 90))  # Хранение истории сессий (дни)
     ENABLE_PAGE_TRACKING = os.environ.get('ENABLE_PAGE_TRACKING', 'true').lower() in ['true', 'on', '1']  # Включить отслеживание страниц
+
+    # Динамический username Telegram-бота (после загрузки .env/.env.dev)
+    TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME_DEV') if os.environ.get('APP_ENV') == 'dev' else os.environ.get('TELEGRAM_BOT_USERNAME_PROD')
+    # Динамический токен Telegram-бота (для обработчика telegram_bot_handler)
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_DEV') if os.environ.get('APP_ENV') == 'dev' else os.environ.get('TELEGRAM_BOT_TOKEN_PROD')
 
 class DevelopmentConfig(Config):
     """Конфигурация для разработки"""

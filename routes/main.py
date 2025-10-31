@@ -9,6 +9,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from utils.telegram_utils import send_telegram_message
+from config import Config
 # Tournament передается как параметр в функции
 
 logger = logging.getLogger(__name__)
@@ -728,7 +729,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             tournament.participants = Participant.query.filter_by(tournament_id=tournament.id).all()
             tournament.matches = Match.query.filter_by(tournament_id=tournament.id).all()
             tournament.waiting_list = WaitingList.query.filter_by(tournament_id=tournament.id, status='ожидает').all()
-        return render_template('tournaments.html', tournaments=tournaments)
+        return render_template('tournaments.html', tournaments=tournaments, bot_username=Config.TELEGRAM_BOT_USERNAME)
     
     @app.route('/request-token', methods=['GET', 'POST'])
     def request_token():

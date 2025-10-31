@@ -31,9 +31,7 @@ def generate_qr_code(token: str, bot_username: str = None) -> str:
     """
     # Получаем username бота из конфига или используем дефолтный
     if not bot_username:
-        # Извлекаем username бота из токена (если он есть в конфиге)
-        # Для примера используем фиксированное имя, в продакшене нужно будет заменить
-        bot_username = "Q_uickScore_bot"  # Username вашего Telegram бота
+        bot_username = Config.TELEGRAM_BOT_USERNAME
     
     # Формируем Telegram Deep Link
     # Когда пользователь перейдет по этой ссылке, бот получит команду /start <token>
@@ -71,7 +69,5 @@ def get_bot_username():
     Returns:
         str: Username бота без @
     """
-    # TODO: Добавить BOT_USERNAME в config.py
-    # На данный момент используем хардкод
-    return "Q_uickScore_bot"  # Username вашего Telegram бота
+    return Config.TELEGRAM_BOT_USERNAME
 

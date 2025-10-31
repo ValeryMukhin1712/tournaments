@@ -395,7 +395,7 @@
                         </div>
                         <div class="form-text ms-4">
                             <i class="fas fa-bell me-1"></i>
-                            При выборе этого варианта появится QR-код. Сканируйте его или найдите бота <strong>Q_uickScore_bot</strong> и отправьте ему команду <code>/start</code>.
+                            При выборе этого варианта появится QR-код. Сканируйте его или найдите бота <strong>{{ tg_username }}</strong> и отправьте ему команду <code>/start</code>.
                         </div>
                     </div>
                     <input type="hidden" name="tournament_id" value="{{ tournament.id }}">
@@ -588,8 +588,13 @@
 </style>
 
 <script>
+window.tgUsername = '{{ bot_username }}';
+
 function showQRCodeModal(participantName, qrCode, tournamentId) {
     // Создаем модальное окно с QR-кодом
+    const token = (window.__lastJoinResponse && window.__lastJoinResponse.telegram_token) || '';
+    const botUsername = window.tgUsername || 'Q_uickScore_bot';
+    const deepLink = token ? `https://t.me/${botUsername}?start=${token}` : `https://t.me/${botUsername}`;
     const modalHtml = `
         <div class="modal fade" id="qrCodeModal${tournamentId}" tabindex="-1" aria-labelledby="qrCodeModalLabel${tournamentId}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -625,7 +630,7 @@ function showQRCodeModal(participantName, qrCode, tournamentId) {
                                 Откройте камеру телефона → Наведите на QR-код → Нажмите на ссылку → START в боте
                             </small>
                             <div class="d-flex flex-wrap gap-2 align-items-center">
-                                <a id="openBotLink${tournamentId}" class="btn btn-primary btn-sm" target="_blank">
+                                <a id="openBotLink${tournamentId}" class="btn btn-primary btn-sm" target="_blank" href="${deepLink}">
                                     <i class="fab fa-telegram me-1"></i>Открыть бота
                                 </a>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" id="copyCmdBtn${tournamentId}">
@@ -633,7 +638,7 @@ function showQRCodeModal(participantName, qrCode, tournamentId) {
                                 </button>
                                 <code class="small text-muted" id="startCmd${tournamentId}"></code>
                             </div>
-                            <small class="text-muted d-block mt-2">Если ищете бота вручную: <strong>Q_uickScore_bot</strong>, отправьте ему команду выше.</small>
+                            <small class="text-muted d-block mt-2">Если ищете бота вручную: <strong>${{ tg_username }}</strong>, отправьте ему команду выше.</small>
                         </div>
                         
                         <p class="text-muted small mt-3">
@@ -662,7 +667,7 @@ function showQRCodeModal(participantName, qrCode, tournamentId) {
     // Настройка ссылок и команды для ручного подключения
     try {
         const token = (window.__lastJoinResponse && window.__lastJoinResponse.telegram_token) || '';
-        const botUsername = 'Q_uickScore_bot';
+        const botUsername = window.tgUsername || 'Q_uickScore_bot';
         const deepLink = token ? `https://t.me/${botUsername}?start=${token}` : `https://t.me/${botUsername}`;
         const cmdEl = document.getElementById('startCmd' + tournamentId);
         const openLinkEl = document.getElementById('openBotLink' + tournamentId);
