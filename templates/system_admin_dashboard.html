@@ -242,7 +242,10 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="deletePlayer({{ player.id }}, '{{ player.name }}')">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill me-1" onclick="openRenamePlayerModal({{ player.id }}, '{{ player.name|replace("'", "\\'") }}')">
+                                                <i class="fas fa-edit"></i> Переименовать
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="deletePlayer({{ player.id }}, '{{ player.name|replace("'", "\\'") }}')">
                                                 <i class="fas fa-trash"></i> Удалить
                                             </button>
                                         </td>
@@ -258,6 +261,31 @@
                             <p class="text-muted">В системе пока нет игроков</p>
                         </div>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для переименования игрока -->
+    <div class="modal fade" id="renamePlayerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Переименовать игрока</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="renamePlayerInput" class="form-label">Новое имя игрока:</label>
+                        <input type="text" class="form-control" id="renamePlayerInput" placeholder="Введите новое имя">
+                        <input type="hidden" id="renamePlayerId">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="confirmRenamePlayerBtn">
+                        <i class="fas fa-save me-2"></i>Сохранить
+                    </button>
                 </div>
             </div>
         </div>
@@ -441,5 +469,111 @@ function deletePlayer(playerId, playerName) {
         });
     }
 }
+
+// Функция открытия модального окна переименования игрока
+function openRenamePlayerModal(playerId, playerName) {
+    document.getElementById('renamePlayerId').value = playerId;
+    const input = document.getElementById('renamePlayerInput');
+    input.value = playerName;
+    input.dataset.originalName = playerName; // Сохраняем исходное имя
+    const modal = new bootstrap.Modal(document.getElementById('renamePlayerModal'));
+    modal.show();
+    // Фокус на поле ввода
+    setTimeout(() => {
+        input.focus();
+        input.select();
+    }, 500);
+}
+
+// Функция переименования игрока
+async function renamePlayer() {
+    const playerId = parseInt(document.getElementById('renamePlayerId').value);
+    const input = document.getElementById('renamePlayerInput');
+    const newName = input.value.trim();
+    const originalName = input.dataset.originalName;
+    
+    if (!newName) {
+        showAlert('Введите новое имя игрока', 'danger');
+        return;
+    }
+    
+    if (newName === originalName) {
+        // Имя не изменилось, просто закрываем модальное окно
+        bootstrap.Modal.getInstance(document.getElementById('renamePlayerModal')).hide();
+        return;
+    }
+    
+    const confirmBtn = document.getElementById('confirmRenamePlayerBtn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Сохранение...';
+    confirmBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/players/${playerId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({ name: newName })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Закрываем модальное окно
+            bootstrap.Modal.getInstance(document.getElementById('renamePlayerModal')).hide();
+            
+            // Обновляем имя в таблице
+            const row = document.querySelector(`button[onclick*="openRenamePlayerModal(${playerId}"]`).closest('tr');
+            const nameCell = row.querySelector('td strong');
+            if (nameCell) {
+                nameCell.textContent = newName;
+            }
+            
+            // Обновляем onclick атрибут кнопки с новым именем
+            const renameBtn = row.querySelector('button[onclick*="openRenamePlayerModal"]');
+            if (renameBtn) {
+                renameBtn.setAttribute('onclick', `openRenamePlayerModal(${playerId}, '${newName.replace(/'/g, "\\'")}')`);
+            }
+            
+            // Обновляем onclick атрибут кнопки удаления с новым именем
+            const deleteBtn = row.querySelector('button[onclick*="deletePlayer"]');
+            if (deleteBtn) {
+                deleteBtn.setAttribute('onclick', `deletePlayer(${playerId}, '${newName.replace(/'/g, "\\'")}')`);
+            }
+            
+            showAlert(`Игрок успешно переименован в "${newName}"`, 'success');
+        } else {
+            showAlert('Ошибка: ' + (data.error || 'Не удалось переименовать игрока'), 'danger');
+        }
+    } catch (error) {
+        console.error('Ошибка при переименовании игрока:', error);
+        showAlert('Произошла ошибка при переименовании игрока', 'danger');
+    } finally {
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// Обработчик кнопки сохранения переименования
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmRenameBtn = document.getElementById('confirmRenamePlayerBtn');
+    if (confirmRenameBtn) {
+        confirmRenameBtn.addEventListener('click', function() {
+            renamePlayer();
+        });
+    }
+    
+    // Обработчик Enter в поле ввода нового имени
+    const renamePlayerInput = document.getElementById('renamePlayerInput');
+    if (renamePlayerInput) {
+        renamePlayerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                renamePlayer();
+            }
+        });
+    }
+});
 </script>
 {% endblock %}
