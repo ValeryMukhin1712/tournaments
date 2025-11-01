@@ -23,6 +23,23 @@
         </div>
     </div>
     
+    <!-- Информация о версии -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Информация о версии
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="versionInfo" class="text-muted">
+                        <i class="fas fa-spinner fa-spin"></i> Загрузка информации о версии...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Секция турниров -->
     <div class="row mb-4">
@@ -556,8 +573,86 @@ async function renamePlayer() {
     }
 }
 
+// Функция загрузки информации о версии
+async function loadVersionInfo() {
+    const versionInfoDiv = document.getElementById('versionInfo');
+    if (!versionInfoDiv) return;
+    
+    try {
+        const response = await fetch('/api/admin/version', {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.version) {
+            const v = data.version;
+            let html = '<div class="row">';
+            
+            // Коммит
+            if (v.git_commit_hash) {
+                html += '<div class="col-md-6 mb-3">';
+                html += '<strong><i class="fas fa-code-branch me-2"></i>Git коммит:</strong><br>';
+                html += `<code class="text-primary">${v.git_commit_hash}</code>`;
+                if (v.git_commit_message) {
+                    html += `<br><small class="text-muted">${v.git_commit_message}</small>`;
+                }
+                html += '</div>';
+            }
+            
+            // Ветка
+            if (v.git_branch) {
+                html += '<div class="col-md-6 mb-3">';
+                html += '<strong><i class="fas fa-sitemap me-2"></i>Ветка:</strong><br>';
+                html += `<span class="badge bg-secondary">${v.git_branch}</span>`;
+                html += '</div>';
+            }
+            
+            // Дата коммита
+            if (v.git_commit_date) {
+                html += '<div class="col-md-6 mb-3">';
+                html += '<strong><i class="fas fa-calendar me-2"></i>Дата коммита:</strong><br>';
+                html += `<span>${v.git_commit_date}</span>`;
+                html += '</div>';
+            }
+            
+            // Дата изменения app.py
+            if (v.app_file_modified) {
+                html += '<div class="col-md-6 mb-3">';
+                html += '<strong><i class="fas fa-clock me-2"></i>Последнее изменение:</strong><br>';
+                html += `<span>${v.app_file_modified}</span>`;
+                html += '</div>';
+            }
+            
+            // Статус изменений
+            html += '<div class="col-12 mb-3">';
+            html += '<strong><i class="fas fa-info-circle me-2"></i>Статус:</strong><br>';
+            if (v.has_uncommitted_changes) {
+                html += '<span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i>Есть несохраненные изменения</span>';
+            } else {
+                html += '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Все изменения сохранены</span>';
+            }
+            html += '</div>';
+            
+            html += '</div>';
+            versionInfoDiv.innerHTML = html;
+        } else {
+            versionInfoDiv.innerHTML = '<span class="text-danger">Не удалось загрузить информацию о версии</span>';
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке версии:', error);
+        versionInfoDiv.innerHTML = '<span class="text-danger">Ошибка при загрузке информации о версии</span>';
+    }
+}
+
 // Обработчик кнопки сохранения переименования
 document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем информацию о версии
+    loadVersionInfo();
+    
     const confirmRenameBtn = document.getElementById('confirmRenamePlayerBtn');
     if (confirmRenameBtn) {
         confirmRenameBtn.addEventListener('click', function() {

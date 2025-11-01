@@ -1919,6 +1919,107 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"Ошибка при получении статистики: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при получении статистики'}), 500
     
+    @app.route('/api/admin/version', methods=['GET'])
+    def admin_get_version():
+        """Получение информации о версии приложения"""
+        from flask import session
+        import subprocess
+        import os
+        from datetime import datetime
+        
+        # Проверяем авторизацию системного администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        admin_email = session.get('admin_email', '')
+        if admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав'}), 403
+        
+        try:
+            version_info = {
+                'git_commit_hash': None,
+                'git_commit_message': None,
+                'git_commit_date': None,
+                'git_branch': None,
+                'has_uncommitted_changes': False,
+                'last_deploy_time': None,
+                'app_file_modified': None
+            }
+            
+            # Получаем директорию приложения
+            app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
+            # Проверяем git информацию
+            try:
+                # Текущий коммит
+                result = subprocess.run(
+                    ['git', 'rev-parse', 'HEAD'],
+                    cwd=app_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    version_info['git_commit_hash'] = result.stdout.strip()[:7]
+                
+                # Сообщение коммита
+                result = subprocess.run(
+                    ['git', 'log', '-1', '--pretty=format:%s'],
+                    cwd=app_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    version_info['git_commit_message'] = result.stdout.strip()
+                
+                # Дата коммита
+                result = subprocess.run(
+                    ['git', 'log', '-1', '--pretty=format:%ai'],
+                    cwd=app_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    version_info['git_commit_date'] = result.stdout.strip()
+                
+                # Ветка
+                result = subprocess.run(
+                    ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                    cwd=app_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    version_info['git_branch'] = result.stdout.strip()
+                
+                # Проверка несохраненных изменений
+                result = subprocess.run(
+                    ['git', 'diff', '--quiet'],
+                    cwd=app_dir,
+                    timeout=5
+                )
+                version_info['has_uncommitted_changes'] = (result.returncode != 0)
+                
+            except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
+                logger.warning(f"Не удалось получить git информацию: {e}")
+            
+            # Дата последнего изменения app.py
+            try:
+                app_file_path = os.path.join(app_dir, 'app.py')
+                if os.path.exists(app_file_path):
+                    mtime = os.path.getmtime(app_file_path)
+                    version_info['app_file_modified'] = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                logger.warning(f"Не удалось получить дату изменения app.py: {e}")
+            
+            return jsonify({'success': True, 'version': version_info})
+        except Exception as e:
+            logger.error(f"Ошибка при получении версии: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении версии'}), 500
+    
     @app.route('/api/admin/tournament-admins/<int:admin_id>', methods=['DELETE'])
     def admin_delete_tournament_admin(admin_id):
         """Удаление администратора турнира"""
