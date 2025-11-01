@@ -3035,15 +3035,18 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 score = f"{match.sets_won_2}:{match.sets_won_1}"
                                 is_winner = match.sets_won_2 > match.sets_won_1
                             
-                            # Создаем детали сета
+                            # Создаем детали сета (только для реально сыгранных сетов)
                             sets_details = ""
                             if hasattr(match, 'set1_score1') and match.set1_score1 is not None:
                                 sets_list = []
-                                if match.set1_score1 is not None and match.set1_score2 is not None:
+                                points_to_win = tournament.points_to_win or 21  # По умолчанию 21 для бадминтона
+                                # Проверяем каждый сет: добавляем только если он реально сыгран
+                                # (не равен значениям по умолчанию типа 21:21)
+                                if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                                     sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
-                                if match.set2_score1 is not None and match.set2_score2 is not None:
+                                if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                                     sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
-                                if match.set3_score1 is not None and match.set3_score2 is not None:
+                                if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                                     sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                                 if sets_list:
                                     sets_details = ", ".join(sets_list)
@@ -3074,15 +3077,18 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 else:
                                     score = f"{match.sets_won_2}:{match.sets_won_1}"
                                 
-                                # Создаем детали сета для матча в процессе
+                                # Создаем детали сета для матча в процессе (только для реально сыгранных сетов)
                                 sets_details = ""
                                 if hasattr(match, 'set1_score1') and match.set1_score1 is not None:
                                     sets_list = []
-                                    if match.set1_score1 is not None and match.set1_score2 is not None:
+                                    points_to_win = tournament.points_to_win or 21  # По умолчанию 21 для бадминтона
+                                    # Проверяем каждый сет: добавляем только если он реально сыгран
+                                    # (не равен значениям по умолчанию типа 21:21)
+                                    if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                                         sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
-                                    if match.set2_score1 is not None and match.set2_score2 is not None:
+                                    if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
                                         sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
-                                    if match.set3_score1 is not None and match.set3_score2 is not None:
+                                    if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
                                         sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
                                     if sets_list:
                                         sets_details = ", ".join(sets_list)

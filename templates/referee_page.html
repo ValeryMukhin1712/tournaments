@@ -586,6 +586,63 @@
             min-width: 12vw;
         }
         
+        /* Кнопка "Обнулить" в центре */
+        .reset-score-btn {
+            pointer-events: auto;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            border: 3px solid #fff;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.8vh;
+            font-weight: bold;
+            padding: 1.2vh 2.5vw;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5vw;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 107, 107, 0.5);
+            transition: all 0.3s ease;
+            z-index: 15;
+            min-width: 10vw;
+            white-space: nowrap;
+        }
+        
+        .reset-score-btn:hover {
+            background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 107, 107, 0.7);
+        }
+        
+        .reset-score-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .reset-score-btn i {
+            font-size: 1.5vh;
+        }
+        
+        .reset-btn-text {
+            font-size: 1.6vh;
+        }
+        
+        /* Адаптация для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .reset-score-btn {
+                font-size: 1.4vh;
+                padding: 0.8vh 1.5vw;
+                min-width: 8vw;
+            }
+            
+            .reset-btn-text {
+                display: none; /* На мобильных показываем только иконку */
+            }
+            
+            .reset-score-btn i {
+                font-size: 2vh;
+            }
+        }
+        
         /* Цвета счёта теперь управляются JavaScript */
         
         .mode-indicator {
@@ -1049,6 +1106,10 @@
             <!-- Счет в центре корта -->
             <div class="scoreboard-container">
                 <div class="score-left" id="scoreLeft">0</div>
+                <button class="reset-score-btn" id="resetScoreBtn" title="Обнулить счёт" onclick="resetScore()">
+                    <i class="fas fa-redo"></i>
+                    <span class="reset-btn-text">Обнулить</span>
+                </button>
                 <div class="score-right" id="scoreRight">0</div>
             </div>
             
@@ -1382,20 +1443,29 @@
         }
         
         function clearAllData() {
-            // Проверяем, есть ли счёт в URL параметрах
+            // При clear=true всегда начинаем с 0:0, если не указаны явно score1 и score2 в URL
             const score1Param = urlParams.get('score1');
             const score2Param = urlParams.get('score2');
             
-            if (score1Param || score2Param) {
-                // Используем счёт из URL параметров
-                window.scoreLeft = (score1Param && parseInt(score1Param) > 0) ? parseInt(score1Param) : 0;
-                window.scoreRight = (score2Param && parseInt(score2Param) > 0) ? parseInt(score2Param) : 0;
-                console.log('Очистка с сохранением счёта из URL:', window.scoreLeft, ':', window.scoreRight);
-            } else {
-                // Сбрасываем счёт в 0
+            // Всегда сбрасываем счёт в 0:0 при открытии с главной страницы (clear=true)
+            // Исключение: если в URL явно указан счёт (score1 или score2), используем его
+            if (clearData && (!score1Param && !score2Param)) {
+                // Открытие с главной страницы - всегда начинаем с 0:0
                 window.scoreLeft = 0;
                 window.scoreRight = 0;
+                console.log('Очистка данных: сброс счёта на 0:0 (открытие с главной страницы)');
+            } else if (score1Param || score2Param) {
+                // Используем счёт из URL параметров (если указаны явно)
+                window.scoreLeft = (score1Param && parseInt(score1Param) >= 0) ? parseInt(score1Param) : 0;
+                window.scoreRight = (score2Param && parseInt(score2Param) >= 0) ? parseInt(score2Param) : 0;
+                console.log('Очистка с сохранением счёта из URL:', window.scoreLeft, ':', window.scoreRight);
+            } else {
+                // Сбрасываем счёт в 0 (если не указаны параметры)
+                window.scoreLeft = 0;
+                window.scoreRight = 0;
+                console.log('Очистка данных: сброс счёта на 0:0');
             }
+            
             window.gameStarted = true; // Игра остается активной после очистки
             shuttlecockPosition = 'top_right';
             gameStartTime = null;
@@ -1409,13 +1479,16 @@
                 document.getElementById(id).value = '';
             });
             
-            // Очищаем localStorage
+            // Очищаем localStorage (важно для сброса сохранённого счёта)
             localStorage.removeItem('court_score_left');
             localStorage.removeItem('court_score_right');
             localStorage.removeItem('court_shuttlecock_position');
             ids.forEach(id => {
                 localStorage.removeItem('court_' + id);
             });
+            
+            // Обновляем отображение счёта сразу после очистки
+            updateScore();
             
             console.log('Данные очищены для нового матча');
         }
@@ -1504,6 +1577,48 @@
             .catch(error => {
                 console.error('Ошибка при автосохранении счета:', error);
             });
+        }
+        
+        // Функция обнуления счёта
+        function resetScore() {
+            // Подтверждение обнуления
+            if (window.scoreLeft === 0 && window.scoreRight === 0) {
+                return; // Уже обнулён
+            }
+            
+            // Сохраняем предыдущее состояние для отмены
+            const previousState = {
+                scoreLeft: window.scoreLeft,
+                scoreRight: window.scoreRight,
+                shuttlecockPosition: shuttlecockPosition,
+                gameStarted: window.gameStarted
+            };
+            
+            gameHistory.push(previousState);
+            
+            // Обнуляем счёт
+            window.scoreLeft = 0;
+            window.scoreRight = 0;
+            
+            // Сбрасываем позицию воланчика на начальную
+            shuttlecockPosition = 'top_right';
+            
+            // Обновляем отображение
+            updateScore();
+            updateShuttlecockDisplay();
+            
+            // Сохраняем в localStorage
+            saveData();
+            
+            // Автоматическое сохранение в базу данных (если в режиме матча)
+            if (isMatchMode && window.matchId) {
+                autoSaveScore();
+            }
+            
+            // Логируем действие
+            logMatchAction('reset_score', previousState.scoreLeft, previousState.scoreRight, 0, 0);
+            
+            console.log('Счёт обнулён: 0:0');
         }
         
         function updateScore() {
@@ -1864,6 +1979,7 @@
         
         function checkVictory() {
             const pointsToWin = 21; // Можно сделать настраиваемым
+            const maxPoints = 30; // Максимальный счёт для бадминтона
             
             // В режиме Просмотр используем значения из DOM, если window переменные не инициализированы
             let scoreLeft = window.scoreLeft;
@@ -1883,7 +1999,35 @@
             
             console.log('checkVictory: Проверка победы:', { scoreLeft, scoreRight, scoreDiff, isViewMode });
             
-            // Проверяем условия победы: набрать нужное количество очков И разница больше 1
+            // Специальное условие для бадминтона: если одна сторона набрала 30 очков - победа
+            // (независимо от счёта соперника, который может быть 29 или 28)
+            if (scoreLeft >= maxPoints) {
+                // Игра остается активной даже после победы
+                if (isMatchMode) {
+                    document.getElementById('btnSaveResult').disabled = false;
+                }
+                
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа левой команды!', scoreLeft, scoreRight);
+                
+                console.log(`Победа левой команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                return true;
+            }
+            
+            if (scoreRight >= maxPoints) {
+                // Игра остается активной даже после победы
+                if (isMatchMode) {
+                    document.getElementById('btnSaveResult').disabled = false;
+                }
+                
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа правой команды!', scoreLeft, scoreRight);
+                
+                console.log(`Победа правой команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                return true;
+            }
+            
+            // Обычное условие победы: набрать нужное количество очков И разница больше 1
             if (scoreLeft >= pointsToWin && scoreDiff > 1) {
                 // Игра остается активной даже после победы
                 if (isMatchMode) {

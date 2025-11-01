@@ -3857,22 +3857,43 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     # Правила пинг-понга: 11 очков и разница >= 2
                     min_score = 11
                 elif 'бадминтон' in sport_type or 'badminton' in sport_type:
-                    # Правила бадминтона: 21 очко и разница >= 2
+                    # Правила бадминтона: 21 очко и разница >= 2, либо 30 очков (независимо от счёта соперника)
                     min_score = 21
+                    max_score = 30  # Максимальный счёт - победа при достижении 30 очков
+                    
+                    logger.info(f"[save-referee-result] Сет {set_number}: sport_type={sport_type}, min_score={min_score}, max_score={max_score}, проверка победителя...")
+                    
+                    # Специальное условие: если одна сторона набрала 30 очков - победа
+                    # (независимо от счёта соперника, который может быть 29 или 28)
+                    if score1 >= max_score:
+                        sets_won_1 += 1
+                        logger.info(f"[save-referee-result] Сет {set_number}: победила команда 1 по правилу 30 очков (счёт: {score1}:{score2}), sets_won_1={sets_won_1}")
+                    elif score2 >= max_score:
+                        sets_won_2 += 1
+                        logger.info(f"[save-referee-result] Сет {set_number}: победила команда 2 по правилу 30 очков (счёт: {score1}:{score2}), sets_won_2={sets_won_2}")
+                    # Обычное условие: 21 очко и разница >= 2
+                    elif score1 >= min_score and score1 - score2 >= 2:
+                        sets_won_1 += 1
+                        logger.info(f"[save-referee-result] Сет {set_number}: победила команда 1 (счёт: {score1}:{score2}), sets_won_1={sets_won_1}")
+                    elif score2 >= min_score and score2 - score1 >= 2:
+                        sets_won_2 += 1
+                        logger.info(f"[save-referee-result] Сет {set_number}: победила команда 2 (счёт: {score1}:{score2}), sets_won_2={sets_won_2}")
+                    else:
+                        logger.info(f"[save-referee-result] Сет {set_number}: не завершен (score1={score1}, score2={score2}, min_score={min_score})")
                 else:
                     # Правила волейбола: 25 очков (или 15 для 3-го сета) и разница >= 2
                     min_score = 15 if (set_number == 3 and tournament.sets_to_win == 2) else 25
-                
-                logger.info(f"[save-referee-result] Сет {set_number}: sport_type={sport_type}, min_score={min_score}, проверка победителя...")
-                
-                if score1 >= min_score and score1 - score2 >= 2:
-                    sets_won_1 += 1
-                    logger.info(f"[save-referee-result] Сет {set_number}: победила команда 1, sets_won_1={sets_won_1}")
-                elif score2 >= min_score and score2 - score1 >= 2:
-                    sets_won_2 += 1
-                    logger.info(f"[save-referee-result] Сет {set_number}: победила команда 2, sets_won_2={sets_won_2}")
-                else:
-                    logger.info(f"[save-referee-result] Сет {set_number}: не завершен (score1={score1}, score2={score2}, min_score={min_score})")
+                    
+                    logger.info(f"[save-referee-result] Сет {set_number}: sport_type={sport_type}, min_score={min_score}, проверка победителя...")
+                    
+                    if score1 >= min_score and score1 - score2 >= 2:
+                        sets_won_1 += 1
+                        logger.info(f"[save-referee-result] Сет {set_number}: победила команда 1, sets_won_1={sets_won_1}")
+                    elif score2 >= min_score and score2 - score1 >= 2:
+                        sets_won_2 += 1
+                        logger.info(f"[save-referee-result] Сет {set_number}: победила команда 2, sets_won_2={sets_won_2}")
+                    else:
+                        logger.info(f"[save-referee-result] Сет {set_number}: не завершен (score1={score1}, score2={score2}, min_score={min_score})")
             
             # Сохраняем количество выигранных сетов
             match.sets_won_1 = sets_won_1
