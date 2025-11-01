@@ -1949,62 +1949,92 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Получаем директорию приложения
             app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             
+            # Находим путь к git
+            git_path = None
+            possible_paths = ['/usr/bin/git', '/usr/local/bin/git', 'git']
+            import shutil
+            for path in possible_paths:
+                full_path = shutil.which(path) if path == 'git' else (path if os.path.exists(path) else None)
+                if full_path:
+                    git_path = full_path
+                    break
+            
             # Проверяем git информацию
-            try:
-                # Текущий коммит
-                result = subprocess.run(
-                    ['git', 'rev-parse', 'HEAD'],
-                    cwd=app_dir,
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                if result.returncode == 0:
-                    version_info['git_commit_hash'] = result.stdout.strip()[:7]
+            if git_path:
+                try:
+                    # Текущий коммит
+                    result = subprocess.run(
+                        [git_path, 'rev-parse', 'HEAD'],
+                        cwd=app_dir,
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                        env={'PATH': os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')}
+                    )
+                    if result.returncode == 0:
+                        version_info['git_commit_hash'] = result.stdout.strip()[:7]
+                    
+                    # Сообщение коммита
+                    result = subprocess.run(
+                        [git_path, 'log', '-1', '--pretty=format:%s'],
+                        cwd=app_dir,
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                        env={'PATH': os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')}
+                    )
+                    if result.returncode == 0:
+                        version_info['git_commit_message'] = result.stdout.strip()
+                    
+                    # Дата коммита
+                    result = subprocess.run(
+                        [git_path, 'log', '-1', '--pretty=format:%ai'],
+                        cwd=app_dir,
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                        env={'PATH': os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')}
+                    )
+                    if result.returncode == 0:
+                        version_info['git_commit_date'] = result.stdout.strip()
+                    
+                    # Ветка
+                    result = subprocess.run(
+                        [git_path, 'rev-parse', '--abbrev-ref', 'HEAD'],
+                        cwd=app_dir,
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                        env={'PATH': os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')}
+                    )
+                    if result.returncode == 0:
+                        version_info['git_branch'] = result.stdout.strip()
+                    
+                    # Проверка несохраненных изменений
+                    result = subprocess.run(
+                        [git_path, 'diff', '--quiet'],
+                        cwd=app_dir,
+                        timeout=5,
+                        env={'PATH': os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')}
+                    )
+                    version_info['has_uncommitted_changes'] = (result.returncode != 0)
                 
-                # Сообщение коммита
-                result = subprocess.run(
-                    ['git', 'log', '-1', '--pretty=format:%s'],
-                    cwd=app_dir,
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                if result.returncode == 0:
-                    version_info['git_commit_message'] = result.stdout.strip()
-                
-                # Дата коммита
-                result = subprocess.run(
-                    ['git', 'log', '-1', '--pretty=format:%ai'],
-                    cwd=app_dir,
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                if result.returncode == 0:
-                    version_info['git_commit_date'] = result.stdout.strip()
-                
-                # Ветка
-                result = subprocess.run(
-                    ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-                    cwd=app_dir,
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                if result.returncode == 0:
-                    version_info['git_branch'] = result.stdout.strip()
-                
-                # Проверка несохраненных изменений
-                result = subprocess.run(
-                    ['git', 'diff', '--quiet'],
-                    cwd=app_dir,
-                    timeout=5
-                )
-                version_info['has_uncommitted_changes'] = (result.returncode != 0)
-                
-            except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
-                logger.warning(f"Не удалось получить git информацию: {e}")
+                except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
+                    logger.warning(f"Не удалось получить git информацию: {e}")
+            else:
+                logger.warning("Git не найден в системе. Информация о версии будет ограничена.")
+                # Попробуем получить информацию из файла .git/HEAD
+                try:
+                    git_head_path = os.path.join(app_dir, '.git', 'HEAD')
+                    if os.path.exists(git_head_path):
+                        with open(git_head_path, 'r') as f:
+                            head_content = f.read().strip()
+                            if head_content.startswith('ref: '):
+                                version_info['git_branch'] = head_content.replace('ref: refs/heads/', '')
+                            else:
+                                version_info['git_commit_hash'] = head_content[:7] if len(head_content) >= 7 else head_content
+                except Exception as e:
+                    logger.warning(f"Не удалось прочитать .git/HEAD: {e}")
             
             # Дата последнего изменения app.py
             try:
