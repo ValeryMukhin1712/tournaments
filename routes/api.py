@@ -3062,6 +3062,52 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"Ошибка при добавлении игрока: {e}")
             return jsonify({'success': False, 'error': 'Ошибка при добавлении игрока'}), 500
 
+    @app.route('/api/players/<int:player_id>', methods=['PUT'])
+    def update_player(player_id):
+        """Переименование игрока"""
+        try:
+            data = request.get_json()
+            new_name = data.get('name', '').strip()
+            
+            if not new_name:
+                return jsonify({
+                    'success': False,
+                    'error': 'Имя игрока не может быть пустым'
+                }), 400
+            
+            player = Player.query.get_or_404(player_id)
+            old_name = player.name
+            
+            # Проверяем, не существует ли уже игрок с таким именем
+            existing_player = Player.query.filter_by(name=new_name).first()
+            if existing_player and existing_player.id != player_id:
+                return jsonify({
+                    'success': False,
+                    'error': 'Игрок с таким именем уже существует'
+                }), 400
+            
+            # Обновляем имя
+            player.name = new_name
+            db.session.commit()
+            
+            logger.info(f"Игрок переименован: '{old_name}' -> '{new_name}'")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Игрок успешно переименован',
+                'player': {
+                    'id': player.id,
+                    'name': player.name,
+                    'created_at': player.created_at.isoformat() if player.created_at else None,
+                    'last_used_at': player.last_used_at.isoformat() if player.last_used_at else None
+                }
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при переименовании игрока: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при переименовании игрока'}), 500
+
     @app.route('/api/players/<int:player_id>', methods=['DELETE'])
     def delete_player(player_id):
         """Удаление игрока из списка"""

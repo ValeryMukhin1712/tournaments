@@ -105,3 +105,5 @@ TELEGRAM_BOT_USERNAME_PROD=Q_uickScore_bot
 - **НЕ** используйте переменные `TELEGRAM_BOT_TOKEN_DEV` и `TELEGRAM_BOT_USERNAME_DEV` на продакшене
 - Используйте только `TELEGRAM_BOT_TOKEN_PROD` и `TELEGRAM_BOT_USERNAME_PROD` на VDS
 
+
+
