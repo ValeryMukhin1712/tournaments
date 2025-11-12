@@ -876,20 +876,8 @@
             }
         }
         
-        /* Увеличение размера шрифта имён игроков для экранов 1280x720 (в 2 раза) */
-        @media screen and (min-width: 1200px) and (max-width: 1400px) and (min-height: 700px) and (max-height: 800px) and (orientation: landscape) {
-            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
-                font-size: 30vh !important; /* Увеличено в 2 раза для экранов 1280x720 (было 15vh) */
-                color: inherit !important; /* Сохраняем цветной шрифт */
-            }
-        }
-        
-        /* Уменьшение размера шрифта имён игроков для экранов 2400x1080 (на 15%) */
-        @media screen and (min-width: 2300px) and (max-width: 2500px) and (min-height: 1000px) and (max-height: 1100px) and (orientation: landscape) {
-            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
-                font-size: 12.75vh !important; /* Уменьшено на 15% для экранов 2400x1080 (было 15vh, стало 12.75vh) */
-            }
-        }
+        /* Размер шрифта имён игроков теперь определяется динамически через JavaScript 
+           на основе высоты значка подачи (синхронизация через syncPlayerNameFontSizeWithShuttlecock) */
         
         /* Дополнительные стили для очень узких горизонтальных экранов */
         @media screen and (max-width: 568px) and (orientation: landscape) {
@@ -1260,21 +1248,57 @@
         let leftTeamColor = 'blue';   // Команда слева всегда синяя
         let rightTeamColor = 'red';   // Команда справа всегда красная
         
-        // Функция для принудительного применения правильного размера шрифта для экранов 1280x720
-        function enforce1280x720FontSize() {
-            const is1280x720 = window.innerWidth >= 1200 && window.innerWidth <= 1400 && 
-                             window.innerHeight >= 700 && window.innerHeight <= 800;
-            if (is1280x720) {
-                const nameInputs = ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'];
-                nameInputs.forEach(id => {
-                    const input = document.getElementById(id);
-                    if (input) {
-                        input.style.setProperty('font-size', '30vh', 'important');
+        // Функция для синхронизации размера шрифта имён игроков с высотой значка подачи
+        function syncPlayerNameFontSizeWithShuttlecock() {
+            // Находим любой видимый значок подачи
+            const shuttlecockIndicators = document.querySelectorAll('.server-indicator');
+            let shuttlecockHeight = null;
+            
+            // Ищем видимый индикатор подачи
+            for (let indicator of shuttlecockIndicators) {
+                if (indicator.style.display !== 'none' && indicator.offsetHeight > 0) {
+                    const img = indicator.querySelector('img');
+                    if (img) {
+                        // Получаем фактическую высоту изображения
+                        shuttlecockHeight = img.offsetHeight || img.clientHeight || 60;
+                        break;
                     }
-                });
-                // Убеждаемся, что цвета применены
-                updatePlayerColors();
+                }
             }
+            
+            // Если не нашли видимый, используем первый доступный или значение по умолчанию
+            if (!shuttlecockHeight) {
+                const firstIndicator = document.querySelector('.server-indicator img');
+                if (firstIndicator) {
+                    // Временно показываем для измерения
+                    const tempDisplay = firstIndicator.parentElement.style.display;
+                    firstIndicator.parentElement.style.display = 'block';
+                    shuttlecockHeight = firstIndicator.offsetHeight || firstIndicator.clientHeight || 60;
+                    firstIndicator.parentElement.style.display = tempDisplay;
+                } else {
+                    shuttlecockHeight = 60; // Значение по умолчанию из CSS
+                }
+            }
+            
+            // Применяем размер шрифта равный высоте значка подачи
+            const nameInputs = ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'];
+            nameInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.style.setProperty('font-size', shuttlecockHeight + 'px', 'important');
+                }
+            });
+            
+            // Убеждаемся, что цвета применены
+            updatePlayerColors();
+            
+            console.log('Размер шрифта имён игроков синхронизирован с высотой значка подачи:', shuttlecockHeight + 'px');
+        }
+        
+        // Функция для принудительного применения правильного размера шрифта для экранов 1280x720 (устаревшая, оставлена для совместимости)
+        function enforce1280x720FontSize() {
+            // Теперь используем синхронизацию с высотой значка подачи
+            syncPlayerNameFontSizeWithShuttlecock();
         }
         
         // Функция для обновления цветов игроков и счёта
@@ -1321,12 +1345,12 @@
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 200);
             
-            // Для экранов 1280x720 принудительно применяем правильный размер шрифта и цвет
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи
             // Вызываем несколько раз с разными задержками, чтобы переопределить любые другие стили
-            setTimeout(enforce1280x720FontSize, 300);
-            setTimeout(enforce1280x720FontSize, 500);
-            setTimeout(enforce1280x720FontSize, 800);
-            setTimeout(enforce1280x720FontSize, 1200);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 300);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 500);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 800);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 1200);
             
             // Принудительно применяем размер шрифта счёта
             setTimeout(() => {
@@ -1351,28 +1375,24 @@
             // Обновляем счет
             updateScore();
             
-            // Принудительно применяем правильный размер для 1280x720 после всех операций загрузки
-            setTimeout(enforce1280x720FontSize, 100);
-            setTimeout(enforce1280x720FontSize, 300);
-            setTimeout(enforce1280x720FontSize, 600);
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций загрузки
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 100);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 300);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 600);
             
-            // Используем MutationObserver для отслеживания изменений в DOM и принудительного применения стилей
+            // Используем MutationObserver для отслеживания изменений в DOM и синхронизации размера шрифта
             const observer = new MutationObserver(function(mutations) {
-                const is1280x720 = window.innerWidth >= 1200 && window.innerWidth <= 1400 && 
-                                 window.innerHeight >= 700 && window.innerHeight <= 800;
-                if (is1280x720) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                            const target = mutation.target;
-                            if (target.id && ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'].includes(target.id)) {
-                                // Если изменился стиль поля имени игрока, принудительно применяем правильный размер
-                                setTimeout(function() {
-                                    target.style.setProperty('font-size', '30vh', 'important');
-                                }, 10);
-                            }
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        if (target.id && ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'].includes(target.id)) {
+                            // Если изменился стиль поля имени игрока, синхронизируем размер с высотой значка подачи
+                            setTimeout(function() {
+                                syncPlayerNameFontSizeWithShuttlecock();
+                            }, 10);
                         }
-                    });
-                }
+                    }
+                });
             });
             
             // Наблюдаем за изменениями в полях имён игроков
@@ -1408,6 +1428,8 @@
             setTimeout(() => {
                 const indicator = document.getElementById('server_' + shuttlecockPosition) || document.getElementById('server_top_right');
                 if (indicator) indicator.style.display = 'block';
+                // Синхронизируем размер шрифта после показа индикатора
+                syncPlayerNameFontSizeWithShuttlecock();
             }, 100);
         }
         
@@ -1784,6 +1806,8 @@
                     currentIndicator.style.display = 'none';
                     targetIndicator.style.display = 'block';
                     isAnimating = false;
+                    // Синхронизируем размер шрифта после обновления значка подачи
+                    setTimeout(syncPlayerNameFontSizeWithShuttlecock, 50);
                 }, 200);
             } else {
                 document.querySelectorAll('.server-indicator').forEach(el => el.style.display = 'none');
@@ -1791,6 +1815,8 @@
                 if (targetIndicator) {
                     targetIndicator.style.display = 'block';
                 }
+                // Синхронизируем размер шрифта после обновления значка подачи
+                setTimeout(syncPlayerNameFontSizeWithShuttlecock, 50);
             }
         }
         
@@ -3011,18 +3037,18 @@
             checkOrientation();
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 100);
-            // Принудительно применяем правильный размер для 1280x720 после всех операций
-            setTimeout(enforce1280x720FontSize, 200);
-            setTimeout(enforce1280x720FontSize, 400);
-            setTimeout(enforce1280x720FontSize, 600);
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 200);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 400);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 600);
         });
         
         // Проверяем ориентацию при изменении размера окна
         window.addEventListener('resize', function() {
             checkOrientation();
             applyMobileLandscapeStyles();
-            // Принудительно применяем правильный размер для 1280x720 после всех операций
-            setTimeout(enforce1280x720FontSize, 100);
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 100);
         });
     </script>
 </body>
