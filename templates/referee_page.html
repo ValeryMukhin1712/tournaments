@@ -876,6 +876,13 @@
             }
         }
         
+        /* Увеличение размера шрифта имён игроков для экранов 1280x720 (в 2 раза) */
+        @media screen and (min-width: 1200px) and (max-width: 1400px) and (min-height: 700px) and (max-height: 800px) and (orientation: landscape) {
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                font-size: 30vh !important; /* Увеличено в 2 раза для экранов 1280x720 (было 15vh) */
+            }
+        }
+        
         /* Дополнительные стили для очень узких горизонтальных экранов */
         @media screen and (max-width: 568px) and (orientation: landscape) {
             input {
