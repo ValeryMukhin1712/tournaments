@@ -996,14 +996,19 @@ function changeTheme(themeName) {
 
 // Очистка модальных окон при загрузке/возврате на страницу
 document.addEventListener('DOMContentLoaded', function() {
-    // Закрываем все открытые модальные окна
+    // Закрываем все открытые модальные окна, но НЕ удаляем helpModal
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
+        // Пропускаем helpModal - его нельзя удалять, он нужен для кнопки Help
+        if (modal.id === 'helpModal') {
+            return;
+        }
+        
         const bsModal = bootstrap.Modal.getInstance(modal);
         if (bsModal) {
             bsModal.hide();
         }
-        // Удаляем модальное окно из DOM
+        // Удаляем модальное окно из DOM (кроме helpModal)
         if (modal.parentNode) {
             modal.parentNode.removeChild(modal);
         }
@@ -1027,14 +1032,19 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addEventListener('pageshow', function(event) {
     // Если страница загружена из кэша (bfcache)
     if (event.persisted) {
-        // Закрываем все открытые модальные окна
+        // Закрываем все открытые модальные окна, но НЕ удаляем helpModal
         const modals = document.querySelectorAll('.modal');
         modals.forEach(modal => {
+            // Пропускаем helpModal - его нельзя удалять, он нужен для кнопки Help
+            if (modal.id === 'helpModal') {
+                return;
+            }
+            
             const bsModal = bootstrap.Modal.getInstance(modal);
             if (bsModal) {
                 bsModal.hide();
             }
-            // Удаляем модальное окно из DOM
+            // Удаляем модальное окно из DOM (кроме helpModal)
             if (modal.parentNode) {
                 modal.parentNode.removeChild(modal);
             }

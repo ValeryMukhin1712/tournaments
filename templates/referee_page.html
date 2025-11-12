@@ -628,6 +628,11 @@
         
         /* Адаптация для мобильных устройств */
         @media screen and (max-width: 768px) {
+            /* Минимальный размер шрифта для имён игроков на смартфонах - 15% от высоты экрана */
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                font-size: 15vh !important;
+            }
+            
             .reset-score-btn {
                 font-size: 1.4vh;
                 padding: 0.8vh 1.5vw;
@@ -756,6 +761,7 @@
             }
             /* Адаптация для очень маленьких экранов */
             #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                font-size: 15vh !important; /* Минимальный размер шрифта - 15% от высоты экрана */
                 padding: 4px !important; /* Еще меньший padding */
             }
             
@@ -832,6 +838,7 @@
             #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
                 position: absolute !important; /* Абсолютное позиционирование на корте */
                 transform: none !important; /* Убираем все трансформации */
+                font-size: 15vh !important; /* Минимальный размер шрифта - 15% от высоты экрана */
             }
             
             /* Позиционирование для горизонтальных экранов - на 5px выше и ниже центра счёта */
@@ -2008,9 +2015,9 @@
                 }
                 
                 // Показываем сообщение о победе
-                showVictoryMessage('Победа левой команды!', scoreLeft, scoreRight);
+                showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
                 
-                console.log(`Победа левой команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                console.log(`Победа Синей команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
                 return true;
             }
             
@@ -2021,9 +2028,9 @@
                 }
                 
                 // Показываем сообщение о победе
-                showVictoryMessage('Победа правой команды!', scoreLeft, scoreRight);
+                showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
                 
-                console.log(`Победа правой команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                console.log(`Победа Красной команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
                 return true;
             }
             
@@ -2035,7 +2042,7 @@
                 }
                 
                 // Показываем сообщение о победе
-                showVictoryMessage('Победа левой команды!', scoreLeft, scoreRight);
+                showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
                 
                 return true;
             }
@@ -2047,7 +2054,7 @@
                 }
                 
                 // Показываем сообщение о победе
-                showVictoryMessage('Победа правой команды!', scoreLeft, scoreRight);
+                showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
                 
                 return true;
             }
