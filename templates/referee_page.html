@@ -1260,6 +1260,23 @@
         let leftTeamColor = 'blue';   // Команда слева всегда синяя
         let rightTeamColor = 'red';   // Команда справа всегда красная
         
+        // Функция для принудительного применения правильного размера шрифта для экранов 1280x720
+        function enforce1280x720FontSize() {
+            const is1280x720 = window.innerWidth >= 1200 && window.innerWidth <= 1400 && 
+                             window.innerHeight >= 700 && window.innerHeight <= 800;
+            if (is1280x720) {
+                const nameInputs = ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'];
+                nameInputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.style.setProperty('font-size', '30vh', 'important');
+                    }
+                });
+                // Убеждаемся, что цвета применены
+                updatePlayerColors();
+            }
+        }
+        
         // Функция для обновления цветов игроков и счёта
         function updatePlayerColors() {
             const leftColor = leftTeamColor === 'blue' ? '#0066ff' : '#ff3333';
@@ -1305,21 +1322,11 @@
             setTimeout(applyMobileLandscapeStyles, 200);
             
             // Для экранов 1280x720 принудительно применяем правильный размер шрифта и цвет
-            setTimeout(function() {
-                const is1280x720 = window.innerWidth >= 1200 && window.innerWidth <= 1400 && 
-                                 window.innerHeight >= 700 && window.innerHeight <= 800;
-                if (is1280x720) {
-                    const nameInputs = ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'];
-                    nameInputs.forEach(id => {
-                        const input = document.getElementById(id);
-                        if (input) {
-                            input.style.setProperty('font-size', '30vh', 'important');
-                            // Цвет уже установлен через updatePlayerColors(), но убедимся что он применен
-                            updatePlayerColors();
-                        }
-                    });
-                }
-            }, 300);
+            // Вызываем несколько раз с разными задержками, чтобы переопределить любые другие стили
+            setTimeout(enforce1280x720FontSize, 300);
+            setTimeout(enforce1280x720FontSize, 500);
+            setTimeout(enforce1280x720FontSize, 800);
+            setTimeout(enforce1280x720FontSize, 1200);
             
             // Принудительно применяем размер шрифта счёта
             setTimeout(() => {
@@ -1343,6 +1350,42 @@
             
             // Обновляем счет
             updateScore();
+            
+            // Принудительно применяем правильный размер для 1280x720 после всех операций загрузки
+            setTimeout(enforce1280x720FontSize, 100);
+            setTimeout(enforce1280x720FontSize, 300);
+            setTimeout(enforce1280x720FontSize, 600);
+            
+            // Используем MutationObserver для отслеживания изменений в DOM и принудительного применения стилей
+            const observer = new MutationObserver(function(mutations) {
+                const is1280x720 = window.innerWidth >= 1200 && window.innerWidth <= 1400 && 
+                                 window.innerHeight >= 700 && window.innerHeight <= 800;
+                if (is1280x720) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            const target = mutation.target;
+                            if (target.id && ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'].includes(target.id)) {
+                                // Если изменился стиль поля имени игрока, принудительно применяем правильный размер
+                                setTimeout(function() {
+                                    target.style.setProperty('font-size', '30vh', 'important');
+                                }, 10);
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Наблюдаем за изменениями в полях имён игроков
+            const nameInputs = ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'];
+            nameInputs.forEach(function(id) {
+                const input = document.getElementById(id);
+                if (input) {
+                    observer.observe(input, {
+                        attributes: true,
+                        attributeFilter: ['style']
+                    });
+                }
+            });
             
             // Инициализируем игру (активна по умолчанию)
             currentGameId = generateGameId();
@@ -2968,12 +3011,18 @@
             checkOrientation();
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 100);
+            // Принудительно применяем правильный размер для 1280x720 после всех операций
+            setTimeout(enforce1280x720FontSize, 200);
+            setTimeout(enforce1280x720FontSize, 400);
+            setTimeout(enforce1280x720FontSize, 600);
         });
         
         // Проверяем ориентацию при изменении размера окна
         window.addEventListener('resize', function() {
             checkOrientation();
             applyMobileLandscapeStyles();
+            // Принудительно применяем правильный размер для 1280x720 после всех операций
+            setTimeout(enforce1280x720FontSize, 100);
         });
     </script>
 </body>
