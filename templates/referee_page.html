@@ -21,7 +21,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/static/referee/icon-192.png">
     <link rel="apple-touch-icon" href="/static/referee/icon-192.png">
     
-    <title>Судейство: {{ tournament_name }}</title>
+    <title>{{ tournament_name }}</title>
     
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -762,13 +762,13 @@
             
             /* Прижимаем имена игроков левой команды к левому краю на маленьких экранах */
             #name_top_left {
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(-50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
             /* Адаптация для очень маленьких экранов */
             #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
@@ -856,14 +856,14 @@
             /* Позиционирование для горизонтальных экранов - на 5px выше и ниже центра счёта */
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(-50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_top_right {
@@ -923,14 +923,14 @@
         /* Позиционирование для левых имён - на 5px выше и ниже центра счёта */
         #name_top_left {
             top: calc(50% - 5px) !important; /* 5px выше центра счёта */
-            left: 10px !important; /* Прижато к левому краю с небольшим отступом */
-            transform: translateX(-200px) translateY(-50%) !important; /* Сдвиг влево на 200px */
+            left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+            transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
         }
         
         #name_bottom_left {
             bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
-            left: 10px !important; /* Прижато к левому краю с небольшим отступом */
-            transform: translateX(-200px) translateY(50%) !important; /* Сдвиг влево на 200px */
+            left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+            transform: translateY(50%) !important; /* Только вертикальное выравнивание */
         }
         
         /* Позиционирование для правых имён - на 5px выше и ниже центра счёта */
@@ -950,14 +950,14 @@
         @media screen and (min-width: 769px) {
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: 10px !important; /* Прижато к левому краю с небольшим отступом */
-                transform: translateX(-200px) translateY(-50%) !important; /* Сдвиг влево на 200px */
+                left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+                transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: 10px !important; /* Прижато к левому краю с небольшим отступом */
-                transform: translateX(-200px) translateY(50%) !important; /* Сдвиг влево на 200px */
+                left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
         }
         
@@ -965,27 +965,27 @@
         @media screen and (max-width: 768px) and (orientation: portrait) {
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(-50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
         }
         
         /* Для всех мобильных устройств (включая горизонтальную ориентацию) - прижимаем к левому краю */
         @media screen and (max-width: 768px) {
             #name_top_left {
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(-50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
-                left: 0 !important; /* Прижато к левому краю родительского элемента */
-                transform: translateX(-200px) translateY(50%) !important; /* Сдвиг влево на 200px */
+                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
         }
         
@@ -3085,13 +3085,16 @@
                 inputs.forEach(input => {
                     input.style.setProperty('position', 'absolute', 'important');
                     
-                    // Для элементов левой команды применяем сдвиг влево на 200px
+                    // Для элементов левой команды применяем сдвиг влево на 200px с учетом ширины control-panel
+                    const controlPanel = document.querySelector('.control-panel');
+                    const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 65;
+                    const leftPosition = Math.max(controlPanelWidth, controlPanelWidth - 200 + 10); // Не меньше ширины панели, чтобы не перекрывать
                     if (input.id === 'name_top_left') {
-                        input.style.setProperty('left', '0', 'important');
-                        input.style.setProperty('transform', 'translateX(-200px) translateY(-50%)', 'important');
+                        input.style.setProperty('left', leftPosition + 'px', 'important');
+                        input.style.setProperty('transform', 'translateY(-50%)', 'important');
                     } else if (input.id === 'name_bottom_left') {
-                        input.style.setProperty('left', '0', 'important');
-                        input.style.setProperty('transform', 'translateX(-200px) translateY(50%)', 'important');
+                        input.style.setProperty('left', leftPosition + 'px', 'important');
+                        input.style.setProperty('transform', 'translateY(50%)', 'important');
                     } else {
                         // Для остальных элементов
                         input.style.setProperty('transform', 'none', 'important');
