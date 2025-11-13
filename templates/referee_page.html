@@ -844,14 +844,14 @@
             /* Позиционирование для горизонтальных экранов - на 5px выше и ниже центра счёта */
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: 20% !important;
-                transform: translateX(-50%) translateY(-50%) !important;
+                left: 10px !important; /* Прижато к левому краю с небольшим отступом */
+                transform: translateY(-50%) !important; /* Убрано центрирование по X */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: 20% !important;
-                transform: translateX(-50%) translateY(50%) !important;
+                left: 10px !important; /* Прижато к левому краю с небольшим отступом */
+                transform: translateY(50%) !important; /* Убрано центрирование по X */
             }
             
             #name_top_right {
@@ -910,14 +910,14 @@
         /* Позиционирование для левых имён - на 5px выше и ниже центра счёта */
         #name_top_left {
             top: calc(50% - 5px) !important; /* 5px выше центра счёта */
-            left: 20% !important;
-            transform: translateX(-50%) translateY(-50%) !important;
+            left: 10px !important; /* Прижато к левому краю с небольшим отступом */
+            transform: translateY(-50%) !important; /* Убрано центрирование по X */
         }
         
         #name_bottom_left {
             bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
-            left: 20% !important;
-            transform: translateX(-50%) translateY(50%) !important;
+            left: 10px !important; /* Прижато к левому краю с небольшим отступом */
+            transform: translateY(50%) !important; /* Убрано центрирование по X */
         }
         
         /* Позиционирование для правых имён - на 5px выше и ниже центра счёта */
@@ -937,14 +937,14 @@
         @media screen and (min-width: 769px), screen and (max-width: 768px) and (orientation: portrait) {
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: 20% !important;
-                transform: translateX(-50%) translateY(-50%) !important;
+                left: 10px !important; /* Прижато к левому краю с небольшим отступом */
+                transform: translateY(-50%) !important; /* Убрано центрирование по X */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: 20% !important;
-                transform: translateX(-50%) translateY(50%) !important;
+                left: 10px !important; /* Прижато к левому краю с небольшим отступом */
+                transform: translateY(50%) !important; /* Убрано центрирование по X */
             }
             
             #name_top_right {
