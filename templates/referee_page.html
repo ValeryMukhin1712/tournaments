@@ -1137,6 +1137,58 @@
             color: #00ff00;
             font-weight: bold;
         }
+        
+        /* Отладочная сетка */
+        .debug-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            display: none;
+        }
+        
+        .debug-grid-line {
+            position: absolute;
+            background: rgba(255, 0, 0, 0.3);
+        }
+        
+        .debug-grid-line.vertical {
+            width: 1px;
+            height: 100vh;
+            top: 0;
+        }
+        
+        .debug-grid-line.horizontal {
+            height: 1px;
+            width: 100vw;
+            left: 0;
+        }
+        
+        .debug-grid-label {
+            position: absolute;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .debug-grid-label.vertical-label {
+            top: 5px;
+            transform: translateX(-50%);
+        }
+        
+        .debug-grid-label.horizontal-label {
+            left: 5px;
+            transform: translateY(-50%);
+        }
     </style>
 </head>
 <body>
@@ -1166,6 +1218,9 @@
             <span class="debug-value" id="debugDPR">-</span>
         </div>
     </div>
+    
+    <!-- Отладочная сетка -->
+    <div id="debugGrid" class="debug-grid"></div>
     
     <!-- Предупреждение о необходимости поворота устройства -->
     <div class="orientation-warning" style="display: none;">
@@ -3290,6 +3345,106 @@
         window.addEventListener('load', function() {
             updateDebugScreenInfo();
         });
+        
+        // ========== ОТЛАДОЧНАЯ СЕТКА ==========
+        function createDebugGrid() {
+            if (!DEBUG_MODE) {
+                const gridElement = document.getElementById('debugGrid');
+                if (gridElement) {
+                    gridElement.style.display = 'none';
+                }
+                return;
+            }
+            
+            const gridElement = document.getElementById('debugGrid');
+            if (!gridElement) return;
+            
+            // Показываем сетку
+            gridElement.style.display = 'block';
+            
+            // Очищаем предыдущую сетку
+            gridElement.innerHTML = '';
+            
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const gridStep = 50; // Шаг сетки 50px
+            
+            // Генерируем вертикальные линии (обозначаются цифрами 1, 2, 3...)
+            const verticalLinesCount = Math.ceil(windowWidth / gridStep);
+            for (let i = 0; i <= verticalLinesCount; i++) {
+                const x = i * gridStep;
+                
+                // Создаем линию
+                const line = document.createElement('div');
+                line.className = 'debug-grid-line vertical';
+                line.style.left = x + 'px';
+                gridElement.appendChild(line);
+                
+                // Создаем подпись (цифры 1, 2, 3...)
+                if (x <= windowWidth) {
+                    const label = document.createElement('div');
+                    label.className = 'debug-grid-label vertical-label';
+                    label.textContent = (i + 1).toString();
+                    label.style.left = x + 'px';
+                    gridElement.appendChild(label);
+                }
+            }
+            
+            // Генерируем горизонтальные линии (обозначаются буквами a, b, c...)
+            const horizontalLinesCount = Math.ceil(windowHeight / gridStep);
+            const letters = 'abcdefghijklmnopqrstuvwxyz';
+            for (let i = 0; i <= horizontalLinesCount; i++) {
+                const y = i * gridStep;
+                
+                // Создаем линию
+                const line = document.createElement('div');
+                line.className = 'debug-grid-line horizontal';
+                line.style.top = y + 'px';
+                gridElement.appendChild(line);
+                
+                // Создаем подпись (буквы a, b, c...)
+                if (y <= windowHeight) {
+                    const label = document.createElement('div');
+                    label.className = 'debug-grid-label horizontal-label';
+                    // Используем буквы: a, b, c... z, aa, ab, ac...
+                    let letterIndex = i;
+                    let labelText = '';
+                    if (letterIndex < letters.length) {
+                        labelText = letters[letterIndex];
+                    } else {
+                        // Для индексов больше 26 используем комбинации: aa, ab, ac...
+                        const firstLetterIndex = Math.floor(letterIndex / letters.length) - 1;
+                        const secondLetterIndex = letterIndex % letters.length;
+                        labelText = letters[firstLetterIndex] + letters[secondLetterIndex];
+                    }
+                    label.textContent = labelText;
+                    label.style.top = y + 'px';
+                    gridElement.appendChild(label);
+                }
+            }
+        }
+        
+        // Инициализация сетки
+        document.addEventListener('DOMContentLoaded', function() {
+            createDebugGrid();
+        });
+        
+        // Обновление сетки при изменении размера окна
+        window.addEventListener('resize', function() {
+            createDebugGrid();
+        });
+        
+        // Обновление сетки при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(createDebugGrid, 100);
+        });
+        
+        // Обновление сетки при загрузке страницы
+        window.addEventListener('load', function() {
+            createDebugGrid();
+        });
+        // ========== КОНЕЦ ОТЛАДОЧНОЙ СЕТКИ ==========
+        
         // ========== КОНЕЦ ОТЛАДОЧНОГО БЛОКА ==========
     </script>
 </body>
