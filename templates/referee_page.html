@@ -296,12 +296,36 @@
             position: relative; 
         }
         
-        .segment:first-child {
+        /* #top_left начинается от верхней границы и доходит до середины */
+        #top_left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80%;
+            height: 50%;
+            flex: none;
+            align-items: flex-start;
+            padding-top: 0;
+        }
+        
+        /* #bottom_left позиционируется ниже #top_left и доходит до низа */
+        #bottom_left {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 80%;
+            height: 50%;
+            flex: none;
+            align-items: flex-end;
+            padding-bottom: 0;
+        }
+        
+        .segment:first-child:not(#top_left):not(#bottom_left) {
             align-items: flex-start;
             padding-top: 15%;
         }
         
-        .segment:last-child {
+        .segment:last-child:not(#top_left):not(#bottom_left) {
             align-items: flex-end;
             padding-bottom: 15%;
         }
@@ -315,12 +339,31 @@
             width: 280px;
         }
         
-        #top_left input, #top_right input {
+        /* Стили для input в #top_left */
+        #top_left input {
+            position: absolute;
+            left: 10% !important;
+            top: 10% !important;
+            bottom: auto;
+            right: auto;
+        }
+        
+        /* Стили для input в #bottom_left */
+        #bottom_left input {
+            position: absolute;
+            left: 10% !important;
+            bottom: 10% !important;
+            top: auto;
+            right: auto;
+        }
+        
+        /* Стили для правых полей остаются без изменений */
+        #top_right input {
             top: 20px;
             bottom: auto;
         }
         
-        #bottom_left input, #bottom_right input {
+        #bottom_right input {
             bottom: 60px;
             top: auto;
         }
@@ -732,8 +775,13 @@
             }
             input { width: fit-content; min-width: 120px; max-width: none; font-size: 16px; padding: 6px; }
             /* Для левых полей сохраняем позицию от линии №3 */
-            #top_left input, #bottom_left input {
-                left: 150px !important; /* Вертикальная линия №3 */
+            #top_left input {
+                left: 10% !important;
+                top: 10% !important;
+            }
+            #bottom_left input {
+                left: 10% !important;
+                bottom: 10% !important;
             }
             .save-result-btn { width: 21px; height: 21px; font-size: 8px; }
             /* Адаптация для мобильных устройств */
@@ -784,8 +832,13 @@
             }
             
             /* Для левых полей сохраняем позицию от линии №3 */
-            #top_left input, #bottom_left input {
-                left: 150px !important; /* Вертикальная линия №3 */
+            #top_left input {
+                left: 10% !important;
+                top: 10% !important;
+            }
+            #bottom_left input {
+                left: 10% !important;
+                bottom: 10% !important;
             }
             
             .controls button {
@@ -833,8 +886,13 @@
             }
             
             /* Для левых полей сохраняем позицию от линии №3 */
-            #top_left input, #bottom_left input {
-                left: 150px !important; /* Вертикальная линия №3 */
+            #top_left input {
+                left: 10% !important;
+                top: 10% !important;
+            }
+            #bottom_left input {
+                left: 10% !important;
+                bottom: 10% !important;
             }
         }
 
@@ -1231,20 +1289,37 @@
             }
         }
         
-        /* КРИТИЧЕСКОЕ ПРАВИЛО: Для левых полей устанавливаем позицию от линии №3 - должно быть в конце для максимального приоритета */
-        #top_left input, #bottom_left input {
-            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+        /* КРИТИЧЕСКОЕ ПРАВИЛО: Для левых полей устанавливаем позицию 10% от левого края - должно быть в конце для максимального приоритета */
+        #top_left input {
+            left: 10% !important;
+            top: 10% !important;
+        }
+        
+        #bottom_left input {
+            left: 10% !important;
+            bottom: 10% !important;
         }
         
         /* Дополнительное правило для всех экранов - переопределяет все медиа-запросы */
-        .court #top_left input, .court #bottom_left input {
-            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+        .court #top_left input {
+            left: 10% !important;
+            top: 10% !important;
+        }
+        
+        .court #bottom_left input {
+            left: 10% !important;
+            bottom: 10% !important;
         }
         
         /* Абсолютно максимальный приоритет - применяется всегда и везде */
-        body #top_left input, body #bottom_left input,
-        html body #top_left input, html body #bottom_left input {
-            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+        body #top_left input, html body #top_left input {
+            left: 10% !important;
+            top: 10% !important;
+        }
+        
+        body #bottom_left input, html body #bottom_left input {
+            left: 10% !important;
+            bottom: 10% !important;
         }
     </style>
 </head>
@@ -1548,33 +1623,41 @@
             console.log('Цвета обновлены:', {leftTeamColor, rightTeamColor, leftColor, rightColor});
         }
         
-        // Принудительно устанавливаем левые поля на линию №3 для всех экранов
+        // Принудительно устанавливаем левые поля на позицию left: 10% для всех экранов
         function forceLeftFieldsPosition() {
             const topLeft = document.getElementById('name_top_left');
             const bottomLeft = document.getElementById('name_bottom_left');
             
             // Устанавливаем позицию для input элементов напрямую (теперь они находятся в segment без .box)
             if (topLeft) {
-                // Принудительно устанавливаем на линию №3 (150px) с максимальным приоритетом
-                topLeft.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3
+                // Принудительно устанавливаем left: 10%, top: 10% с максимальным приоритетом
+                topLeft.style.setProperty('left', '10%', 'important');
+                topLeft.style.setProperty('top', '10%', 'important');
                 topLeft.style.setProperty('right', 'auto', 'important');
+                topLeft.style.setProperty('bottom', 'auto', 'important');
                 // Дополнительная проверка через небольшой таймаут
                 setTimeout(() => {
                     if (topLeft) {
-                        topLeft.style.setProperty('left', '150px', 'important');
+                        topLeft.style.setProperty('left', '10%', 'important');
+                        topLeft.style.setProperty('top', '10%', 'important');
                         topLeft.style.setProperty('right', 'auto', 'important');
+                        topLeft.style.setProperty('bottom', 'auto', 'important');
                     }
                 }, 10);
             }
             if (bottomLeft) {
-                // Принудительно устанавливаем на линию №3 (150px) с максимальным приоритетом
-                bottomLeft.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3
+                // Принудительно устанавливаем left: 10%, bottom: 10% с максимальным приоритетом
+                bottomLeft.style.setProperty('left', '10%', 'important');
+                bottomLeft.style.setProperty('bottom', '10%', 'important');
                 bottomLeft.style.setProperty('right', 'auto', 'important');
+                bottomLeft.style.setProperty('top', 'auto', 'important');
                 // Дополнительная проверка через небольшой таймаут
                 setTimeout(() => {
                     if (bottomLeft) {
-                        bottomLeft.style.setProperty('left', '150px', 'important');
+                        bottomLeft.style.setProperty('left', '10%', 'important');
+                        bottomLeft.style.setProperty('bottom', '10%', 'important');
                         bottomLeft.style.setProperty('right', 'auto', 'important');
+                        bottomLeft.style.setProperty('top', 'auto', 'important');
                     }
                 }, 10);
             }
@@ -3310,13 +3393,15 @@
                 inputs.forEach(input => {
                     input.style.setProperty('position', 'absolute', 'important');
                     
-                    // Для элементов левой команды устанавливаем позицию на вертикальной линии №3 (150px)
+                    // Для элементов левой команды устанавливаем позицию left: 10%
                     if (input.id === 'name_top_left') {
-                        input.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3 = 3 * 50px
-                        input.style.setProperty('transform', 'translateY(-50%)', 'important');
+                        input.style.setProperty('left', '10%', 'important');
+                        input.style.setProperty('top', '10%', 'important');
+                        input.style.setProperty('transform', 'none', 'important');
                     } else if (input.id === 'name_bottom_left') {
-                        input.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3 = 3 * 50px
-                        input.style.setProperty('transform', 'translateY(50%)', 'important');
+                        input.style.setProperty('left', '10%', 'important');
+                        input.style.setProperty('bottom', '10%', 'important');
+                        input.style.setProperty('transform', 'none', 'important');
                     } else {
                         // Для остальных элементов
                         input.style.setProperty('transform', 'none', 'important');
@@ -3551,8 +3636,13 @@
                         element.style.setProperty('font-size', '50px', 'important');
                         
                         // Левые границы
-                        if (id === 'name_top_left' || id === 'name_bottom_left') {
-                            element.style.setProperty('left', '150px', 'important'); // Линия "3" = 3 * 50px
+                        if (id === 'name_top_left') {
+                            element.style.setProperty('left', '10%', 'important');
+                            element.style.setProperty('top', '10%', 'important');
+                            element.style.setProperty('right', 'auto', 'important');
+                        } else if (id === 'name_bottom_left') {
+                            element.style.setProperty('left', '10%', 'important');
+                            element.style.setProperty('bottom', '10%', 'important');
                             element.style.setProperty('right', 'auto', 'important');
                         }
                         
@@ -3643,8 +3733,10 @@
                         )) {
                             const currentLeft = getComputedStyle(target).left;
                             const leftValue = parseFloat(currentLeft);
-                            // Если позиция отличается от 150px, принудительно устанавливаем
-                            if (Math.abs(leftValue - 150) > 1) {
+                            const parentWidth = target.parentElement ? target.parentElement.offsetWidth : window.innerWidth;
+                            const expectedLeft = parentWidth * 0.1; // 10% от ширины родителя
+                            // Если позиция отличается от 10%, принудительно устанавливаем
+                            if (Math.abs(leftValue - expectedLeft) > parentWidth * 0.01) { // Допуск 1% от ширины
                                 setTimeout(() => {
                                     forceLeftFieldsPosition();
                                 }, 10);
@@ -3687,19 +3779,27 @@
                 if (topLeft) {
                     const currentLeft = getComputedStyle(topLeft).left;
                     const leftValue = parseFloat(currentLeft);
-                    if (Math.abs(leftValue - 150) > 1) {
-                        console.log('[DEBUG] Исправление позиции topLeft input:', {currentLeft: leftValue});
-                        topLeft.style.setProperty('left', '150px', 'important');
+                    const parentWidth = topLeft.parentElement ? topLeft.parentElement.offsetWidth : window.innerWidth;
+                    const expectedLeft = parentWidth * 0.1; // 10% от ширины родителя
+                    if (Math.abs(leftValue - expectedLeft) > parentWidth * 0.01) { // Допуск 1% от ширины
+                        console.log('[DEBUG] Исправление позиции topLeft input:', {currentLeft: leftValue, expected: expectedLeft});
+                        topLeft.style.setProperty('left', '10%', 'important');
+                        topLeft.style.setProperty('top', '10%', 'important');
                         topLeft.style.setProperty('right', 'auto', 'important');
+                        topLeft.style.setProperty('bottom', 'auto', 'important');
                     }
                 }
                 if (bottomLeft) {
                     const currentLeft = getComputedStyle(bottomLeft).left;
                     const leftValue = parseFloat(currentLeft);
-                    if (Math.abs(leftValue - 150) > 1) {
-                        console.log('[DEBUG] Исправление позиции bottomLeft input:', {currentLeft: leftValue});
-                        bottomLeft.style.setProperty('left', '150px', 'important');
+                    const parentWidth = bottomLeft.parentElement ? bottomLeft.parentElement.offsetWidth : window.innerWidth;
+                    const expectedLeft = parentWidth * 0.1; // 10% от ширины родителя
+                    if (Math.abs(leftValue - expectedLeft) > parentWidth * 0.01) { // Допуск 1% от ширины
+                        console.log('[DEBUG] Исправление позиции bottomLeft input:', {currentLeft: leftValue, expected: expectedLeft});
+                        bottomLeft.style.setProperty('left', '10%', 'important');
+                        bottomLeft.style.setProperty('bottom', '10%', 'important');
                         bottomLeft.style.setProperty('right', 'auto', 'important');
+                        bottomLeft.style.setProperty('top', 'auto', 'important');
                     }
                 }
             }, 5000); // Увеличено до 5 секунд для снижения нагрузки
