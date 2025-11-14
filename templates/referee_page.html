@@ -315,12 +315,12 @@
             width: 280px;
         }
         
-        #top_left .box, #top_right .box {
+        #top_left input, #top_right input {
             top: 20px;
             bottom: auto;
         }
         
-        #bottom_left .box, #bottom_right .box {
+        #bottom_left input, #bottom_right input {
             bottom: 60px;
             top: auto;
         }
@@ -731,7 +731,10 @@
                 min-width: 10vw;
             }
             input { width: fit-content; min-width: 120px; max-width: none; font-size: 16px; padding: 6px; }
-            .box { width: 200px; }
+            /* Для левых полей сохраняем позицию от линии №3 */
+            #top_left input, #bottom_left input {
+                left: 150px !important; /* Вертикальная линия №3 */
+            }
             .save-result-btn { width: 21px; height: 21px; font-size: 8px; }
             /* Адаптация для мобильных устройств */
             #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
@@ -762,12 +765,12 @@
             
             /* Прижимаем имена игроков левой команды к левому краю на маленьких экранах */
             #name_top_left {
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
             /* Адаптация для очень маленьких экранов */
@@ -778,6 +781,11 @@
             
             .box {
                 width: 150px;
+            }
+            
+            /* Для левых полей сохраняем позицию от линии №3 */
+            #top_left input, #bottom_left input {
+                left: 150px !important; /* Вертикальная линия №3 */
             }
             
             .controls button {
@@ -823,6 +831,11 @@
             .box {
                 width: 150px;
             }
+            
+            /* Для левых полей сохраняем позицию от линии №3 */
+            #top_left input, #bottom_left input {
+                left: 150px !important; /* Вертикальная линия №3 */
+            }
         }
 
         /* Стили для режима просмотра */
@@ -856,13 +869,13 @@
             /* Позиционирование для горизонтальных экранов - на 5px выше и ниже центра счёта */
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
             
@@ -923,13 +936,13 @@
         /* Позиционирование для левых имён - на 5px выше и ниже центра счёта */
         #name_top_left {
             top: calc(50% - 5px) !important; /* 5px выше центра счёта */
-            left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
             transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
         }
         
         #name_bottom_left {
             bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
-            left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
             transform: translateY(50%) !important; /* Только вертикальное выравнивание */
         }
         
@@ -950,13 +963,13 @@
         @media screen and (min-width: 769px) {
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: max(80px, calc(80px - 200px + 10px)) !important; /* Не меньше ширины control-panel (80px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
         }
@@ -965,13 +978,13 @@
         @media screen and (max-width: 768px) and (orientation: portrait) {
             #name_top_left {
                 top: calc(50% - 5px) !important;
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
                 bottom: calc(50% - 5px) !important;
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
         }
@@ -979,12 +992,12 @@
         /* Для всех мобильных устройств (включая горизонтальную ориентацию) - прижимаем к левому краю */
         @media screen and (max-width: 768px) {
             #name_top_left {
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(-50%) !important; /* Только вертикальное выравнивание */
             }
             
             #name_bottom_left {
-                left: max(65px, calc(65px - 200px + 10px)) !important; /* Не меньше ширины control-panel (65px), чтобы не перекрывать панель */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
                 transform: translateY(50%) !important; /* Только вертикальное выравнивание */
             }
         }
@@ -1217,6 +1230,22 @@
                 top: calc(50% - 5px + 30px) !important; /* Опускаем на 30px */
             }
         }
+        
+        /* КРИТИЧЕСКОЕ ПРАВИЛО: Для левых полей устанавливаем позицию от линии №3 - должно быть в конце для максимального приоритета */
+        #top_left input, #bottom_left input {
+            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+        }
+        
+        /* Дополнительное правило для всех экранов - переопределяет все медиа-запросы */
+        .court #top_left input, .court #bottom_left input {
+            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+        }
+        
+        /* Абсолютно максимальный приоритет - применяется всегда и везде */
+        body #top_left input, body #bottom_left input,
+        html body #top_left input, html body #bottom_left input {
+            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+        }
     </style>
 </head>
 <body>
@@ -1307,19 +1336,15 @@
             <div class="half left" id="court_left" title="Кликните для увеличения счета левой команды">
                 <div class="segments">
                     <div class="segment" id="top_left">
-                        <div class="box">
-                            <input type="text" placeholder="Имя игрока" id="name_top_left" value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}" />
-                            <div class="server-indicator" id="server_top_left" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
-                            </div>
+                        <input type="text" placeholder="Имя игрока" id="name_top_left" value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}" />
+                        <div class="server-indicator" id="server_top_left" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                         </div>
                     </div>
                     <div class="segment" id="bottom_left">
-                        <div class="box">
-                            <input type="text" placeholder="Имя игрока" id="name_bottom_left" value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}" />
-                            <div class="server-indicator" id="server_bottom_left" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
-                            </div>
+                        <input type="text" placeholder="Имя игрока" id="name_bottom_left" value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}" />
+                        <div class="server-indicator" id="server_bottom_left" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                         </div>
                     </div>
                 </div>
@@ -1328,20 +1353,16 @@
             <div class="half right" id="court_right" title="Кликните для увеличения счета правой команды">
                 <div class="segments">
                     <div class="segment" id="top_right">
-                        <div class="box">
-                            <div class="server-indicator" id="server_top_right" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
-                            </div>
-                            <input type="text" placeholder="Имя игрока" id="name_top_right" value="{{ participant2.split('-')[0] if '-' in participant2 else participant2 }}" />
+                        <div class="server-indicator" id="server_top_right" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                         </div>
+                        <input type="text" placeholder="Имя игрока" id="name_top_right" value="{{ participant2.split('-')[0] if '-' in participant2 else participant2 }}" />
                     </div>
                     <div class="segment" id="bottom_right">
-                        <div class="box">
-                            <div class="server-indicator" id="server_bottom_right" title="Подаёт" style="display: none;">
-                                <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
-                            </div>
-                            <input type="text" placeholder="Имя игрока" id="name_bottom_right" value="{{ participant2.split('-')[1] if '-' in participant2 and participant2.split('-')|length > 1 else participant2 }}" />
+                        <div class="server-indicator" id="server_bottom_right" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
                         </div>
+                        <input type="text" placeholder="Имя игрока" id="name_bottom_right" value="{{ participant2.split('-')[1] if '-' in participant2 and participant2.split('-')|length > 1 else participant2 }}" />
                     </div>
                 </div>
             </div>
@@ -1527,6 +1548,38 @@
             console.log('Цвета обновлены:', {leftTeamColor, rightTeamColor, leftColor, rightColor});
         }
         
+        // Принудительно устанавливаем левые поля на линию №3 для всех экранов
+        function forceLeftFieldsPosition() {
+            const topLeft = document.getElementById('name_top_left');
+            const bottomLeft = document.getElementById('name_bottom_left');
+            
+            // Устанавливаем позицию для input элементов напрямую (теперь они находятся в segment без .box)
+            if (topLeft) {
+                // Принудительно устанавливаем на линию №3 (150px) с максимальным приоритетом
+                topLeft.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3
+                topLeft.style.setProperty('right', 'auto', 'important');
+                // Дополнительная проверка через небольшой таймаут
+                setTimeout(() => {
+                    if (topLeft) {
+                        topLeft.style.setProperty('left', '150px', 'important');
+                        topLeft.style.setProperty('right', 'auto', 'important');
+                    }
+                }, 10);
+            }
+            if (bottomLeft) {
+                // Принудительно устанавливаем на линию №3 (150px) с максимальным приоритетом
+                bottomLeft.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3
+                bottomLeft.style.setProperty('right', 'auto', 'important');
+                // Дополнительная проверка через небольшой таймаут
+                setTimeout(() => {
+                    if (bottomLeft) {
+                        bottomLeft.style.setProperty('left', '150px', 'important');
+                        bottomLeft.style.setProperty('right', 'auto', 'important');
+                    }
+                }, 10);
+            }
+        }
+        
         // Инициализация
         function init() {
             console.log('🚀 Функция init() вызвана');
@@ -1544,6 +1597,15 @@
             
             // Применяем стили для горизонтальных экранов
             setTimeout(applyMobileLandscapeStyles, 200);
+            
+            // Принудительно устанавливаем позицию левых полей на линию №3
+            // Вызываем несколько раз с разными задержками, чтобы переопределить любые другие стили
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+            setTimeout(forceLeftFieldsPosition, 800);
+            setTimeout(forceLeftFieldsPosition, 1200);
+            setTimeout(forceLeftFieldsPosition, 1500);
             
             // Синхронизируем размер шрифта имён игроков с высотой значка подачи
             // Вызываем несколько раз с разными задержками, чтобы переопределить любые другие стили
@@ -3248,15 +3310,12 @@
                 inputs.forEach(input => {
                     input.style.setProperty('position', 'absolute', 'important');
                     
-                    // Для элементов левой команды применяем сдвиг влево на 200px с учетом ширины control-panel
-                    const controlPanel = document.querySelector('.control-panel');
-                    const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 65;
-                    const leftPosition = Math.max(controlPanelWidth, controlPanelWidth - 200 + 10); // Не меньше ширины панели, чтобы не перекрывать
+                    // Для элементов левой команды устанавливаем позицию на вертикальной линии №3 (150px)
                     if (input.id === 'name_top_left') {
-                        input.style.setProperty('left', leftPosition + 'px', 'important');
+                        input.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3 = 3 * 50px
                         input.style.setProperty('transform', 'translateY(-50%)', 'important');
                     } else if (input.id === 'name_bottom_left') {
-                        input.style.setProperty('left', leftPosition + 'px', 'important');
+                        input.style.setProperty('left', '150px', 'important'); // Вертикальная линия №3 = 3 * 50px
                         input.style.setProperty('transform', 'translateY(50%)', 'important');
                     } else {
                         // Для остальных элементов
@@ -3311,6 +3370,8 @@
             setTimeout(syncPlayerNameFontSizeWithShuttlecock, 100);
             // Обновляем отладочную информацию
             updateDebugScreenInfo();
+            // Принудительно устанавливаем позицию левых полей
+            setTimeout(forceLeftFieldsPosition, 150);
         });
         
         // ========== ОТЛАДОЧНЫЙ БЛОК ДЛЯ РАЗМЕРОВ ЭКРАНА ==========
@@ -3529,6 +3590,119 @@
                 originalInit();
                 setTimeout(applySpecialScreenStyles, 300);
             };
+        }
+        
+        // Применяем принудительное позиционирование после всех других стилей
+        // Вызываем несколько раз с разными задержками для гарантии
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+            setTimeout(forceLeftFieldsPosition, 800);
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(forceLeftFieldsPosition, 50);
+            setTimeout(forceLeftFieldsPosition, 150);
+            setTimeout(forceLeftFieldsPosition, 300);
+        });
+        
+        window.addEventListener('load', function() {
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+            setTimeout(forceLeftFieldsPosition, 800);
+        });
+        
+        // Применяем после applyMobileLandscapeStyles
+        const originalApplyMobileLandscapeStyles = applyMobileLandscapeStyles;
+        applyMobileLandscapeStyles = function() {
+            originalApplyMobileLandscapeStyles();
+            setTimeout(forceLeftFieldsPosition, 50);
+            setTimeout(forceLeftFieldsPosition, 150);
+            setTimeout(forceLeftFieldsPosition, 300);
+        };
+        
+        // Также применяем при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+        });
+        
+        // Используем MutationObserver для отслеживания изменений стилей и принудительного применения позиции
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        // Отслеживаем изменения для input элементов (теперь они находятся в segment без .box)
+                        if (target && (
+                            target.id === 'name_top_left' || 
+                            target.id === 'name_bottom_left'
+                        )) {
+                            const currentLeft = getComputedStyle(target).left;
+                            const leftValue = parseFloat(currentLeft);
+                            // Если позиция отличается от 150px, принудительно устанавливаем
+                            if (Math.abs(leftValue - 150) > 1) {
+                                setTimeout(() => {
+                                    forceLeftFieldsPosition();
+                                }, 10);
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Начинаем наблюдение после загрузки DOM
+            document.addEventListener('DOMContentLoaded', function() {
+                const topLeft = document.getElementById('name_top_left');
+                const bottomLeft = document.getElementById('name_bottom_left');
+                
+                if (topLeft) {
+                    observer.observe(topLeft, { attributes: true, attributeFilter: ['style'] });
+                }
+                if (bottomLeft) {
+                    observer.observe(bottomLeft, { attributes: true, attributeFilter: ['style'] });
+                }
+            });
+        }
+        
+        // Периодическая проверка и исправление позиции (каждые 5 секунд - только для отладки)
+        // ВАЖНО: Эта проверка нужна для защиты от переопределения стилей другими функциями
+        // Причины необходимости:
+        // 1. Другие JS функции (applyMobileLandscapeStyles, syncPlayerNameFontSizeWithShuttlecock) могут изменять стили
+        // 2. Динамические изменения (resize, orientationchange) могут сбрасывать позицию
+        // 3. Конфликты CSS правил с разной специфичностью
+        // 4. Асинхронная загрузка элементов и стилей
+        // 
+        // Можно отключить, установив DEBUG_MODE = false, но тогда нужно убедиться,
+        // что все другие функции не переопределяют позицию левых полей
+        if (DEBUG_MODE) {
+            setInterval(function() {
+                const topLeft = document.getElementById('name_top_left');
+                const bottomLeft = document.getElementById('name_bottom_left');
+                
+                // Проверяем и исправляем позицию input элементов (теперь они находятся в segment без .box)
+                if (topLeft) {
+                    const currentLeft = getComputedStyle(topLeft).left;
+                    const leftValue = parseFloat(currentLeft);
+                    if (Math.abs(leftValue - 150) > 1) {
+                        console.log('[DEBUG] Исправление позиции topLeft input:', {currentLeft: leftValue});
+                        topLeft.style.setProperty('left', '150px', 'important');
+                        topLeft.style.setProperty('right', 'auto', 'important');
+                    }
+                }
+                if (bottomLeft) {
+                    const currentLeft = getComputedStyle(bottomLeft).left;
+                    const leftValue = parseFloat(currentLeft);
+                    if (Math.abs(leftValue - 150) > 1) {
+                        console.log('[DEBUG] Исправление позиции bottomLeft input:', {currentLeft: leftValue});
+                        bottomLeft.style.setProperty('left', '150px', 'important');
+                        bottomLeft.style.setProperty('right', 'auto', 'important');
+                    }
+                }
+            }, 5000); // Увеличено до 5 секунд для снижения нагрузки
         }
         // ========== КОНЕЦ СПЕЦИАЛЬНЫХ СТИЛЕЙ ==========
         
