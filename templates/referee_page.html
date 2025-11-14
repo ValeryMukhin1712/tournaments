@@ -1279,23 +1279,23 @@
                 right: auto !important;
             }
             
-            /* Верхние имена опустить на 30px */
+            /* Верхние имена опустить на 70px (было 30px, затем еще 15px, теперь еще 25px) */
             #name_top_left {
-                top: calc(50% - 5px + 30px + 15px) !important; /* Опускаем на 45px (30px + 15px) */
+                top: calc(50% - 5px + 30px + 15px + 25px) !important; /* Опускаем на 70px (30px + 15px + 25px) */
             }
             
             #name_top_right {
                 top: calc(50% - 5px + 30px) !important; /* Опускаем на 30px */
             }
             
-            /* Опускаем поля с цифрами счёта на 30px (было поднято на 50px, теперь на 20px) */
+            /* Опускаем поля с цифрами счёта на 40px (было поднято на 50px, затем опущено на 30px, теперь еще на 10px) */
             .scoreboard-container {
-                top: calc(50% - 50px + 30px) !important; /* calc(50% - 20px) */
+                top: calc(50% - 50px + 30px + 10px) !important; /* calc(50% - 10px) */
             }
             
-            /* Поднимаем input в #bottom_left на 100px (было 75px, теперь еще на 25px) */
+            /* Поднимаем input в #bottom_left на 125px (было 75px, затем еще на 25px, теперь еще на 25px) */
             #name_bottom_left {
-                bottom: calc(10% + 75px + 25px) !important; /* calc(10% + 100px) */
+                bottom: calc(10% + 75px + 25px + 25px) !important; /* calc(10% + 125px) */
             }
         }
         
@@ -3648,11 +3648,11 @@
                         // Левые границы
                         if (id === 'name_top_left') {
                             element.style.setProperty('left', '10%', 'important');
-                            element.style.setProperty('top', 'calc(50% - 5px + 30px + 15px)', 'important'); // Опускаем на 45px (30px + 15px)
+                            element.style.setProperty('top', 'calc(50% - 5px + 30px + 15px + 25px)', 'important'); // Опускаем на 70px (30px + 15px + 25px)
                             element.style.setProperty('right', 'auto', 'important');
                         } else if (id === 'name_bottom_left') {
                             element.style.setProperty('left', '10%', 'important');
-                            element.style.setProperty('bottom', 'calc(10% + 75px + 25px)', 'important'); // Поднимаем на 100px (75px + 25px)
+                            element.style.setProperty('bottom', 'calc(10% + 75px + 25px + 25px)', 'important'); // Поднимаем на 125px (75px + 25px + 25px)
                             element.style.setProperty('right', 'auto', 'important');
                         }
                         
@@ -3668,10 +3668,10 @@
                     }
                 });
                 
-                // Опускаем поля с цифрами счёта на 30px (было поднято на 50px, теперь на 20px)
+                // Опускаем поля с цифрами счёта на 40px (было поднято на 50px, затем опущено на 30px, теперь еще на 10px)
                 const scoreboard = document.querySelector('.scoreboard-container');
                 if (scoreboard) {
-                    scoreboard.style.setProperty('top', 'calc(50% - 50px + 30px)', 'important'); // calc(50% - 20px)
+                    scoreboard.style.setProperty('top', 'calc(50% - 50px + 30px + 10px)', 'important'); // calc(50% - 10px)
                 }
             }
         }
