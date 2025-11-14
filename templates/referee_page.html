@@ -1287,6 +1287,16 @@
             #name_top_right {
                 top: calc(50% - 5px + 30px) !important; /* Опускаем на 30px */
             }
+            
+            /* Поднимаем поля с цифрами счёта на 50px */
+            .scoreboard-container {
+                top: calc(50% - 50px) !important;
+            }
+            
+            /* Поднимаем input в #bottom_left на 75px */
+            #name_bottom_left {
+                bottom: calc(10% + 75px) !important;
+            }
         }
         
         /* КРИТИЧЕСКОЕ ПРАВИЛО: Для левых полей устанавливаем позицию 10% от левого края - должно быть в конце для максимального приоритета */
@@ -3642,7 +3652,7 @@
                             element.style.setProperty('right', 'auto', 'important');
                         } else if (id === 'name_bottom_left') {
                             element.style.setProperty('left', '10%', 'important');
-                            element.style.setProperty('bottom', '10%', 'important');
+                            element.style.setProperty('bottom', 'calc(10% + 75px)', 'important'); // Поднимаем на 75px
                             element.style.setProperty('right', 'auto', 'important');
                         }
                         
@@ -3657,6 +3667,12 @@
                         }
                     }
                 });
+                
+                // Поднимаем поля с цифрами счёта на 50px
+                const scoreboard = document.querySelector('.scoreboard-container');
+                if (scoreboard) {
+                    scoreboard.style.setProperty('top', 'calc(50% - 50px)', 'important');
+                }
             }
         }
         
