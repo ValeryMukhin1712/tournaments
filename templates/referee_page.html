@@ -1189,6 +1189,34 @@
             left: 5px;
             transform: translateY(-50%);
         }
+        
+        /* Специальные стили для экрана 791 x 303 px с DPR 2.75 */
+        @media screen and (width: 791px) and (height: 303px) {
+            /* Шрифт в полях имён высотой 50px */
+            #name_top_left, #name_bottom_left, #name_top_right, #name_bottom_right {
+                font-size: 50px !important;
+            }
+            
+            /* Левые границы полей левых имён на линии "3" (150px) */
+            #name_top_left, #name_bottom_left {
+                left: 150px !important; /* Линия "3" = 3 * 50px */
+            }
+            
+            /* Левые границы правых имён на линии "11" (550px) */
+            #name_top_right, #name_bottom_right {
+                left: 550px !important; /* Линия "11" = 11 * 50px */
+                right: auto !important;
+            }
+            
+            /* Верхние имена опустить на 30px */
+            #name_top_left {
+                top: calc(50% - 5px + 30px) !important; /* Опускаем на 30px */
+            }
+            
+            #name_top_right {
+                top: calc(50% - 5px + 30px) !important; /* Опускаем на 30px */
+            }
+        }
     </style>
 </head>
 <body>
@@ -3444,6 +3472,65 @@
             createDebugGrid();
         });
         // ========== КОНЕЦ ОТЛАДОЧНОЙ СЕТКИ ==========
+        
+        // ========== СПЕЦИАЛЬНЫЕ СТИЛИ ДЛЯ ЭКРАНА 791 x 303 px с DPR 2.75 ==========
+        function applySpecialScreenStyles() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            
+            // Проверяем точное разрешение и DPR
+            if (windowWidth === 791 && windowHeight === 303 && Math.abs(devicePixelRatio - 2.75) < 0.1) {
+                const nameInputs = ['name_top_left', 'name_bottom_left', 'name_top_right', 'name_bottom_right'];
+                
+                nameInputs.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        // Шрифт 50px с !important
+                        element.style.setProperty('font-size', '50px', 'important');
+                        
+                        // Левые границы
+                        if (id === 'name_top_left' || id === 'name_bottom_left') {
+                            element.style.setProperty('left', '150px', 'important'); // Линия "3" = 3 * 50px
+                            element.style.setProperty('right', 'auto', 'important');
+                        }
+                        
+                        if (id === 'name_top_right' || id === 'name_bottom_right') {
+                            element.style.setProperty('left', '550px', 'important'); // Линия "11" = 11 * 50px
+                            element.style.setProperty('right', 'auto', 'important');
+                        }
+                        
+                        // Верхние имена опустить на 30px
+                        if (id === 'name_top_left' || id === 'name_top_right') {
+                            element.style.setProperty('top', 'calc(50% - 5px + 30px)', 'important');
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Применяем стили при загрузке и изменении размера
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(applySpecialScreenStyles, 100);
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(applySpecialScreenStyles, 100);
+        });
+        
+        window.addEventListener('load', function() {
+            setTimeout(applySpecialScreenStyles, 200);
+        });
+        
+        // Также применяем после инициализации приложения
+        if (typeof init !== 'undefined') {
+            const originalInit = init;
+            init = function() {
+                originalInit();
+                setTimeout(applySpecialScreenStyles, 300);
+            };
+        }
+        // ========== КОНЕЦ СПЕЦИАЛЬНЫХ СТИЛЕЙ ==========
         
         // ========== КОНЕЦ ОТЛАДОЧНОГО БЛОКА ==========
     </script>
