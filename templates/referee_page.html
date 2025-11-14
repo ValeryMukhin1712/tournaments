@@ -21,7 +21,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/static/referee/icon-192.png">
     <link rel="apple-touch-icon" href="/static/referee/icon-192.png">
     
-    <title>.</title>
+    <title></title>
     
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -1098,10 +1098,75 @@
                 font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
             }
         }
+        
+        /* Отладочный блок для отображения размеров экрана */
+        .debug-screen-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 9999;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            line-height: 1.6;
+            min-width: 200px;
+        }
+        
+        .debug-screen-info .debug-title {
+            font-weight: bold;
+            color: #00ff00;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .debug-screen-info .debug-item {
+            margin: 3px 0;
+        }
+        
+        .debug-screen-info .debug-label {
+            color: #ffff00;
+        }
+        
+        .debug-screen-info .debug-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <!-- VERSION-2024-10-23-BADMINTON-UPDATED -->
+    
+    <!-- Отладочный блок для отображения размеров экрана -->
+    <div id="debugScreenInfo" class="debug-screen-info" style="display: none;">
+        <div class="debug-title">📱 Размеры экрана</div>
+        <div class="debug-item">
+            <span class="debug-label">Window:</span>
+            <span class="debug-value" id="debugWindowSize">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Screen:</span>
+            <span class="debug-value" id="debugScreenSize">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Viewport:</span>
+            <span class="debug-value" id="debugViewportSize">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Ориентация:</span>
+            <span class="debug-value" id="debugOrientation">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Device Pixel Ratio:</span>
+            <span class="debug-value" id="debugDPR">-</span>
+        </div>
+    </div>
+    
     <!-- Предупреждение о необходимости поворота устройства -->
     <div class="orientation-warning" style="display: none;">
         <i class="fas fa-mobile-alt"></i>
@@ -1236,6 +1301,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Попытка войти в полноэкранный режим
             setTimeout(enterFullscreen, 500);
+            
+            // Дополнительная попытка через взаимодействие пользователя (требуется для некоторых браузеров)
+            let fullscreenAttempted = false;
+            const tryFullscreenOnInteraction = function() {
+                if (!fullscreenAttempted && !document.fullscreenElement) {
+                    fullscreenAttempted = true;
+                    enterFullscreen();
+                }
+            };
+            
+            // Пробуем войти в полноэкранный режим при первом клике/касании
+            document.addEventListener('click', tryFullscreenOnInteraction, { once: true });
+            document.addEventListener('touchstart', tryFullscreenOnInteraction, { once: true });
         });
 
         // Обработка выхода из полноэкранного режима
@@ -1243,6 +1321,8 @@
             if (!document.fullscreenElement) {
                 // Пользователь вышел из полноэкранного режима
                 console.log('Выход из полноэкранного режима');
+            } else {
+                console.log('Вход в полноэкранный режим');
             }
         });
 
@@ -3146,7 +3226,71 @@
             applyMobileLandscapeStyles();
             // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций
             setTimeout(syncPlayerNameFontSizeWithShuttlecock, 100);
+            // Обновляем отладочную информацию
+            updateDebugScreenInfo();
         });
+        
+        // ========== ОТЛАДОЧНЫЙ БЛОК ДЛЯ РАЗМЕРОВ ЭКРАНА ==========
+        // Включить/выключить отладку: измените DEBUG_MODE на true/false
+        const DEBUG_MODE = true; // Установите false для отключения отладки
+        
+        function updateDebugScreenInfo() {
+            if (!DEBUG_MODE) {
+                const debugElement = document.getElementById('debugScreenInfo');
+                if (debugElement) {
+                    debugElement.style.display = 'none';
+                }
+                return;
+            }
+            
+            const debugElement = document.getElementById('debugScreenInfo');
+            if (!debugElement) return;
+            
+            // Показываем блок
+            debugElement.style.display = 'block';
+            
+            // Получаем размеры
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = document.documentElement.clientHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            
+            // Определяем ориентацию
+            let orientation = 'Неизвестно';
+            if (window.innerHeight > window.innerWidth) {
+                orientation = 'Портретная (Portrait)';
+            } else if (window.innerWidth > window.innerHeight) {
+                orientation = 'Альбомная (Landscape)';
+            } else {
+                orientation = 'Квадратная';
+            }
+            
+            // Обновляем значения
+            document.getElementById('debugWindowSize').textContent = `${windowWidth} × ${windowHeight} px`;
+            document.getElementById('debugScreenSize').textContent = `${screenWidth} × ${screenHeight} px`;
+            document.getElementById('debugViewportSize').textContent = `${viewportWidth} × ${viewportHeight} px`;
+            document.getElementById('debugOrientation').textContent = orientation;
+            document.getElementById('debugDPR').textContent = devicePixelRatio.toFixed(2);
+        }
+        
+        // Инициализация отладочного блока
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDebugScreenInfo();
+        });
+        
+        // Обновление при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateDebugScreenInfo, 100);
+        });
+        
+        // Обновление при загрузке страницы
+        window.addEventListener('load', function() {
+            updateDebugScreenInfo();
+        });
+        // ========== КОНЕЦ ОТЛАДОЧНОГО БЛОКА ==========
     </script>
 </body>
 </html>
