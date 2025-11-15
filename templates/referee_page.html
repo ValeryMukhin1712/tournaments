@@ -749,6 +749,72 @@
             .scoreboard {
                 top: 45% !important; /* Было 50%, теперь 45% (поднято на 5%) */
             }
+            
+            /* Настройки для режима просмотра */
+            /* Убираем кнопку "Обнулить" в режиме просмотра */
+            .view-mode .reset-btn {
+                display: none !important;
+            }
+            
+            /* Увеличиваем шрифт счёта на 15% в режиме просмотра (225px * 1.15 = 258.75px, округлено до 259px) */
+            .view-mode .score {
+                font-size: 259px !important;
+            }
+            
+            /* Уменьшаем шрифт имён игроков на 30% в режиме просмотра (58px * 0.7 = 40.6px, округлено до 41px) */
+            .view-mode .player-name {
+                font-size: 41px !important;
+            }
+            
+            /* Размещаем имена игроков в углы экрана в режиме просмотра */
+            .view-mode #top_left_player_input {
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+            
+            .view-mode #name_top_right {
+                top: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+            }
+            
+            .view-mode #bottom_left_player_input {
+                bottom: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+            
+            .view-mode #name_bottom_right {
+                bottom: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+            }
+            
+            /* Кнопка Back в режиме просмотра - круг диаметром 50px со стрелкой, внизу по середине */
+            .view-mode .back-btn-view {
+                position: fixed !important;
+                bottom: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 50px !important;
+                height: 50px !important;
+                border-radius: 50% !important;
+                background: rgba(102, 102, 102, 0.8) !important;
+                color: white !important;
+                border: none !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 24px !important;
+                cursor: pointer !important;
+                z-index: 1000 !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            }
+            
+            .view-mode .back-btn-view:hover {
+                background: rgba(102, 102, 102, 1) !important;
+            }
         }
         
         /* Медиа-запрос для маленьких экранов (Viewport 793 x 305 и менее) с DevicePixelRatio 1.20 */
@@ -836,6 +902,72 @@
             /* Поднимаем цифры счёта на 5% */
             .scoreboard {
                 top: 45% !important; /* Было 50%, теперь 45% (поднято на 5%) */
+            }
+            
+            /* Настройки для режима просмотра */
+            /* Убираем кнопку "Обнулить" в режиме просмотра */
+            .view-mode .reset-btn {
+                display: none !important;
+            }
+            
+            /* Увеличиваем шрифт счёта на 15% в режиме просмотра (225px * 1.15 = 258.75px, округлено до 259px) */
+            .view-mode .score {
+                font-size: 259px !important;
+            }
+            
+            /* Уменьшаем шрифт имён игроков на 30% в режиме просмотра (58px * 0.7 = 40.6px, округлено до 41px) */
+            .view-mode .player-name {
+                font-size: 41px !important;
+            }
+            
+            /* Размещаем имена игроков в углы экрана в режиме просмотра */
+            .view-mode #top_left_player_input {
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+            
+            .view-mode #name_top_right {
+                top: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+            }
+            
+            .view-mode #bottom_left_player_input {
+                bottom: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+            
+            .view-mode #name_bottom_right {
+                bottom: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+            }
+            
+            /* Кнопка Back в режиме просмотра - круг диаметром 50px со стрелкой, внизу по середине */
+            .view-mode .back-btn-view {
+                position: fixed !important;
+                bottom: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 50px !important;
+                height: 50px !important;
+                border-radius: 50% !important;
+                background: rgba(102, 102, 102, 0.8) !important;
+                color: white !important;
+                border: none !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 24px !important;
+                cursor: pointer !important;
+                z-index: 1000 !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            }
+            
+            .view-mode .back-btn-view:hover {
+                background: rgba(102, 102, 102, 1) !important;
             }
         }
         
@@ -957,14 +1089,18 @@
             <div id="court_right" style="position: absolute; right: 0; top: 0; width: 50%; height: 100%; cursor: pointer;" title="Кликните для увеличения счета правой команды"></div>
             
             <!-- Счет -->
-            <div class="scoreboard">
-                <div class="score score-left" id="scoreLeft">0</div>
-                <button class="reset-btn" onclick="resetScore()" title="Обнулить счёт">
-                    <i class="fas fa-times"></i>
-                    <span class="reset-btn-text">Обнулить</span>
-                </button>
-                <div class="score score-right" id="scoreRight">0</div>
-            </div>
+        <div class="scoreboard">
+            <div class="score score-left" id="scoreLeft">0</div>
+            <button class="reset-btn" onclick="resetScore()" title="Обнулить счёт">
+                <i class="fas fa-times"></i>
+                <span class="reset-btn-text">Обнулить</span>
+            </button>
+            <div class="score score-right" id="scoreRight">0</div>
+        </div>
+        <!-- Кнопка Back для режима просмотра -->
+        <button class="back-btn-view" onclick="handleBack()" title="Назад" style="display: none;">
+            <i class="fas fa-arrow-left"></i>
+        </button>
             
             <!-- Поля для имен игроков -->
             <input type="text" 
@@ -1043,6 +1179,23 @@
         let shuttlecockPosition = 'bottom_left'; // Позиция воланчика
         let isViewMode = false;
         let journalVisible = false;
+        
+        // Переменные для хранения исходного состояния перед отражением
+        let originalState = {
+            scoreLeft: 0,
+            scoreRight: 0,
+            topLeftName: '',
+            bottomLeftName: '',
+            topRightName: '',
+            bottomRightName: '',
+            shuttlecockPosition: '',
+            topLeftColor: '',
+            bottomLeftColor: '',
+            topRightColor: '',
+            bottomRightColor: '',
+            scoreLeftColor: '',
+            scoreRightColor: ''
+        };
         
         // Сохранение состояния игры для отмены
         function saveGameState() {
@@ -1385,12 +1538,133 @@
             document.getElementById('name_bottom_right').value = topRightName;
         }
         
+        // Функция для отражения элементов относительно центра
+        function mirrorElementsForViewMode() {
+            // Сохраняем исходное состояние
+            originalState.scoreLeft = scoreLeft;
+            originalState.scoreRight = scoreRight;
+            originalState.topLeftName = document.getElementById('top_left_player_input').value;
+            originalState.bottomLeftName = document.getElementById('bottom_left_player_input').value;
+            originalState.topRightName = document.getElementById('name_top_right').value;
+            originalState.bottomRightName = document.getElementById('name_bottom_right').value;
+            originalState.shuttlecockPosition = shuttlecockPosition;
+            
+            // Сохраняем цвета
+            const topLeftEl = document.getElementById('top_left_player_input');
+            const bottomLeftEl = document.getElementById('bottom_left_player_input');
+            const topRightEl = document.getElementById('name_top_right');
+            const bottomRightEl = document.getElementById('name_bottom_right');
+            const scoreLeftEl = document.getElementById('scoreLeft');
+            const scoreRightEl = document.getElementById('scoreRight');
+            
+            originalState.topLeftColor = window.getComputedStyle(topLeftEl).color;
+            originalState.bottomLeftColor = window.getComputedStyle(bottomLeftEl).color;
+            originalState.topRightColor = window.getComputedStyle(topRightEl).color;
+            originalState.bottomRightColor = window.getComputedStyle(bottomRightEl).color;
+            originalState.scoreLeftColor = window.getComputedStyle(scoreLeftEl).color;
+            originalState.scoreRightColor = window.getComputedStyle(scoreRightEl).color;
+            
+            // Меняем местами счёт
+            const tempScore = scoreLeft;
+            scoreLeft = scoreRight;
+            scoreRight = tempScore;
+            
+            // Меняем местами имена по диагонали: top_left <-> bottom_right, bottom_left <-> top_right
+            const tempTopLeft = originalState.topLeftName;
+            const tempBottomLeft = originalState.bottomLeftName;
+            const tempTopRight = originalState.topRightName;
+            const tempBottomRight = originalState.bottomRightName;
+            
+            document.getElementById('top_left_player_input').value = tempBottomRight;
+            document.getElementById('bottom_left_player_input').value = tempTopRight;
+            document.getElementById('name_top_right').value = tempBottomLeft;
+            document.getElementById('name_bottom_right').value = tempTopLeft;
+            
+            // Меняем местами цвета счёта
+            scoreLeftEl.style.setProperty('color', originalState.scoreRightColor, 'important');
+            scoreRightEl.style.setProperty('color', originalState.scoreLeftColor, 'important');
+            
+            // Меняем местами цвета имён игроков
+            topLeftEl.style.setProperty('color', originalState.bottomRightColor, 'important');
+            bottomLeftEl.style.setProperty('color', originalState.topRightColor, 'important');
+            topRightEl.style.setProperty('color', originalState.bottomLeftColor, 'important');
+            bottomRightEl.style.setProperty('color', originalState.topLeftColor, 'important');
+            
+            // Перемещаем индикатор подачи на новое место
+            // Отражение позиций:
+            // top_left -> bottom_right
+            // bottom_left -> top_right
+            // top_right -> bottom_left
+            // bottom_right -> top_left
+            const positionMap = {
+                'top_left': 'bottom_right',
+                'bottom_left': 'top_right',
+                'top_right': 'bottom_left',
+                'bottom_right': 'top_left'
+            };
+            shuttlecockPosition = positionMap[originalState.shuttlecockPosition] || originalState.shuttlecockPosition;
+            
+            // Обновляем отображение
+            updateScore();
+            updateShuttlecockPosition();
+        }
+        
+        // Функция для восстановления исходного состояния (без счёта, так как счёт применяется отдельно)
+        function restoreOriginalState() {
+            // Восстанавливаем имена
+            document.getElementById('top_left_player_input').value = originalState.topLeftName;
+            document.getElementById('bottom_left_player_input').value = originalState.bottomLeftName;
+            document.getElementById('name_top_right').value = originalState.topRightName;
+            document.getElementById('name_bottom_right').value = originalState.bottomRightName;
+            
+            // Восстанавливаем цвета счёта
+            const scoreLeftEl = document.getElementById('scoreLeft');
+            const scoreRightEl = document.getElementById('scoreRight');
+            scoreLeftEl.style.setProperty('color', originalState.scoreLeftColor, 'important');
+            scoreRightEl.style.setProperty('color', originalState.scoreRightColor, 'important');
+            
+            // Восстанавливаем цвета имён
+            const topLeftEl = document.getElementById('top_left_player_input');
+            const bottomLeftEl = document.getElementById('bottom_left_player_input');
+            const topRightEl = document.getElementById('name_top_right');
+            const bottomRightEl = document.getElementById('name_bottom_right');
+            
+            topLeftEl.style.setProperty('color', originalState.topLeftColor, 'important');
+            bottomLeftEl.style.setProperty('color', originalState.bottomLeftColor, 'important');
+            topRightEl.style.setProperty('color', originalState.topRightColor, 'important');
+            bottomRightEl.style.setProperty('color', originalState.bottomRightColor, 'important');
+            
+            // Восстанавливаем позицию индикатора подачи
+            shuttlecockPosition = originalState.shuttlecockPosition;
+            
+            // Обновляем отображение индикатора
+            updateShuttlecockPosition();
+        }
+        
         // Переключить режим просмотра
         function toggleViewMode() {
             isViewMode = !isViewMode;
             document.body.classList.toggle('view-mode', isViewMode);
             
+            // Показываем/скрываем кнопку Back для режима просмотра
+            const backBtn = document.querySelector('.back-btn-view');
+            if (backBtn) {
+                // Проверяем, попадаем ли мы под медиа-запрос для 793x305
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const isSmallScreen = viewportWidth <= 793 && viewportHeight <= 305;
+                
+                if (isViewMode && isSmallScreen) {
+                    backBtn.style.display = 'flex';
+                } else {
+                    backBtn.style.display = 'none';
+                }
+            }
+            
             if (isViewMode) {
+                // Сохраняем и отражаем элементы относительно центра
+                mirrorElementsForViewMode();
+                
                 // Увеличиваем размер счета и имен
                 document.querySelectorAll('.score').forEach(score => {
                     score.style.fontSize = '300px'; /* Увеличено в 2 раза (было 150px) */
@@ -1400,6 +1674,23 @@
                     name.readOnly = true;
                 });
             } else {
+                // Сохраняем текущий отражённый счёт перед восстановлением
+                // В режиме просмотра счёт был отражён (левый стал правым, правый стал левым)
+                const mirroredScoreLeft = scoreLeft;  // Это был правый счёт в исходном состоянии
+                const mirroredScoreRight = scoreRight; // Это был левый счёт в исходном состоянии
+                
+                // Восстанавливаем исходное состояние (имена, цвета, позиция индикатора)
+                restoreOriginalState();
+                
+                // Применяем отражённый счёт к исходным командам (меняем местами обратно)
+                // mirroredScoreLeft (был правым) -> scoreRight
+                // mirroredScoreRight (был левым) -> scoreLeft
+                scoreLeft = mirroredScoreRight;
+                scoreRight = mirroredScoreLeft;
+                
+                // Обновляем отображение счёта
+                updateScore();
+                
                 // Возвращаем обычные размеры
                 document.querySelectorAll('.score').forEach(score => {
                     score.style.fontSize = '240px'; /* Увеличено в 2 раза (было 120px) */
@@ -1427,10 +1718,17 @@
         
         // Назад
         function handleBack() {
-            if (window.history.length > 1) {
-                window.history.back();
+            // Для кнопки Back в режиме просмотра выходим из режима просмотра
+            if (document.body.classList.contains('view-mode')) {
+                // Выходим из режима просмотра, оставаясь на той же странице судейства
+                toggleViewMode();
             } else {
-                window.location.href = '/';
+                // Обычное поведение для других случаев
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/referee';
+                }
             }
         }
         
