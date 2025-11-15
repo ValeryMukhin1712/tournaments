@@ -423,22 +423,22 @@
                 display: none !important;
             }
             
-            /* Уменьшаем шрифт счёта на 30% (240px * 0.7 = 168px) */
+            /* Уменьшаем шрифт счёта на 25% (168px * 0.75 = 126px) */
             .score {
-                font-size: 168px !important;
+                font-size: 126px !important;
             }
             
             .view-mode .score {
-                font-size: 210px !important; /* 300px * 0.7 = 210px */
+                font-size: 158px !important; /* 210px * 0.75 = 157.5px, округлено до 158px */
             }
             
-            /* Уменьшаем шрифт имён игроков на 25% (48px * 0.75 = 36px) */
+            /* Уменьшаем шрифт имён игроков на 20% (36px * 0.8 = 28.8px, округлено до 29px) */
             .player-name {
-                font-size: 36px !important;
+                font-size: 29px !important;
             }
             
             .view-mode .player-name {
-                font-size: 54px !important; /* 72px * 0.75 = 54px */
+                font-size: 43px !important; /* 54px * 0.8 = 43.2px, округлено до 43px */
             }
             
             /* Увеличиваем ширину полей имён игроков в 1.5 раза (15vw * 1.5 = 22.5vw) */
@@ -446,34 +446,34 @@
                 width: 22.5vw !important;
             }
             
-            /* Опускаем нижние поля имён еще на 5% (было 9%, теперь 4%) */
+            /* Опускаем нижние поля имён еще на 5% (было 4%, теперь 1%) */
             #bottom_left_player_input,
             #name_bottom_right {
-                bottom: calc(10% - 6%) !important; /* Было 10%, теперь 4% от низа (опущено на 6%) */
+                bottom: 1% !important; /* Было calc(10% - 6%) = 4%, опущено на 5% до 1% */
             }
             
             /* Уменьшаем кнопки в левой панели для размещения всех на экране */
             .control-panel {
-                padding: 2px !important; /* Еще больше уменьшаем padding */
+                padding: 1px !important; /* Еще больше уменьшаем padding */
             }
             
             .control-panel button {
-                width: 36px !important;
-                height: 36px !important;
-                font-size: 14px !important;
+                width: 32px !important; /* Уменьшено с 36px до 32px */
+                height: 32px !important; /* Уменьшено с 36px до 32px */
+                font-size: 12px !important; /* Уменьшено с 14px до 12px */
             }
             
             .navigation-buttons {
-                margin-bottom: 2px !important;
+                margin-bottom: 1px !important; /* Уменьшено с 2px до 1px */
             }
             
             .controls {
-                gap: 2px !important;
+                gap: 1px !important; /* Уменьшено с 2px до 1px */
             }
             
             /* Уменьшаем ширину панели для экономии места */
             .control-panel {
-                width: 44px !important; /* Было 80px, уменьшаем до 44px (36px кнопка + 4px padding с каждой стороны) */
+                width: 38px !important; /* 32px кнопка + 3px padding с каждой стороны (1px padding + 1px gap) */
             }
             
             /* Делаем окно с информацией об экране более прозрачным */
