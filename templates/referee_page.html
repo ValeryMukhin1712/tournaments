@@ -311,8 +311,97 @@
             font-size: 72px !important; /* Увеличено в 2 раза (было 36px) */
         }
         
-        /* Медиа-запрос для маленьких экранов (Viewport 791 x 303 и менее) */
-        @media screen and (max-width: 791px) and (max-height: 303px) {
+        /* Медиа-запрос для маленьких экранов (Viewport 791 x 303 и менее) с DevicePixelRatio 1.2 */
+        @media screen and (max-width: 791px) and (max-height: 303px) and (-webkit-min-device-pixel-ratio: 1.2) and (-webkit-max-device-pixel-ratio: 2.74),
+               screen and (max-width: 791px) and (max-height: 303px) and (min-resolution: 1.2dppx) and (max-resolution: 2.74dppx) {
+            /* Кнопка обнулить - круг с крестиком диаметром 50px */
+            .reset-btn {
+                width: 50px !important;
+                height: 50px !important;
+                border-radius: 50% !important;
+                padding: 0 !important;
+                min-width: 50px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 24px !important;
+            }
+            
+            .reset-btn i {
+                margin: 0 !important;
+            }
+            
+            .reset-btn-text {
+                display: none !important;
+            }
+            
+            /* Уменьшаем шрифт счёта на 30% (240px * 0.7 = 168px) */
+            .score {
+                font-size: 168px !important;
+            }
+            
+            .view-mode .score {
+                font-size: 210px !important; /* 300px * 0.7 = 210px */
+            }
+            
+            /* Уменьшаем шрифт имён игроков на 25% (48px * 0.75 = 36px) */
+            .player-name {
+                font-size: 36px !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 54px !important; /* 72px * 0.75 = 54px */
+            }
+            
+            /* Увеличиваем ширину полей имён игроков в 1.5 раза (15vw * 1.5 = 22.5vw) */
+            .player-name {
+                width: 22.5vw !important;
+            }
+            
+            /* Опускаем нижние поля имён еще на 5% (было 9%, теперь 4%) */
+            #bottom_left_player_input,
+            #name_bottom_right {
+                bottom: calc(10% - 6%) !important; /* Было 10%, теперь 4% от низа (опущено на 6%) */
+            }
+            
+            /* Уменьшаем кнопки в левой панели для размещения всех на экране */
+            .control-panel {
+                padding: 2px !important; /* Еще больше уменьшаем padding */
+            }
+            
+            .control-panel button {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 14px !important;
+            }
+            
+            .navigation-buttons {
+                margin-bottom: 2px !important;
+            }
+            
+            .controls {
+                gap: 2px !important;
+            }
+            
+            /* Уменьшаем ширину панели для экономии места */
+            .control-panel {
+                width: 44px !important; /* Было 80px, уменьшаем до 44px (36px кнопка + 4px padding с каждой стороны) */
+            }
+            
+            /* Делаем окно с информацией об экране более прозрачным */
+            .debug-screen-info {
+                background: rgba(11, 112, 54, 0.5) !important; /* Было 0.9, теперь 0.5 - более прозрачное */
+            }
+            
+            /* Поднимаем цифры счёта на 5% */
+            .scoreboard {
+                top: 45% !important; /* Было 50%, теперь 45% (поднято на 5%) */
+            }
+        }
+        
+        /* Медиа-запрос для маленьких экранов (Viewport 791 x 303 и менее) с DevicePixelRatio 2.75 */
+        @media screen and (max-width: 791px) and (max-height: 303px) and (-webkit-min-device-pixel-ratio: 2.75),
+               screen and (max-width: 791px) and (max-height: 303px) and (min-resolution: 2.75dppx) {
             /* Кнопка обнулить - круг с крестиком диаметром 50px */
             .reset-btn {
                 width: 50px !important;
