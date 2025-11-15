@@ -89,3 +89,11 @@ def force_recalc(tournament_id=17):
 if __name__ == "__main__":
     force_recalc(17)
 
+
+
+
+
+
+
+
+

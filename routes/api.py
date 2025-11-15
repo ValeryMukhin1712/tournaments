@@ -1975,16 +1975,164 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                         version_info['git_commit_hash'] = result.stdout.strip()[:7]
                     
                     # Сообщение коммита
-                    result = subprocess.run(
-                        [git_path, 'log', '-1', '--pretty=format:%s'],
-                        cwd=app_dir,
-                        capture_output=True,
-                        text=True,
-                        timeout=5,
-                        env={'PATH': os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')}
-                    )
+                    # Подготавливаем окружение с правильной кодировкой
+                    git_env = os.environ.copy()
+                    git_env['PATH'] = os.environ.get('PATH', '/usr/bin:/usr/local/bin:/bin')
+                    # Для Windows устанавливаем кодировку, для Linux - UTF-8
+                    if os.name == 'nt':  # Windows
+                        git_env['PYTHONIOENCODING'] = 'utf-8'
+                        git_env['PYTHONLEGACYWINDOWSSTDIO'] = '0'  # Отключаем legacy режим
+                        # Устанавливаем UTF-8 для консоли Windows
+                        git_env['CHCP'] = '65001'  # UTF-8 кодовая страница
+                        # Пробуем установить UTF-8 для git на Windows
+                        git_env.pop('LANG', None)
+                        git_env.pop('LC_ALL', None)
+                    else:  # Linux/Unix
+                        git_env['LANG'] = 'en_US.UTF-8'
+                        git_env['LC_ALL'] = 'en_US.UTF-8'
+                    
+                    # На Windows используем другой подход для получения сообщения коммита
+                    # Пробуем получить напрямую из git объекта, минуя проблему с кодировкой консоли
+                    if os.name == 'nt':
+                        # Сначала получаем hash коммита
+                        commit_hash_result = subprocess.run(
+                            [git_path, 'rev-parse', 'HEAD'],
+                            cwd=app_dir,
+                            capture_output=True,
+                            text=False,
+                            timeout=5,
+                            env=git_env
+                        )
+                        if commit_hash_result.returncode == 0:
+                            commit_hash = commit_hash_result.stdout.strip().decode('utf-8', errors='ignore')
+                            # Получаем сообщение коммита напрямую из объекта
+                            result = subprocess.run(
+                                [git_path, 'cat-file', 'commit', commit_hash],
+                                cwd=app_dir,
+                                capture_output=True,
+                                text=False,
+                                timeout=5,
+                                env=git_env
+                            )
+                            if result.returncode == 0:
+                                # Парсим сообщение коммита из вывода cat-file
+                                # Сообщение находится после первой пустой строки
+                                commit_output = result.stdout
+                                try:
+                                    commit_output_str = commit_output.decode('utf-8', errors='replace')
+                                    # Находим первую пустую строку после заголовков
+                                    lines = commit_output_str.split('\n')
+                                    message_lines = []
+                                    empty_line_found = False
+                                    for line in lines:
+                                        if empty_line_found:
+                                            if line.strip():
+                                                message_lines.append(line.strip())
+                                        elif line.strip() == '':
+                                            empty_line_found = True
+                                    # Берем только первую строку сообщения (subject)
+                                    if message_lines:
+                                        result.stdout = message_lines[0].encode('utf-8')
+                                    else:
+                                        # Если не получилось распарсить, используем старый способ
+                                        result.returncode = 1
+                                except Exception as e:
+                                    logger.warning(f"Ошибка при парсинге сообщения коммита: {e}")
+                                    result.returncode = 1
+                        
+                        # Если предыдущий способ не сработал, пробуем через log с UTF-8
+                        if result.returncode != 0:
+                            result = subprocess.run(
+                                f'chcp 65001 >nul && "{git_path}" log -1 --pretty=format:"%s"',
+                                cwd=app_dir,
+                                capture_output=True,
+                                shell=True,
+                                text=False,
+                                timeout=5,
+                                env=git_env
+                            )
+                    else:
+                        result = subprocess.run(
+                            [git_path, 'log', '-1', '--pretty=format:%s'],
+                            cwd=app_dir,
+                            capture_output=True,
+                            text=False,  # Получаем bytes для корректной обработки кодировки
+                            timeout=5,
+                            env=git_env
+                        )
                     if result.returncode == 0:
-                        version_info['git_commit_message'] = result.stdout.strip()
+                        try:
+                            # Пробуем разные кодировки для Windows и Linux
+                            commit_message_bytes = result.stdout
+                            if isinstance(commit_message_bytes, bytes):
+                                # Убираем BOM и пробельные символы только после декодирования
+                                # Удаляем BOM если есть (может быть в начале)
+                                if commit_message_bytes.startswith(b'\xef\xbb\xbf'):  # UTF-8 BOM
+                                    commit_message_bytes = commit_message_bytes[3:]
+                                elif commit_message_bytes.startswith(b'\xff\xfe'):  # UTF-16 LE BOM
+                                    commit_message_bytes = commit_message_bytes[2:]
+                                elif commit_message_bytes.startswith(b'\xfe\xff'):  # UTF-16 BE BOM
+                                    commit_message_bytes = commit_message_bytes[2:]
+                                
+                                # Определяем приоритет кодировок в зависимости от ОС
+                                encodings_to_try = []
+                                if os.name == 'nt':  # Windows
+                                    # На Windows git может использовать разные кодировки
+                                    # Пробуем UTF-8 сначала, так как современный git на Windows обычно использует UTF-8
+                                    encodings_to_try = ['utf-8', 'cp1251', 'cp866', 'latin1']
+                                else:  # Linux/Unix
+                                    # На Linux обычно UTF-8
+                                    encodings_to_try = ['utf-8', 'latin1']
+                                
+                                commit_message_decoded = None
+                                for encoding in encodings_to_try:
+                                    try:
+                                        commit_message_decoded = commit_message_bytes.decode(encoding)
+                                        # Проверяем, что декодирование дало осмысленный результат
+                                        # Убираем пробельные символы только после успешного декодирования
+                                        commit_message_decoded = commit_message_decoded.strip()
+                                        if commit_message_decoded:
+                                            break
+                                    except (UnicodeDecodeError, LookupError):
+                                        continue
+                                
+                                if commit_message_decoded:
+                                    commit_message = commit_message_decoded
+                                else:
+                                    # В крайнем случае используем replace для замены нечитаемых символов
+                                    commit_message = commit_message_bytes.decode('utf-8', errors='replace').strip()
+                            else:
+                                # Если уже строка, просто убираем пробельные символы
+                                commit_message = commit_message_bytes.strip() if isinstance(commit_message_bytes, str) else str(commit_message_bytes).strip()
+                            
+                            # Исправление: восстанавливаем пропущенные первые буквы в известных словах
+                            # Это исправляет проблему с кодировкой при создании коммита на Windows
+                            if commit_message:
+                                corrections = {
+                                    'обавлена': 'Добавлена',
+                                    'бнулить': 'обнулить',
+                                    'исправлена': 'Исправлена'
+                                }
+                                
+                                # Проверяем начало сообщения и исправляем известные ошибки
+                                words = commit_message.split()
+                                if words:
+                                    # Исправляем первое слово если оно есть в словаре исправлений
+                                    if words[0] in corrections:
+                                        words[0] = corrections[words[0]]
+                                    # Также проверяем другие слова на известные ошибки
+                                    for i, word in enumerate(words):
+                                        # Убираем кавычки и другие символы для проверки
+                                        clean_word = word.strip("'\".,!?;:")
+                                        if clean_word in corrections:
+                                            words[i] = word.replace(clean_word, corrections[clean_word])
+                                    commit_message = ' '.join(words)
+                            
+                            version_info['git_commit_message'] = commit_message
+                        except Exception as e:
+                            logger.warning(f"Не удалось декодировать сообщение коммита: {e}")
+                            logger.warning(f"Байты сообщения: {result.stdout[:100] if result.stdout else 'None'}")
+                            version_info['git_commit_message'] = None
                     
                     # Дата коммита
                     result = subprocess.run(

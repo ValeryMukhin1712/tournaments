@@ -165,3 +165,8 @@ ls -lh app.py
 
 **Примечание:** Скрипт `check_version.sh` должен быть скопирован на VDS в директорию `~/quick-score/` и иметь права на выполнение (`chmod +x check_version.sh`).
 
+
+
+
+
+

@@ -686,6 +686,19 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              set_number=set_number,
                              match_id=match_id)
     
+    @app.route('/referee-badminton-simple')
+    def referee_badminton_simple():
+        """Упрощенная страница судейства бадминтона для тестирования"""
+        # Получаем параметры из URL
+        participant1 = request.args.get('p1', 'Игрок 1')
+        participant2 = request.args.get('p2', 'Игрок 2')
+        tournament_name = request.args.get('tournament', 'Турнир')
+        
+        return render_template('referee_page_simple.html', 
+                             participant1=participant1, 
+                             participant2=participant2, 
+                             tournament_name=tournament_name)
+    
     @app.route('/referee-volleyball')
     def referee_volleyball():
         """Страница судейства волейбола"""

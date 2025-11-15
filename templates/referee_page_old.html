@@ -1,0 +1,4021 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-title" content="Судейство">
+    <meta name="application-name" content="Судейство">
+    <meta name="msapplication-TileColor" content="#2E7D32">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/referee/manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/referee/icon-192.png">
+    <link rel="apple-touch-icon" href="/static/referee/icon-192.png">
+        <title></title>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        /* Разрешаем вертикальный скролл на мобильных устройствах */
+        @media screen and (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                overflow-x: hidden;
+                position: relative;
+                min-height: 100vh;
+            }
+        }
+        
+        /* Принудительный горизонтальный режим для мобильных устройств */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            body {
+                transform: rotate(90deg);
+                transform-origin: center center;
+                width: 100vh;
+                height: 100vw;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                margin-left: -50vh;
+                margin-top: -50vw;
+            }
+            
+            .container {
+                width: 100vh;
+                height: 100vw;
+            }
+        }
+        
+        /* Сообщение о необходимости повернуть устройство */
+        .orientation-warning {
+            display: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            z-index: 10000 !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-direction: column !important;
+            color: white !important;
+            text-align: center !important;
+            padding: 20px !important;
+            writing-mode: horizontal-tb !important;
+            text-orientation: mixed !important;
+        }
+        
+        .orientation-warning i {
+            font-size: 4rem !important;
+            margin-bottom: 20px !important;
+            animation: rotate-icon 2s infinite !important;
+            display: inline-block !important;
+        }
+        
+        @keyframes rotate-icon {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        
+        .orientation-warning h2 {
+            font-size: 1.5rem !important;
+            margin-bottom: 10px !important;
+            color: white !important;
+            writing-mode: horizontal-tb !important;
+        }
+        
+        .orientation-warning p {
+            font-size: 1rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            writing-mode: horizontal-tb !important;
+        }
+        
+        /* Скрываем элементы при вертикальной ориентации на мобильных */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            .orientation-warning {
+                display: flex !important;
+            }
+        }
+        
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            .orientation-warning {
+                display: none !important;
+            }
+        }
+        
+        .container { 
+            height: 100vh; 
+            width: 100vw; 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Адаптация контейнера для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .container {
+                min-height: 100vh;
+                height: auto;
+            }
+        }
+        
+        .main-layout {
+            display: flex;
+            flex: 1;
+            height: 100%;
+        }
+        
+        /* Адаптация основного макета для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .main-layout {
+                min-height: calc(100vh - 60px); /* Учитываем высоту навигационных кнопок */
+                height: auto;
+            }
+        }
+        
+        .control-panel {
+            width: 80px;
+            min-width: 80px;
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 2px solid #2E7D32;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+
+        /* Кнопки управления — всегда квадратные */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .controls button {
+            width: 25px;
+            height: 25px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            line-height: 1;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
+        }
+        
+        .court { 
+            background: rgba(76, 175, 80, 0.1); 
+            border: none; 
+            border-radius: 0; 
+            position: relative; 
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #90EE90; /* Светлозелёный фон */
+            background-size: contain;
+            background-position: center center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+        
+        /* Адаптация корта для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            .court {
+                min-height: 300px; /* Минимальная высота для корта */
+                height: auto;
+            }
+        }
+        
+        .net { 
+            position: absolute; 
+            left: 50%; 
+            top: 0; 
+            width: 3px; 
+            height: 100%; 
+            background: #fff; 
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .half {
+            position: absolute;
+            top: 0; 
+            width: 50%; 
+            height: 100%; 
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        .half:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .half:hover::after {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+            animation: none;
+        }
+        
+        .half:active {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.98);
+        }
+        
+        .half.left {
+            border-color: rgba(33, 150, 243, 0.7);
+            background-color: rgba(33, 150, 243, 0.05);
+        }
+        
+        .half.right {
+            border-color: rgba(244, 67, 54, 0.7);
+            background-color: rgba(244, 67, 54, 0.05);
+        }
+        
+        /* .half::after удалён */
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .half.clicked {
+            background-color: rgba(0, 255, 0, 0.3);
+        }
+        
+        .left { left: 0; }
+        .right { right: 0; }
+        
+        .segments { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
+        
+        .segment { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+        }
+        
+        /* #top_left начинается от верхней границы и доходит до середины */
+        #top_left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80%;
+            height: 50%;
+            flex: none;
+            align-items: flex-start;
+            padding-top: 0;
+        }
+        
+        /* #bottom_left позиционируется ниже #top_left и доходит до низа */
+        #bottom_left {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 80%;
+            height: 50%;
+            flex: none;
+            align-items: flex-end;
+            padding-bottom: 0;
+        }
+        
+        .segment:first-child:not(#top_left):not(#bottom_left) {
+            align-items: flex-start;
+            padding-top: 15%;
+        }
+        
+        .segment:last-child:not(#top_left):not(#bottom_left) {
+            align-items: flex-end;
+            padding-bottom: 15%;
+        }
+        
+        .box { 
+            text-align: center; 
+            padding: 10px; 
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+        }
+        
+        /* Стили для input в #top_left */
+        #top_left_player_input {
+            position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+            left: 10% !important;
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            bottom: auto !important;
+            right: auto !important;
+            transform: none !important; /* Убираем трансформацию */
+            z-index: 10000 !important; /* Очень высокий z-index чтобы был поверх других элементов */
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Стили для input в #bottom_left */
+        #bottom_left_player_input {
+            position: absolute;
+            left: 10% !important;
+            bottom: 10% !important;
+            top: auto;
+            right: auto;
+        }
+        
+        /* Стили для правых полей остаются без изменений */
+        #top_right input {
+            top: 20px;
+            bottom: auto;
+        }
+        
+        #bottom_right input {
+            bottom: 60px;
+            top: auto;
+        }
+        
+        .hint { 
+            color: #fff; 
+            font-size: 12px; 
+            margin-bottom: 5px; 
+        }
+        
+        input { 
+            padding: 8px; 
+            border: none; /* Убираем рамку */
+            border-radius: 0; /* Убираем скругление */
+            width: fit-content; /* Автоматическая ширина под содержимое */
+            min-width: 200px; /* Минимальная ширина */
+            max-width: none; /* Убираем ограничение максимальной ширины для длинных имён */
+            font-size: 54px; /* Увеличиваем размер шрифта в 2 раза */
+            font-weight: bold; /* Делаем шрифт жирным */
+            font-style: italic; /* Делаем шрифт курсивом */
+            text-align: center;
+            background: transparent; /* Прозрачный фон */
+            transition: all 0.3s ease;
+            white-space: nowrap; /* Не переносить текст */
+            overflow: visible; /* Показывать весь текст */
+        }
+        
+        /* Убираем все рамки */
+        #top_left_player_input, #bottom_left_player_input, #name_top_right, #name_bottom_right {
+            border: none !important;
+        }
+        
+        /* Убираем рамки для всех input элементов */
+        input[type="text"], input[type="input"] {
+            border: none !important;
+            outline: none !important;
+        }
+        
+        /* Убираем рамки для всех input элементов */
+        * input {
+            border: none !important;
+        }
+        
+        /* Яркие цвета для полей имен игроков */
+        /* Цвета игроков теперь управляются JavaScript */
+        
+        /* Стили для счёта */
+        .score {
+            font-size: 12px !important; /* Уменьшаем размер шрифта в 4 раза */
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        /* Дополнительные правила для гарантированного применения размера шрифта счёта */
+        #scoreLeft, #scoreRight {
+            font-size: 12.5vw !important;
+        }
+        
+        .scoreboard-container .score-left, .scoreboard-container .score-right {
+            font-size: 12.5vw !important;
+        }
+        
+        /* Прозрачный фон для всех полей ввода имен */
+        #top_left_player_input, #bottom_left_player_input, #name_top_right, #name_bottom_right {
+            background: transparent !important; /* Прозрачный фон */
+            border-radius: 0 !important; /* Убираем скругления */
+            padding: 8px !important; /* Стандартный padding */
+            box-shadow: none !important; /* Убираем тень */
+        }
+        
+        input:focus {
+            outline: none;
+            border: none; /* Убираем рамку при фокусе */
+            box-shadow: none; /* Убираем тень при фокусе */
+        }
+        
+        /* Стили для заблокированных полей ввода в режиме матча */
+        input[readonly] {
+            background-color: #f5f5f5 !important;
+            cursor: default !important;
+            color: #666 !important;
+            opacity: 0.8;
+        }
+        
+        input[readonly]:focus {
+            background-color: #f5f5f5 !important;
+            cursor: default !important;
+        }
+        
+        /* Цветовая индикация для полей ввода имен */
+        #top_left_player_input, #bottom_left_player_input {
+            border: none !important; /* Убираем рамки */
+        }
+        
+        #name_top_right, #name_bottom_right {
+            border: none !important; /* Убираем рамки */
+        }
+        
+        .server-indicator { 
+            margin-bottom: 5px; 
+            position: absolute;
+            transition: transform 0.2s ease-in-out;
+            z-index: 1000;
+            width: 72px;
+            height: 72px;
+            background: transparent; /* Убираем фон */
+            border-radius: 0; /* Убираем круглую форму */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none; /* Убираем тень */
+        }
+        
+        /* Позиционирование иконок подачи */
+        #server_top_left {
+            top: 50%;
+            right: -25px;
+            transform: translateY(-50%);
+        }
+        
+        #server_bottom_left {
+            top: 50%;
+            right: -25px;
+            transform: translateY(-50%);
+        }
+        
+        #server_top_right {
+            top: 50%;
+            left: -25px;
+            transform: translateY(-50%);
+        }
+        
+        #server_bottom_right {
+            top: 50%;
+            left: -25px;
+            transform: translateY(-50%);
+        }
+        
+        .server-indicator img { 
+            width: 60px; 
+            height: 60px; 
+            border: none; 
+            background-color: transparent;
+            display: block;
+            border-radius: 0; /* Убираем круглую форму */
+            padding: 0;
+            box-sizing: border-box;
+            object-fit: contain;
+        }
+        
+        .controls { 
+            text-align: center; 
+            margin: 0; 
+            padding: 10px 0; 
+            background: transparent;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .controls button { 
+            margin: 0; 
+            padding: 0; 
+            font-size: 10px; 
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .controls button:hover {
+            transform: scale(1.05);
+        }
+        
+        .navigation-buttons {
+            text-align: center;
+            margin: 0;
+            padding: 8px 0;
+            background: transparent;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .navigation-buttons button {
+            margin: 0;
+            padding: 0;
+            font-size: 8px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 21px;
+            height: 21px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .navigation-buttons button:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-warning:hover { background-color: #e0a800; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-info:hover { background-color: #138496; }
+        .btn-secondary:hover { background-color: #545b62; }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .scoreboard-container { 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            gap: 15vw;
+            align-items: center;
+        }
+        
+        .score-left {
+            transform: translateX(1.5vw);
+        }
+        
+        .score-right {
+            transform: translateX(-1.5vw);
+        }
+        
+        .score-left, .score-right {
+            font-size: 31.25vh !important; /* В 2 раза меньше чем в режиме Просмотр */
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
+            padding: 1.5vh 3vw;
+            min-width: 12vw;
+        }
+        
+        /* Кнопка "Обнулить" в центре */
+        .reset-score-btn {
+            pointer-events: auto;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            border: 3px solid #fff;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.8vh;
+            font-weight: bold;
+            padding: 1.2vh 2.5vw;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5vw;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 107, 107, 0.5);
+            transition: all 0.3s ease;
+            z-index: 15;
+            min-width: 10vw;
+            white-space: nowrap;
+        }
+        
+        .reset-score-btn:hover {
+            background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 107, 107, 0.7);
+        }
+        
+        .reset-score-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .reset-score-btn i {
+            font-size: 1.5vh;
+        }
+        
+        .reset-btn-text {
+            font-size: 1.6vh;
+        }
+        
+        /* Адаптация для мобильных устройств */
+        @media screen and (max-width: 768px) {
+            /* Минимальный размер шрифта для имён игроков на смартфонах - 15% от высоты экрана */
+            #top_left_player_input, #bottom_left_player_input, #name_top_right, #name_bottom_right {
+                font-size: 15vh !important;
+            }
+            
+            .reset-score-btn {
+                font-size: 1.4vh;
+                padding: 0.8vh 1.5vw;
+                min-width: 8vw;
+            }
+            
+            .reset-btn-text {
+                display: none; /* На мобильных показываем только иконку */
+            }
+            
+            .reset-score-btn i {
+                font-size: 2vh;
+            }
+        }
+        
+        /* Цвета счёта теперь управляются JavaScript */
+        
+        .mode-indicator {
+            position: relative;
+            top: auto;
+            left: auto;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 100;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .mode-indicator.standalone {
+            background: rgba(76, 175, 80, 0.9);
+        }
+        
+        .mode-indicator.match-mode {
+            background: rgba(33, 150, 243, 0.9);
+        }
+        
+        /* Стили для .set-info убраны */
+        
+        .save-result-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 0;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            margin: 0;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .save-result-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .save-result-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            /* Сохраняем панель слева от корта даже на узких экранах */
+            .main-layout { flex-direction: row; }
+            .control-panel {
+                width: 65px;
+                min-width: 65px;
+                flex-direction: column;
+                padding: 6px;
+                border-right: 2px solid #2E7D32;
+                border-bottom: none;
+            }
+            .controls { gap: 6px; }
+            .controls button {
+                width: 21px;
+                height: 21px;
+                font-size: 8px;
+            }
+            .scoreboard-container { gap: 8vw; }
+            .score-left, .score-right {
+                font-size: 62.5vh !important; /* 62.5% от высоты экрана */
+                padding: 1vh 2vw;
+                min-width: 10vw;
+            }
+            input { width: fit-content; min-width: 120px; max-width: none; font-size: 16px; padding: 6px; }
+            /* Для левых полей сохраняем позицию от линии №3 */
+            #top_left_player_input {
+                left: 10% !important;
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            }
+            #bottom_left_player_input {
+                left: 10% !important;
+                bottom: 10% !important;
+            }
+            .save-result-btn { width: 21px; height: 21px; font-size: 8px; }
+            /* Адаптация для мобильных устройств */
+            #top_left_player_input, #bottom_left_player_input, #name_top_right, #name_bottom_right {
+                padding: 6px !important; /* Уменьшенный padding для мобильных */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .controls button { width: 19px; height: 19px; font-size: 7px; }
+            
+            .scoreboard-container {
+                gap: 10vw;
+            }
+            
+            .score-left, .score-right {
+                font-size: 5vw !important; /* Увеличиваем в 2 раза (было 2.5vw, стало 5vw) */
+                padding: 0.8vh 1.5vw;
+                min-width: 8vw;
+            }
+            
+            input {
+                width: fit-content;
+                min-width: 100px;
+                max-width: none; /* Убираем ограничение для длинных имён */
+                font-size: 14px;
+                padding: 4px;
+            }
+            
+            /* Прижимаем имена игроков левой команды к левому краю на маленьких экранах */
+            #top_left_player_input {
+                position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: none !important; /* Убираем трансформацию */
+                z-index: 100 !important;
+            }
+            
+            #bottom_left_player_input {
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
+            }
+            /* Адаптация для очень маленьких экранов */
+            #top_left_player_input, #bottom_left_player_input, #name_top_right, #name_bottom_right {
+                font-size: 15vh !important; /* Минимальный размер шрифта - 15% от высоты экрана */
+                padding: 4px !important; /* Еще меньший padding */
+            }
+            
+            .box {
+                width: 150px;
+            }
+            
+            /* Для левых полей сохраняем позицию от линии №3 */
+            #top_left_player_input {
+                left: 10% !important;
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            }
+            #bottom_left_player_input {
+                left: 10% !important;
+                bottom: 10% !important;
+            }
+            
+            .controls button {
+                margin: 0 2px;
+                padding: 3px 5px;
+                font-size: 5px;
+                min-width: 18px;
+                height: 18px;
+            }
+            
+            .save-result-btn {
+                width: 19px;
+                height: 19px;
+                font-size: 7px;
+            }
+        }
+        
+        /* Портретная ориентация */
+        @media (orientation: portrait) and (max-height: 600px) {
+            .court {
+                height: 100vh;
+                background-size: contain;
+            }
+            
+            .scoreboard-container {
+                gap: 8vw;
+            }
+            
+            .score-left, .score-right {
+                font-size: 4vw !important; /* Увеличиваем в 2 раза (было 2vw, стало 4vw) */
+                padding: 0.5vh 1vw;
+                min-width: 6vw;
+            }
+            
+            input {
+                width: fit-content;
+                min-width: 80px;
+                max-width: none; /* Убираем ограничение для длинных имён */
+                font-size: 16px;
+                padding: 4px;
+            }
+            
+            .box {
+                width: 150px;
+            }
+            
+            /* Для левых полей сохраняем позицию от линии №3 */
+            #top_left_player_input {
+                left: 10% !important;
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            }
+            #bottom_left_player_input {
+                left: 10% !important;
+                bottom: 10% !important;
+            }
+        }
+
+        /* Стили для режима просмотра */
+        .view-mode-btn {
+            display: none; /* По умолчанию скрыта */
+        }
+        
+        @media screen and (max-width: 768px) {
+            .view-mode-btn {
+                display: inline-flex !important; /* Показываем только на мобильных */
+            }
+        }
+        
+        /* Специальные стили для горизонтальной ориентации мобильных устройств */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            /* Уменьшаем размер шрифта для горизонтальных экранов */
+            input {
+                font-size: 8px !important; /* Уменьшаем в 2 раза */
+                min-width: 60px !important; /* Очень маленькая минимальная ширина */
+                max-width: none !important; /* Убираем ограничение для длинных имён */
+                width: fit-content !important; /* Автоматическая ширина под содержимое */
+            }
+            
+            /* Позиционирование имён на корте для горизонтальных экранов */
+            #top_left_player_input {
+                position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+                transform: none !important; /* Убираем все трансформации */
+                font-size: 15vh !important; /* Минимальный размер шрифта - 15% от высоты экрана */
+                z-index: 100 !important;
+            }
+            
+            #bottom_left_player_input, #name_top_right, #name_bottom_right {
+                position: absolute !important; /* Абсолютное позиционирование на корте */
+                transform: none !important; /* Убираем все трансформации */
+                font-size: 15vh !important; /* Минимальный размер шрифта - 15% от высоты экрана */
+            }
+            
+            /* Позиционирование для горизонтальных экранов - на 5px выше и ниже центра счёта */
+            #top_left_player_input {
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+            }
+            
+            #bottom_left_player_input {
+                bottom: calc(50% - 5px) !important;
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
+            }
+            
+            #name_top_right {
+                top: calc(50% - 5px) !important;
+                right: 20% !important;
+                transform: translateX(50%) translateY(-50%) !important;
+            }
+            
+            #name_bottom_right {
+                bottom: calc(50% - 5px) !important;
+                right: 20% !important;
+                transform: translateX(50%) translateY(50%) !important;
+            }
+            
+            /* Размер счёта для горизонтальных экранов в режиме просмотра */
+            .view-mode .score {
+                font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+            }
+            
+            .view-mode .score-left, .view-mode .score-right {
+                font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+            }
+        }
+        
+        /* Размер шрифта имён игроков теперь определяется динамически через JavaScript 
+           на основе высоты значка подачи (синхронизация через syncPlayerNameFontSizeWithShuttlecock) */
+        
+        /* Дополнительные стили для очень узких горизонтальных экранов */
+        @media screen and (max-width: 568px) and (orientation: landscape) {
+            input {
+                font-size: 6px !important; /* Уменьшаем в 2 раза */
+                min-width: 50px !important;
+                max-width: none !important; /* Убираем ограничение для длинных имён */
+                width: fit-content !important; /* Автоматическая ширина под содержимое */
+            }
+            
+            /* Размер счёта в 2 раза меньше чем в режиме Просмотр */
+            .score {
+                font-size: 31.25vh !important; /* В 2 раза меньше чем в режиме Просмотр */
+            }
+        }
+        
+        
+        
+        /* Позиционирование имён игроков на поверхности корта */
+        /* ВАЖНО: top_left_player_input использует position: fixed, поэтому исключаем его из этого правила */
+        #bottom_left_player_input, #name_top_right, #name_bottom_right {
+            position: absolute !important;
+            z-index: 10 !important;
+            background: rgba(11, 112, 54, 0.8) !important; /* Полупрозрачный фон цвета корта */
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+            transform: none !important; /* Убираем все трансформации по умолчанию */
+        }
+        
+        /* КРИТИЧЕСКОЕ ПРАВИЛО: top_left_player_input ДОЛЖЕН использовать position: fixed */
+        #top_left_player_input {
+            position: fixed !important; /* ФИКСИРОВАННОЕ позиционирование - переопределяет absolute */
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            left: 10% !important;
+            z-index: 10000 !important; /* Очень высокий z-index */
+            background: rgba(11, 112, 54, 0.8) !important; /* Полупрозрачный фон цвета корта */
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+            transform: none !important; /* Убираем трансформацию */
+        }
+        
+        #bottom_left_player_input {
+            bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
+            left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+            transform: translateY(50%) !important; /* Только вертикальное выравнивание */
+        }
+        
+        /* Позиционирование для правых имён - на 5px выше и ниже центра счёта */
+        #name_top_right {
+            top: calc(50% - 5px) !important; /* 5px выше центра счёта */
+            right: 20% !important;
+            transform: translateX(50%) translateY(-50%) !important;
+        }
+        
+        #name_bottom_right {
+            bottom: calc(50% - 5px) !important; /* 5px ниже центра счёта */
+            right: 20% !important;
+            transform: translateX(50%) translateY(50%) !important;
+        }
+        
+        /* Для десктопа и вертикальных мобильных - применяем новое позиционирование */
+        @media screen and (min-width: 769px) {
+            #top_left_player_input {
+                position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: none !important; /* Убираем трансформацию */
+                z-index: 100 !important;
+            }
+            
+            #bottom_left_player_input {
+                bottom: calc(50% - 5px) !important;
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
+            }
+        }
+        
+        /* Для мобильных устройств в портретной ориентации - прижимаем к левому краю */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #top_left_player_input {
+                position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: none !important; /* Убираем трансформацию */
+                z-index: 100 !important;
+            }
+            
+            #bottom_left_player_input {
+                bottom: calc(50% - 5px) !important;
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
+            }
+        }
+        
+        /* Для всех мобильных устройств (включая горизонтальную ориентацию) - прижимаем к левому краю */
+        @media screen and (max-width: 768px) {
+            #top_left_player_input {
+                position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: none !important; /* Убираем трансформацию */
+                z-index: 100 !important;
+            }
+            
+            #bottom_left_player_input {
+                left: 150px !important; /* Вертикальная линия №3 = 3 * 50px */
+                transform: translateY(50%) !important; /* Только вертикальное выравнивание */
+            }
+        }
+        
+        /* Режим просмотра - зеленый фон */
+        .view-mode {
+            background: #0b7036 !important;
+            color: white !important;
+        }
+        
+        .view-mode .container {
+            background: transparent !important;
+        }
+        
+        .view-mode .main-layout {
+            background: transparent !important;
+        }
+        
+        .view-mode .court {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        .view-mode .net {
+            background: white !important;
+        }
+        
+        /* В режиме просмотра скрываем все кнопки управления */
+        .view-mode .controls {
+            display: none !important;
+        }
+        
+        .view-mode .navigation-buttons {
+            display: none !important;
+        }
+        
+        .view-mode .control-panel {
+            display: none !important;
+        }
+        
+        /* Показываем кнопку возврата */
+        .view-mode .return-to-referee-btn {
+            display: block !important;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 1000;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Увеличиваем счет в режиме просмотра */
+        .view-mode .score {
+            font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+            font-weight: bold !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        /* Увеличиваем счет в режиме просмотра для страницы Судейство */
+        .view-mode .score-left, .view-mode .score-right {
+            font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+        }
+        
+        .view-mode #scoreLeft, .view-mode #scoreRight {
+            font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+        }
+        
+        /* Увеличиваем имена игроков в режиме просмотра */
+        .view-mode input {
+            font-size: 3vw !important; /* Уменьшаем в 2 раза */
+            font-weight: bold !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            border: none !important; /* Убираем рамку в режиме просмотра */
+            width: fit-content !important; /* Автоматическая ширина под содержимое */
+            max-width: none !important; /* Убираем ограничение для длинных имён */
+        }
+        
+        .view-mode #top_left_player_input {
+            position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+        }
+        
+        /* Адаптивные стили для режима просмотра на горизонтальных мобильных экранах */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            .view-mode input {
+                font-size: 1.25vw !important; /* Уменьшаем в 2 раза */
+                min-width: 50px !important;
+                max-width: none !important; /* Убираем ограничение для длинных имён */
+                width: fit-content !important; /* Автоматическая ширина под содержимое */
+            }
+            
+            .view-mode #top_left_player_input {
+                position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+            }
+            
+            .view-mode #bottom_left_player_input,
+            .view-mode #name_top_right,
+            .view-mode #name_bottom_right {
+                position: absolute !important; /* Остаёмся на корте */
+            }
+            
+            .view-mode .score {
+                font-size: 125vh !important; /* 125% от высоты экрана (62.5vh × 2) */
+            }
+        }
+        
+        /* Дополнительные стили для режима просмотра на очень узких экранах */
+        @media screen and (max-width: 568px) and (orientation: landscape) {
+            .view-mode input {
+                font-size: 1vw !important; /* Уменьшаем в 2 раза */
+                min-width: 40px !important;
+                max-width: none !important; /* Убираем ограничение для длинных имён */
+                width: fit-content !important; /* Автоматическая ширина под содержимое */
+            }
+            
+            .view-mode .score {
+                font-size: 79.6875vh !important; /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+            }
+        }
+        
+        /* Отладочный блок для отображения размеров экрана */
+        .debug-screen-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 9999;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            line-height: 1.6;
+            min-width: 200px;
+        }
+        
+        .debug-screen-info .debug-title {
+            font-weight: bold;
+            color: #00ff00;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .debug-screen-info .debug-item {
+            margin: 3px 0;
+        }
+        
+        .debug-screen-info .debug-label {
+            color: #ffff00;
+        }
+        
+        .debug-screen-info .debug-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        
+        /* Отладочная сетка */
+        .debug-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            display: none;
+        }
+        
+        .debug-grid-line {
+            position: absolute;
+            background: rgba(255, 0, 0, 0.3);
+        }
+        
+        .debug-grid-line.vertical {
+            width: 1px;
+            height: 100vh;
+            top: 0;
+        }
+        
+        .debug-grid-line.horizontal {
+            height: 1px;
+            width: 100vw;
+            left: 0;
+        }
+        
+        .debug-grid-label {
+            position: absolute;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .debug-grid-label.vertical-label {
+            top: 5px;
+            transform: translateX(-50%);
+        }
+        
+        .debug-grid-label.horizontal-label {
+            left: 5px;
+            transform: translateY(-50%);
+        }
+        
+        /* Специальные стили для экрана 791 x 303 px с DPR 2.75 */
+        @media screen and (width: 791px) and (height: 303px) {
+            /* Шрифт в полях имён высотой 50px */
+            #top_left_player_input, #bottom_left_player_input, #name_top_right, #name_bottom_right {
+                font-size: 50px !important;
+            }
+            
+            /* Левые границы полей левых имён на линии "3" (150px) */
+            #top_left_player_input, #bottom_left_player_input {
+                left: 150px !important; /* Линия "3" = 3 * 50px */
+            }
+            
+            /* Левые границы правых имён на линии "11" (550px) */
+            #name_top_right, #name_bottom_right {
+                left: 550px !important; /* Линия "11" = 11 * 50px */
+                right: auto !important;
+            }
+            
+            /* Для экранов 791x303 с DPR 2.75 - специальное позиционирование */
+            #top_left_player_input {
+                top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px (переопределяет calc для этого разрешения) */
+            }
+            
+            #name_top_right {
+                top: calc(50% - 5px + 30px) !important; /* Опускаем на 30px */
+            }
+            
+            /* Опускаем поля с цифрами счёта на 40px (было поднято на 50px, затем опущено на 30px, теперь еще на 10px) */
+            .scoreboard-container {
+                top: calc(50% - 50px + 30px + 10px) !important; /* calc(50% - 10px) */
+            }
+            
+            /* Поднимаем input в #bottom_left на 125px (было 75px, затем еще на 25px, теперь еще на 25px) */
+            #bottom_left_player_input {
+                bottom: calc(10% + 75px + 25px + 25px) !important; /* calc(10% + 125px) */
+            }
+        }
+        
+        /* КРИТИЧЕСКОЕ ПРАВИЛО: Для левых полей устанавливаем позицию 10% от левого края - должно быть в конце для максимального приоритета */
+        #top_left_player_input {
+            position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+            left: 10% !important;
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            z-index: 100 !important; /* Высокий z-index чтобы был поверх других элементов */
+        }
+        
+        #bottom_left_player_input {
+            left: 10% !important;
+            bottom: 10% !important;
+        }
+        
+        /* Дополнительное правило для всех экранов - переопределяет все медиа-запросы */
+        .court #top_left_player_input {
+            position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+            left: 10% !important;
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            z-index: 100 !important;
+        }
+        
+        .court #bottom_left_player_input {
+            left: 10% !important;
+            bottom: 10% !important;
+        }
+        
+        /* Абсолютно максимальный приоритет - применяется всегда и везде */
+        html body #top_left_player_input,
+        body html #top_left_player_input,
+        html #top_left_player_input,
+        body #top_left_player_input {
+            position: fixed !important; /* Фиксированное позиционирование относительно viewport */
+            left: 10% !important;
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            z-index: 10000 !important; /* Очень высокий z-index */
+            transform: none !important; /* Убираем трансформацию */
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Переопределяем даже если родитель имеет transform */
+        #top_left #top_left_player_input,
+        .half #top_left_player_input,
+        .segments #top_left_player_input,
+        .segment #top_left_player_input {
+            position: fixed !important;
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px */
+            left: 10% !important;
+            z-index: 10000 !important;
+            transform: none !important;
+        }
+        
+        body #bottom_left_player_input, html body #bottom_left input {
+            left: 10% !important;
+            bottom: 10% !important;
+        }
+        
+        /* ФИНАЛЬНОЕ ПРАВИЛО - максимальная специфичность для гарантированного применения */
+        html body div#top_left_player_input,
+        html body #top_left_player_input,
+        body html #top_left_player_input,
+        html #top_left_player_input,
+        body #top_left_player_input,
+        #top_left_player_input {
+            top: 180px !important; /* Ниже горизонтальной линии "b" (100px) на 80px - ФИНАЛЬНОЕ ПРАВИЛО */
+        }
+    </style>
+</head>
+<body>
+    <!-- VERSION-2024-10-23-BADMINTON-UPDATED -->
+    
+    <!-- Отладочный блок для отображения размеров экрана -->
+    <div id="debugScreenInfo" class="debug-screen-info" style="display: none;">
+        <div class="debug-title">📱 Размеры экрана</div>
+        <div class="debug-item">
+            <span class="debug-label">Window:</span>
+            <span class="debug-value" id="debugWindowSize">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Screen:</span>
+            <span class="debug-value" id="debugScreenSize">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Viewport:</span>
+            <span class="debug-value" id="debugViewportSize">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Ориентация:</span>
+            <span class="debug-value" id="debugOrientation">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Device Pixel Ratio:</span>
+            <span class="debug-value" id="debugDPR">-</span>
+        </div>
+    </div>
+    
+    <!-- Отладочная сетка -->
+    <div id="debugGrid" class="debug-grid"></div>
+    
+    <!-- Предупреждение о необходимости поворота устройства -->
+    <div class="orientation-warning" style="display: none;">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>Поверните устройство</h2>
+        <p>Для удобства судейства используйте горизонтальную ориентацию экрана</p>
+    </div>
+    
+    <div class="container">
+        <div class="main-layout">
+            <!-- Блок управления слева -->
+            <div class="control-panel">
+                <!-- Индикатор режима (скрыт) -->
+                <div id="modeIndicator" class="mode-indicator standalone" style="display: none;">
+                    🏸 Независимый режим
+                </div>
+                
+                <!-- Информация о сете убрана -->
+
+                <!-- Кнопки навигации -->
+                <div class="navigation-buttons">
+                    <button id="btnBack" class="btn btn-secondary" title="Назад" onclick="handleBackButton()">←</button>
+                </div>
+
+                <!-- Кнопки управления -->
+                <div class="controls">
+                    <button id="btnViewMode" class="btn btn-primary view-mode-btn" title="Режим просмотра для игроков">👁️</button>
+                    <button id="btnUndo" class="btn btn-warning" title="Отменить">↶</button>
+                    <button id="btnMoveShuttlecock" class="btn btn-info" title="Переместить подачу">↻</button>
+                    <button id="btnSwapTeams" class="btn btn-success" title="Поменять команды местами">⇄</button>
+                    <button id="btnSwapLeftTeam" class="btn btn-info" title="Поменять игроков в левой команде">⇅</button>
+                    <button id="btnSwapRightTeam" class="btn btn-danger" title="Поменять игроков в правой команде">⇅</button>
+                    <button id="btnToggleJournal" class="btn btn-secondary" title="Журнал подач">📋</button>
+                    
+                    <!-- Кнопка сохранения результата (только в режиме матча) -->
+                    <button id="btnSaveResult" class="save-result-btn" style="display: none;" title="Сохранить счёт в форму результата" onclick="try{ saveResult(); }catch(e){ console.error('[Referee] saveResult onclick error', e); }">
+                        <span style="font-size: 12px; font-weight: bold;">↓</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Корт справа -->
+            <div class="court">
+            <div class="net"></div>
+            
+            <!-- Счет в центре корта -->
+            <div class="scoreboard-container">
+                <div class="score-left" id="scoreLeft">0</div>
+                <button class="reset-score-btn" id="resetScoreBtn" title="Обнулить счёт" onclick="resetScore()">
+                    <i class="fas fa-redo"></i>
+                    <span class="reset-btn-text">Обнулить</span>
+                </button>
+                <div class="score-right" id="scoreRight">0</div>
+            </div>
+            
+            <div class="half left" id="court_left" title="Кликните для увеличения счета левой команды">
+                <div class="segments">
+                    <div class="segment" id="top_left">
+                        <input type="text" placeholder="Имя игрока" id="top_left_player_input" value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}" />
+                        <div class="server-indicator" id="server_top_left" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
+                        </div>
+                    </div>
+                    <div class="segment" id="bottom_left">
+                        <input type="text" placeholder="Имя игрока" id="bottom_left_player_input" value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}" />
+                        <div class="server-indicator" id="server_bottom_left" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="half right" id="court_right" title="Кликните для увеличения счета правой команды">
+                <div class="segments">
+                    <div class="segment" id="top_right">
+                        <div class="server-indicator" id="server_top_right" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
+                        </div>
+                        <input type="text" placeholder="Имя игрока" id="name_top_right" value="{{ participant2.split('-')[0] if '-' in participant2 else participant2 }}" />
+                    </div>
+                    <div class="segment" id="bottom_right">
+                        <div class="server-indicator" id="server_bottom_right" title="Подаёт" style="display: none;">
+                            <img src="/static/referee/img_01.png" alt="Подающий" onerror="console.error('[Referee] Ошибка загрузки изображения подачи:', this.src)" />
+                        </div>
+                        <input type="text" placeholder="Имя игрока" id="name_bottom_right" value="{{ participant2.split('-')[1] if '-' in participant2 and participant2.split('-')|length > 1 else participant2 }}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Кнопка возврата из режима просмотра -->
+        <button id="btnReturnToReferee" class="btn btn-success return-to-referee-btn" style="display: none;" title="Вернуться к судейству">
+            ←
+        </button>
+
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/referee/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker зарегистрирован успешно');
+                    })
+                    .catch(function(error) {
+                        console.log('Ошибка регистрации ServiceWorker:', error);
+                    });
+            });
+        }
+
+        // Fullscreen API
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // Автоматический полноэкранный режим
+        document.addEventListener('DOMContentLoaded', function() {
+            // Попытка войти в полноэкранный режим
+            setTimeout(enterFullscreen, 500);
+            
+            // Дополнительная попытка через взаимодействие пользователя (требуется для некоторых браузеров)
+            let fullscreenAttempted = false;
+            const tryFullscreenOnInteraction = function() {
+                if (!fullscreenAttempted && !document.fullscreenElement) {
+                    fullscreenAttempted = true;
+                    enterFullscreen();
+                }
+            };
+            
+            // Пробуем войти в полноэкранный режим при первом клике/касании
+            document.addEventListener('click', tryFullscreenOnInteraction, { once: true });
+            document.addEventListener('touchstart', tryFullscreenOnInteraction, { once: true });
+        });
+
+        // Обработка выхода из полноэкранного режима
+        document.addEventListener('fullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                // Пользователь вышел из полноэкранного режима
+                console.log('Выход из полноэкранного режима');
+            } else {
+                console.log('Вход в полноэкранный режим');
+            }
+        });
+
+        // Основная логика приложения
+        const ids = [
+            'top_left_player_input', 'bottom_left_player_input',
+            'name_top_right', 'name_bottom_right'
+        ];
+        
+        // Параметры URL (глобальные переменные)
+        const urlParams = new URLSearchParams(window.location.search);
+        const clearData = urlParams.get('clear') === 'true';
+        const matchMode = urlParams.get('match') === 'true';
+        window.setNumber = urlParams.get('set') || '1';
+        window.matchId = urlParams.get('match_id');
+        
+        // Получаем режим из шаблона (глобальные переменные)
+        window.templateMatchMode = {% if match_mode %}true{% else %}false{% endif %};
+        window.templateSetNumber = '{{ set_number }}';
+        
+        // Инициализация переменных
+        window.scoreLeft = 0;
+        window.scoreRight = 0;
+        let shuttlecockPosition = 'top_right';
+        window.gameStarted = true; // Игра активна по умолчанию
+        let gameStartTime = null;
+        let journalEntries = [];
+        let currentGameId = null;
+        let gameHistory = [];
+        let isAnimating = false;
+        
+        // Режим работы
+        let isMatchMode = false;
+        
+        // Цвета команд (привязаны к командам, а не к позициям)
+        let leftTeamColor = 'blue';   // Команда слева всегда синяя
+        let rightTeamColor = 'red';   // Команда справа всегда красная
+        
+        // Функция для синхронизации размера шрифта имён игроков с высотой значка подачи
+        function syncPlayerNameFontSizeWithShuttlecock() {
+            // Находим любой видимый значок подачи
+            const shuttlecockIndicators = document.querySelectorAll('.server-indicator');
+            let shuttlecockHeight = null;
+            
+            // Ищем видимый индикатор подачи
+            for (let indicator of shuttlecockIndicators) {
+                if (indicator.style.display !== 'none' && indicator.offsetHeight > 0) {
+                    const img = indicator.querySelector('img');
+                    if (img) {
+                        // Получаем фактическую высоту изображения
+                        shuttlecockHeight = img.offsetHeight || img.clientHeight || 60;
+                        break;
+                    }
+                }
+            }
+            
+            // Если не нашли видимый, используем первый доступный или значение по умолчанию
+            if (!shuttlecockHeight) {
+                const firstIndicator = document.querySelector('.server-indicator img');
+                if (firstIndicator) {
+                    // Временно показываем для измерения
+                    const tempDisplay = firstIndicator.parentElement.style.display;
+                    firstIndicator.parentElement.style.display = 'block';
+                    shuttlecockHeight = firstIndicator.offsetHeight || firstIndicator.clientHeight || 60;
+                    firstIndicator.parentElement.style.display = tempDisplay;
+                } else {
+                    shuttlecockHeight = 60; // Значение по умолчанию из CSS
+                }
+            }
+            
+            // Применяем размер шрифта равный высоте значка подачи
+            const nameInputs = ['top_left_player_input', 'bottom_left_player_input', 'name_top_right', 'name_bottom_right'];
+            nameInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.style.setProperty('font-size', shuttlecockHeight + 'px', 'important');
+                    // Автоматически изменяем размер поля после изменения размера шрифта
+                    if (window.autoResizeInput) {
+                        window.autoResizeInput(input);
+                    }
+                }
+            });
+            
+            // Убеждаемся, что цвета применены
+            updatePlayerColors();
+            
+            // ПРИНУДИТЕЛЬНО восстанавливаем позицию после синхронизации
+            if (window.enforceTopLeftPosition) {
+                window.enforceTopLeftPosition();
+            }
+            
+            console.log('Размер шрифта имён игроков синхронизирован с высотой значка подачи:', shuttlecockHeight + 'px');
+        }
+        
+        // Функция для принудительного применения правильного размера шрифта для экранов 1280x720 (устаревшая, оставлена для совместимости)
+        function enforce1280x720FontSize() {
+            // Теперь используем синхронизацию с высотой значка подачи
+            syncPlayerNameFontSizeWithShuttlecock();
+        }
+        
+        // Функция для обновления цветов игроков и счёта
+        function updatePlayerColors() {
+            const leftColor = leftTeamColor === 'blue' ? '#0066ff' : '#ff3333';
+            const rightColor = rightTeamColor === 'blue' ? '#0066ff' : '#ff3333';
+            
+            // Левые игроки (верхний и нижний)
+            const topLeft = document.getElementById('top_left_player_input');
+            const bottomLeft = document.getElementById('bottom_left_player_input');
+            topLeft.style.setProperty('color', leftColor, 'important');
+            bottomLeft.style.setProperty('color', leftColor, 'important');
+            
+            // Правые игроки (верхний и нижний)
+            const topRight = document.getElementById('name_top_right');
+            const bottomRight = document.getElementById('name_bottom_right');
+            topRight.style.setProperty('color', rightColor, 'important');
+            bottomRight.style.setProperty('color', rightColor, 'important');
+            
+            // Обновляем цвета счёта
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (scoreLeft) scoreLeft.style.setProperty('color', leftColor, 'important');
+            if (scoreRight) scoreRight.style.setProperty('color', rightColor, 'important');
+            
+            console.log('Цвета обновлены:', {leftTeamColor, rightTeamColor, leftColor, rightColor});
+            
+            // ПРИНУДИТЕЛЬНО восстанавливаем позицию после обновления цветов
+            if (window.enforceTopLeftPosition) {
+                setTimeout(window.enforceTopLeftPosition, 10);
+            }
+        }
+        
+        // Принудительно устанавливаем левые поля на позицию left: 10% для всех экранов
+        function forceLeftFieldsPosition() {
+            const topLeft = document.getElementById('top_left_player_input');
+            const bottomLeft = document.getElementById('bottom_left_player_input');
+            
+            // Устанавливаем позицию для input элементов напрямую (теперь они находятся в segment без .box)
+            if (topLeft) {
+                // Принудительно устанавливаем left: 10%, top: 140px (ниже линии "b" на 40px) с максимальным приоритетом
+                // Удаляем все возможные inline стили, которые могут мешать
+                topLeft.style.removeProperty('position');
+                topLeft.style.removeProperty('left');
+                topLeft.style.removeProperty('top');
+                topLeft.style.removeProperty('transform');
+                topLeft.style.removeProperty('right');
+                topLeft.style.removeProperty('bottom');
+                
+                // Устанавливаем правильные значения
+                topLeft.style.setProperty('position', 'fixed', 'important'); // Фиксированное позиционирование относительно viewport
+                topLeft.style.setProperty('left', '10%', 'important');
+                topLeft.style.setProperty('top', '180px', 'important'); // Ниже горизонтальной линии "b" (100px) на 80px
+                topLeft.style.setProperty('transform', 'none', 'important'); // Убираем трансформацию
+                topLeft.style.setProperty('z-index', '100', 'important'); // Высокий z-index
+                topLeft.style.setProperty('right', 'auto', 'important');
+                topLeft.style.setProperty('bottom', 'auto', 'important');
+                
+                // Дополнительная проверка через несколько таймаутов для надежности
+                [10, 50, 100, 200, 500].forEach(delay => {
+                    setTimeout(() => {
+                        if (topLeft) {
+                            const computedStyle = window.getComputedStyle(topLeft);
+                            const currentPosition = computedStyle.position;
+                            const currentTop = parseFloat(computedStyle.top);
+                            
+                            // Если position не fixed или top не 180px, принудительно исправляем
+                            if (currentPosition !== 'fixed' || Math.abs(currentTop - 180) > 1) {
+                                console.log(`[DEBUG] Исправление позиции topLeft на ${delay}ms:`, {
+                                    currentPosition,
+                                    currentTop,
+                                    expectedTop: 180
+                                });
+                                topLeft.style.removeProperty('position');
+                                topLeft.style.removeProperty('top');
+                                topLeft.style.removeProperty('left');
+                                topLeft.style.removeProperty('transform');
+                                topLeft.style.setProperty('position', 'fixed', 'important');
+                                topLeft.style.setProperty('top', '140px', 'important');
+                                topLeft.style.setProperty('left', '10%', 'important');
+                                topLeft.style.setProperty('transform', 'none', 'important');
+                                topLeft.style.setProperty('z-index', '10000', 'important');
+                                topLeft.style.setProperty('margin', '0', 'important');
+                                topLeft.style.setProperty('padding', '0', 'important');
+                            }
+                        }
+                    }, delay);
+                });
+            }
+            if (bottomLeft) {
+                // Принудительно устанавливаем left: 10%, bottom: 10% с максимальным приоритетом
+                bottomLeft.style.setProperty('left', '10%', 'important');
+                bottomLeft.style.setProperty('bottom', '10%', 'important');
+                bottomLeft.style.setProperty('right', 'auto', 'important');
+                bottomLeft.style.setProperty('top', 'auto', 'important');
+                // Дополнительная проверка через небольшой таймаут
+                setTimeout(() => {
+                    if (bottomLeft) {
+                        bottomLeft.style.setProperty('left', '10%', 'important');
+                        bottomLeft.style.setProperty('bottom', '10%', 'important');
+                        bottomLeft.style.setProperty('right', 'auto', 'important');
+                        bottomLeft.style.setProperty('top', 'auto', 'important');
+                    }
+                }, 10);
+            }
+        }
+        
+        // Инициализация
+        function init() {
+            console.log('🚀 Функция init() вызвана');
+            // Определяем режим работы (приоритет у параметров шаблона)
+            isMatchMode = window.templateMatchMode || (matchMode && window.matchId);
+            const currentSetNumber = window.templateSetNumber || window.setNumber;
+            console.log('🔍 Режим матча:', isMatchMode, 'Сет:', currentSetNumber);
+            
+            // Обновляем UI в зависимости от режима
+            updateModeUI();
+            
+            // Устанавливаем начальные цвета игроков
+            console.log('Инициализация цветов:', {leftTeamColor, rightTeamColor});
+            updatePlayerColors();
+            
+            // Применяем стили для горизонтальных экранов
+            setTimeout(applyMobileLandscapeStyles, 200);
+            
+            // Принудительно устанавливаем позицию левых полей на линию №3
+            // Вызываем несколько раз с разными задержками, чтобы переопределить любые другие стили
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+            setTimeout(forceLeftFieldsPosition, 800);
+            setTimeout(forceLeftFieldsPosition, 1200);
+            setTimeout(forceLeftFieldsPosition, 1500);
+            
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи
+            // Вызываем несколько раз с разными задержками, чтобы переопределить любые другие стили
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 300);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 500);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 800);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 1200);
+            
+            // Принудительно применяем размер шрифта счёта
+            setTimeout(() => {
+                const scoreLeft = document.getElementById('scoreLeft');
+                const scoreRight = document.getElementById('scoreRight');
+                if (scoreLeft) scoreLeft.style.setProperty('font-size', '31.25vh', 'important');
+                if (scoreRight) scoreRight.style.setProperty('font-size', '31.25vh', 'important');
+            }, 100);
+            
+            // Очищаем данные если нужно
+            if (clearData) {
+                clearAllData();
+            } else {
+                loadData();
+            }
+            
+            // В режиме матча заполняем имена участников
+            if (isMatchMode) {
+                fillParticipantNames();
+            }
+            
+            // Обновляем счет
+            updateScore();
+            
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций загрузки
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 100);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 300);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 600);
+            
+            // Используем MutationObserver для отслеживания изменений в DOM и синхронизации размера шрифта
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        if (target.id && ['top_left_player_input', 'bottom_left_player_input', 'name_top_right', 'name_bottom_right'].includes(target.id)) {
+                            // Если изменился стиль поля имени игрока, синхронизируем размер с высотой значка подачи
+                            setTimeout(function() {
+                                syncPlayerNameFontSizeWithShuttlecock();
+                            }, 10);
+                            
+                            // ПРИНУДИТЕЛЬНО устанавливаем правильную позицию для top_left_player_input
+                            if (target.id === 'top_left_player_input') {
+                                const currentTop = parseFloat(window.getComputedStyle(target).top);
+                                if (Math.abs(currentTop - 180) > 1) {
+                                    target.style.setProperty('top', '180px', 'important');
+                                    target.style.setProperty('position', 'fixed', 'important');
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Наблюдаем за изменениями в полях имён игроков
+            const nameInputs = ['top_left_player_input', 'bottom_left_player_input', 'name_top_right', 'name_bottom_right'];
+            nameInputs.forEach(function(id) {
+                const input = document.getElementById(id);
+                if (input) {
+                    observer.observe(input, {
+                        attributes: true,
+                        attributeFilter: ['style']
+                    });
+                }
+            });
+            
+            // АГРЕССИВНЫЙ КОНТРОЛЬ ПОЗИЦИИ: Постоянно проверяем и исправляем позицию top_left_player_input
+            function enforceTopLeftPosition() {
+                const topLeft = document.getElementById('top_left_player_input');
+                if (topLeft) {
+                    const computedStyle = window.getComputedStyle(topLeft);
+                    const currentTop = parseFloat(computedStyle.top);
+                    const currentPosition = computedStyle.position;
+                    
+                    // ВСЕГДА принудительно устанавливаем правильную позицию
+                    topLeft.style.setProperty('position', 'fixed', 'important');
+                    topLeft.style.setProperty('top', '180px', 'important');
+                    topLeft.style.setProperty('left', '10%', 'important');
+                    topLeft.style.setProperty('transform', 'none', 'important');
+                    topLeft.style.setProperty('z-index', '10000', 'important');
+                    topLeft.style.setProperty('margin', '0', 'important');
+                    topLeft.style.setProperty('padding', '0', 'important');
+                    
+                    // Логируем только если позиция была неправильной
+                    if (currentPosition !== 'fixed' || Math.abs(currentTop - 180) > 1) {
+                        console.log('[ENFORCE] Исправляю позицию top_left_player_input:', {
+                            currentTop: currentTop,
+                            currentPosition: currentPosition,
+                            expectedTop: 180
+                        });
+                    }
+                } else {
+                    console.warn('[ENFORCE] Элемент top_left_player_input не найден!');
+                }
+            }
+            
+            // Делаем функцию доступной глобально
+            window.enforceTopLeftPosition = enforceTopLeftPosition;
+            
+            // Запускаем проверку сразу и затем каждые 50мс (более часто)
+            enforceTopLeftPosition();
+            setInterval(enforceTopLeftPosition, 50);
+            
+            // Также проверяем при различных событиях
+            ['resize', 'scroll', 'orientationchange'].forEach(function(event) {
+                window.addEventListener(event, function() {
+                    setTimeout(enforceTopLeftPosition, 50);
+                });
+            });
+            
+            // Инициализируем игру (активна по умолчанию)
+            currentGameId = generateGameId();
+            gameStartTime = new Date();
+            journalEntries = [];
+            
+            // Настраиваем обработчики событий
+            setupEventListeners();
+            
+            // Показываем иконку подачи
+            document.querySelectorAll('.server-indicator').forEach(el => el.style.display = 'none');
+            const firstIndicator = document.getElementById('server_' + shuttlecockPosition) || document.getElementById('server_top_right');
+            if (firstIndicator) {
+                firstIndicator.style.display = 'block';
+                console.log('[Referee] Показываем индикатор подачи:', 'server_' + shuttlecockPosition);
+            } else {
+                console.warn('[Referee] Не найден индикатор подачи для:', shuttlecockPosition);
+            }
+            // Принудительно показываем индикатор без анимации при инициализации
+            setTimeout(() => {
+                const indicator = document.getElementById('server_' + shuttlecockPosition) || document.getElementById('server_top_right');
+                if (indicator) indicator.style.display = 'block';
+                // Синхронизируем размер шрифта после показа индикатора
+                syncPlayerNameFontSizeWithShuttlecock();
+            }, 100);
+        }
+        
+        function fillParticipantNames() {
+            // Получаем имена участников из URL параметров
+            const p1 = urlParams.get('p1') || '';
+            const p2 = urlParams.get('p2') || '';
+            
+            if (p1 && p2) {
+                // Парсим имена участников (поддерживаем формат "имя1-имя2")
+                const p1Names = p1.split('-');
+                const p2Names = p2.split('-');
+                
+                // Логика заполнения:
+                // Если есть тире: имя1-имя2
+                // - имя1 (первый игрок) -> нижнее поле
+                // - имя2 (второй игрок) -> верхнее поле
+                // Если нет тире: имя -> оба поля
+                
+                // Заполняем поля для левой команды
+                if (p1Names.length > 1) {
+                    // Есть тире: имя1-имя2
+                    document.getElementById('bottom_left_player_input').value = p1Names[0].trim(); // Первый игрок -> нижнее
+                    document.getElementById('top_left_player_input').value = p1Names[1].trim();    // Второй игрок -> верхнее
+                } else {
+                    // Нет тире: одно имя для обоих полей
+                    document.getElementById('bottom_left_player_input').value = p1.trim();
+                    document.getElementById('top_left_player_input').value = p1.trim();
+                }
+                
+                // Заполняем поля для правой команды
+                if (p2Names.length > 1) {
+                    // Есть тире: имя1-имя2
+                    document.getElementById('name_bottom_right').value = p2Names[0].trim(); // Первый игрок -> нижнее
+                    document.getElementById('name_top_right').value = p2Names[1].trim();    // Второй игрок -> верхнее
+                } else {
+                    // Нет тире: одно имя для обоих полей
+                    document.getElementById('name_bottom_right').value = p2.trim();
+                    document.getElementById('name_top_right').value = p2.trim();
+                }
+                
+                console.log('Имена участников заполнены:', {
+                    left: { 
+                        bottom: document.getElementById('bottom_left_player_input').value, 
+                        top: document.getElementById('top_left_player_input').value 
+                    },
+                    right: { 
+                        bottom: document.getElementById('name_bottom_right').value, 
+                        top: document.getElementById('name_top_right').value 
+                    }
+                });
+            }
+        }
+        
+        function updateModeUI() {
+            const modeIndicator = document.getElementById('modeIndicator');
+            const saveResultBtn = document.getElementById('btnSaveResult');
+            const swapTeamsBtn = document.getElementById('btnSwapTeams');
+            const swapLeftTeamBtn = document.getElementById('btnSwapLeftTeam');
+            const swapRightTeamBtn = document.getElementById('btnSwapRightTeam');
+            
+            if (isMatchMode) {
+                modeIndicator.textContent = '🏆 Режим матча';
+                modeIndicator.className = 'mode-indicator match-mode';
+                // Поле "Сет" убрано
+                saveResultBtn.style.display = 'inline-block';
+                
+                // Показываем кнопки обмена в режиме матча
+                if (swapTeamsBtn) swapTeamsBtn.style.display = 'inline-block';
+                if (swapLeftTeamBtn) swapLeftTeamBtn.style.display = 'inline-block';
+                if (swapRightTeamBtn) swapRightTeamBtn.style.display = 'inline-block';
+                
+                // Блокируем поля ввода имен в режиме матча
+                const nameInputs = [
+                    'top_left_player_input', 'bottom_left_player_input', 
+                    'name_top_right', 'name_bottom_right'
+                ];
+                
+                nameInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.readOnly = true;
+                        input.style.cursor = 'default';
+                        input.style.backgroundColor = '#f5f5f5';
+                        input.title = 'Имена игроков нельзя изменить в режиме матча';
+                    }
+                });
+            } else {
+                modeIndicator.textContent = '🏸 Независимый режим';
+                modeIndicator.className = 'mode-indicator standalone';
+                // Поле "Сет" убрано
+                saveResultBtn.style.display = 'none';
+                
+                // Показываем кнопки обмена в независимом режиме
+                if (swapTeamsBtn) swapTeamsBtn.style.display = 'inline-block';
+                if (swapLeftTeamBtn) swapLeftTeamBtn.style.display = 'inline-block';
+                if (swapRightTeamBtn) swapRightTeamBtn.style.display = 'inline-block';
+                
+                // Разблокируем поля ввода имен в независимом режиме
+                const nameInputs = [
+                    'top_left_player_input', 'bottom_left_player_input', 
+                    'name_top_right', 'name_bottom_right'
+                ];
+                
+                nameInputs.forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.readOnly = false;
+                        input.style.cursor = 'text';
+                        input.style.backgroundColor = 'transparent';
+                        input.title = '';
+                    }
+                });
+            }
+        }
+        
+        function clearAllData() {
+            // При clear=true всегда начинаем с 0:0, если не указаны явно score1 и score2 в URL
+            const score1Param = urlParams.get('score1');
+            const score2Param = urlParams.get('score2');
+            
+            // Всегда сбрасываем счёт в 0:0 при открытии с главной страницы (clear=true)
+            // Исключение: если в URL явно указан счёт (score1 или score2), используем его
+            if (clearData && (!score1Param && !score2Param)) {
+                // Открытие с главной страницы - всегда начинаем с 0:0
+                window.scoreLeft = 0;
+                window.scoreRight = 0;
+                console.log('Очистка данных: сброс счёта на 0:0 (открытие с главной страницы)');
+            } else if (score1Param || score2Param) {
+                // Используем счёт из URL параметров (если указаны явно)
+                window.scoreLeft = (score1Param && parseInt(score1Param) >= 0) ? parseInt(score1Param) : 0;
+                window.scoreRight = (score2Param && parseInt(score2Param) >= 0) ? parseInt(score2Param) : 0;
+                console.log('Очистка с сохранением счёта из URL:', window.scoreLeft, ':', window.scoreRight);
+            } else {
+                // Сбрасываем счёт в 0 (если не указаны параметры)
+                window.scoreLeft = 0;
+                window.scoreRight = 0;
+                console.log('Очистка данных: сброс счёта на 0:0');
+            }
+            
+            window.gameStarted = true; // Игра остается активной после очистки
+            shuttlecockPosition = 'top_right';
+            gameStartTime = null;
+            journalEntries = [];
+            currentGameId = null;
+            gameHistory = [];
+            isAnimating = false;
+            
+            // Очищаем поля ввода
+            ids.forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            
+            // Очищаем localStorage (важно для сброса сохранённого счёта)
+            localStorage.removeItem('court_score_left');
+            localStorage.removeItem('court_score_right');
+            localStorage.removeItem('court_shuttlecock_position');
+            ids.forEach(id => {
+                localStorage.removeItem('court_' + id);
+            });
+            
+            // Обновляем отображение счёта сразу после очистки
+            updateScore();
+            
+            console.log('Данные очищены для нового матча');
+        }
+        
+        function loadData() {
+            ids.forEach(id => {
+                const v = localStorage.getItem('court_' + id);
+                if (v !== null) document.getElementById(id).value = v;
+            });
+            
+            const sL = localStorage.getItem('court_score_left');
+            const sR = localStorage.getItem('court_score_right');
+            const sP = localStorage.getItem('court_shuttlecock_position');
+            
+            // Проверяем, есть ли счёт в URL параметрах (приоритет)
+            const score1Param = urlParams.get('score1');
+            const score2Param = urlParams.get('score2');
+            
+            if (score1Param || score2Param) {
+                // Используем счёт из URL параметров
+                window.scoreLeft = (score1Param && parseInt(score1Param) > 0) ? parseInt(score1Param) : 0;
+                window.scoreRight = (score2Param && parseInt(score2Param) > 0) ? parseInt(score2Param) : 0;
+                console.log('Загружаем счёт из URL параметров:', window.scoreLeft, ':', window.scoreRight);
+            } else {
+                // Используем счёт из localStorage
+                window.scoreLeft = sL !== null ? parseInt(sL, 10) || 0 : 0;
+                window.scoreRight = sR !== null ? parseInt(sR, 10) || 0 : 0;
+            }
+            
+            shuttlecockPosition = sP !== null ? sP : 'top_right';
+            
+            updateShuttlecockDisplay();
+        }
+        
+        function saveData() {
+            ids.forEach(id => {
+                const v = document.getElementById(id).value || '';
+                localStorage.setItem('court_' + id, v);
+            });
+            localStorage.setItem('court_score_left', String(window.scoreLeft));
+            localStorage.setItem('court_score_right', String(window.scoreRight));
+            localStorage.setItem('court_shuttlecock_position', shuttlecockPosition);
+        }
+        
+        // Функция автоматического сохранения счета в базу данных
+        function autoSaveScore() {
+            // Получаем параметры из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const setNumber = urlParams.get('set') || '1';
+            
+            if (!matchId) {
+                console.log('Нет match_id, пропускаем автосохранение');
+                return;
+            }
+            
+            // Получаем CSRF токен
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Подготавливаем данные для сохранения
+            const scoreData = {
+                score1: window.scoreLeft,
+                score2: window.scoreRight,
+                set_number: parseInt(setNumber)
+            };
+            
+            console.log('Автосохранение счета:', scoreData);
+            
+            // Отправляем запрос на сервер
+            fetch(`/api/matches/${matchId}/auto-save-score`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(scoreData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Счет автоматически сохранен:', data.message);
+                } else {
+                    console.error('Ошибка автосохранения:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при автосохранении счета:', error);
+            });
+        }
+        
+        // Функция обнуления счёта
+        function resetScore() {
+            // Подтверждение обнуления
+            if (window.scoreLeft === 0 && window.scoreRight === 0) {
+                return; // Уже обнулён
+            }
+            
+            // Сохраняем предыдущее состояние для отмены
+            const previousState = {
+                scoreLeft: window.scoreLeft,
+                scoreRight: window.scoreRight,
+                shuttlecockPosition: shuttlecockPosition,
+                gameStarted: window.gameStarted
+            };
+            
+            gameHistory.push(previousState);
+            
+            // Обнуляем счёт
+            window.scoreLeft = 0;
+            window.scoreRight = 0;
+            
+            // Сбрасываем позицию воланчика на начальную
+            shuttlecockPosition = 'top_right';
+            
+            // Обновляем отображение
+            updateScore();
+            updateShuttlecockDisplay();
+            
+            // Сохраняем в localStorage
+            saveData();
+            
+            // Автоматическое сохранение в базу данных (если в режиме матча)
+            if (isMatchMode && window.matchId) {
+                autoSaveScore();
+            }
+            
+            // Логируем действие
+            logMatchAction('reset_score', previousState.scoreLeft, previousState.scoreRight, 0, 0);
+            
+            console.log('Счёт обнулён: 0:0');
+        }
+        
+        function updateScore() {
+            document.getElementById('scoreLeft').textContent = window.scoreLeft;
+            document.getElementById('scoreRight').textContent = window.scoreRight;
+            
+            // Принудительно применяем размер шрифта счёта
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+        if (isViewMode) {
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '79.6875vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '79.6875vh', 'important');
+        } else {
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '31.25vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '31.25vh', 'important');
+        }
+        }
+        
+        // Функция checkGameReady удалена - игра активна по умолчанию
+        
+        // Функция startGame удалена - игра активна по умолчанию
+        
+        function saveGameState() {
+            gameHistory.push({
+                scoreLeft: window.scoreLeft,
+                scoreRight: window.scoreRight,
+                shuttlecockPosition: shuttlecockPosition,
+                gameStarted: window.gameStarted
+            });
+            
+            if (gameHistory.length > 50) {
+                gameHistory = gameHistory.slice(-50);
+            }
+        }
+        
+        function undoLastAction() {
+            if (gameHistory.length === 0) {
+                alert('Нет действий для отмены');
+                return;
+            }
+            
+            const previousState = gameHistory.pop();
+            
+            window.scoreLeft = previousState.scoreLeft;
+            window.scoreRight = previousState.scoreRight;
+            shuttlecockPosition = previousState.shuttlecockPosition;
+            window.gameStarted = true; // Игра всегда активна
+            
+            updateScore();
+            updateShuttlecockDisplay();
+            saveData();
+        }
+        
+        // Функция clearAll удалена
+        
+        function updateShuttlecockDisplay() {
+            if (isAnimating) return;
+            
+            const currentIndicator = document.querySelector('.server-indicator[style*="display: block"]');
+            
+            if (currentIndicator) {
+                isAnimating = true;
+                
+                const currentRect = currentIndicator.getBoundingClientRect();
+                const targetSegment = document.getElementById(shuttlecockPosition);
+                const targetIndicator = document.getElementById('server_' + shuttlecockPosition);
+                
+                targetIndicator.style.display = 'block';
+                const targetRect = targetIndicator.getBoundingClientRect();
+                targetIndicator.style.display = 'none';
+                
+                const deltaX = targetRect.left - currentRect.left;
+                const deltaY = targetRect.top - currentRect.top;
+                
+                currentIndicator.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                currentIndicator.style.zIndex = '1000';
+                
+                setTimeout(() => {
+                    currentIndicator.style.transform = '';
+                    currentIndicator.style.zIndex = '';
+                    currentIndicator.style.display = 'none';
+                    targetIndicator.style.display = 'block';
+                    isAnimating = false;
+                    // Синхронизируем размер шрифта после обновления значка подачи
+                    setTimeout(syncPlayerNameFontSizeWithShuttlecock, 50);
+                }, 200);
+            } else {
+                document.querySelectorAll('.server-indicator').forEach(el => el.style.display = 'none');
+                const targetIndicator = document.getElementById('server_' + shuttlecockPosition);
+                if (targetIndicator) {
+                    targetIndicator.style.display = 'block';
+                }
+                // Синхронизируем размер шрифта после обновления значка подачи
+                setTimeout(syncPlayerNameFontSizeWithShuttlecock, 50);
+            }
+        }
+        
+        function moveShuttlecock(side) {
+            if (side === 'left') {
+                shuttlecockPosition = shuttlecockPosition === 'top_left' ? 'bottom_left' : 'top_left';
+            } else {
+                shuttlecockPosition = shuttlecockPosition === 'top_right' ? 'bottom_right' : 'top_right';
+            }
+            updateShuttlecockDisplay();
+            saveData();
+        }
+        
+        function moveShuttlecockBetweenSides() {
+            saveGameState();
+            
+            if (shuttlecockPosition === 'top_right') {
+                shuttlecockPosition = 'top_left';
+            } else if (shuttlecockPosition === 'top_left') {
+                shuttlecockPosition = 'bottom_left';
+            } else if (shuttlecockPosition === 'bottom_left') {
+                shuttlecockPosition = 'bottom_right';
+            } else if (shuttlecockPosition === 'bottom_right') {
+                shuttlecockPosition = 'top_right';
+            }
+            
+            updateShuttlecockDisplay();
+            saveData();
+        }
+        
+        function swapTeams() {
+            console.log('Функция swapTeams вызвана!');
+            saveGameState();
+            
+            // Сохраняем текущие значения
+            const topLeftName = document.getElementById('top_left_player_input').value;
+            const bottomLeftName = document.getElementById('bottom_left_player_input').value;
+            const topRightName = document.getElementById('name_top_right').value;
+            const bottomRightName = document.getElementById('name_bottom_right').value;
+            
+            // Меняем команды местами по диагонали:
+            // Левый нижний -> Правый верхний
+            // Левый верхний -> Правый нижний
+            // Правый верхний -> Левый нижний
+            // Правый нижний -> Левый верхний
+            document.getElementById('top_left_player_input').value = bottomRightName;
+            document.getElementById('bottom_left_player_input').value = topRightName;
+            document.getElementById('name_top_right').value = bottomLeftName;
+            document.getElementById('name_bottom_right').value = topLeftName;
+            
+            // Меняем счёт местами
+            const tempScore = window.scoreLeft;
+            window.scoreLeft = window.scoreRight;
+            window.scoreRight = tempScore;
+            
+            // Обновляем отображение счёта
+            document.getElementById('scoreLeft').textContent = window.scoreLeft;
+            document.getElementById('scoreRight').textContent = window.scoreRight;
+            
+            // Меняем цвета команд местами
+            console.log('До смены цветов:', {leftTeamColor, rightTeamColor});
+            const tempColor = leftTeamColor;
+            leftTeamColor = rightTeamColor;
+            rightTeamColor = tempColor;
+            console.log('После смены цветов:', {leftTeamColor, rightTeamColor});
+            
+            // Обновляем цвета игроков
+            updatePlayerColors();
+            
+            // Меняем позицию воланчика (зеркально)
+            if (shuttlecockPosition === 'top_left') {
+                shuttlecockPosition = 'top_right';
+            } else if (shuttlecockPosition === 'top_right') {
+                shuttlecockPosition = 'top_left';
+            } else if (shuttlecockPosition === 'bottom_left') {
+                shuttlecockPosition = 'bottom_right';
+            } else if (shuttlecockPosition === 'bottom_right') {
+                shuttlecockPosition = 'bottom_left';
+            }
+            
+            updateShuttlecockDisplay();
+            saveData();
+        }
+        
+        function swapLeftTeam() {
+            console.log('Функция swapLeftTeam вызвана!');
+            saveGameState();
+            
+            // Меняем местами верхнего и нижнего игрока в левой команде
+            const topLeftName = document.getElementById('top_left_player_input').value;
+            const bottomLeftName = document.getElementById('bottom_left_player_input').value;
+            
+            document.getElementById('top_left_player_input').value = bottomLeftName;
+            document.getElementById('bottom_left_player_input').value = topLeftName;
+            
+            console.log('Игроки левой команды поменялись местами:', {topLeftName, bottomLeftName});
+            saveData();
+        }
+        
+        function swapRightTeam() {
+            console.log('Функция swapRightTeam вызвана!');
+            saveGameState();
+            
+            // Меняем местами верхнего и нижнего игрока в правой команде
+            const topRightName = document.getElementById('name_top_right').value;
+            const bottomRightName = document.getElementById('name_bottom_right').value;
+            
+            document.getElementById('name_top_right').value = bottomRightName;
+            document.getElementById('name_bottom_right').value = topRightName;
+            
+            console.log('Игроки правой команды поменялись местами:', {topRightName, bottomRightName});
+            saveData();
+        }
+        
+        function swapPlayers(side) {
+            if (side === 'left') {
+                const topValue = document.getElementById('top_left_player_input').value;
+                const bottomValue = document.getElementById('bottom_left_player_input').value;
+                document.getElementById('top_left_player_input').value = bottomValue;
+                document.getElementById('bottom_left_player_input').value = topValue;
+            } else {
+                const topValue = document.getElementById('name_top_right').value;
+                const bottomValue = document.getElementById('name_bottom_right').value;
+                document.getElementById('name_top_right').value = bottomValue;
+                document.getElementById('name_bottom_right').value = topValue;
+            }
+        }
+        
+        // Функция для получения CSRF токена
+        function getCSRFToken() {
+            const token = document.querySelector('meta[name=csrf-token]');
+            return token ? token.getAttribute('content') : '';
+        }
+        
+        // Функция для записи лога матча
+        function logMatchAction(action, previousLeft, previousRight, currentLeft, currentRight) {
+            // Проверяем, что мы в режиме матча (не независимый режим)
+            const urlParams = new URLSearchParams(window.location.search);
+            const isMatchMode = urlParams.get('match') === 'true';
+            const matchId = urlParams.get('match_id');
+            const tournamentName = urlParams.get('tournament');
+            const setNumber = urlParams.get('set') || 1;
+            
+            // Конвертируем имя турнира в ID
+            let tournamentId;
+            if (tournamentName === 'K') {
+                tournamentId = 8; // ID турнира K
+            } else {
+                tournamentId = 8; // По умолчанию
+            }
+            
+            if (!isMatchMode || !matchId || !tournamentId) {
+                return; // Не записываем логи в независимом режиме
+            }
+            
+            // Получаем имена игроков
+            const leftPlayerName = document.getElementById('bottom_left_player_input').value + ' + ' + document.getElementById('top_left_player_input').value;
+            const rightPlayerName = document.getElementById('name_bottom_right').value + ' + ' + document.getElementById('name_top_right').value;
+            
+            // Отправляем данные на сервер
+            
+            fetch('/api/match-log/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    tournament_id: parseInt(tournamentId),
+                    match_id: parseInt(matchId),
+                    set_number: parseInt(setNumber),
+                    previous_score_left: previousLeft,
+                    previous_score_right: previousRight,
+                    current_score_left: currentLeft,
+                    current_score_right: currentRight,
+                    serve_position: shuttlecockPosition,
+                    left_player_name: leftPlayerName,
+                    right_player_name: rightPlayerName,
+                    action: action,
+                    notes: ''
+                })
+            }).then(response => {
+                return response.json();
+            }).then(data => {
+                // Запись успешно добавлена
+            }).catch(error => {
+                console.log('Ошибка при записи лога матча:', error);
+            });
+        }
+
+        window.addPointLeft = function() {
+            // Игра всегда активна - убираем проверку
+            saveGameState();
+            
+            const isShuttlecockOnLeft = shuttlecockPosition.includes('left');
+            
+            // Сохраняем предыдущий счёт для лога
+            const previousLeft = window.scoreLeft;
+            const previousRight = window.scoreRight;
+            
+            // Увеличиваем счет только один раз
+            window.scoreLeft += 1;
+            
+            if (isShuttlecockOnLeft) {
+                updateScore();
+                saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
+                moveShuttlecock('left');
+                swapPlayers('left');
+                // Записываем лог
+                logMatchAction('+1_left', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
+                checkVictory();
+            } else {
+                if (window.scoreLeft % 2 === 0) {
+                    shuttlecockPosition = 'bottom_left'; // Чётное - нижний левый
+                } else {
+                    shuttlecockPosition = 'top_left'; // Нечётное - верхний левый
+                }
+                
+                updateShuttlecockDisplay();
+                saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
+                updateScore();
+                // Записываем лог
+                logMatchAction('+1_left', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
+                checkVictory();
+            }
+        };
+        
+        window.addPointRight = function() {
+            // Игра всегда активна - убираем проверку
+            saveGameState();
+            
+            const isShuttlecockOnRight = shuttlecockPosition.includes('right');
+            
+            // Сохраняем предыдущий счёт для лога
+            const previousLeft = window.scoreLeft;
+            const previousRight = window.scoreRight;
+            
+            // Увеличиваем счет только один раз
+            window.scoreRight += 1;
+            
+            if (isShuttlecockOnRight) {
+                updateScore();
+                saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
+                moveShuttlecock('right');
+                swapPlayers('right');
+                // Записываем лог
+                logMatchAction('+1_right', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
+                checkVictory();
+            } else {
+                if (window.scoreRight % 2 === 0) {
+                    shuttlecockPosition = 'top_right'; // Чётное - верхний правый
+                } else {
+                    shuttlecockPosition = 'bottom_right'; // Нечётное - нижний правый
+                }
+                
+                updateShuttlecockDisplay();
+                saveData();
+                autoSaveScore(); // Автоматическое сохранение в базу данных
+                updateScore();
+                // Записываем лог
+                logMatchAction('+1_right', previousLeft, previousRight, window.scoreLeft, window.scoreRight);
+                checkVictory();
+            }
+        };
+        
+        function checkVictory() {
+            const pointsToWin = 21; // Можно сделать настраиваемым
+            const maxPoints = 30; // Максимальный счёт для бадминтона
+            
+            // В режиме Просмотр используем значения из DOM, если window переменные не инициализированы
+            let scoreLeft = window.scoreLeft;
+            let scoreRight = window.scoreRight;
+            
+            if (isViewMode && (scoreLeft === undefined || scoreRight === undefined)) {
+                const scoreLeftElement = document.getElementById('scoreLeft');
+                const scoreRightElement = document.getElementById('scoreRight');
+                if (scoreLeftElement && scoreRightElement) {
+                    scoreLeft = parseInt(scoreLeftElement.textContent) || 0;
+                    scoreRight = parseInt(scoreRightElement.textContent) || 0;
+                    console.log('checkVictory: Используем значения из DOM в режиме Просмотр:', { scoreLeft, scoreRight });
+                }
+            }
+            
+            const scoreDiff = Math.abs(scoreLeft - scoreRight);
+            
+            console.log('checkVictory: Проверка победы:', { scoreLeft, scoreRight, scoreDiff, isViewMode });
+            
+            // Специальное условие для бадминтона: если одна сторона набрала 30 очков - победа
+            // (независимо от счёта соперника, который может быть 29 или 28)
+            if (scoreLeft >= maxPoints) {
+                // Игра остается активной даже после победы
+                if (isMatchMode) {
+                    document.getElementById('btnSaveResult').disabled = false;
+                }
+                
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
+                
+                console.log(`Победа Синей команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                return true;
+            }
+            
+            if (scoreRight >= maxPoints) {
+                // Игра остается активной даже после победы
+                if (isMatchMode) {
+                    document.getElementById('btnSaveResult').disabled = false;
+                }
+                
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
+                
+                console.log(`Победа Красной команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                return true;
+            }
+            
+            // Обычное условие победы: набрать нужное количество очков И разница больше 1
+            if (scoreLeft >= pointsToWin && scoreDiff > 1) {
+                // Игра остается активной даже после победы
+                if (isMatchMode) {
+                    document.getElementById('btnSaveResult').disabled = false;
+                }
+                
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
+                
+                return true;
+            }
+            
+            if (scoreRight >= pointsToWin && scoreDiff > 1) {
+                // Игра остается активной даже после победы
+                if (isMatchMode) {
+                    document.getElementById('btnSaveResult').disabled = false;
+                }
+                
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        function showVictoryMessage(message, scoreLeft, scoreRight) {
+            // Отладочные сообщения
+            console.log('showVictoryMessage вызвана с параметрами:', { message, scoreLeft, scoreRight });
+            console.log('window.scoreLeft:', window.scoreLeft, 'window.scoreRight:', window.scoreRight);
+            
+            // ВСЕГДА используем текущие значения из window, игнорируя переданные параметры
+            console.log('Используем ТЕКУЩИЙ счёт из window:', { scoreLeft: window.scoreLeft, scoreRight: window.scoreRight });
+            
+            // Создаем модальное окно с сообщением о победе
+            const modal = document.createElement('div');
+            modal.id = 'victory-modal-' + Date.now();
+            modal.className = 'victory-modal';
+            modal.style.cssText = `
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: rgba(0, 0, 0, 0.8) !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                z-index: 99999 !important;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                max-width: 400px;
+                width: 90%;
+            `;
+            
+            // Получаем счёт напрямую из DOM элементов (самый надёжный способ)
+            const scoreLeftElement = document.getElementById('scoreLeft');
+            const scoreRightElement = document.getElementById('scoreRight');
+            
+            console.log('showVictoryMessage: DOM элементы найдены:', {
+                scoreLeftElement: !!scoreLeftElement,
+                scoreRightElement: !!scoreRightElement,
+                scoreLeftText: scoreLeftElement?.textContent,
+                scoreRightText: scoreRightElement?.textContent
+            });
+            
+            let finalScoreLeft = 0;
+            let finalScoreRight = 0;
+            
+            if (scoreLeftElement) {
+                finalScoreLeft = parseInt(scoreLeftElement.textContent) || 0;
+            }
+            
+            if (scoreRightElement) {
+                finalScoreRight = parseInt(scoreRightElement.textContent) || 0;
+            }
+            
+            console.log('showVictoryMessage: Финальные значения счёта:', {
+                finalScoreLeft,
+                finalScoreRight,
+                isViewMode: isViewMode,
+                windowScoreLeft: window.scoreLeft,
+                windowScoreRight: window.scoreRight
+            });
+            
+            console.log('Отображаем счёт в сообщении:', { finalScoreLeft, finalScoreRight });
+            console.log('window.scoreLeft:', window.scoreLeft, 'window.scoreRight:', window.scoreRight);
+            console.log('DOM элементы:', {
+                scoreLeftElement: document.getElementById('scoreLeft')?.textContent,
+                scoreRightElement: document.getElementById('scoreRight')?.textContent
+            });
+            
+            // Если DOM элементы не найдены, пробуем альтернативные способы
+            if (!scoreLeftElement || !scoreRightElement) {
+                console.log('showVictoryMessage: DOM элементы не найдены, пробуем альтернативные способы');
+                
+                // Пробуем получить из window переменных
+                if (window.scoreLeft !== undefined && window.scoreRight !== undefined) {
+                    finalScoreLeft = window.scoreLeft;
+                    finalScoreRight = window.scoreRight;
+                    console.log('showVictoryMessage: Используем window переменные:', { finalScoreLeft, finalScoreRight });
+                }
+                // Пробуем получить из оригинальных значений в режиме Просмотр
+                else if (isViewMode && typeof originalScoreLeft !== 'undefined' && typeof originalScoreRight !== 'undefined') {
+                    finalScoreLeft = originalScoreLeft;
+                    finalScoreRight = originalScoreRight;
+                    console.log('showVictoryMessage: Используем оригинальные значения в режиме Просмотр:', { finalScoreLeft, finalScoreRight });
+                }
+            }
+            
+            // Убеждаемся, что значения не undefined или null
+            let displayScoreLeft = finalScoreLeft !== undefined && finalScoreLeft !== null ? finalScoreLeft : 0;
+            let displayScoreRight = finalScoreRight !== undefined && finalScoreRight !== null ? finalScoreRight : 0;
+            
+            // Принудительно приводим к числу и проверяем
+            displayScoreLeft = Number(displayScoreLeft) || 0;
+            displayScoreRight = Number(displayScoreRight) || 0;
+            
+            // Дополнительная проверка - если значения все еще undefined, используем значения из window
+            if (displayScoreLeft === undefined || displayScoreLeft === null || isNaN(displayScoreLeft)) {
+                displayScoreLeft = Number(window.scoreLeft) || 0;
+                console.log('showVictoryMessage: Используем window.scoreLeft как fallback:', displayScoreLeft);
+            }
+            if (displayScoreRight === undefined || displayScoreRight === null || isNaN(displayScoreRight)) {
+                displayScoreRight = Number(window.scoreRight) || 0;
+                console.log('showVictoryMessage: Используем window.scoreRight как fallback:', displayScoreRight);
+            }
+            
+            // В режиме Просмотр принудительно используем оригинальные значения, если они есть
+            if (isViewMode && typeof originalScoreLeft !== 'undefined' && typeof originalScoreRight !== 'undefined') {
+                if (originalScoreLeft > 0 || originalScoreRight > 0) {
+                    displayScoreLeft = originalScoreLeft;
+                    displayScoreRight = originalScoreRight;
+                    console.log('showVictoryMessage: Принудительно используем оригинальные значения в режиме Просмотр:', { displayScoreLeft, displayScoreRight });
+                }
+            }
+            
+            // Если значения все еще 0:0, пробуем получить из URL параметров
+            if (displayScoreLeft === 0 && displayScoreRight === 0) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlScore1 = urlParams.get('score1');
+                const urlScore2 = urlParams.get('score2');
+                if (urlScore1 && urlScore2) {
+                    displayScoreLeft = parseInt(urlScore1) || 0;
+                    displayScoreRight = parseInt(urlScore2) || 0;
+                    console.log('showVictoryMessage: Используем значения из URL параметров:', { displayScoreLeft, displayScoreRight });
+                }
+            }
+            
+            console.log('showVictoryMessage: Финальные значения для отображения:', { displayScoreLeft, displayScoreRight });
+            
+            // Проверяем значения переменных перед созданием HTML
+            console.log('showVictoryMessage: Проверка переменных перед созданием HTML:', {
+                displayScoreLeft: displayScoreLeft,
+                displayScoreRight: displayScoreRight,
+                displayScoreLeftType: typeof displayScoreLeft,
+                displayScoreRightType: typeof displayScoreRight,
+                displayScoreLeftString: String(displayScoreLeft),
+                displayScoreRightString: String(displayScoreRight),
+                finalScoreLeft: finalScoreLeft,
+                finalScoreRight: finalScoreRight,
+                originalScoreLeft: typeof originalScoreLeft !== 'undefined' ? originalScoreLeft : 'undefined',
+                originalScoreRight: typeof originalScoreRight !== 'undefined' ? originalScoreRight : 'undefined'
+            });
+            
+            // Создаем HTML с принудительной проверкой переменных
+            const htmlTemplate = `
+                <h2 style="color: #4CAF50; margin-bottom: 20px;">${message}</h2>
+                <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+                    Счет: ${String(displayScoreLeft)} : ${String(displayScoreRight)}
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="background: #4CAF50; color: white; border: none; padding: 10px 20px; 
+                               border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    OK
+                </button>
+            `;
+            
+            // Альтернативный способ создания HTML, если первый не работает
+            const alternativeHtml = `
+                <h2 style="color: #4CAF50; margin-bottom: 20px;">${message}</h2>
+                <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+                    Счет: ${window.scoreLeft || 0} : ${window.scoreRight || 0}
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="background: #4CAF50; color: white; border: none; padding: 10px 20px; 
+                               border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    OK
+                </button>
+            `;
+            
+            console.log('showVictoryMessage: HTML шаблон:', htmlTemplate);
+            console.log('showVictoryMessage: Альтернативный HTML:', alternativeHtml);
+            
+            content.innerHTML = htmlTemplate;
+            
+            // Проверяем, что HTML вставился правильно
+            setTimeout(() => {
+                const scoreElement = content.querySelector('div');
+                if (scoreElement && scoreElement.textContent.includes('Счет:')) {
+                    console.log('showVictoryMessage: HTML вставлен правильно, содержимое:', scoreElement.textContent);
+                } else {
+                    console.log('showVictoryMessage: HTML не вставился правильно, используем альтернативный');
+                    content.innerHTML = alternativeHtml;
+                }
+                
+                // Дополнительная проверка через 50мс
+                setTimeout(() => {
+                    const finalScoreElement = content.querySelector('div');
+                    console.log('showVictoryMessage: Финальная проверка содержимого через 50мс:', {
+                        element: finalScoreElement,
+                        textContent: finalScoreElement?.textContent,
+                        innerHTML: finalScoreElement?.innerHTML,
+                        allContent: content.innerHTML
+                    });
+                    
+                    // Если содержимое все еще пустое, принудительно устанавливаем
+                    if (!finalScoreElement || !finalScoreElement.textContent.includes('Счет:')) {
+                        console.log('showVictoryMessage: Принудительно устанавливаем содержимое');
+                        content.innerHTML = `
+                            <h2 style="color: #4CAF50; margin-bottom: 20px;">${message}</h2>
+                            <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+                                Счет: ${displayScoreLeft} : ${displayScoreRight}
+                            </div>
+                            <button onclick="this.parentElement.parentElement.remove()" 
+                                    style="background: #4CAF50; color: white; border: none; padding: 10px 20px; 
+                                           border-radius: 5px; cursor: pointer; font-size: 16px;">
+                                OK
+                            </button>
+                        `;
+                    }
+                }, 50);
+            }, 10);
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            // Принудительно показываем модальное окно
+            modal.style.display = 'flex';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            
+            console.log('showVictoryMessage: Модальное окно создано и добавлено в DOM');
+            console.log('showVictoryMessage: Модальное окно видимо:', modal.style.display !== 'none');
+            console.log('showVictoryMessage: Модальное окно в DOM:', document.body.contains(modal));
+            console.log('showVictoryMessage: Размеры модального окна:', {
+                width: modal.offsetWidth,
+                height: modal.offsetHeight,
+                clientWidth: modal.clientWidth,
+                clientHeight: modal.clientHeight
+            });
+            console.log('showVictoryMessage: Позиция модального окна:', {
+                top: modal.offsetTop,
+                left: modal.offsetLeft,
+                position: modal.style.position
+            });
+            console.log('showVictoryMessage: CSS стили модального окна:', {
+                display: modal.style.display,
+                visibility: modal.style.visibility,
+                opacity: modal.style.opacity,
+                zIndex: modal.style.zIndex
+            });
+            
+            // Альтернативный способ отображения для тестирования
+            console.log('showVictoryMessage: Попробуем альтернативный способ отображения');
+            setTimeout(() => {
+                if (!document.querySelector('.victory-modal')) {
+                    console.log('showVictoryMessage: Модальное окно не найдено, показываем alert');
+                    alert(`${message}\nСчет: ${displayScoreLeft} : ${displayScoreRight}`);
+                } else {
+                    // Проверяем, что модальное окно все еще содержит правильное содержимое
+                    const modal = document.querySelector('.victory-modal');
+                    const content = modal?.querySelector('div');
+                    console.log('showVictoryMessage: Проверка модального окна через 100мс:', {
+                        modal: modal,
+                        content: content,
+                        textContent: content?.textContent,
+                        innerHTML: content?.innerHTML
+                    });
+                    
+                    // Если содержимое исчезло, восстанавливаем его
+                    if (!content || !content.textContent.includes('Счет:')) {
+                        console.log('showVictoryMessage: Содержимое исчезло, восстанавливаем');
+                        if (modal) {
+                            modal.innerHTML = `
+                                <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                    <h2 style="color: #4CAF50; margin-bottom: 20px;">${message}</h2>
+                                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+                                        Счет: ${displayScoreLeft} : ${displayScoreRight}
+                                    </div>
+                                    <button onclick="this.parentElement.parentElement.remove()" 
+                                            style="background: #4CAF50; color: white; border: none; padding: 10px 20px; 
+                                                   border-radius: 5px; cursor: pointer; font-size: 16px;">
+                                        OK
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            }, 100);
+            
+            // Автоматически закрываем через 5 секунд (увеличиваем время для тестирования)
+            setTimeout(() => {
+                console.log('showVictoryMessage: Автоматическое закрытие модального окна');
+                if (modal.parentElement) {
+                    modal.remove();
+                }
+            }, 5000);
+        }
+        
+        function generateGameId() {
+            return 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Защита от повторных вызовов
+        let isSaving = false;
+        
+        function saveResult() {
+            if (isSaving) {
+                console.log('[Referee] saveResult(): уже выполняется, пропускаем');
+                return;
+            }
+            isSaving = true;
+            
+            console.log('[Referee] saveResult(): старт');
+            if (!isMatchMode) {
+                alert('Эта функция доступна только в режиме матча');
+                isSaving = false;
+                return;
+            }
+            
+            const currentSetNumber = window.templateSetNumber || window.setNumber;
+            
+            // Формируем имена участников в правильном формате
+            const leftBottom = document.getElementById('bottom_left_player_input').value;
+            const leftTop = document.getElementById('top_left_player_input').value;
+            const rightBottom = document.getElementById('name_bottom_right').value;
+            const rightTop = document.getElementById('name_top_right').value;
+            
+            // Если имена одинаковые, отправляем одно имя, иначе - в формате "имя1-имя2"
+            const participant1 = (leftBottom === leftTop) ? leftBottom : `${leftBottom}-${leftTop}`;
+            const participant2 = (rightBottom === rightTop) ? rightBottom : `${rightBottom}-${rightTop}`;
+            
+            const result = {
+                scoreLeft: window.scoreLeft,
+                scoreRight: window.scoreRight,
+                setNumber: currentSetNumber,
+                matchId: window.matchId,
+                participant1: participant1,
+                participant2: participant2,
+                player1: leftBottom,  // Первый игрок левой команды
+                player2: leftTop,     // Второй игрок левой команды
+                player3: rightBottom, // Первый игрок правой команды
+                player4: rightTop     // Второй игрок правой команды
+            };
+            
+            console.log('[Referee] saveResult(): формируем payload', {
+                currentSetNumber,
+                templateSetNumber: window.templateSetNumber,
+                setNumber: window.setNumber,
+                matchId: window.matchId,
+                result
+            });
+            
+            // Отправляем результат в родительское окно
+            if (window.opener) {
+                console.log('[Referee] 📤 saveResult(): есть window.opener — отправляем postMessage');
+                console.log('[Referee]  Данные для отправки:', result);
+                try {
+                    // 1) postMessage как основной путь
+                    console.log('[Referee]  Отправляем postMessage с типом refereeResult');
+                    window.opener.postMessage({
+                        type: 'refereeResult',
+                        result: result
+                    }, '*');
+                    console.log('[Referee]  postMessage отправлен успешно');
+                    
+                    // 2) Прямое применение результата как надёжный дубль
+                    if (typeof window.opener.applyRefereeResultToSet === 'function') {
+                        console.log('[Referee] saveResult(): вызываю opener.applyRefereeResultToSet');
+                        window.opener.applyRefereeResultToSet(result, currentSetNumber);
+                    } else if (typeof window.opener.applyRefereeResult === 'function') {
+                        console.log('[Referee] saveResult(): вызываю opener.applyRefereeResult');
+                        window.opener.applyRefereeResult(result);
+                    }
+
+                    // Автосабмит формы убран - теперь обрабатывается в applyRefereeResultToSet
+                } catch (e) { /* ignore */ }
+                
+                // Ожидаем подтверждение от родителя, или закрываемся по таймауту
+                console.log('[Referee]  Ожидаем ack от родителя в течение 800ms...');
+                let ackReceived = false;
+                const onAck = (ev) => {
+                    console.log('[Referee]  Получено сообщение от родителя:', ev.data);
+                    if (ev && ev.data && ev.data.type === 'refereeAck') {
+                        ackReceived = true;
+                        console.log('[Referee]  Получен ack от родителя — закрываю окно');
+                        window.removeEventListener('message', onAck);
+                        isSaving = false; // Сбрасываем флаг
+                        try { window.close(); } catch(_) {}
+                    }
+                };
+                window.addEventListener('message', onAck);
+                setTimeout(() => {
+                    if (!ackReceived) {
+                        console.log('[Referee]  ack не получен в течение 800мс — закрываю окно');
+                        window.removeEventListener('message', onAck);
+                        try { window.close(); } catch(_) {}
+                    } else {
+                        console.log('[Referee]  ack получен, но окно не закрылось — принудительно закрываю');
+                        try { window.close(); } catch(_) {}
+                    }
+                    isSaving = false; // Сбрасываем флаг
+                }, 1000); // Увеличиваем таймаут до 1 секунды
+            } else {
+                // Если открыто не в popup, перенаправляем обратно
+                alert(`Результат сета ${currentSetNumber}: ${result.scoreLeft}:${result.scoreRight}`);
+                isSaving = false; // Сбрасываем флаг
+                window.history.back();
+            }
+        }
+        
+        function saveToTournament() {
+            if (isSaving) {
+                console.log('[Referee] saveToTournament(): уже выполняется, пропускаем');
+                return;
+            }
+            isSaving = true;
+            
+            console.log('[Referee] saveToTournament(): старт');
+            if (!isMatchMode) {
+                alert('Эта функция доступна только в режиме матча');
+                isSaving = false;
+                return;
+            }
+            
+            if (!window.matchId) {
+                alert('ID матча не найден. Убедитесь, что вы открыли страницу судейства из турнирной таблицы.');
+                isSaving = false;
+                return;
+            }
+            
+            const currentSetNumber = window.templateSetNumber || window.setNumber;
+            
+            // Формируем данные для сохранения
+            const sets = [];
+            
+            // Добавляем текущий сет
+            sets.push({
+                set_number: currentSetNumber,
+                score1: window.scoreLeft,
+                score2: window.scoreRight,
+                completed: true
+            });
+            
+            // Если есть завершенные сеты, добавляем их
+            if (window.completedSets) {
+                window.completedSets.forEach((set, index) => {
+                    sets.push({
+                        set_number: index + 1,
+                        score1: set.scoreLeft,
+                        score2: set.scoreRight,
+                        completed: true
+                    });
+                });
+            }
+            
+            const resultData = {
+                sets: sets,
+                matchId: window.matchId
+            };
+            
+            console.log('[Referee] saveToTournament(): отправляем данные', resultData);
+            
+            // Отправляем запрос на сохранение
+            fetch(`/api/matches/${window.matchId}/save-referee-result`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(resultData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Результат успешно сохранен в турнир!');
+                    // Закрываем окно судейства
+                    try { window.close(); } catch(_) {}
+                } else {
+                    alert('Ошибка при сохранении: ' + (data.error || 'Неизвестная ошибка'));
+                }
+                isSaving = false;
+            })
+            .catch(error => {
+                console.error('[Referee] Ошибка при сохранении в турнир:', error);
+                alert('Ошибка при сохранении результата в турнир');
+                isSaving = false;
+            });
+        }
+        
+        // Переменная для отслеживания режима просмотра
+        let isViewMode = false;
+        let originalScoreLeft = 0;
+        let originalScoreRight = 0;
+        let originalLeftTeamColor = 'blue';
+        let originalRightTeamColor = 'red';
+        let originalPlayerNames = {
+            leftBottom: '',
+            leftTop: '',
+            rightBottom: '',
+            rightTop: ''
+        };
+        let originalShuttlecockPosition = '';
+        
+        function toggleViewMode() {
+            if (isViewMode) {
+                returnToRefereeMode();
+            } else {
+                enterViewMode();
+            }
+        }
+        
+        function enterViewMode() {
+            // Сохраняем оригинальные значения счета, цветов и имен игроков
+            originalScoreLeft = window.scoreLeft;
+            originalScoreRight = window.scoreRight;
+            originalLeftTeamColor = leftTeamColor;
+            originalRightTeamColor = rightTeamColor;
+            
+            // Сохраняем оригинальные имена игроков
+            originalPlayerNames.leftBottom = document.getElementById('bottom_left_player_input').value;
+            originalPlayerNames.leftTop = document.getElementById('top_left_player_input').value;
+            originalPlayerNames.rightBottom = document.getElementById('name_bottom_right').value;
+            originalPlayerNames.rightTop = document.getElementById('name_top_right').value;
+            
+            // Сохраняем оригинальную позицию значка подачи
+            originalShuttlecockPosition = shuttlecockPosition;
+            
+            // Меняем счет местами
+            window.scoreLeft = originalScoreRight;
+            window.scoreRight = originalScoreLeft;
+            
+            // Меняем цвета команд местами
+            leftTeamColor = originalRightTeamColor;
+            rightTeamColor = originalLeftTeamColor;
+            
+            // Меняем игроков местами по диагонали:
+            // левый нижний ↔ правый верхний
+            // левый верхний ↔ правый нижний
+            document.getElementById('bottom_left_player_input').value = originalPlayerNames.rightTop;
+            document.getElementById('top_left_player_input').value = originalPlayerNames.rightBottom;
+            document.getElementById('name_bottom_right').value = originalPlayerNames.leftTop;
+            document.getElementById('name_top_right').value = originalPlayerNames.leftBottom;
+            
+            // Меняем позицию значка подачи по диагонали:
+            // левый нижний ↔ правый верхний
+            // левый верхний ↔ правый нижний
+            if (originalShuttlecockPosition === 'bottom_left') {
+                shuttlecockPosition = 'top_right';
+            } else if (originalShuttlecockPosition === 'top_left') {
+                shuttlecockPosition = 'bottom_right';
+            } else if (originalShuttlecockPosition === 'bottom_right') {
+                shuttlecockPosition = 'top_left';
+            } else if (originalShuttlecockPosition === 'top_right') {
+                shuttlecockPosition = 'bottom_left';
+            }
+            
+            // Обновляем отображение счета
+            document.getElementById('scoreLeft').textContent = window.scoreLeft;
+            document.getElementById('scoreRight').textContent = window.scoreRight;
+            
+            // Обновляем цвета игроков и счета
+            updatePlayerColors();
+            
+            // Обновляем отображение значка подачи
+            updateShuttlecockDisplay();
+            
+            // Включаем режим просмотра
+            isViewMode = true;
+            document.body.classList.add('view-mode');
+            
+            // Проверяем победу при входе в режим просмотра с задержкой
+            setTimeout(() => {
+                console.log('checkVictory в режиме Просмотр: window.scoreLeft =', window.scoreLeft, 'window.scoreRight =', window.scoreRight);
+                checkVictory();
+            }, 100);
+            
+            // Принудительно применяем размер шрифта счёта для режима просмотра
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '79.6875vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '79.6875vh', 'important');
+            
+            // Применяем стили для горизонтальных экранов в режиме просмотра
+            setTimeout(applyMobileLandscapeStyles, 100);
+            
+            // Принудительно устанавливаем горизонтальную ориентацию
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.log('Не удалось заблокировать ориентацию:', err);
+                });
+            }
+        }
+        
+        function returnToRefereeMode() {
+            // При возврате из режима просмотра нужно правильно восстановить счет
+            // В режиме просмотра счет был поменян местами, поэтому при возврате
+            // нужно поменять его обратно с учетом возможных изменений
+            const currentScoreLeft = window.scoreLeft;
+            const currentScoreRight = window.scoreRight;
+            
+            // Восстанавливаем счет (меняем местами обратно)
+            window.scoreLeft = currentScoreRight;
+            window.scoreRight = currentScoreLeft;
+            
+            // Восстанавливаем цвета команд
+            leftTeamColor = originalLeftTeamColor;
+            rightTeamColor = originalRightTeamColor;
+            
+            // Восстанавливаем оригинальные имена игроков
+            document.getElementById('bottom_left_player_input').value = originalPlayerNames.leftBottom;
+            document.getElementById('top_left_player_input').value = originalPlayerNames.leftTop;
+            document.getElementById('name_bottom_right').value = originalPlayerNames.rightBottom;
+            document.getElementById('name_top_right').value = originalPlayerNames.rightTop;
+            
+            // При возврате из режима просмотра применяем диагональную смену к текущей позиции значка подачи
+            // В режиме просмотра позиция могла измениться из-за изменений счета, поэтому
+            // нужно применить диагональную смену к текущей позиции, а не восстанавливать оригинальную
+            const currentShuttlecockPosition = shuttlecockPosition;
+            if (currentShuttlecockPosition === 'bottom_left') {
+                shuttlecockPosition = 'top_right';
+            } else if (currentShuttlecockPosition === 'top_left') {
+                shuttlecockPosition = 'bottom_right';
+            } else if (currentShuttlecockPosition === 'bottom_right') {
+                shuttlecockPosition = 'top_left';
+            } else if (currentShuttlecockPosition === 'top_right') {
+                shuttlecockPosition = 'bottom_left';
+            }
+            
+            // Обновляем отображение счета
+            document.getElementById('scoreLeft').textContent = window.scoreLeft;
+            document.getElementById('scoreRight').textContent = window.scoreRight;
+            
+            // Восстанавливаем оригинальные цвета игроков и счета
+            updatePlayerColors();
+            
+            // Восстанавливаем отображение значка подачи
+            updateShuttlecockDisplay();
+            
+            // Выключаем режим просмотра
+            isViewMode = false;
+            document.body.classList.remove('view-mode');
+            
+            // Принудительно применяем размер шрифта счёта для режима судейства
+            const scoreLeft = document.getElementById('scoreLeft');
+            const scoreRight = document.getElementById('scoreRight');
+            if (scoreLeft) scoreLeft.style.setProperty('font-size', '31.25vh', 'important');
+            if (scoreRight) scoreRight.style.setProperty('font-size', '31.25vh', 'important');
+            
+            // Применяем стили для горизонтальных экранов после выхода из режима просмотра
+            setTimeout(applyMobileLandscapeStyles, 100);
+            
+            // Разблокируем ориентацию
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+            }
+        }
+        
+        function handleBackButton() {
+            if (isMatchMode) {
+                // В режиме матча просто закрываем окно (возвращаемся в форму результата)
+                if (window.opener) {
+                    window.close();
+                } else {
+                    // Если открыто не в popup, используем history.back()
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = '/';
+                    }
+                }
+            } else {
+                // В независимом режиме используем стандартное поведение
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/';
+                }
+            }
+        }
+        
+        function setupEventListeners() {
+            console.log('🔧 setupEventListeners() вызвана');
+            // Проверяем, не были ли уже добавлены обработчики
+            if (window.eventListenersSetup) {
+                console.log('⚠️ Обработчики уже установлены, пропускаем');
+                return;
+            }
+            window.eventListenersSetup = true;
+            console.log(' Устанавливаем обработчики событий');
+            
+            // Кнопки навигации удалены
+            
+            const backBtn = document.getElementById('btnBack');
+            if (backBtn) {
+                backBtn.addEventListener('click', handleBackButton);
+            }
+            
+            // Кнопки управления
+            const saveBtn = document.getElementById('btnSave');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    saveData();
+                    alert('Имена сохранены');
+                });
+            }
+            
+            // Обработчик кнопки "Начать игру" удален - игра активна по умолчанию
+            const undoBtn = document.getElementById('btnUndo');
+            if (undoBtn) undoBtn.addEventListener('click', undoLastAction);
+            // Кнопка "Очистить" удалена
+            const moveBtn = document.getElementById('btnMoveShuttlecock');
+            if (moveBtn) moveBtn.addEventListener('click', moveShuttlecockBetweenSides);
+            const swapTeamsBtn = document.getElementById('btnSwapTeams');
+            if (swapTeamsBtn) swapTeamsBtn.addEventListener('click', swapTeams);
+            const swapLeftTeamBtn = document.getElementById('btnSwapLeftTeam');
+            if (swapLeftTeamBtn) swapLeftTeamBtn.addEventListener('click', swapLeftTeam);
+            const swapRightTeamBtn = document.getElementById('btnSwapRightTeam');
+            if (swapRightTeamBtn) swapRightTeamBtn.addEventListener('click', swapRightTeam);
+            const saveResultBtn = document.getElementById('btnSaveResult');
+            if (saveResultBtn) saveResultBtn.addEventListener('click', saveResult);
+            
+            // Обработчики для режима просмотра
+            const viewModeBtn = document.getElementById('btnViewMode');
+            if (viewModeBtn) viewModeBtn.addEventListener('click', toggleViewMode);
+            
+            const returnToRefereeBtn = document.getElementById('btnReturnToReferee');
+            if (returnToRefereeBtn) returnToRefereeBtn.addEventListener('click', returnToRefereeMode);
+            
+            // Автоматическое изменение размера полей ввода при изменении содержимого
+            window.autoResizeInput = function(input) {
+                // Создаем временный элемент для измерения ширины текста
+                const temp = document.createElement('span');
+                temp.style.visibility = 'hidden';
+                temp.style.position = 'absolute';
+                temp.style.whiteSpace = 'nowrap';
+                temp.style.font = window.getComputedStyle(input).font;
+                temp.textContent = input.value || input.placeholder || 'M';
+                document.body.appendChild(temp);
+                const width = temp.offsetWidth;
+                document.body.removeChild(temp);
+                
+                // Устанавливаем ширину с учетом минимальной ширины и padding
+                const minWidth = parseInt(window.getComputedStyle(input).minWidth) || 200;
+                const padding = parseInt(window.getComputedStyle(input).paddingLeft) + 
+                               parseInt(window.getComputedStyle(input).paddingRight) || 16;
+                input.style.width = Math.max(width + padding, minWidth) + 'px';
+            };
+            
+            // Применяем автоматическое изменение размера для всех полей с именами игроков
+            const nameInputs = ['top_left_player_input', 'bottom_left_player_input', 'name_top_right', 'name_bottom_right'];
+            nameInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    // Инициализируем размер при загрузке
+                    window.autoResizeInput(input);
+                    
+                    // Обновляем размер при изменении содержимого
+                    input.addEventListener('input', function() {
+                        window.autoResizeInput(this);
+                    });
+                    
+                    // Обновляем размер при изменении размера шрифта
+                    const observer = new MutationObserver(function() {
+                        window.autoResizeInput(input);
+                    });
+                    observer.observe(input, {
+                        attributes: true,
+                        attributeFilter: ['style', 'value']
+                    });
+                }
+            });
+            
+            // Обработчики кликов по корту
+            document.getElementById('court_left').addEventListener('click', function(event) {
+                console.log('🖱️ Клик по левому корту, target:', event.target.tagName);
+                if (event.target.tagName !== 'INPUT') {
+                    console.log(' Вызываем addPointLeft');
+                    addPointLeft();
+                } else {
+                    console.log('❌ Клик по INPUT, игнорируем');
+                }
+            });
+            
+            document.getElementById('court_right').addEventListener('click', function(event) {
+                console.log('🖱️ Клик по правому корту, target:', event.target.tagName);
+                if (event.target.tagName !== 'INPUT') {
+                    console.log(' Вызываем addPointRight');
+                    addPointRight();
+                } else {
+                    console.log('❌ Клик по INPUT, игнорируем');
+                }
+            });
+            
+            console.log(' Обработчики кликов по корту установлены');
+            // Обработчики для полей ввода удалены - игра активна по умолчанию
+        }
+        
+        // Инициализация приложения после загрузки DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM загружен, запускаем инициализацию...');
+            init();
+        });
+        
+        // Дополнительная инициализация для совместимости
+        if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
+        } else {
+            init();
+        }
+        
+        // Адаптация размеров при изменении размера окна
+        function adaptToScreenSize() {
+            const court = document.querySelector('.court');
+            const scoreboard = document.querySelector('.scoreboard-container');
+            const scores = document.querySelectorAll('.score-left, .score-right');
+            const inputs = document.querySelectorAll('input');
+            
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const controlPanel = document.querySelector('.control-panel');
+            const controlPanelWidth = controlPanel ? controlPanel.offsetWidth : 80;
+            const availableWidth = windowWidth - controlPanelWidth;
+            const availableHeight = windowHeight;
+            
+            // Адаптация размера шрифта счета (увеличен в 4 раза)
+            const scoreFontSize = availableHeight * 0.6; // Было 0.15, стало 0.6 (в 4 раза больше)
+            scores.forEach(score => {
+                score.style.fontSize = Math.max(scoreFontSize, 120) + 'px'; // Было 30, стало 120 (в 4 раза больше)
+            });
+            
+            // Адаптация размера полей ввода - убираем ограничения ширины
+            inputs.forEach(input => {
+                // Позволяем полям ввода автоматически подстраиваться под содержимое
+                input.style.width = 'fit-content';
+                input.style.minWidth = '200px';
+                input.style.maxWidth = 'none'; // Убираем ограничение для длинных имён
+                // Убираем динамическое изменение размера шрифта - используем CSS
+                // input.style.fontSize = Math.max(inputWidth * 0.18, 16) + 'px';
+            });
+            
+            // Адаптация отступов для счетов
+            const scoreGap = Math.min(availableWidth * 0.1, 100);
+            if (scoreboard) {
+                scoreboard.style.gap = scoreGap + 'px';
+            }
+        }
+        
+        // Вызываем адаптацию при загрузке и изменении размера окна
+        window.addEventListener('load', adaptToScreenSize);
+        window.addEventListener('resize', adaptToScreenSize);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(adaptToScreenSize, 100);
+            checkOrientation();
+        });
+        
+        // Функция проверки ориентации устройства
+        function checkOrientation() {
+            const warning = document.querySelector('.orientation-warning');
+            if (!warning) return;
+            
+            // Проверяем, является ли устройство мобильным
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Проверяем ориентацию
+                const isPortrait = window.innerHeight > window.innerWidth;
+                
+                if (isPortrait) {
+                    warning.style.display = 'flex';
+                } else {
+                    warning.style.display = 'none';
+                }
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+        
+        // Принудительное применение стилей для горизонтальных экранов
+        function applyMobileLandscapeStyles() {
+            // Проверяем, не является ли это экраном 1280x720 (не применяем стили для этого разрешения)
+            const is1280x720 = window.innerWidth >= 1200 && window.innerWidth <= 1400 && 
+                               window.innerHeight >= 700 && window.innerHeight <= 800;
+            
+            if (window.innerWidth <= 768 && window.innerHeight < window.innerWidth && !is1280x720) {
+                // Горизонтальная ориентация мобильного устройства (но не 1280x720)
+                const inputs = document.querySelectorAll('input');
+                inputs.forEach(input => {
+                    // Для top_left_player_input используем fixed позиционирование
+                    if (input.id === 'top_left_player_input') {
+                        input.style.setProperty('position', 'fixed', 'important'); // Фиксированное позиционирование относительно viewport
+                        input.style.setProperty('left', '10%', 'important');
+                        input.style.setProperty('top', '140px', 'important'); // Ниже горизонтальной линии "b" (100px) на 40px
+                        input.style.setProperty('transform', 'none', 'important'); // Убираем трансформацию
+                        input.style.setProperty('z-index', '100', 'important'); // Высокий z-index
+                        input.style.setProperty('right', 'auto', 'important');
+                        input.style.setProperty('bottom', 'auto', 'important');
+                    } else {
+                        // Для остальных элементов используем absolute
+                        input.style.setProperty('position', 'absolute', 'important');
+                        if (input.id === 'bottom_left_player_input') {
+                            input.style.setProperty('left', '10%', 'important');
+                            input.style.setProperty('bottom', '10%', 'important');
+                            input.style.setProperty('transform', 'none', 'important');
+                        } else {
+                            // Для остальных элементов
+                            input.style.setProperty('transform', 'none', 'important');
+                            input.style.setProperty('left', 'auto', 'important');
+                        }
+                        input.style.setProperty('right', 'auto', 'important');
+                    }
+                    
+                    if (isViewMode) {
+                        // В режиме просмотра используем более маленькие размеры
+                        input.style.setProperty('font-size', '1.25vw', 'important'); /* Уменьшаем в 2 раза */
+                        input.style.setProperty('min-width', '50px', 'important');
+                        input.style.setProperty('max-width', 'none', 'important'); /* Убираем ограничение для длинных имён */
+                        input.style.setProperty('width', 'fit-content', 'important'); /* Автоматическая ширина */
+                    } else {
+                        // В обычном режиме
+                        input.style.setProperty('font-size', '8px', 'important'); /* Уменьшаем в 2 раза */
+                        input.style.setProperty('min-width', '60px', 'important');
+                        input.style.setProperty('max-width', 'none', 'important'); /* Убираем ограничение для длинных имён */
+                        input.style.setProperty('width', 'fit-content', 'important'); /* Автоматическая ширина */
+                    }
+                });
+                
+                const scores = document.querySelectorAll('.score');
+                scores.forEach(score => {
+                if (isViewMode) {
+                    score.style.setProperty('font-size', '79.6875vh', 'important'); /* 79.6875% от высоты экрана (93.75vh × 0.85) */
+                } else {
+                    score.style.setProperty('font-size', '31.25vh', 'important'); /* В 2 раза меньше чем в режиме Просмотр */
+                }
+                });
+            }
+        }
+        
+        // Проверяем ориентацию при загрузке страницы
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkOrientation();
+            // Применяем стили для горизонтальных экранов
+            setTimeout(applyMobileLandscapeStyles, 100);
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 200);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 400);
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 600);
+        });
+        
+        // Проверяем ориентацию при изменении размера окна
+        window.addEventListener('resize', function() {
+            checkOrientation();
+            applyMobileLandscapeStyles();
+            // Синхронизируем размер шрифта имён игроков с высотой значка подачи после всех операций
+            setTimeout(syncPlayerNameFontSizeWithShuttlecock, 100);
+            // Обновляем отладочную информацию
+            updateDebugScreenInfo();
+            // Принудительно устанавливаем позицию левых полей
+            setTimeout(forceLeftFieldsPosition, 150);
+        });
+        
+        // ========== ОТЛАДОЧНЫЙ БЛОК ДЛЯ РАЗМЕРОВ ЭКРАНА ==========
+        // Включить/выключить отладку: измените DEBUG_MODE на true/false
+        const DEBUG_MODE = true; // Установите false для отключения отладки
+        
+        function updateDebugScreenInfo() {
+            if (!DEBUG_MODE) {
+                const debugElement = document.getElementById('debugScreenInfo');
+                if (debugElement) {
+                    debugElement.style.display = 'none';
+                }
+                return;
+            }
+            
+            const debugElement = document.getElementById('debugScreenInfo');
+            if (!debugElement) return;
+            
+            // Показываем блок
+            debugElement.style.display = 'block';
+            
+            // Получаем размеры
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = document.documentElement.clientHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            
+            // Определяем ориентацию
+            let orientation = 'Неизвестно';
+            if (window.innerHeight > window.innerWidth) {
+                orientation = 'Портретная (Portrait)';
+            } else if (window.innerWidth > window.innerHeight) {
+                orientation = 'Альбомная (Landscape)';
+            } else {
+                orientation = 'Квадратная';
+            }
+            
+            // Обновляем значения
+            document.getElementById('debugWindowSize').textContent = `${windowWidth} × ${windowHeight} px`;
+            document.getElementById('debugScreenSize').textContent = `${screenWidth} × ${screenHeight} px`;
+            document.getElementById('debugViewportSize').textContent = `${viewportWidth} × ${viewportHeight} px`;
+            document.getElementById('debugOrientation').textContent = orientation;
+            document.getElementById('debugDPR').textContent = devicePixelRatio.toFixed(2);
+        }
+        
+        // Инициализация отладочного блока
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDebugScreenInfo();
+        });
+        
+        // Обновление при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateDebugScreenInfo, 100);
+        });
+        
+        // Обновление при загрузке страницы
+        window.addEventListener('load', function() {
+            updateDebugScreenInfo();
+        });
+        
+        // ========== ОТЛАДОЧНАЯ СЕТКА ==========
+        function createDebugGrid() {
+            if (!DEBUG_MODE) {
+                const gridElement = document.getElementById('debugGrid');
+                if (gridElement) {
+                    gridElement.style.display = 'none';
+                }
+                return;
+            }
+            
+            const gridElement = document.getElementById('debugGrid');
+            if (!gridElement) return;
+            
+            // Показываем сетку
+            gridElement.style.display = 'block';
+            
+            // Очищаем предыдущую сетку
+            gridElement.innerHTML = '';
+            
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const gridStep = 50; // Шаг сетки 50px
+            
+            // Генерируем вертикальные линии (обозначаются цифрами 1, 2, 3...)
+            const verticalLinesCount = Math.ceil(windowWidth / gridStep);
+            for (let i = 0; i <= verticalLinesCount; i++) {
+                const x = i * gridStep;
+                
+                // Создаем линию
+                const line = document.createElement('div');
+                line.className = 'debug-grid-line vertical';
+                line.style.left = x + 'px';
+                gridElement.appendChild(line);
+                
+                // Создаем подпись (цифры 1, 2, 3...)
+                if (x <= windowWidth) {
+                    const label = document.createElement('div');
+                    label.className = 'debug-grid-label vertical-label';
+                    label.textContent = (i + 1).toString();
+                    label.style.left = x + 'px';
+                    gridElement.appendChild(label);
+                }
+            }
+            
+            // Генерируем горизонтальные линии (обозначаются буквами a, b, c...)
+            const horizontalLinesCount = Math.ceil(windowHeight / gridStep);
+            const letters = 'abcdefghijklmnopqrstuvwxyz';
+            for (let i = 0; i <= horizontalLinesCount; i++) {
+                const y = i * gridStep;
+                
+                // Создаем линию
+                const line = document.createElement('div');
+                line.className = 'debug-grid-line horizontal';
+                line.style.top = y + 'px';
+                gridElement.appendChild(line);
+                
+                // Создаем подпись (буквы a, b, c...)
+                if (y <= windowHeight) {
+                    const label = document.createElement('div');
+                    label.className = 'debug-grid-label horizontal-label';
+                    // Используем буквы: a, b, c... z, aa, ab, ac...
+                    let letterIndex = i;
+                    let labelText = '';
+                    if (letterIndex < letters.length) {
+                        labelText = letters[letterIndex];
+                    } else {
+                        // Для индексов больше 26 используем комбинации: aa, ab, ac...
+                        const firstLetterIndex = Math.floor(letterIndex / letters.length) - 1;
+                        const secondLetterIndex = letterIndex % letters.length;
+                        labelText = letters[firstLetterIndex] + letters[secondLetterIndex];
+                    }
+                    label.textContent = labelText;
+                    label.style.top = y + 'px';
+                    gridElement.appendChild(label);
+                }
+            }
+        }
+        
+        // Инициализация сетки
+        document.addEventListener('DOMContentLoaded', function() {
+            createDebugGrid();
+        });
+        
+        // Обновление сетки при изменении размера окна
+        window.addEventListener('resize', function() {
+            createDebugGrid();
+        });
+        
+        // Обновление сетки при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(createDebugGrid, 100);
+        });
+        
+        // Обновление сетки при загрузке страницы
+        window.addEventListener('load', function() {
+            createDebugGrid();
+        });
+        // ========== КОНЕЦ ОТЛАДОЧНОЙ СЕТКИ ==========
+        
+        // ========== СПЕЦИАЛЬНЫЕ СТИЛИ ДЛЯ ЭКРАНА 791 x 303 px с DPR 2.75 ==========
+        function applySpecialScreenStyles() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            
+            // Проверяем точное разрешение и DPR
+            if (windowWidth === 791 && windowHeight === 303 && Math.abs(devicePixelRatio - 2.75) < 0.1) {
+                const nameInputs = ['top_left_player_input', 'bottom_left_player_input', 'name_top_right', 'name_bottom_right'];
+                
+                nameInputs.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        // Шрифт 50px с !important
+                        element.style.setProperty('font-size', '50px', 'important');
+                        
+                        // Левые границы
+                        if (id === 'top_left_player_input') {
+                            element.style.setProperty('left', '10%', 'important');
+                            element.style.setProperty('top', '140px', 'important'); // Ниже горизонтальной линии "b" (100px) на 40px
+                            element.style.setProperty('right', 'auto', 'important');
+                        } else if (id === 'bottom_left_player_input') {
+                            element.style.setProperty('left', '10%', 'important');
+                            element.style.setProperty('bottom', 'calc(10% + 75px + 25px + 25px)', 'important'); // Поднимаем на 125px (75px + 25px + 25px)
+                            element.style.setProperty('right', 'auto', 'important');
+                        }
+                        
+                        if (id === 'name_top_right' || id === 'name_bottom_right') {
+                            element.style.setProperty('left', '550px', 'important'); // Линия "11" = 11 * 50px
+                            element.style.setProperty('right', 'auto', 'important');
+                        }
+                        
+                        // Верхние имена опустить на 30px (только для правых)
+                        if (id === 'name_top_right') {
+                            element.style.setProperty('top', 'calc(50% - 5px + 30px)', 'important');
+                        }
+                    }
+                });
+                
+                // Опускаем поля с цифрами счёта на 40px (было поднято на 50px, затем опущено на 30px, теперь еще на 10px)
+                const scoreboard = document.querySelector('.scoreboard-container');
+                if (scoreboard) {
+                    scoreboard.style.setProperty('top', 'calc(50% - 50px + 30px + 10px)', 'important'); // calc(50% - 10px)
+                }
+            }
+        }
+        
+        // Применяем стили при загрузке и изменении размера
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(applySpecialScreenStyles, 100);
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(applySpecialScreenStyles, 100);
+        });
+        
+        window.addEventListener('load', function() {
+            setTimeout(applySpecialScreenStyles, 200);
+        });
+        
+        // Также применяем после инициализации приложения
+        if (typeof init !== 'undefined') {
+            const originalInit = init;
+            init = function() {
+                originalInit();
+                setTimeout(applySpecialScreenStyles, 300);
+            };
+        }
+        
+        // Применяем принудительное позиционирование после всех других стилей
+        // Вызываем несколько раз с разными задержками для гарантии
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+            setTimeout(forceLeftFieldsPosition, 800);
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(forceLeftFieldsPosition, 50);
+            setTimeout(forceLeftFieldsPosition, 150);
+            setTimeout(forceLeftFieldsPosition, 300);
+        });
+        
+        window.addEventListener('load', function() {
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+            setTimeout(forceLeftFieldsPosition, 800);
+        });
+        
+        // Применяем после applyMobileLandscapeStyles
+        const originalApplyMobileLandscapeStyles = applyMobileLandscapeStyles;
+        applyMobileLandscapeStyles = function() {
+            originalApplyMobileLandscapeStyles();
+            setTimeout(forceLeftFieldsPosition, 50);
+            setTimeout(forceLeftFieldsPosition, 150);
+            setTimeout(forceLeftFieldsPosition, 300);
+        };
+        
+        // Также применяем при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(forceLeftFieldsPosition, 100);
+            setTimeout(forceLeftFieldsPosition, 300);
+            setTimeout(forceLeftFieldsPosition, 500);
+        });
+        
+        // Используем MutationObserver для отслеживания изменений стилей и принудительного применения позиции
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        // Отслеживаем изменения для input элементов (теперь они находятся в segment без .box)
+                        if (target && (
+                            target.id === 'top_left_player_input' || 
+                            target.id === 'bottom_left_player_input'
+                        )) {
+                            const currentLeft = getComputedStyle(target).left;
+                            const leftValue = parseFloat(currentLeft);
+                            const parentWidth = target.parentElement ? target.parentElement.offsetWidth : window.innerWidth;
+                            const expectedLeft = parentWidth * 0.1; // 10% от ширины родителя
+                            // Если позиция отличается от 10%, принудительно устанавливаем
+                            if (Math.abs(leftValue - expectedLeft) > parentWidth * 0.01) { // Допуск 1% от ширины
+                                setTimeout(() => {
+                                    forceLeftFieldsPosition();
+                                }, 10);
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Начинаем наблюдение после загрузки DOM
+            document.addEventListener('DOMContentLoaded', function() {
+                const topLeft = document.getElementById('top_left_player_input');
+                const bottomLeft = document.getElementById('bottom_left_player_input');
+                
+                if (topLeft) {
+                    observer.observe(topLeft, { attributes: true, attributeFilter: ['style'] });
+                }
+                if (bottomLeft) {
+                    observer.observe(bottomLeft, { attributes: true, attributeFilter: ['style'] });
+                }
+            });
+        }
+        
+        // Периодическая проверка и исправление позиции (каждые 5 секунд - только для отладки)
+        // ВАЖНО: Эта проверка нужна для защиты от переопределения стилей другими функциями
+        // Причины необходимости:
+        // 1. Другие JS функции (applyMobileLandscapeStyles, syncPlayerNameFontSizeWithShuttlecock) могут изменять стили
+        // 2. Динамические изменения (resize, orientationchange) могут сбрасывать позицию
+        // 3. Конфликты CSS правил с разной специфичностью
+        // 4. Асинхронная загрузка элементов и стилей
+        // 
+        // Можно отключить, установив DEBUG_MODE = false, но тогда нужно убедиться,
+        // что все другие функции не переопределяют позицию левых полей
+        if (DEBUG_MODE) {
+            setInterval(function() {
+                const topLeft = document.getElementById('top_left_player_input');
+                const bottomLeft = document.getElementById('bottom_left_player_input');
+                
+                // Проверяем и исправляем позицию input элементов (теперь они находятся в segment без .box)
+                if (topLeft) {
+                    const computedStyle = window.getComputedStyle(topLeft);
+                    const currentPosition = computedStyle.position;
+                    const currentTop = parseFloat(computedStyle.top);
+                    const currentLeft = computedStyle.left;
+                    const leftValue = parseFloat(currentLeft);
+                    const parentWidth = topLeft.parentElement ? topLeft.parentElement.offsetWidth : window.innerWidth;
+                    const expectedLeft = parentWidth * 0.1; // 10% от ширины родителя
+                    
+                    // Проверяем position и top
+                    if (currentPosition !== 'fixed' || Math.abs(currentTop - 180) > 1 || Math.abs(leftValue - expectedLeft) > parentWidth * 0.01) {
+                        console.log('[DEBUG] Исправление позиции topLeft input:', {
+                            currentPosition,
+                            currentTop,
+                            currentLeft: leftValue,
+                            expectedTop: 180,
+                            expectedLeft: expectedLeft
+                        });
+                        topLeft.style.setProperty('position', 'fixed', 'important');
+                        topLeft.style.setProperty('top', '180px', 'important'); // Ниже горизонтальной линии "b" (100px) на 80px
+                        topLeft.style.setProperty('left', '10%', 'important');
+                        topLeft.style.setProperty('transform', 'none', 'important');
+                        topLeft.style.setProperty('z-index', '10000', 'important');
+                        topLeft.style.setProperty('right', 'auto', 'important');
+                        topLeft.style.setProperty('bottom', 'auto', 'important');
+                        topLeft.style.setProperty('margin', '0', 'important');
+                        topLeft.style.setProperty('padding', '0', 'important');
+                    }
+                }
+                if (bottomLeft) {
+                    const currentLeft = getComputedStyle(bottomLeft).left;
+                    const leftValue = parseFloat(currentLeft);
+                    const parentWidth = bottomLeft.parentElement ? bottomLeft.parentElement.offsetWidth : window.innerWidth;
+                    const expectedLeft = parentWidth * 0.1; // 10% от ширины родителя
+                    if (Math.abs(leftValue - expectedLeft) > parentWidth * 0.01) { // Допуск 1% от ширины
+                        console.log('[DEBUG] Исправление позиции bottomLeft input:', {currentLeft: leftValue, expected: expectedLeft});
+                        bottomLeft.style.setProperty('left', '10%', 'important');
+                        bottomLeft.style.setProperty('bottom', '10%', 'important');
+                        bottomLeft.style.setProperty('right', 'auto', 'important');
+                        bottomLeft.style.setProperty('top', 'auto', 'important');
+                    }
+                }
+            }, 5000); // Увеличено до 5 секунд для снижения нагрузки
+        }
+        // ========== КОНЕЦ СПЕЦИАЛЬНЫХ СТИЛЕЙ ==========
+        
+        // ========== КОНЕЦ ОТЛАДОЧНОГО БЛОКА ==========
+    </script>
+</body>
+</html>
