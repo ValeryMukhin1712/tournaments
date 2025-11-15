@@ -154,6 +154,29 @@
                 repeating-linear-gradient(to bottom, transparent 0, transparent 49px, rgba(255, 0, 0, 0.3) 49px, rgba(255, 0, 0, 0.3) 50px);
         }
         
+        /* Маркировка линий разметки */
+        .grid-label {
+            position: absolute;
+            color: rgba(255, 0, 0, 0.7);
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 5;
+            pointer-events: none;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Вертикальные линии - цифры (сверху) */
+        .grid-label.vertical {
+            top: 5px;
+            transform: translateX(-50%);
+        }
+        
+        /* Горизонтальные линии - буквы (слева) */
+        .grid-label.horizontal {
+            left: 5px;
+            transform: translateY(-50%);
+        }
+        
         /* Центральная линия (сетка) */
         .net {
             position: absolute;
@@ -387,6 +410,12 @@
             <!-- Сетка -->
             <div class="court-grid"></div>
             
+            <!-- Маркировка вертикальных линий (цифры) -->
+            <div id="vertical-labels"></div>
+            
+            <!-- Маркировка горизонтальных линий (буквы) -->
+            <div id="horizontal-labels"></div>
+            
             <!-- Сетка (центральная линия) -->
             <div class="net"></div>
             
@@ -479,7 +508,7 @@
         let scoreLeft = 0;
         let scoreRight = 0;
         let gameHistory = [];
-        let shuttlecockPosition = 'bottom_right'; // Позиция воланчика
+        let shuttlecockPosition = 'bottom_left'; // Позиция воланчика
         let isViewMode = false;
         let journalVisible = false;
         
@@ -501,6 +530,101 @@
             document.getElementById('scoreLeft').textContent = scoreLeft;
             document.getElementById('scoreRight').textContent = scoreRight;
             updateShuttlecockPosition();
+            checkVictory();
+        }
+        
+        // Функция определения победителя
+        function checkVictory() {
+            const pointsToWin = 21; // Можно сделать настраиваемым
+            const maxPoints = 30; // Максимальный счёт для бадминтона
+            
+            const scoreDiff = Math.abs(scoreLeft - scoreRight);
+            
+            console.log('checkVictory: Проверка победы:', { scoreLeft, scoreRight, scoreDiff });
+            
+            // Специальное условие для бадминтона: если одна сторона набрала 30 очков - победа
+            // (независимо от счёта соперника, который может быть 29 или 28)
+            if (scoreLeft >= maxPoints) {
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
+                console.log(`Победа Синей команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                return true;
+            }
+            
+            if (scoreRight >= maxPoints) {
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
+                console.log(`Победа Красной команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                return true;
+            }
+            
+            // Обычное условие победы: набрать нужное количество очков И разница больше 1
+            if (scoreLeft >= pointsToWin && scoreDiff > 1) {
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
+                return true;
+            }
+            
+            if (scoreRight >= pointsToWin && scoreDiff > 1) {
+                // Показываем сообщение о победе
+                showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Функция показа сообщения о победе
+        function showVictoryMessage(message, scoreLeft, scoreRight) {
+            // Создаем модальное окно с сообщением о победе
+            const modal = document.createElement('div');
+            modal.id = 'victory-modal-' + Date.now();
+            modal.className = 'victory-modal';
+            modal.style.cssText = `
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: rgba(0, 0, 0, 0.8) !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                z-index: 99999 !important;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                max-width: 400px;
+                width: 90%;
+            `;
+            
+            // Используем текущие значения счета
+            const displayScoreLeft = scoreLeft !== undefined && scoreLeft !== null ? scoreLeft : 0;
+            const displayScoreRight = scoreRight !== undefined && scoreRight !== null ? scoreRight : 0;
+            
+            // Создаем HTML
+            content.innerHTML = `
+                <h2 style="color: #4CAF50; margin-bottom: 20px;">${message}</h2>
+                <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+                    Счет: ${displayScoreLeft} : ${displayScoreRight}
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="background: #4CAF50; color: white; border: none; padding: 10px 20px; 
+                               border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    OK
+                </button>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            console.log('showVictoryMessage: Отображено сообщение о победе:', { message, displayScoreLeft, displayScoreRight });
         }
         
         // Обновление позиции индикатора подачи
@@ -547,11 +671,76 @@
             updateScore();
         }
         
+        // Функция для обмена игроков в команде
+        function swapPlayersInTeam(isLeftTeam) {
+            if (isLeftTeam) {
+                // Меняем местами игроков левой команды
+                const tempName = document.getElementById('top_left_player_input').value;
+                document.getElementById('top_left_player_input').value = document.getElementById('bottom_left_player_input').value;
+                document.getElementById('bottom_left_player_input').value = tempName;
+            } else {
+                // Меняем местами игроков правой команды
+                const tempName = document.getElementById('name_top_right').value;
+                document.getElementById('name_top_right').value = document.getElementById('name_bottom_right').value;
+                document.getElementById('name_bottom_right').value = tempName;
+            }
+        }
+        
+        // Функция для перемещения индикатора подачи при выигрыше очка
+        function handlePointScored(scoringTeam) {
+            // Определяем, какая команда подавала
+            const isServingLeft = shuttlecockPosition === 'top_left' || shuttlecockPosition === 'bottom_left';
+            const isServingRight = shuttlecockPosition === 'top_right' || shuttlecockPosition === 'bottom_right';
+            
+            if (scoringTeam === 'left') {
+                // Левая команда выиграла очко
+                if (isServingLeft) {
+                    // Подавала левая команда - игроки меняются местами, индикатор переходит с подававшим
+                    swapPlayersInTeam(true);
+                    // Индикатор остается на той же стороне, но переходит на другую позицию (top <-> bottom)
+                    if (shuttlecockPosition === 'top_left') {
+                        shuttlecockPosition = 'bottom_left';
+                    } else {
+                        shuttlecockPosition = 'top_left';
+                    }
+                } else {
+                    // Подавала правая команда - подача переходит на левую сторону
+                    // К правому игроку (top_left), если счет четный, к левому (bottom_left), если нечетный
+                    if (scoreLeft % 2 === 0) {
+                        shuttlecockPosition = 'top_left';
+                    } else {
+                        shuttlecockPosition = 'bottom_left';
+                    }
+                }
+            } else {
+                // Правая команда выиграла очко
+                if (isServingRight) {
+                    // Подавала правая команда - игроки меняются местами, индикатор переходит с подававшим
+                    swapPlayersInTeam(false);
+                    // Индикатор остается на той же стороне, но переходит на другую позицию (top <-> bottom)
+                    if (shuttlecockPosition === 'top_right') {
+                        shuttlecockPosition = 'bottom_right';
+                    } else {
+                        shuttlecockPosition = 'top_right';
+                    }
+                } else {
+                    // Подавала левая команда - подача переходит на правую сторону
+                    // К правому игроку (top_right), если счет четный, к левому (bottom_right), если нечетный
+                    if (scoreRight % 2 === 0) {
+                        shuttlecockPosition = 'top_right';
+                    } else {
+                        shuttlecockPosition = 'bottom_right';
+                    }
+                }
+            }
+        }
+        
         // Увеличение счета левой команды
         document.getElementById('court_left')?.addEventListener('click', function(e) {
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
             saveGameState();
             scoreLeft++;
+            handlePointScored('left');
             updateScore();
         });
         
@@ -560,6 +749,7 @@
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
             saveGameState();
             scoreRight++;
+            handlePointScored('right');
             updateScore();
         });
         
@@ -712,6 +902,45 @@
             }
         }
         
+        // Создание маркировки линий разметки
+        function createGridLabels() {
+            const courtArea = document.querySelector('.court-area');
+            if (!courtArea) return;
+            
+            const verticalLabelsContainer = document.getElementById('vertical-labels');
+            const horizontalLabelsContainer = document.getElementById('horizontal-labels');
+            if (!verticalLabelsContainer || !horizontalLabelsContainer) return;
+            
+            // Очищаем существующие метки
+            verticalLabelsContainer.innerHTML = '';
+            horizontalLabelsContainer.innerHTML = '';
+            
+            const courtWidth = courtArea.offsetWidth;
+            const courtHeight = courtArea.offsetHeight;
+            const lineSpacing = 50; // Расстояние между линиями в пикселях
+            
+            // Создаем метки для вертикальных линий (цифры)
+            const verticalLinesCount = Math.floor(courtWidth / lineSpacing);
+            for (let i = 1; i <= verticalLinesCount; i++) {
+                const label = document.createElement('div');
+                label.className = 'grid-label vertical';
+                label.textContent = i;
+                label.style.left = (i * lineSpacing) + 'px';
+                verticalLabelsContainer.appendChild(label);
+            }
+            
+            // Создаем метки для горизонтальных линий (буквы)
+            const horizontalLinesCount = Math.floor(courtHeight / lineSpacing);
+            const letters = 'abcdefghijklmnopqrstuvwxyz';
+            for (let i = 0; i < horizontalLinesCount && i < letters.length; i++) {
+                const label = document.createElement('div');
+                label.className = 'grid-label horizontal';
+                label.textContent = letters[i];
+                label.style.top = (i * lineSpacing) + 'px';
+                horizontalLabelsContainer.appendChild(label);
+            }
+        }
+        
         // Обновление информации о размере экрана
         function updateDebugScreenInfo() {
             const debugElement = document.getElementById('debugScreenInfo');
@@ -755,6 +984,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateScore();
             
+            // Создаем маркировку линий разметки
+            createGridLabels();
+            
             // Привязываем обработчики к кнопкам
             document.getElementById('btnUndo')?.addEventListener('click', undoLastAction);
             document.getElementById('btnMoveShuttlecock')?.addEventListener('click', moveShuttlecockBetweenSides);
@@ -769,9 +1001,15 @@
             updateDebugScreenInfo();
             
             // Обновляем информацию при изменении размера окна
-            window.addEventListener('resize', updateDebugScreenInfo);
+            window.addEventListener('resize', function() {
+                updateDebugScreenInfo();
+                createGridLabels(); // Пересоздаем метки при изменении размера
+            });
             window.addEventListener('orientationchange', function() {
-                setTimeout(updateDebugScreenInfo, 100);
+                setTimeout(function() {
+                    updateDebugScreenInfo();
+                    createGridLabels(); // Пересоздаем метки при изменении ориентации
+                }, 100);
             });
             
             console.log('Страница судейства загружена');
