@@ -630,8 +630,34 @@ function updateToggleButton() {
     }
 }
 
+// BroadcastChannel для получения обновлений счёта от других вкладок
+let scoreUpdateChannel = null;
+
+function setupScoreUpdateListener() {
+    try {
+        scoreUpdateChannel = new BroadcastChannel('match-score-updates');
+        scoreUpdateChannel.onmessage = function(event) {
+            const data = event.data;
+            if (data.type === 'score-updated' && data.matchId) {
+                console.log(`[TournamentView] 📨 Получено сообщение об обновлении счёта для матча ${data.matchId}`);
+                // Если автообновление активно, обновляем страницу немедленно
+                if (isAutoRefreshActive) {
+                    console.log('[TournamentView] 🔄 Немедленное обновление страницы из-за изменения счёта');
+                    location.reload();
+                }
+            }
+        };
+        console.log('[TournamentView] 📡 Слушатель обновлений счёта активирован');
+    } catch (error) {
+        console.warn('[TournamentView] ⚠️ Не удалось создать BroadcastChannel:', error);
+    }
+}
+
 // Запускаем автообновление при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
+    // Настраиваем слушатель обновлений счёта от других вкладок
+    setupScoreUpdateListener();
+    
     // Загружаем сохраненные настройки
     loadRefreshSettings();
     
@@ -646,6 +672,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Останавливаем автообновление при уходе со страницы
     window.addEventListener('beforeunload', function() {
         stopAutoRefresh();
+        if (scoreUpdateChannel) {
+            scoreUpdateChannel.close();
+        }
     });
 });
 

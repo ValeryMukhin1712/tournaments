@@ -1580,6 +1580,80 @@
             .then(result => {
                 if (result.success) {
                     console.log('[Referee] ✅ Счёт сохранён в БД:', result.message);
+                    console.log('[Referee] 📊 Текущий счёт:', score1, ':', score2, 'для матча', matchId, 'сет', setNumber);
+                    
+                    // Получаем параметры из URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const matchIdFromUrl = urlParams.get('match_id') || '';
+                    const setNumberFromUrl = urlParams.get('set') || '1';
+                    
+                    // Получаем текущий счёт
+                    let currentScoreLeft = scoreLeft;
+                    let currentScoreRight = scoreRight;
+                    
+                    // Формируем имена участников из полей
+                    const topLeftName = document.getElementById('top_left_player_input').value || '';
+                    const bottomLeftName = document.getElementById('bottom_left_player_input').value || '';
+                    const topRightName = document.getElementById('name_top_right').value || '';
+                    const bottomRightName = document.getElementById('name_bottom_right').value || '';
+                    
+                    // Если верхнее и нижнее имена разные, объединяем через " - "
+                    let participant1Name = topLeftName;
+                    if (bottomLeftName && bottomLeftName !== topLeftName) {
+                        participant1Name = bottomLeftName + ' - ' + topLeftName;
+                    }
+                    
+                    let participant2Name = topRightName;
+                    if (bottomRightName && bottomRightName !== topRightName) {
+                        participant2Name = topRightName + ' - ' + bottomRightName;
+                    }
+                    
+                    // Отправляем результат в родительское окно (форму Результат), если оно открыто
+                    // Это обновит таблицы Расписание и Турнирная через механизм формы Результат
+                    // Используем отдельный тип сообщения для автообновления, чтобы не закрывать окно
+                    if (window.opener && !window.opener.closed) {
+                        try {
+                            const resultData = {
+                                type: 'refereeResultAutoUpdate', // Отдельный тип для автообновления
+                                result: {
+                                    match_id: matchIdFromUrl,
+                                    setNumber: setNumberFromUrl,
+                                    scoreLeft: currentScoreLeft,
+                                    scoreRight: currentScoreRight,
+                                    participant1: participant1Name,
+                                    participant2: participant2Name,
+                                    tournament_name: urlParams.get('tournament') || ''
+                                }
+                            };
+                            
+                            window.opener.postMessage(resultData, window.location.origin);
+                            console.log('[Referee] 📤 Результат отправлен в родительское окно для автообновления таблиц (без закрытия окна)');
+                            console.log('[Referee] 📤 Данные:', resultData);
+                        } catch (error) {
+                            console.warn('[Referee] ⚠️ Не удалось отправить результат в родительское окно:', error);
+                        }
+                    } else {
+                        console.log('[Referee] ℹ️ window.opener не доступен (страница открыта напрямую, не через window.open)');
+                    }
+                    
+                    // Отправляем сообщение другим вкладкам о том, что счёт обновлен
+                    // Это работает даже если window.opener недоступен
+                    try {
+                        const broadcastChannel = new BroadcastChannel('match-score-updates');
+                        broadcastChannel.postMessage({
+                            type: 'score-updated',
+                            matchId: matchIdFromUrl,
+                            setNumber: parseInt(setNumberFromUrl) || 1,
+                            score1: score1,
+                            score2: score2,
+                            timestamp: Date.now()
+                        });
+                        console.log('[Referee] 📡 Сообщение об обновлении счёта отправлено другим вкладкам через BroadcastChannel');
+                        console.log('[Referee] 📡 Данные:', { matchId: matchIdFromUrl, setNumber: setNumberFromUrl, score1, score2 });
+                        broadcastChannel.close();
+                    } catch (error) {
+                        console.warn('[Referee] ⚠️ Не удалось отправить сообщение через BroadcastChannel:', error);
+                    }
                 } else {
                     console.warn('[Referee] ⚠️ Ошибка сохранения счёта:', result.error);
                 }

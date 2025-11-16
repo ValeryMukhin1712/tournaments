@@ -3815,6 +3815,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     def auto_save_match_score(match_id):
         """Автоматическое сохранение счета матча (используется страницей судейства)"""
         from flask import session
+        from datetime import datetime
         try:
             # CSRF из заголовка, аналогично другим POST API
             csrf_token = request.headers.get('X-CSRFToken')
@@ -3857,7 +3858,6 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Устанавливаем реальное время начала матча при первом сохранении счета
             # Используем локальное время для учета часового пояса пользователя
             if not match.actual_start_time:
-                from datetime import datetime
                 match.actual_start_time = datetime.now()
                 match.status = 'в_процессе'
                 logger.info(f"[РЕАЛЬНОЕ ВРЕМЯ] Начало матча {match_id} (первое действие): {match.actual_start_time}")
