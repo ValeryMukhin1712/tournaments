@@ -1103,29 +1103,75 @@
         </button>
             
             <!-- Поля для имен игроков -->
-            <input type="text" 
-                   class="player-name" 
-                   id="top_left_player_input" 
-                   placeholder="Игрок 1" 
-                   value="{{ participant1.split('-')[0] if '-' in participant1 else participant1 }}">
+            {# Упрощенная обработка participant1 #}
+            {# Алгоритм: если есть тире "-", разделяем на части; если нет - дублируем имя в оба поля #}
+            {% if '-' in participant1 %}
+                {# Если есть тире, разделяем на части #}
+                {# Поддержка форматов: "Маша - Оля" или "Маша-Оля" #}
+                {% if ' - ' in participant1 %}
+                    {% set p1_parts = participant1.split(' - ', 1) %}
+                {% else %}
+                    {% set p1_parts = participant1.split('-', 1) %}
+                {% endif %}
+                {# Пример: "Маша - Оля" -> нижний левый: Маша, верхний левый: Оля #}
+                <input type="text" 
+                       class="player-name" 
+                       id="top_left_player_input" 
+                       placeholder="Игрок 1" 
+                       value="{{ p1_parts[1].strip() if p1_parts|length > 1 else participant1 }}">
+                <input type="text" 
+                       class="player-name" 
+                       id="bottom_left_player_input" 
+                       placeholder="Игрок 1" 
+                       value="{{ p1_parts[0].strip() if p1_parts|length > 1 else participant1 }}">
+            {% else %}
+                {# Если нет тире, показываем имя в обоих полях #}
+                <input type="text" 
+                       class="player-name" 
+                       id="top_left_player_input" 
+                       placeholder="Игрок 1" 
+                       value="{{ participant1 }}">
+                <input type="text" 
+                       class="player-name" 
+                       id="bottom_left_player_input" 
+                       placeholder="Игрок 1" 
+                       value="{{ participant1 }}">
+            {% endif %}
             
-            <input type="text" 
-                   class="player-name" 
-                   id="bottom_left_player_input" 
-                   placeholder="Игрок 1" 
-                   value="{{ participant1.split('-')[1] if '-' in participant1 and participant1.split('-')|length > 1 else participant1 }}">
-            
-            <input type="text" 
-                   class="player-name" 
-                   id="name_top_right" 
-                   placeholder="Игрок 2" 
-                   value="{{ participant2.split('-')[0] if '-' in participant2 else participant2 }}">
-            
-            <input type="text" 
-                   class="player-name" 
-                   id="name_bottom_right" 
-                   placeholder="Игрок 2" 
-                   value="{{ participant2.split('-')[1] if '-' in participant2 and participant2.split('-')|length > 1 else participant2 }}">
+            {# Упрощенная обработка participant2 #}
+            {# Алгоритм: если есть тире "-", разделяем на части; если нет - дублируем имя в оба поля #}
+            {% if '-' in participant2 %}
+                {# Если есть тире, разделяем на части #}
+                {# Поддержка форматов: "Надя - Галя" или "Надя-Галя" #}
+                {% if ' - ' in participant2 %}
+                    {% set p2_parts = participant2.split(' - ', 1) %}
+                {% else %}
+                    {% set p2_parts = participant2.split('-', 1) %}
+                {% endif %}
+                {# Пример: "Надя - Галя" -> верхний правый: Надя, нижний правый: Галя #}
+                <input type="text" 
+                       class="player-name" 
+                       id="name_top_right" 
+                       placeholder="Игрок 2" 
+                       value="{{ p2_parts[0].strip() if p2_parts|length > 1 else participant2 }}">
+                <input type="text" 
+                       class="player-name" 
+                       id="name_bottom_right" 
+                       placeholder="Игрок 2" 
+                       value="{{ p2_parts[1].strip() if p2_parts|length > 1 else participant2 }}">
+            {% else %}
+                {# Если нет тире, показываем имя в обоих полях #}
+                <input type="text" 
+                       class="player-name" 
+                       id="name_top_right" 
+                       placeholder="Игрок 2" 
+                       value="{{ participant2 }}">
+                <input type="text" 
+                       class="player-name" 
+                       id="name_bottom_right" 
+                       placeholder="Игрок 2" 
+                       value="{{ participant2 }}">
+            {% endif %}
             
             <!-- Индикаторы подачи -->
             <div class="server-indicator" id="server_top_left">
@@ -1211,11 +1257,91 @@
         }
         
         // Обновление счета
+        // Переменная для отслеживания таймера сохранения (debounce)
+        let saveScoreTimeout = null;
+        
+        // Функция для сохранения счёта в базу данных
+        function saveScoreToDatabase() {
+            // Получаем параметры из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const setNumber = urlParams.get('set') || '1';
+            
+            // Если нет match_id, значит это не матч из турнира, не сохраняем
+            if (!matchId || matchId === '') {
+                return;
+            }
+            
+            // Получаем текущий счёт
+            // В режиме просмотра команды отражены визуально, но в базе данных они остаются в исходном порядке
+            // score1 в БД = левая команда (participant1)
+            // score2 в БД = правая команда (participant2)
+            let score1, score2;
+            
+            if (document.body.classList.contains('view-mode')) {
+                // В режиме просмотра команды визуально поменялись местами:
+                // scoreLeft отображает правую команду (participant2) -> score2 в БД
+                // scoreRight отображает левую команду (participant1) -> score1 в БД
+                score1 = scoreRight;  // В режиме просмотра правый счёт = левая команда в БД
+                score2 = scoreLeft;   // В режиме просмотра левый счёт = правая команда в БД
+            } else {
+                // В обычном режиме счёт соответствует командам напрямую
+                score1 = scoreLeft;   // Левая команда (participant1)
+                score2 = scoreRight;  // Правая команда (participant2)
+            }
+            
+            // Получаем CSRF токен
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (!csrfToken) {
+                console.warn('[Referee] CSRF токен не найден');
+                return;
+            }
+            
+            // Подготавливаем данные для отправки
+            const data = {
+                score1: score1,
+                score2: score2,
+                set_number: parseInt(setNumber) || 1
+            };
+            
+            // Отправляем запрос на сохранение
+            fetch(`/api/matches/${matchId}/auto-save-score`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    console.log('[Referee] ✅ Счёт сохранён в БД:', result.message);
+                } else {
+                    console.warn('[Referee] ⚠️ Ошибка сохранения счёта:', result.error);
+                }
+            })
+            .catch(error => {
+                console.error('[Referee] ❌ Ошибка при сохранении счёта:', error);
+            });
+        }
+        
         function updateScore() {
             document.getElementById('scoreLeft').textContent = scoreLeft;
             document.getElementById('scoreRight').textContent = scoreRight;
             updateShuttlecockPosition();
             checkVictory();
+            
+            // Сохраняем счёт в базу данных с задержкой (debounce)
+            // Очищаем предыдущий таймер
+            if (saveScoreTimeout) {
+                clearTimeout(saveScoreTimeout);
+            }
+            
+            // Устанавливаем новый таймер на 500мс (сохраняем через 0.5 секунды после последнего изменения)
+            saveScoreTimeout = setTimeout(function() {
+                saveScoreToDatabase();
+            }, 500);
         }
         
         // Функция определения победителя
@@ -1709,11 +1835,75 @@
         }
         
         // Сохранить результат (заглушка)
+        // Функция для отправки счёта в родительское окно
+        function sendResultToParent() {
+            // Проверяем, открыто ли окно через window.open
+            if (window.opener && !window.opener.closed) {
+                // Получаем параметры из URL для передачи обратно
+                const urlParams = new URLSearchParams(window.location.search);
+                const matchId = urlParams.get('match_id') || '';
+                const setNumber = urlParams.get('set') || '1';
+                
+                // Получаем текущий счёт
+                let currentScoreLeft = scoreLeft;
+                let currentScoreRight = scoreRight;
+                
+                // Формируем имена участников из полей
+                const topLeftName = document.getElementById('top_left_player_input').value || '';
+                const bottomLeftName = document.getElementById('bottom_left_player_input').value || '';
+                const topRightName = document.getElementById('name_top_right').value || '';
+                const bottomRightName = document.getElementById('name_bottom_right').value || '';
+                
+                // Если верхнее и нижнее имена разные, объединяем через " - "
+                let participant1Name = topLeftName;
+                if (bottomLeftName && bottomLeftName !== topLeftName) {
+                    participant1Name = bottomLeftName + ' - ' + topLeftName;
+                }
+                
+                let participant2Name = topRightName;
+                if (bottomRightName && bottomRightName !== topRightName) {
+                    participant2Name = topRightName + ' - ' + bottomRightName;
+                }
+                
+                // Отправляем счёт в родительское окно через postMessage
+                const resultData = {
+                    type: 'refereeResult',
+                    result: {
+                        match_id: matchId,
+                        setNumber: setNumber,
+                        scoreLeft: currentScoreLeft,
+                        scoreRight: currentScoreRight,
+                        participant1: participant1Name,
+                        participant2: participant2Name,
+                        tournament_name: urlParams.get('tournament') || ''
+                    }
+                };
+                
+                console.log('[Referee] Отправляем результат в родительское окно:', resultData);
+                try {
+                    window.opener.postMessage(resultData, window.location.origin);
+                    console.log('[Referee] ✅ Результат отправлен успешно');
+                    return true;
+                } catch (e) {
+                    console.error('[Referee] ❌ Ошибка при отправке результата:', e);
+                    return false;
+                }
+            }
+            return false;
+        }
+        
         function saveResult() {
-            alert('Сохранение результата:\n' + 
-                  'Левые: ' + scoreLeft + '\n' +
-                  'Правые: ' + scoreRight + '\n' +
-                  '(Функция в разработке)');
+            // Отправляем результат в родительское окно
+            if (sendResultToParent()) {
+                alert('Результат сохранён и передан в форму Результат:\n' + 
+                      'Левые: ' + scoreLeft + '\n' +
+                      'Правые: ' + scoreRight);
+            } else {
+                alert('Сохранение результата:\n' + 
+                      'Левые: ' + scoreLeft + '\n' +
+                      'Правые: ' + scoreRight + '\n' +
+                      '\nПримечание: Страница не открыта из формы Результат.');
+            }
         }
         
         // Назад
@@ -1723,11 +1913,20 @@
                 // Выходим из режима просмотра, оставаясь на той же странице судейства
                 toggleViewMode();
             } else {
-                // Обычное поведение для других случаев
-                if (window.history.length > 1) {
-                    window.history.back();
+                // Если страница открыта из формы Результат (через window.open)
+                if (window.opener && !window.opener.closed) {
+                    // Отправляем счёт в родительское окно
+                    sendResultToParent();
+                    
+                    // Закрываем окно судейства
+                    window.close();
                 } else {
-                    window.location.href = '/referee';
+                    // Если не открыто через window.open, используем обычное поведение
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = '/referee';
+                    }
                 }
             }
         }
@@ -1858,8 +2057,119 @@
         }
         
         // Инициализация обработчиков событий
+        // Автоматическая передача счёта при закрытии окна
+        window.addEventListener('beforeunload', function(e) {
+            // Если страница открыта из формы Результат, передаем счёт при закрытии
+            if (window.opener && !window.opener.closed) {
+                // Используем sendBeacon для надежной передачи данных при закрытии окна
+                try {
+                    sendResultToParent();
+                } catch (err) {
+                    console.error('[Referee] Ошибка при передаче счёта при закрытии окна:', err);
+                }
+            }
+        });
+        
+        // Функция для загрузки счёта из базы данных
+        async function loadScoreFromDatabase() {
+            // Получаем параметры из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const setNumber = urlParams.get('set') || '1';
+            
+            // Если нет match_id, значит это не матч из турнира, используем счёт из URL или 0:0
+            if (!matchId || matchId === '') {
+                // Пробуем загрузить из URL параметров
+                const score1Param = urlParams.get('score1');
+                const score2Param = urlParams.get('score2');
+                
+                if (score1Param !== null && score2Param !== null) {
+                    scoreLeft = parseInt(score1Param, 10) || 0;
+                    scoreRight = parseInt(score2Param, 10) || 0;
+                    console.log('[Referee] Счёт загружен из URL параметров:', scoreLeft, ':', scoreRight);
+                    updateScore();
+                    return;
+                }
+                
+                // Если нет параметров, оставляем 0:0
+                return;
+            }
+            
+            // Загружаем счёт из базы данных
+            try {
+                const response = await fetch(`/api/matches/${matchId}?_t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.match) {
+                    let currentScore1, currentScore2;
+                    
+                    // Получаем счёт для соответствующего сета из базы данных
+                    const setNum = parseInt(setNumber) || 1;
+                    
+                    if (setNum === 1) {
+                        currentScore1 = data.match.set1_score1 !== null ? data.match.set1_score1 : 0;
+                        currentScore2 = data.match.set1_score2 !== null ? data.match.set1_score2 : 0;
+                    } else if (setNum === 2) {
+                        currentScore1 = data.match.set2_score1 !== null ? data.match.set2_score1 : 0;
+                        currentScore2 = data.match.set2_score2 !== null ? data.match.set2_score2 : 0;
+                    } else if (setNum === 3) {
+                        currentScore1 = data.match.set3_score1 !== null ? data.match.set3_score1 : 0;
+                        currentScore2 = data.match.set3_score2 !== null ? data.match.set3_score2 : 0;
+                    } else {
+                        currentScore1 = 0;
+                        currentScore2 = 0;
+                    }
+                    
+                    // Устанавливаем счёт
+                    // score1 в БД = левая команда (participant1) = scoreLeft
+                    // score2 в БД = правая команда (participant2) = scoreRight
+                    scoreLeft = currentScore1;
+                    scoreRight = currentScore2;
+                    
+                    console.log(`[Referee] ✅ Счёт загружен из БД для матча ${matchId}, сет ${setNum}:`, scoreLeft, ':', scoreRight);
+                    updateScore();
+                } else {
+                    console.warn('[Referee] ⚠️ Не удалось загрузить данные матча из БД');
+                    
+                    // Пробуем загрузить из URL параметров как резервный вариант
+                    const score1Param = urlParams.get('score1');
+                    const score2Param = urlParams.get('score2');
+                    
+                    if (score1Param !== null && score2Param !== null) {
+                        scoreLeft = parseInt(score1Param, 10) || 0;
+                        scoreRight = parseInt(score2Param, 10) || 0;
+                        console.log('[Referee] Счёт загружен из URL параметров (резервный вариант):', scoreLeft, ':', scoreRight);
+                        updateScore();
+                    }
+                }
+            } catch (error) {
+                console.error('[Referee] ❌ Ошибка при загрузке счёта из БД:', error);
+                
+                // Пробуем загрузить из URL параметров как резервный вариант
+                const score1Param = urlParams.get('score1');
+                const score2Param = urlParams.get('score2');
+                
+                if (score1Param !== null && score2Param !== null) {
+                    scoreLeft = parseInt(score1Param, 10) || 0;
+                    scoreRight = parseInt(score2Param, 10) || 0;
+                    console.log('[Referee] Счёт загружен из URL параметров (резервный вариант):', scoreLeft, ':', scoreRight);
+                    updateScore();
+                }
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
-            updateScore();
+            // Загружаем счёт из базы данных или URL параметров
+            loadScoreFromDatabase().then(() => {
+                // После загрузки счёта обновляем отображение
+                updateScore();
+            });
             
             // Создаем маркировку линий разметки
             createGridLabels();

@@ -667,16 +667,35 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         set_number = request.args.get('set', '1')
         match_id = request.args.get('match_id', '')
         
-        if clear_data:
+        # Всегда получаем параметры из URL, даже если clear=true
+        # Flask автоматически декодирует URL параметры (заменяет + на пробелы)
+        from urllib.parse import unquote
+        participant1 = request.args.get('p1', '')
+        participant2 = request.args.get('p2', '')
+        tournament_name = request.args.get('tournament', '')
+        
+        # Дополнительное декодирование на случай двойного кодирования
+        if participant1:
+            participant1 = unquote(participant1)
+        if participant2:
+            participant2 = unquote(participant2)
+        if tournament_name:
+            tournament_name = unquote(tournament_name)
+        
+        # Если clear=true, очищаем только если параметры не переданы
+        if clear_data and not participant1 and not participant2:
             # Очищаем данные для нового матча
             participant1 = ''
             participant2 = ''
             tournament_name = ''
         else:
-            # Используем переданные данные или значения по умолчанию
-            participant1 = request.args.get('p1', 'Игрок 1')
-            participant2 = request.args.get('p2', 'Игрок 2')
-            tournament_name = request.args.get('tournament', 'Турнир')
+            # Если параметры пустые после получения, используем значения по умолчанию
+            if not participant1 or participant1.strip() == '':
+                participant1 = 'Игрок 1'
+            if not participant2 or participant2.strip() == '':
+                participant2 = 'Игрок 2'
+            if not tournament_name or tournament_name.strip() == '':
+                tournament_name = 'Турнир'
         
         return render_template('referee_page.html', 
                              participant1=participant1, 
