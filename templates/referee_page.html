@@ -206,6 +206,8 @@
             font-weight: bold;
             min-width: 150px;
             text-align: center;
+            cursor: pointer;
+            user-select: none; /* Предотвращает выделение текста при клике */
         }
         
         .score-left {
@@ -549,7 +551,7 @@
             }
             
             .view-mode .score {
-                font-size: 225px !important; /* 300px * 0.75 = 225px */
+                font-size: 214px !important; /* 225px * 0.95 = 213.75px, округлено до 214px (уменьшено на 5%) */
             }
             
             /* Уменьшаем шрифт имён игроков на 20% (48px * 0.8 = 38.4px, округлено до 38px) */
@@ -620,6 +622,16 @@
             /* Поднимаем цифры счёта на 5% */
             .scoreboard {
                 top: 45% !important; /* Было 50%, теперь 45% (поднято на 5%) */
+            }
+            
+            /* Поднимаем цифры счёта на 2% в режиме просмотра (было 50%, теперь 48%) */
+            .view-mode .scoreboard {
+                top: 48% !important;
+            }
+            
+            /* Делаем фон полей имён игроков прозрачным */
+            .player-name {
+                background: transparent !important;
             }
         }
         
@@ -653,7 +665,7 @@
             }
             
             .view-mode .score {
-                font-size: 225px !important; /* 300px * 0.75 = 225px */
+                font-size: 214px !important; /* 225px * 0.95 = 213.75px, округлено до 214px (уменьшено на 5%) */
             }
             
             /* Уменьшаем шрифт имён игроков на 20% (48px * 0.8 = 38.4px, округлено до 38px) */
@@ -724,6 +736,16 @@
             /* Поднимаем цифры счёта на 5% */
             .scoreboard {
                 top: 45% !important; /* Было 50%, теперь 45% (поднято на 5%) */
+            }
+            
+            /* Поднимаем цифры счёта на 2% в режиме просмотра (было 50%, теперь 48%) */
+            .view-mode .scoreboard {
+                top: 48% !important;
+            }
+            
+            /* Делаем фон полей имён игроков прозрачным */
+            .player-name {
+                background: transparent !important;
             }
         }
         
@@ -1799,6 +1821,23 @@
         // Увеличение счета правой команды
         document.getElementById('court_right')?.addEventListener('click', function(e) {
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
+            saveGameState();
+            scoreRight++;
+            handlePointScored('right');
+            updateScore();
+        });
+        
+        // Увеличение счета при клике на цифры счёта (работает в режиме просмотра)
+        document.getElementById('scoreLeft')?.addEventListener('click', function(e) {
+            e.stopPropagation(); // Останавливаем всплытие события
+            saveGameState();
+            scoreLeft++;
+            handlePointScored('left');
+            updateScore();
+        });
+        
+        document.getElementById('scoreRight')?.addEventListener('click', function(e) {
+            e.stopPropagation(); // Останавливаем всплытие события
             saveGameState();
             scoreRight++;
             handlePointScored('right');
