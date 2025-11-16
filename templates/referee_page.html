@@ -391,6 +391,22 @@
             /* Делаем окно с информацией об экране более прозрачным */
             .debug-screen-info {
                 background: rgba(11, 112, 54, 0.5) !important; /* Было 0.9, теперь 0.5 - более прозрачное */
+                top: 50px !important; /* Окно ниже чекбокса */
+            }
+            
+            /* Чекбокс для маленьких экранов */
+            .screen-info-checkbox-container {
+                top: 8px !important;
+                padding: 6px 12px !important;
+            }
+            
+            .screen-info-checkbox-container label {
+                font-size: 12px !important;
+            }
+            
+            .screen-info-checkbox-container input[type="checkbox"] {
+                width: 16px !important;
+                height: 16px !important;
             }
             
             /* Поднимаем цифры счёта на 5% */
@@ -479,6 +495,22 @@
             /* Делаем окно с информацией об экране более прозрачным */
             .debug-screen-info {
                 background: rgba(11, 112, 54, 0.5) !important; /* Было 0.9, теперь 0.5 - более прозрачное */
+                top: 50px !important; /* Окно ниже чекбокса */
+            }
+            
+            /* Чекбокс для маленьких экранов */
+            .screen-info-checkbox-container {
+                top: 8px !important;
+                padding: 6px 12px !important;
+            }
+            
+            .screen-info-checkbox-container label {
+                font-size: 12px !important;
+            }
+            
+            .screen-info-checkbox-container input[type="checkbox"] {
+                width: 16px !important;
+                height: 16px !important;
             }
             
             /* Поднимаем цифры счёта на 5% */
@@ -567,6 +599,22 @@
             /* Делаем окно с информацией об экране более прозрачным */
             .debug-screen-info {
                 background: rgba(11, 112, 54, 0.5) !important;
+                top: 50px !important; /* Окно ниже чекбокса */
+            }
+            
+            /* Чекбокс для маленьких экранов */
+            .screen-info-checkbox-container {
+                top: 8px !important;
+                padding: 6px 12px !important;
+            }
+            
+            .screen-info-checkbox-container label {
+                font-size: 12px !important;
+            }
+            
+            .screen-info-checkbox-container input[type="checkbox"] {
+                width: 16px !important;
+                height: 16px !important;
             }
             
             /* Поднимаем цифры счёта на 5% */
@@ -655,6 +703,22 @@
             /* Делаем окно с информацией об экране более прозрачным */
             .debug-screen-info {
                 background: rgba(11, 112, 54, 0.5) !important;
+                top: 50px !important; /* Окно ниже чекбокса */
+            }
+            
+            /* Чекбокс для маленьких экранов */
+            .screen-info-checkbox-container {
+                top: 8px !important;
+                padding: 6px 12px !important;
+            }
+            
+            .screen-info-checkbox-container label {
+                font-size: 12px !important;
+            }
+            
+            .screen-info-checkbox-container input[type="checkbox"] {
+                width: 16px !important;
+                height: 16px !important;
             }
             
             /* Поднимаем цифры счёта на 5% */
@@ -985,10 +1049,44 @@
             z-index: 1000;
         }
         
+        /* Чекбокс для показа свойств экрана */
+        .screen-info-checkbox-container {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .screen-info-checkbox-container label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2E7D32;
+            user-select: none;
+        }
+        
+        .screen-info-checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #2E7D32;
+        }
+        
         /* Блок информации о размере экрана */
         .debug-screen-info {
             position: fixed;
-            top: 10px;
+            top: 50px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(11, 112, 54, 0.9);
@@ -1000,6 +1098,11 @@
             z-index: 1000;
             min-width: 200px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: none;
+        }
+        
+        .debug-screen-info.visible {
+            display: block;
         }
         
         .debug-screen-info .debug-title {
@@ -1047,6 +1150,14 @@
     </style>
 </head>
 <body>
+    <!-- Чекбокс для показа свойств экрана -->
+    <div class="screen-info-checkbox-container">
+        <label for="showScreenInfo">
+            <input type="checkbox" id="showScreenInfo">
+            Показать свойства экрана
+        </label>
+    </div>
+    
     <div class="container">
         <!-- Панель управления -->
         <div class="control-panel">
@@ -2187,15 +2298,34 @@
             // Инициализация блока информации о размере экрана
             updateDebugScreenInfo();
             
+            // Обработчик для чекбокса показа свойств экрана
+            const showScreenInfoCheckbox = document.getElementById('showScreenInfo');
+            const debugScreenInfo = document.getElementById('debugScreenInfo');
+            
+            if (showScreenInfoCheckbox && debugScreenInfo) {
+                showScreenInfoCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        debugScreenInfo.classList.add('visible');
+                        updateDebugScreenInfo();
+                    } else {
+                        debugScreenInfo.classList.remove('visible');
+                    }
+                });
+            }
+            
             // Обновляем информацию при изменении размера окна
             window.addEventListener('resize', function() {
-                updateDebugScreenInfo();
+                if (debugScreenInfo && debugScreenInfo.classList.contains('visible')) {
+                    updateDebugScreenInfo();
+                }
                 createGridLabels(); // Пересоздаем метки при изменении размера
                 positionPlayerNameFields(); // Обновляем позиции полей
             });
             window.addEventListener('orientationchange', function() {
                 setTimeout(function() {
-                    updateDebugScreenInfo();
+                    if (debugScreenInfo && debugScreenInfo.classList.contains('visible')) {
+                        updateDebugScreenInfo();
+                    }
                     createGridLabels(); // Пересоздаем метки при изменении ориентации
                     positionPlayerNameFields(); // Обновляем позиции полей
                 }, 100);
