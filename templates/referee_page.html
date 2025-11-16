@@ -1035,6 +1035,136 @@
             }
         }
         
+        /* Медиа-запрос для Redme 4x (Viewport 642 x 281 и меньше) с DevicePixelRatio 2.00 */
+        @media screen and (max-width: 642px) and (max-height: 281px) and (-webkit-min-device-pixel-ratio: 2.0) and (-webkit-max-device-pixel-ratio: 2.0),
+               screen and (max-width: 642px) and (max-height: 281px) and (min-resolution: 2.0dppx) and (max-resolution: 2.0dppx) {
+            /* Уменьшаем шрифт имён игроков на 20% (48px * 0.8 = 38.4px, округлено до 38px) */
+            .player-name {
+                font-size: 38px !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 58px !important; /* 72px * 0.8 = 57.6px, округлено до 58px */
+            }
+            
+            /* Поднимаем верхние имена на 10px */
+            #top_left_player_input,
+            #name_top_right {
+                transform: translateY(-10px) !important;
+            }
+            
+            /* Настройки чекбокса: без надписи, уменьшенный размер, расширяющееся поле до 80px */
+            .screen-info-checkbox-container {
+                width: auto !important;
+                max-width: 80px !important;
+                padding: 6px 8px !important;
+            }
+            
+            .screen-info-checkbox-container label {
+                font-size: 0 !important; /* Скрываем текст */
+                line-height: 0 !important;
+                gap: 0 !important;
+            }
+            
+            /* Уменьшаем размер чекбокса на 20% (18px * 0.8 = 14.4px, округлено до 14px) */
+            .screen-info-checkbox-container input[type="checkbox"] {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            
+            /* Поля имён игроков расширяющиеся в зависимости от длины имени: минимум 18vw, максимум 30vw */
+            .player-name {
+                width: auto !important;
+                min-width: 18vw !important;
+                max-width: 30vw !important;
+                text-align: center !important; /* Выравнивание по центру */
+            }
+            
+            /* Сдвигаем правые поля вправо на 5% (было 10%, теперь 5%) */
+            #name_top_right,
+            #name_bottom_right {
+                right: 5% !important;
+            }
+        }
+        
+        /* Медиа-запрос для Redme 4x (Viewport 642 x 281 и меньше) с DevicePixelRatio 1.20 */
+        @media screen and (max-width: 642px) and (max-height: 281px) and (-webkit-min-device-pixel-ratio: 1.2) and (-webkit-max-device-pixel-ratio: 1.2),
+               screen and (max-width: 642px) and (max-height: 281px) and (min-resolution: 1.2dppx) and (max-resolution: 1.2dppx) {
+            /* Уменьшаем шрифт имён игроков на 20% (48px * 0.8 = 38.4px, округлено до 38px) */
+            .player-name {
+                font-size: 38px !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 58px !important; /* 72px * 0.8 = 57.6px, округлено до 58px */
+            }
+            
+            /* Поднимаем верхние имена на 10px */
+            #top_left_player_input,
+            #name_top_right {
+                transform: translateY(-10px) !important;
+            }
+            
+            /* Настройки чекбокса: без надписи, уменьшенный размер, расширяющееся поле до 80px */
+            .screen-info-checkbox-container {
+                width: auto !important;
+                max-width: 80px !important;
+                padding: 6px 8px !important;
+            }
+            
+            .screen-info-checkbox-container label {
+                font-size: 0 !important; /* Скрываем текст */
+                line-height: 0 !important;
+                gap: 0 !important;
+            }
+            
+            /* Уменьшаем размер чекбокса на 20% (18px * 0.8 = 14.4px, округлено до 14px) */
+            .screen-info-checkbox-container input[type="checkbox"] {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            
+            /* Поля имён игроков расширяющиеся в зависимости от длины имени: минимум 18vw, максимум 30vw */
+            .player-name {
+                width: auto !important;
+                min-width: 18vw !important;
+                max-width: 30vw !important;
+                text-align: center !important; /* Выравнивание по центру */
+            }
+            
+            /* Сдвигаем правые поля вправо на 5% (было 10%, теперь 5%) */
+            #name_top_right,
+            #name_bottom_right {
+                right: 5% !important;
+            }
+        }
+        
+        /* Медиа-запрос для Viewport 643 x 285 и меньше с DevicePixelRatio 2.00 */
+        @media screen and (max-width: 643px) and (max-height: 285px) and (-webkit-min-device-pixel-ratio: 2.0) and (-webkit-max-device-pixel-ratio: 2.0),
+               screen and (max-width: 643px) and (max-height: 285px) and (min-resolution: 2.0dppx) and (max-resolution: 2.0dppx) {
+            /* Уменьшаем шрифт имён игроков на 50% (48px * 0.5 = 24px) */
+            .player-name {
+                font-size: 24px !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 36px !important; /* 72px * 0.5 = 36px */
+            }
+        }
+        
+        /* Медиа-запрос для Viewport 643 x 285 и меньше с DevicePixelRatio 1.20 */
+        @media screen and (max-width: 643px) and (max-height: 285px) and (-webkit-min-device-pixel-ratio: 1.2) and (-webkit-max-device-pixel-ratio: 1.2),
+               screen and (max-width: 643px) and (max-height: 285px) and (min-resolution: 1.2dppx) and (max-resolution: 1.2dppx) {
+            /* Уменьшаем шрифт имён игроков на 50% (48px * 0.5 = 24px) */
+            .player-name {
+                font-size: 24px !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 36px !important; /* 72px * 0.5 = 36px */
+            }
+        }
+        
         /* Кнопка возврата */
         .back-btn {
             position: fixed;
