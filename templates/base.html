@@ -396,15 +396,25 @@
         }
 
         .theme-option label {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 28px;
             height: 28px;
             border-radius: 50%;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.3s ease;
             position: relative;
+            transition: all 0.3s ease;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .theme-number {
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            z-index: 1;
         }
 
         .theme-option label:hover {
@@ -418,6 +428,10 @@
             box-shadow: 0 0 0 2px var(--primary-color), 0 3px 8px rgba(0, 0, 0, 0.3);
         }
 
+        .theme-option input[type="radio"]:checked + label .theme-number {
+            display: none;
+        }
+        
         .theme-option input[type="radio"]:checked + label::after {
             content: '✓';
             position: absolute;
@@ -775,38 +789,39 @@
             
             <!-- Кнопки выбора темы (только на главной странице) -->
             <div class="theme-selector">
+                <span style="font-size: 0.85rem; margin-right: 8px; color: var(--text-primary);">цветовая тема:</span>
                 <div class="theme-options">
                     <div class="theme-option theme-gray">
                         <input type="radio" id="theme-gray" name="theme" value="gray" onchange="changeTheme(this.value)">
-                        <label for="theme-gray" title="Серый"></label>
+                        <label for="theme-gray" title="Серый"><span class="theme-number">1</span></label>
                     </div>
                     <div class="theme-option theme-original-emerald">
                         <input type="radio" id="theme-original-emerald" name="theme" value="original-emerald" onchange="changeTheme(this.value)">
-                        <label for="theme-original-emerald" title="Оригинальный изумруд"></label>
+                        <label for="theme-original-emerald" title="Оригинальный изумруд"><span class="theme-number">2</span></label>
                     </div>
                     <div class="theme-option theme-deep-emerald">
                         <input type="radio" id="theme-deep-emerald" name="theme" value="deep-emerald" onchange="changeTheme(this.value)">
-                        <label for="theme-deep-emerald" title="Глубокий изумруд"></label>
+                        <label for="theme-deep-emerald" title="Глубокий изумруд"><span class="theme-number">3</span></label>
                     </div>
                     <div class="theme-option theme-bright-emerald">
                         <input type="radio" id="theme-bright-emerald" name="theme" value="bright-emerald" onchange="changeTheme(this.value)">
-                        <label for="theme-bright-emerald" title="Яркий изумруд"></label>
+                        <label for="theme-bright-emerald" title="Яркий изумруд"><span class="theme-number">4</span></label>
                     </div>
                     <div class="theme-option theme-blue">
                         <input type="radio" id="theme-blue" name="theme" value="blue" onchange="changeTheme(this.value)">
-                        <label for="theme-blue" title="Голубой"></label>
+                        <label for="theme-blue" title="Голубой"><span class="theme-number">5</span></label>
                     </div>
                     <div class="theme-option theme-red">
                         <input type="radio" id="theme-red" name="theme" value="red" onchange="changeTheme(this.value)">
-                        <label for="theme-red" title="Красный"></label>
+                        <label for="theme-red" title="Красный"><span class="theme-number">6</span></label>
                     </div>
                     <div class="theme-option theme-purple">
                         <input type="radio" id="theme-purple" name="theme" value="purple" onchange="changeTheme(this.value)">
-                        <label for="theme-purple" title="Фиолетовый"></label>
+                        <label for="theme-purple" title="Фиолетовый"><span class="theme-number">7</span></label>
                     </div>
                     <div class="theme-option theme-black">
                         <input type="radio" id="theme-black" name="theme" value="black" onchange="changeTheme(this.value)">
-                        <label for="theme-black" title="Чёрный"></label>
+                        <label for="theme-black" title="Чёрный"><span class="theme-number">8</span></label>
                     </div>
                 </div>
             </div>

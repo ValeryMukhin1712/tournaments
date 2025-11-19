@@ -1187,6 +1187,15 @@
             }
         }
         
+        /* Медиа-запрос для Viewport 796 x 307 и более */
+        @media screen and (min-width: 796px) and (min-height: 307px) {
+            /* Опускаем нижние поля имён на 100px выше нижней границы экрана */
+            #bottom_left_player_input,
+            #name_bottom_right {
+                bottom: 100px !important;
+            }
+        }
+        
         /* Кнопка возврата */
         .back-btn {
             position: fixed;
@@ -2290,6 +2299,10 @@
             const courtArea = document.querySelector('.court-area');
             if (!courtArea) return;
             
+            // Получаем размеры viewport
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            
             const courtHeight = courtArea.offsetHeight;
             const lineSpacing = 50; // Расстояние между линиями в пикселях
             
@@ -2307,7 +2320,13 @@
             // Нижние поля: на 5% выше линии "g" (от верха корта)
             // Но нужно учитывать, что bottom считается от низа, поэтому:
             // bottom = courtHeight - lineGPosition - offsetPercent
-            const bottomFieldsPosition = courtHeight - lineGPosition - offsetPercent;
+            // Для viewport 796 x 307 и более устанавливаем bottom: 100px
+            let bottomFieldsPosition;
+            if (viewportWidth >= 796 && viewportHeight >= 307) {
+                bottomFieldsPosition = 100; // 100px выше нижней границы экрана
+            } else {
+                bottomFieldsPosition = courtHeight - lineGPosition - offsetPercent;
+            }
             
             // Применяем позиции
             const topLeftField = document.getElementById('top_left_player_input');

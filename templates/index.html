@@ -649,9 +649,12 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="window.location.href='{{ url_for('admin_tournament') }}'">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <div class="role-icon">⚙️</div>
+                            <div class="role-icon" style="display: flex; gap: 0.3rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                                <span style="font-size: 0.8em;">🏸</span>
+                                <span style="font-size: 0.8em;">🏐</span>
+                            </div>
                         </div>
-                        <h4 class="card-title card-title-mobile">Админ турнира</h4>
+                        <h4 class="card-title card-title-mobile">Для администраторов турниров</h4>
                         <p class="card-text text-muted small d-none d-sm-block">
                             Войдите с помощью email и пароля
                         </p>
@@ -667,14 +670,16 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-3" onclick="showParticipantLogin()">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <div class="role-icon">👤</div>
+                            <div class="role-icon">
+                                <img src="/static/icons/boy_1.png" alt="Для игроков" style="width: 96px; height: 96px; object-fit: contain; background: transparent;">
+                            </div>
                         </div>
-                        <h4 class="card-title card-title-mobile">Ваши турниры</h4>
+                        <h4 class="card-title card-title-mobile">Для Игроков</h4>
                         <p class="card-text text-muted small d-none d-sm-block">
-                            Ваши турниры
+                            Для Игроков
                         </p>
                         <div class="mt-2 mt-sm-3 d-flex align-items-center justify-content-center" style="height: 35px; font-size: 0.8rem;">
-                            <i class="fas fa-user me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Ваши турниры</span>
+                            <i class="fas fa-user me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти как участник</span><span class="d-sm-none">Для Игроков</span>
                         </div>
                     </div>
                 </div>
@@ -685,13 +690,11 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-4" onclick="window.location.href='{{ url_for('tournaments_list') }}'">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <div class="role-icon" style="display: flex; gap: 0.3rem; justify-content: center; align-items: center; flex-wrap: wrap;">
-                                <span style="font-size: 0.8em;">🏸</span>
-                                <span style="font-size: 0.8em;">🏓</span>
-                                <span style="font-size: 0.8em;">🏐</span>
+                            <div class="role-icon">
+                                <img src="/static/icons/spectator.png" alt="Для зрителей" style="width: 81.6px; height: 81.6px; object-fit: contain;">
                             </div>
                         </div>
-                        <h4 class="card-title card-title-mobile">Все турниры</h4>
+                        <h4 class="card-title card-title-mobile">Для Зрителей</h4>
                         <p class="card-text text-muted small d-none d-sm-block">
                             Посмотрите все доступные турниры
                         </p>
