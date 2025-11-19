@@ -3073,6 +3073,37 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         participants_with_stats.sort(key=lambda x: x['position'])
         participants_with_stats_chessboard.sort(key=lambda x: x['participant'].name)
         
+        # Определяем ближайшие матчи для выделения (аналогично tournament_detail)
+        from datetime import datetime, date, time
+        now = datetime.now()
+        today = date.today()
+        current_time = now.time()
+        
+        upcoming_matches = []
+        for match in matches:
+            if match.status == 'запланирован' and match.match_date and match.match_time:
+                match_datetime = datetime.combine(match.match_date, match.match_time)
+                if match_datetime >= now:
+                    participant1 = next((p for p in participants if p.id == match.participant1_id), None)
+                    participant2 = next((p for p in participants if p.id == match.participant2_id), None)
+                    if participant1 and participant2:
+                        upcoming_matches.append({
+                            'match_id': match.id,
+                            'date': match.match_date,
+                            'time': match.match_time,
+                            'participant1': participant1.name,
+                            'participant2': participant2.name,
+                            'participant1_id': match.participant1_id,
+                            'participant2_id': match.participant2_id
+                        })
+        
+        # Сортируем по времени и берем ближайшие 3 матча
+        upcoming_matches.sort(key=lambda x: (x['date'], x['time']))
+        next_matches = upcoming_matches[:3] if upcoming_matches else []
+        next_match_ids = {m['match_id'] for m in next_matches}
+        
+        logger.info(f"[tournament_spectator] Ближайшие матчи для выделения: {[m['match_id'] for m in next_matches]}")
+        
         # Создаем шахматку (упрощенная версия)
         chessboard = {}
         for participant in participants:
@@ -3173,6 +3204,16 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 }
                         else:
                             # Матч запланирован
+                            is_next_match = match.id in next_match_ids
+                            # Определяем, является ли это следующим или вторым матчем
+                            is_next = False
+                            is_second = False
+                            if next_matches:
+                                if len(next_matches) > 0 and next_matches[0]['match_id'] == match.id:
+                                    is_next = True
+                                elif len(next_matches) > 1 and next_matches[1]['match_id'] == match.id:
+                                    is_second = True
+                            
                             chessboard[participant.id][other_participant.id] = {
                                 'type': 'upcoming',
                                 'value': 'vs',
@@ -3182,7 +3223,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 'date': match.match_date,
                                 'time': match.match_time,
                                 'court': match.court_number,
-                                'is_next_match': False,
+                                'is_next_match': is_next_match,
+                                'is_next': is_next,
+                                'is_second': is_second,
                                 'sets_details': ''
                             }
                     else:
@@ -3231,7 +3274,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                         sets_details = ", ".join(sets_list)
                 
                 schedule_display[date_str]['matches'].append({
+                    'id': match.id,  # Добавляем id для совместимости с шаблоном
                     'match_id': match.id,
+                    'participant1_id': match.participant1_id,  # Добавляем ID участников для поиска элементов
+                    'participant2_id': match.participant2_id,
                     'participant1': participant1.name if participant1 else 'Неизвестно',
                     'participant2': participant2.name if participant2 else 'Неизвестно',
                     'participant1_name': participant1.name if participant1 else 'Неизвестно',

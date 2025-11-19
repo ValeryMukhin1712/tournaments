@@ -4,6 +4,18 @@
 
 {% block content %}
 <style>
+/* Анимация pulse для ближайших матчей */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
 /* Стили для фиксации первого столбца при горизонтальном скролле */
 #tournament-table {
     position: relative;
@@ -179,7 +191,7 @@
                                     </td>
                                             </tr>
                                             {% for match in day_data.matches %}
-                                            <tr {% if match.is_participant_match %}class="table-primary"{% endif %}>
+                                            <tr {% if match.is_participant_match %}class="table-primary"{% endif %} data-match-id="{{ match.id }}" data-p1-id="{{ match.participant1_id }}" data-p2-id="{{ match.participant2_id }}">
                                                 <td class="d-none d-sm-table-cell text-center">
                                                     <span class="badge bg-primary">{{ match.global_number or loop.index }}</span>
                                                 </td>
@@ -210,31 +222,31 @@
                                                         <span class="badge bg-primary ms-2 rounded-pill">Ваш матч</span>
                                                     {% endif %}
                                                 </td>
-                                                <td class="text-center">
+                                                <td class="text-center" data-match-score-cell>
                                                     {% if match.score and match.status != 'запланирован' %}
                                                         {% if match.status == 'завершен' %}
                                                             {% set score_parts = match.score.split(':') %}
                                                             {% set score1 = score_parts[0]|int %}
                                                             {% set score2 = score_parts[1]|int %}
                                                             {% if score1 > score2 %}
-                                                                <span class="badge bg-success text-white">{{ match.score }}</span>
+                                                                <span class="badge bg-success text-white match-score">{{ match.score }}</span>
                                                             {% else %}
-                                                                <span class="badge bg-danger text-white">{{ match.score }}</span>
+                                                                <span class="badge bg-danger text-white match-score">{{ match.score }}</span>
                                                             {% endif %}
                                                         {% elif match.status in ['в_процессе', 'играют'] %}
-                                                            <span class="badge bg-warning text-dark" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
+                                                            <span class="badge bg-warning text-dark match-score" style="background-color: #ffc107 !important; color: #000 !important;">{{ match.score }}</span>
                                                         {% else %}
-                                                            <span class="badge bg-warning text-dark">{{ match.score }}</span>
+                                                            <span class="badge bg-warning text-dark match-score">{{ match.score }}</span>
                                                         {% endif %}
                                                         {% if match.sets_details %}
-                                                            <br><small class="text-muted" {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
+                                                            <br><small class="text-muted match-sets-details" {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107; padding: 2px 4px; border-radius: 3px;"{% endif %}>{{ match.sets_details }}</small>
                                                         {% endif %}
                                                     {% else %}
-                                                        <span class="text-muted">—</span>
+                                                        <span class="text-muted match-score">—</span>
                                                     {% endif %}
                                                 </td>
-                                                <td class="d-none d-md-table-cell text-center">
-                                                    <span class="badge rounded-pill
+                                                <td class="d-none d-md-table-cell text-center" data-match-status-cell>
+                                                    <span class="badge rounded-pill match-status
                                                         {% if match.status == 'завершен' %}bg-success
                                                         {% elif match.status == 'запланирован' %}bg-info
                                                         {% else %}bg-secondary{% endif %}"
@@ -389,22 +401,22 @@
                                         {% set participant = p1_data.participant %}
                                         {% set participant_stats = p1_data.stats %}
                                         {% set participant_position = p1_data.position %}
-                                        <tr class="{% if p1_data.is_late_participant %}table-warning{% endif %}">
-                                            <td>{{ participant_position }}</td>
+                                        <tr class="{% if p1_data.is_late_participant %}table-warning{% endif %}" data-participant-id="{{ participant.id }}">
+                                            <td data-stat-position>{{ participant_position }}</td>
                                             <td>
                                                 <strong>{{ participant.name }}</strong>
                                                 {% if participant.is_team %}
                                                     <span class="badge bg-info ms-2">Команда</span>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ participant_stats.games }}</td>
-                                            <td>{{ participant_stats.wins }}</td>
-                                            <td>{{ participant_stats.losses }}</td>
-                                            <td>{{ participant_stats.points }}</td>
-                                            <td>
+                                            <td data-stat-games>{{ participant_stats.games }}</td>
+                                            <td data-stat-wins>{{ participant_stats.wins }}</td>
+                                            <td data-stat-losses>{{ participant_stats.losses }}</td>
+                                            <td data-stat-points>{{ participant_stats.points }}</td>
+                                            <td data-stat-sets-diff>
                                                 {% if participant_stats.sets_difference > 0 %}+{% endif %}{{ participant_stats.sets_difference }}
                                             </td>
-                                            <td>
+                                            <td data-stat-goal-diff>
                                                 {% if participant_stats.goal_difference > 0 %}+{% endif %}{{ participant_stats.goal_difference }}
                                             </td>
                                         </tr>
@@ -449,11 +461,11 @@
                                             <td class="{% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold">
                                                 {{ p1.name[:15] }}{% if p1.name|length > 15 %}...{% endif %}
                                             </td>
-                                            <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-primary">{{ p1_stats.points }}</td>
-                                            <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-success">{{ p1_position }}</td>
+                                            <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-primary" data-chessboard-points data-participant-id="{{ p1.id }}">{{ p1_stats.points }}</td>
+                                            <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-success" data-chessboard-position data-participant-id="{{ p1.id }}">{{ p1_position }}</td>
                                             {% for p2_data in participants_with_stats_chessboard %}
                                             {% set p2 = p2_data.participant %}
-                                            <td class="text-center position-relative {% if p1_data.is_late_participant or p2_data.is_late_participant %}bg-success bg-opacity-25{% endif %}" style="height: 80px; width: 120px; vertical-align: middle;">
+                                            <td class="text-center position-relative {% if p1_data.is_late_participant or p2_data.is_late_participant %}bg-success bg-opacity-25{% endif %}" style="height: 80px; width: 120px; vertical-align: middle;" data-chessboard-cell data-p1-id="{{ p1.id }}" data-p2-id="{{ p2.id }}">
                                                 {% if p1.id == p2.id %}
                                                     <span class="text-muted">—</span>
                                                 {% else %}
@@ -461,19 +473,19 @@
                                                     {% if cell_data.type == 'result' %}
                                                         <div class="d-flex flex-column align-items-center">
                                                             {% if cell_data.is_winner %}
-                                                                <span class="badge bg-success text-white mb-1">{{ cell_data.value }}</span>
+                                                                <span class="badge bg-success text-white mb-1 chessboard-score">{{ cell_data.value }}</span>
                                     {% else %}
-                                                                <span class="badge bg-danger text-white mb-1">{{ cell_data.value }}</span>
+                                                                <span class="badge bg-danger text-white mb-1 chessboard-score">{{ cell_data.value }}</span>
                                                             {% endif %}
                                                             {% if cell_data.sets_details %}
-                                                            <small class="text-muted">{{ cell_data.sets_details }}</small>
+                                                            <small class="text-muted chessboard-sets-details">{{ cell_data.sets_details }}</small>
                                                             {% endif %}
                                                         </div>
                                                     {% elif cell_data.type == 'in_progress' %}
                                                         <div class="d-flex flex-column align-items-center">
-                                                            <span class="badge bg-warning text-dark mb-1" style="background-color: #ffc107 !important;">{{ cell_data.value }}</span>
+                                                            <span class="badge bg-warning text-dark mb-1 chessboard-score" style="background-color: #ffc107 !important;">{{ cell_data.value }}</span>
                                                             {% if cell_data.sets_details %}
-                                                            <small class="text-muted">{{ cell_data.sets_details }}</small>
+                                                            <small class="text-muted chessboard-sets-details">{{ cell_data.sets_details }}</small>
                                         {% endif %}
                                                         </div>
                                                     {% elif cell_data.type == 'upcoming' %}
@@ -487,11 +499,13 @@
                                                             7: 'dark',
                                                             8: 'light'
                                                         } %}
+                                                        {% set is_next_match = cell_data.get('is_next_match', False) %}
                                                         {% set court_color = court_colors.get(cell_data.court, 'secondary') %}
                                                         
-                                                        <div class="text-center position-relative">
+                                                        <div class="text-center position-relative {% if is_next_match %}border border-warning border-3 rounded bg-warning bg-opacity-10{% endif %}" 
+                                                             style="{% if is_next_match %}animation: pulse 2s infinite;{% endif %}">
                                                             <!-- Основной контейнер с цветом площадки -->
-                                                            <div class="border border-{{ court_color }} border-1 rounded p-1 bg-{{ court_color }} bg-opacity-10" style="height: 70px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                                                            <div class="{% if cell_data.is_next %}border border-warning border-1 rounded p-1 bg-warning bg-opacity-15 shadow-sm{% elif cell_data.is_second %}border border-success border-1 rounded p-1 bg-success bg-opacity-15 shadow-sm{% else %}border border-{{ court_color }} border-1 rounded p-1 bg-{{ court_color }} bg-opacity-10{% endif %}" style="height: 70px; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                                                                 <!-- Верхняя часть -->
                                                                 <div>
                                                                     <!-- Номер корта крупным полупрозрачным шрифтом -->
@@ -502,10 +516,10 @@
                                                                 
                                                                 <!-- Время матча - внизу -->
                                                                 <div class="mt-auto">
-                                                                    <small class="d-block text-dark fw-bold text-center" style="font-size: 0.6rem; background-color: rgba(255, 255, 255, 0.95); padding: 1px 3px; border-radius: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                                    <small class="d-block text-dark fw-bold text-center match-time" style="font-size: 0.6rem; background-color: rgba(255, 255, 255, 0.95); padding: 1px 3px; border-radius: 2px; max-width: 100%;">
                                                                         {% if cell_data.time %}
                                                                             {{ cell_data.time.strftime('%H:%M') }}
-                                                    {% else %}
+                                                                        {% else %}
                                                                             Время не указано
                                                                         {% endif %}
                                                                     </small>
@@ -536,6 +550,7 @@
 let autoRefreshInterval;
 let refreshIntervalSeconds = 3; // Интервал по умолчанию
 let isAutoRefreshActive = true;
+let lastUpdateTime = Date.now(); // Время последнего обновления данных
 
 function startAutoRefresh() {
     // Очищаем предыдущий интервал, если он был
@@ -552,13 +567,489 @@ function startAutoRefresh() {
     // Обновляем кнопку управления
     updateToggleButton();
     
+    // Получаем ID турнира из URL
+    const urlParts = window.location.pathname.split('/').filter(part => part);
+    let tournamentId = urlParts[urlParts.length - 1];
+    
+    // Проверяем, что tournamentId - это число
+    if (!tournamentId || isNaN(tournamentId)) {
+        console.error(`[startAutoRefresh] Не удалось определить ID турнира из URL: ${window.location.pathname}`);
+        return;
+    }
+    
+    console.log(`[startAutoRefresh] ID турнира: ${tournamentId}, URL: ${window.location.pathname}`);
+    
     // Устанавливаем новый интервал обновления
+    // Начинаем с обычного интервала, затем адаптируем при необходимости
     autoRefreshInterval = setInterval(function() {
-        console.log(`Автоматическое обновление страницы (каждые ${refreshIntervalSeconds} сек)...`);
-        window.location.reload();
+        console.log(`[startAutoRefresh] Автоматическое обновление данных (каждые ${refreshIntervalSeconds} сек)...`);
+        updateTournamentData(tournamentId);
     }, refreshIntervalSeconds * 1000);
     
-    console.log(`Автообновление запущено (каждые ${refreshIntervalSeconds} секунд)`);
+    console.log(`[startAutoRefresh] Автообновление запущено (каждые ${refreshIntervalSeconds} секунд)`);
+    
+    // Делаем первое обновление сразу для проверки активных матчей
+    updateTournamentData(tournamentId);
+}
+
+// Функция для частичного обновления данных турнира
+function updateTournamentData(tournamentId) {
+    console.log(`[updateTournamentData] Запрос обновлений для турнира ${tournamentId}`);
+    fetch(`/api/tournaments/${tournamentId}/updates`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log(`[updateTournamentData] Получено ${data.matches.length} матчей и ${data.participants_stats.length} участников`);
+                // Логируем первые несколько матчей для отладки
+                if (data.matches.length > 0) {
+                    console.log('[updateTournamentData] Первый матч:', JSON.stringify(data.matches[0]));
+                }
+                
+                // Обновляем счёт матчей
+                updateMatches(data.matches);
+                // Обновляем статистику участников
+                updateParticipantsStats(data.participants_stats);
+                
+                lastUpdateTime = Date.now();
+                console.log('[updateTournamentData] Данные турнира обновлены');
+            } else {
+                console.error('[updateTournamentData] Ошибка обновления данных:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('[updateTournamentData] Ошибка при запросе обновлений:', error);
+        });
+}
+
+
+// Функция для обновления счёта матчей
+function updateMatches(matches) {
+    console.log(`[updateMatches] Обновление ${matches.length} матчей`);
+    matches.forEach(match => {
+        // Ищем строку матча по ID или по участникам (в обоих направлениях)
+        // Преобразуем ID в строки для надежности
+        const matchId = String(match.id);
+        const p1Id = String(match.participant1_id);
+        const p2Id = String(match.participant2_id);
+        
+        let matchRow = document.querySelector('tr[data-match-id="' + matchId + '"]');
+        if (!matchRow) {
+            matchRow = document.querySelector('tr[data-p1-id="' + p1Id + '"][data-p2-id="' + p2Id + '"]');
+        }
+        if (!matchRow) {
+            // Пробуем обратный порядок участников
+            matchRow = document.querySelector('tr[data-p1-id="' + p2Id + '"][data-p2-id="' + p1Id + '"]');
+        }
+        
+        // Если все еще не найдено, пробуем найти по всем строкам с data-атрибутами
+        if (!matchRow) {
+            const allMatchRows = document.querySelectorAll('tr[data-match-id], tr[data-p1-id]');
+            for (let row of allMatchRows) {
+                const rowMatchId = row.getAttribute('data-match-id');
+                const rowP1Id = row.getAttribute('data-p1-id');
+                const rowP2Id = row.getAttribute('data-p2-id');
+                if (rowMatchId === matchId || 
+                    (rowP1Id === p1Id && rowP2Id === p2Id) ||
+                    (rowP1Id === p2Id && rowP2Id === p1Id)) {
+                    matchRow = row;
+                    console.log('[updateMatches] Матч найден альтернативным способом:', matchId);
+                    break;
+                }
+            }
+        }
+        
+        if (matchRow) {
+            console.log('[updateMatches] Найден матч', match.id, ':', match.participant1_name, 'vs', match.participant2_name, ', статус:', match.status, ', счёт:', match.score || 'нет');
+            
+            // Обновляем счёт
+            const scoreCell = matchRow.querySelector('[data-match-score-cell]');
+            if (scoreCell) {
+                const currentScoreEl = scoreCell.querySelector('.match-score');
+                const currentScore = currentScoreEl ? currentScoreEl.textContent.trim() : (scoreCell.textContent.includes('—') ? '—' : '');
+                const newScore = match.score || '—';
+                
+                // Также проверяем sets_details - возможно, там отображается текущий счёт
+                const currentSetsDetailsEl = scoreCell.querySelector('.match-sets-details');
+                const currentSetsDetails = currentSetsDetailsEl ? currentSetsDetailsEl.textContent.trim() : '';
+                const newSetsDetails = match.sets_details || '';
+                
+                console.log(`[updateMatches] Матч ${match.id}: текущий счёт="${currentScore}", новый счёт="${newScore}", статус="${match.status}"`);
+                console.log(`[updateMatches] Матч ${match.id}: текущие детали сетов="${currentSetsDetails}", новые детали="${newSetsDetails}"`);
+                
+                // Обновляем, если счёт изменился, или детали сетов изменились, или если матч в процессе и счёт еще не отображается
+                const scoreChanged = currentScore !== newScore;
+                const setsDetailsChanged = currentSetsDetails !== newSetsDetails;
+                const shouldUpdate = scoreChanged || setsDetailsChanged || 
+                                    (['в_процессе', 'играют'].includes(match.status) && (currentScore === '—' || !currentScoreEl));
+                
+                console.log(`[updateMatches] shouldUpdate=${shouldUpdate}, scoreChanged=${scoreChanged}, setsDetailsChanged=${setsDetailsChanged}`);
+                
+                if (shouldUpdate) {
+                    console.log(`[updateMatches] Обновление счёта: "${currentScore}" -> "${newScore}"`);
+                    console.log(`[updateMatches] Детали: match.id=${match.id}, match.status=${match.status}, match.sets_won_1=${match.sets_won_1}, match.sets_won_2=${match.sets_won_2}`);
+                    // Обновляем счёт
+                    const scoreBadge = scoreCell.querySelector('.match-score');
+                    if (scoreBadge) {
+                        // Определяем класс для бейджа в зависимости от статуса
+                        scoreBadge.className = 'badge match-score';
+                        if (match.status === 'завершен') {
+                            const scoreParts = newScore.split(':');
+                            const score1 = parseInt(scoreParts[0]);
+                            const score2 = parseInt(scoreParts[1]);
+                            if (score1 > score2) {
+                                scoreBadge.className += ' bg-success text-white';
+                            } else {
+                                scoreBadge.className += ' bg-danger text-white';
+                            }
+                        } else if (['в_процессе', 'играют'].includes(match.status)) {
+                            scoreBadge.className += ' bg-warning text-dark';
+                            scoreBadge.style.cssText = 'background-color: #ffc107 !important; color: #000 !important;';
+                        } else {
+                            scoreBadge.className += ' bg-warning text-dark';
+                        }
+                        scoreBadge.textContent = newScore;
+                    } else {
+                        // Создаём новый бейдж, если его нет
+                        scoreCell.innerHTML = '';
+                        if (newScore !== '—') {
+                            let badgeClass = 'badge match-score';
+                            if (match.status === 'завершен') {
+                                const scoreParts = newScore.split(':');
+                                const score1 = parseInt(scoreParts[0]);
+                                const score2 = parseInt(scoreParts[1]);
+                                badgeClass += score1 > score2 ? ' bg-success text-white' : ' bg-danger text-white';
+                            } else if (['в_процессе', 'играют'].includes(match.status)) {
+                                badgeClass += ' bg-warning text-dark';
+                            } else {
+                                badgeClass += ' bg-warning text-dark';
+                            }
+                            const badge = document.createElement('span');
+                            badge.className = badgeClass;
+                            badge.textContent = newScore;
+                            if (['в_процессе', 'играют'].includes(match.status)) {
+                                badge.style.cssText = 'background-color: #ffc107 !important; color: #000 !important;';
+                            }
+                            scoreCell.appendChild(badge);
+                            
+                            // Добавляем детали сетов, если есть
+                            if (match.sets_details) {
+                                const setsDetails = document.createElement('br');
+                                const setsSmall = document.createElement('small');
+                                setsSmall.className = 'text-muted match-sets-details';
+                                setsSmall.textContent = match.sets_details;
+                                if (['в_процессе', 'играют'].includes(match.status)) {
+                                    setsSmall.style.cssText = 'background-color: #ffc107; padding: 2px 4px; border-radius: 3px;';
+                                }
+                                scoreCell.appendChild(setsDetails);
+                                scoreCell.appendChild(setsSmall);
+                            }
+                        } else {
+                            const span = document.createElement('span');
+                            span.className = 'text-muted match-score';
+                            span.textContent = '—';
+                            scoreCell.appendChild(span);
+                        }
+                    }
+                    
+                    // Обновляем детали сетов (всегда, даже если основной счёт не изменился)
+                    const setsDetailsEl = scoreCell.querySelector('.match-sets-details');
+                    if (match.sets_details) {
+                        if (setsDetailsEl) {
+                            // Обновляем только если изменилось
+                            if (setsDetailsEl.textContent.trim() !== match.sets_details) {
+                                setsDetailsEl.textContent = match.sets_details;
+                                console.log(`[updateMatches] Обновлены детали сетов: "${setsDetailsEl.textContent.trim()}" -> "${match.sets_details}"`);
+                            }
+                        } else {
+                            // Создаём элемент для деталей сетов
+                            const br = document.createElement('br');
+                            const small = document.createElement('small');
+                            small.className = 'text-muted match-sets-details';
+                            small.textContent = match.sets_details;
+                            if (['в_процессе', 'играют'].includes(match.status)) {
+                                small.style.cssText = 'background-color: #ffc107; padding: 2px 4px; border-radius: 3px;';
+                            }
+                            scoreCell.appendChild(br);
+                            scoreCell.appendChild(small);
+                            console.log(`[updateMatches] Создан элемент для деталей сетов: "${match.sets_details}"`);
+                        }
+                    } else if (setsDetailsEl) {
+                        setsDetailsEl.remove();
+                        const brBefore = setsDetailsEl.previousSibling;
+                        if (brBefore && brBefore.tagName === 'BR') {
+                            brBefore.remove();
+                        }
+                    }
+                } else {
+                    // Даже если основной счёт не изменился, обновляем детали сетов, если они изменились
+                    if (setsDetailsChanged && match.sets_details) {
+                        const setsDetailsEl = scoreCell.querySelector('.match-sets-details');
+                        if (setsDetailsEl) {
+                            setsDetailsEl.textContent = match.sets_details;
+                            console.log(`[updateMatches] Обновлены только детали сетов: "${match.sets_details}"`);
+                        } else if (match.sets_details) {
+                            // Создаём элемент для деталей сетов
+                            const br = document.createElement('br');
+                            const small = document.createElement('small');
+                            small.className = 'text-muted match-sets-details';
+                            small.textContent = match.sets_details;
+                            if (['в_процессе', 'играют'].includes(match.status)) {
+                                small.style.cssText = 'background-color: #ffc107; padding: 2px 4px; border-radius: 3px;';
+                            }
+                            const scoreBadge = scoreCell.querySelector('.match-score');
+                            if (scoreBadge && scoreBadge.nextSibling) {
+                                scoreCell.insertBefore(br, scoreBadge.nextSibling);
+                                scoreCell.insertBefore(small, br.nextSibling);
+                            } else {
+                                scoreCell.appendChild(br);
+                                scoreCell.appendChild(small);
+                            }
+                            console.log(`[updateMatches] Создан элемент для деталей сетов (без изменения основного счёта): "${match.sets_details}"`);
+                        }
+                    }
+                }
+                
+                // Обновляем статус
+                const statusCell = matchRow.querySelector('[data-match-status-cell]');
+                if (statusCell) {
+                    const statusBadge = statusCell.querySelector('.match-status');
+                    if (statusBadge && statusBadge.textContent.trim() !== match.status) {
+                        statusBadge.className = 'badge rounded-pill match-status';
+                        if (match.status === 'завершен') {
+                            statusBadge.className += ' bg-success';
+                        } else if (match.status === 'запланирован') {
+                            statusBadge.className += ' bg-info';
+                        } else {
+                            statusBadge.className += ' bg-secondary';
+                        }
+                        if (['в_процессе', 'играют'].includes(match.status)) {
+                            statusBadge.style.cssText = 'background-color: #ffc107 !important; color: #000 !important;';
+                        } else {
+                            statusBadge.style.cssText = '';
+                        }
+                        statusBadge.textContent = match.status;
+                    }
+                }
+            } else {
+                console.log('[updateMatches] Ячейка счёта не найдена для матча', match.id);
+            }
+        } else {
+            console.log('[updateMatches] Строка матча не найдена: ID=', match.id, ', p1=', match.participant1_id, '(', match.participant1_name, '), p2=', match.participant2_id, '(', match.participant2_name, ')');
+        }
+        
+        // Обновляем шахматку (турнирную таблицу) для всех матчей
+        // Ищем ячейку шахматки для этого матча
+        const chessboardCell1 = document.querySelector('td[data-chessboard-cell][data-p1-id="' + match.participant1_id + '"][data-p2-id="' + match.participant2_id + '"]');
+        const chessboardCell2 = document.querySelector('td[data-chessboard-cell][data-p1-id="' + match.participant2_id + '"][data-p2-id="' + match.participant1_id + '"]');
+        const chessboardCell = chessboardCell1 || chessboardCell2;
+        
+        // Обновляем шахматку для всех матчей, которые имеют статус или данные
+        if (chessboardCell) {
+            const currentScoreEl = chessboardCell.querySelector('.chessboard-score');
+            const currentScore = currentScoreEl ? currentScoreEl.textContent.trim() : '';
+            const newScore = match.score || '';
+            const currentSetsDetailsEl = chessboardCell.querySelector('.chessboard-sets-details');
+            const currentSetsDetails = currentSetsDetailsEl ? currentSetsDetailsEl.textContent.trim() : '';
+            const newSetsDetails = match.sets_details || '';
+            
+            // Обновляем, если изменился счёт, детали сетов, или если матч в процессе
+            const scoreChanged = currentScore !== newScore;
+            const setsDetailsChanged = currentSetsDetails !== newSetsDetails;
+            const isInProgress = ['в_процессе', 'играют'].includes(match.status);
+            const isCompleted = match.status === 'завершен';
+            
+            // Обновляем если: счёт изменился, детали сетов изменились, или матч в процессе/завершен и есть новые данные
+            // Важно: обновляем всегда, если есть новые данные для матча в процессе или завершенного матча
+            const shouldUpdate = scoreChanged || setsDetailsChanged || 
+                                (isInProgress && (newScore || newSetsDetails)) ||
+                                (isCompleted && newScore);
+            
+            console.log(`[updateMatches] Шахматка для матча ${match.id}: currentScore="${currentScore}", newScore="${newScore}", currentSets="${currentSetsDetails}", newSets="${newSetsDetails}", shouldUpdate=${shouldUpdate}, status=${match.status}`);
+            
+            if (shouldUpdate) {
+                console.log(`[updateMatches] Обновление шахматки для матча ${match.id}: счёт="${currentScore}"->"${newScore}", детали="${currentSetsDetails}"->"${newSetsDetails}"`);
+                
+                // Определяем, кто выиграл (для определения цвета бейджа) - только если есть счёт
+                let isRowWinner = false;
+                if (newScore && newScore.includes(':')) {
+                    const scoreParts = newScore.split(':');
+                    const score1 = parseInt(scoreParts[0]) || 0;
+                    const score2 = parseInt(scoreParts[1]) || 0;
+                    const isP1Winner = score1 > score2;
+                    
+                    // Определяем, какой участник в строке (p1) и какой в столбце (p2)
+                    const cellP1Id = parseInt(chessboardCell.getAttribute('data-p1-id'));
+                    const cellP2Id = parseInt(chessboardCell.getAttribute('data-p2-id'));
+                    const isP1InRow = cellP1Id === match.participant1_id;
+                    
+                    // Определяем победителя относительно строки
+                    isRowWinner = isP1InRow ? isP1Winner : !isP1Winner;
+                }
+                
+                // Обновляем или создаём бейдж
+                let scoreBadge = chessboardCell.querySelector('.chessboard-score');
+                if (!scoreBadge) {
+                    // Создаём контейнер, если его нет
+                    const container = document.createElement('div');
+                    container.className = 'd-flex flex-column align-items-center';
+                    chessboardCell.innerHTML = '';
+                    chessboardCell.appendChild(container);
+                    scoreBadge = document.createElement('span');
+                    scoreBadge.className = 'badge mb-1 chessboard-score';
+                    container.appendChild(scoreBadge);
+                }
+                
+                // Обновляем класс и текст бейджа
+                scoreBadge.className = 'badge mb-1 chessboard-score';
+                if (match.status === 'завершен') {
+                    if (isRowWinner) {
+                        scoreBadge.className += ' bg-success text-white';
+                    } else {
+                        scoreBadge.className += ' bg-danger text-white';
+                    }
+                    scoreBadge.style.cssText = '';
+                } else if (['в_процессе', 'играют'].includes(match.status)) {
+                    scoreBadge.className += ' bg-warning text-dark';
+                    scoreBadge.style.cssText = 'background-color: #ffc107 !important; color: #000 !important;';
+                } else {
+                    scoreBadge.className += ' bg-warning text-dark';
+                    scoreBadge.style.cssText = '';
+                }
+                
+                // Обновляем текст счёта, если он есть, иначе показываем "В процессе"
+                // Важно: обновляем всегда, даже если значение не изменилось (на случай, если элемент был пересоздан)
+                if (newScore) {
+                    scoreBadge.textContent = newScore;
+                    console.log(`[updateMatches] Обновлён счёт в шахматке: "${scoreBadge.textContent}"`);
+                } else if (isInProgress) {
+                    scoreBadge.textContent = 'В процессе';
+                } else {
+                    scoreBadge.textContent = '—';
+                }
+                
+                // Обновляем детали сетов (всегда проверяем, даже если основной счёт не изменился)
+                let setsDetailsEl = chessboardCell.querySelector('.chessboard-sets-details');
+                if (match.sets_details) {
+                    if (setsDetailsEl) {
+                        // Обновляем только если изменилось
+                        if (setsDetailsEl.textContent.trim() !== match.sets_details) {
+                            setsDetailsEl.textContent = match.sets_details;
+                            console.log(`[updateMatches] Обновлены детали сетов в шахматке: "${match.sets_details}"`);
+                        }
+                    } else {
+                        // Создаём элемент для деталей сетов
+                        const container = chessboardCell.querySelector('.d-flex') || chessboardCell;
+                        const small = document.createElement('small');
+                        small.className = 'text-muted chessboard-sets-details';
+                        if (isInProgress) {
+                            small.style.cssText = 'background-color: #ffc107; padding: 2px 4px; border-radius: 3px;';
+                        }
+                        small.textContent = match.sets_details;
+                        container.appendChild(small);
+                        console.log(`[updateMatches] Создан элемент для деталей сетов в шахматке: "${match.sets_details}"`);
+                    }
+                } else if (setsDetailsEl && !isInProgress) {
+                    // Удаляем детали сетов только если матч не в процессе
+                    setsDetailsEl.remove();
+                }
+            } else if (setsDetailsChanged && match.sets_details) {
+                // Обновляем только детали сетов, если основной счёт не изменился
+                let setsDetailsEl = chessboardCell.querySelector('.chessboard-sets-details');
+                if (setsDetailsEl) {
+                    setsDetailsEl.textContent = match.sets_details;
+                    console.log(`[updateMatches] Обновлены только детали сетов в шахматке (без изменения счёта): "${match.sets_details}"`);
+                } else {
+                    // Создаём элемент для деталей сетов
+                    const container = chessboardCell.querySelector('.d-flex') || chessboardCell;
+                    if (container) {
+                        const small = document.createElement('small');
+                        small.className = 'text-muted chessboard-sets-details';
+                        if (isInProgress) {
+                            small.style.cssText = 'background-color: #ffc107; padding: 2px 4px; border-radius: 3px;';
+                        }
+                        small.textContent = match.sets_details;
+                        container.appendChild(small);
+                        console.log(`[updateMatches] Создан элемент для деталей сетов в шахматке (без изменения счёта): "${match.sets_details}"`);
+                    }
+                }
+            }
+        } else if (chessboardCell) {
+            console.log(`[updateMatches] Шахматка найдена, но матч ${match.id} не требует обновления: score=${match.score}, sets_details=${match.sets_details}, status=${match.status}`);
+        }
+    });
+}
+
+// Функция для обновления статистики участников
+function updateParticipantsStats(participantsStats) {
+    participantsStats.forEach(participantStat => {
+        const participantRow = document.querySelector('tr[data-participant-id="' + participantStat.id + '"]');
+        if (participantRow) {
+            // Обновляем позицию
+            const positionCell = participantRow.querySelector('[data-stat-position]');
+            if (positionCell && positionCell.textContent.trim() != participantStat.position) {
+                positionCell.textContent = participantStat.position;
+            }
+            
+            // Обновляем игры
+            const gamesCell = participantRow.querySelector('[data-stat-games]');
+            if (gamesCell && gamesCell.textContent.trim() != participantStat.games) {
+                gamesCell.textContent = participantStat.games;
+            }
+            
+            // Обновляем победы
+            const winsCell = participantRow.querySelector('[data-stat-wins]');
+            if (winsCell && winsCell.textContent.trim() != participantStat.wins) {
+                winsCell.textContent = participantStat.wins;
+            }
+            
+            // Обновляем поражения
+            const lossesCell = participantRow.querySelector('[data-stat-losses]');
+            if (lossesCell && lossesCell.textContent.trim() != participantStat.losses) {
+                lossesCell.textContent = participantStat.losses;
+            }
+            
+            // Обновляем очки
+            const pointsCell = participantRow.querySelector('[data-stat-points]');
+            if (pointsCell && pointsCell.textContent.trim() != participantStat.points) {
+                pointsCell.textContent = participantStat.points;
+            }
+            
+            // Обновляем разницу сетов
+            const setsDiffCell = participantRow.querySelector('[data-stat-sets-diff]');
+            if (setsDiffCell) {
+                const newValue = participantStat.sets_difference > 0 ? '+' + participantStat.sets_difference : participantStat.sets_difference;
+                if (setsDiffCell.textContent.trim() != newValue) {
+                    setsDiffCell.textContent = newValue;
+                }
+            }
+            
+            // Обновляем разницу очков
+            const goalDiffCell = participantRow.querySelector('[data-stat-goal-diff]');
+            if (goalDiffCell) {
+                const newValue = participantStat.goal_difference > 0 ? '+' + participantStat.goal_difference : participantStat.goal_difference;
+                if (goalDiffCell.textContent.trim() != newValue) {
+                    goalDiffCell.textContent = newValue;
+                }
+            }
+            
+            // Обновляем очки в шахматке
+            const chessboardPoints = document.querySelector('td[data-chessboard-points][data-participant-id="' + participantStat.id + '"]');
+            if (chessboardPoints && chessboardPoints.textContent.trim() != participantStat.points) {
+                chessboardPoints.textContent = participantStat.points;
+            }
+            
+            // Обновляем позицию в шахматке
+            const chessboardPosition = document.querySelector('td[data-chessboard-position][data-participant-id="' + participantStat.id + '"]');
+            if (chessboardPosition && chessboardPosition.textContent.trim() != participantStat.position) {
+                chessboardPosition.textContent = participantStat.position;
+            }
+        }
+    });
 }
 
 function stopAutoRefresh() {
@@ -640,10 +1131,17 @@ function setupScoreUpdateListener() {
             const data = event.data;
             if (data.type === 'score-updated' && data.matchId) {
                 console.log(`[TournamentView] 📨 Получено сообщение об обновлении счёта для матча ${data.matchId}`);
-                // Если автообновление активно, обновляем страницу немедленно
-                if (isAutoRefreshActive) {
-                    console.log('[TournamentView] 🔄 Немедленное обновление страницы из-за изменения счёта');
-                    location.reload();
+                // Всегда обновляем данные немедленно при получении сообщения об обновлении счёта
+                console.log('[TournamentView] 🔄 Немедленное обновление данных из-за изменения счёта');
+                // Получаем ID турнира из URL
+                const urlParts = window.location.pathname.split('/').filter(part => part);
+                let tournamentId = urlParts[urlParts.length - 1];
+                
+                // Проверяем, что tournamentId - это число
+                if (tournamentId && !isNaN(tournamentId)) {
+                    updateTournamentData(tournamentId);
+                } else {
+                    console.error(`[TournamentView] Не удалось определить ID турнира из URL: ${window.location.pathname}`);
                 }
             }
         };
@@ -658,13 +1156,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Настраиваем слушатель обновлений счёта от других вкладок
     setupScoreUpdateListener();
     
-    // Загружаем сохраненные настройки
+    // Загружаем сохраненные настройки (по умолчанию автообновление активно)
     loadRefreshSettings();
     
-    // Запускаем автообновление только если оно было активно
+    // Запускаем автообновление в зависимости от настроек
     if (isAutoRefreshActive) {
+        console.log('[DOMContentLoaded] Запуск автообновления...');
         startAutoRefresh();
     } else {
+        console.log('[DOMContentLoaded] Автообновление отключено пользователем');
         // Обновляем кнопку для отображения правильного состояния
         updateToggleButton();
     }
@@ -691,8 +1191,13 @@ function loadRefreshSettings() {
         }
     }
     
-    if (savedState !== null) {
+    // Загружаем состояние автообновления только если оно явно сохранено
+    // По умолчанию автообновление активно
+    if (savedState !== null && savedState !== undefined) {
         isAutoRefreshActive = savedState === 'true';
+    } else {
+        // Если настройка не сохранена, используем значение по умолчанию (активно)
+        isAutoRefreshActive = true;
     }
 }
 
