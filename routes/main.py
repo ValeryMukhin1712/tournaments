@@ -1150,6 +1150,26 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     @app.route('/admin-tournament', methods=['GET', 'POST'])
     def admin_tournament():
         """Страница входа для админов турниров"""
+        # Проверяем, есть ли уже активная сессия администратора
+        if request.method == 'GET':
+            admin_email = session.get('admin_email')
+            session_token = session.get('session_token')
+            if admin_email and session_token:
+                # Проверяем валидность сессии
+                try:
+                    from models import create_models
+                    models = create_models(db)
+                    UserActivity = models['UserActivity']
+                    from utils.session_manager import create_session_manager
+                    session_manager = create_session_manager(db, UserActivity)
+                    is_valid, session_data, error = session_manager.validate_session(session_token, admin_email)
+                    if is_valid:
+                        # Сессия валидна, перенаправляем на dashboard
+                        return redirect(url_for('admin_dashboard'))
+                except Exception as e:
+                    app.logger.warning(f'Ошибка проверки сессии: {e}')
+                    # Если ошибка проверки, продолжаем показ формы входа
+        
         # Получаем все токены для отладки
         all_tokens = []
         try:
@@ -2482,6 +2502,17 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                              tournaments=participant_tournaments,
                              participant_name=participant_name)
 
+    @app.route('/check-participant-session')
+    def check_participant_session():
+        """Проверка активной сессии участника"""
+        from flask import jsonify
+        logged_in = session.get('participant_logged_in', False)
+        participant_name = session.get('participant_name', '')
+        return jsonify({
+            'logged_in': logged_in,
+            'participant_name': participant_name
+        })
+    
     @app.route('/participant-logout')
     def participant_logout():
         """Выход участника"""
@@ -3265,7 +3296,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         session.pop('session_token', None)
         
         flash('Вы вышли из системы', 'info')
-        return redirect(url_for('admin_tournament'))
+        return redirect(url_for('index'))
     
     @app.route('/admin/sessions')
     def admin_sessions():

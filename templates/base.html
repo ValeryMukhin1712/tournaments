@@ -520,6 +520,11 @@
             color: white;
         }
         
+        .nav-btn-inline.nav-btn-logout {
+            background-color: rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+        
         .nav-btn-inline.nav-btn-home:hover {
             background-color: rgba(33, 136, 56, 0.7);
             color: white;
@@ -532,6 +537,11 @@
         
         .nav-btn-inline.nav-btn-help:hover {
             background-color: rgba(0, 105, 217, 0.7);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-logout:hover {
+            background-color: rgba(220, 53, 69, 0.7);
             color: white;
         }
         
@@ -886,6 +896,15 @@
             <a href="#" class="nav-btn-inline nav-btn-help" title="Помощь" onclick="showHelp()">
                 <i class="fas fa-question"></i>
             </a>
+            {% if session.get('admin_email') or session.get('is_system_admin') %}
+            <a href="{{ url_for('admin_logout') }}" class="nav-btn-inline nav-btn-logout" title="Выйти">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+            {% elif session.get('participant_logged_in') %}
+            <a href="{{ url_for('participant_logout') }}" class="nav-btn-inline nav-btn-logout" title="Выйти">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+            {% endif %}
             {% if request.endpoint not in ['referee_test', 'referee_page', 'referee_badminton', 'referee_volleyball', 'referee_pingpong', 'badminton_referee', 'tournaments_list', 'request_token', 'admin_tournament'] %}
                 {% if request.endpoint == 'tournament_spectator' %}
                     <span class="user-name-display">зритель</span>

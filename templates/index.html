@@ -649,9 +649,8 @@ body {
                 <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="window.location.href='{{ url_for('admin_tournament') }}'">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
-                            <div class="role-icon" style="display: flex; gap: 0.3rem; justify-content: center; align-items: center; flex-wrap: wrap;">
-                                <span style="font-size: 0.8em;">🏸</span>
-                                <span style="font-size: 0.8em;">🏐</span>
+                            <div class="role-icon">
+                                <img src="/static/icons/referee.png" alt="Для администраторов турниров" style="width: 96px; height: 96px; object-fit: contain; background: transparent;">
                             </div>
                         </div>
                         <h4 class="card-title card-title-mobile">Для администраторов турниров</h4>
@@ -847,6 +846,27 @@ function performAdminLogin() {
 
 
 function showParticipantLogin() {
+    // Проверяем, есть ли уже активная сессия участника
+    // Если есть, перенаправляем сразу на страницу турниров
+    fetch('/check-participant-session')
+        .then(response => response.json())
+        .then(data => {
+            if (data.logged_in) {
+                // Участник уже авторизован, перенаправляем на страницу турниров
+                window.location.href = '/participant-tournaments';
+                return;
+            }
+            // Показываем модальное окно для входа участника
+            showParticipantLoginModal();
+        })
+        .catch(error => {
+            console.error('Ошибка проверки сессии:', error);
+            // В случае ошибки показываем модальное окно
+            showParticipantLoginModal();
+        });
+}
+
+function showParticipantLoginModal() {
     // Показываем модальное окно для входа участника
     const modal = document.createElement('div');
     modal.className = 'modal fade';
