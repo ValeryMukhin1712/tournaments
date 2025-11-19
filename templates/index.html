@@ -619,8 +619,8 @@ body {
                 <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="adminLogin()" title="Вход для администратора системы" style="opacity: 0.4; border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.3);">
                     <i class="fas fa-user-shield"></i>
                 </button>
-                <button class="btn btn-gradient btn-sm rounded-pill" onclick="openReferee()" title="Открыть приложение судейства">
-                    <i class="fas fa-whistle me-2"></i>Судейство
+                <button class="btn btn-gradient btn-sm rounded-pill" onclick="openReferee()" title="Открыть приложение судейства" style="background: transparent; border: none;">
+                    <img src="/static/icons/scale.png" alt="Судейство" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle;">
                 </button>
             </div>
         </div>
@@ -980,7 +980,7 @@ function toggleAdminPasswordVisibility() {
 // Добавляем обработчик после создания модального окна
 document.addEventListener('DOMContentLoaded', function() {
     // Инициализация темы
-    const savedTheme = localStorage.getItem('selectedTheme') || 'original-emerald';
+    const savedTheme = localStorage.getItem('selectedTheme') || 'deep-emerald';
     const themeRadio = document.getElementById(`theme-${savedTheme}`);
     if (themeRadio) {
         themeRadio.checked = true;
