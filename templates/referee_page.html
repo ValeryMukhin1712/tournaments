@@ -1695,34 +1695,56 @@
             const pointsToWin = 21; // Можно сделать настраиваемым
             const maxPoints = 30; // Максимальный счёт для бадминтона
             
-            const scoreDiff = Math.abs(scoreLeft - scoreRight);
+            // В режиме Просмотр команды и счёт отражены зеркально
+            // Нужно использовать исходные значения счёта для правильного определения победителя
+            let actualScoreLeft, actualScoreRight;
             
-            console.log('checkVictory: Проверка победы:', { scoreLeft, scoreRight, scoreDiff });
+            if (isViewMode) {
+                // В режиме Просмотр: отражённый левый счёт = исходный правый счёт
+                // отражённый правый счёт = исходный левый счёт
+                actualScoreLeft = scoreRight;  // Исходный левый (Синяя команда)
+                actualScoreRight = scoreLeft;  // Исходный правый (Красная команда)
+            } else {
+                // В обычном режиме используем текущие значения
+                actualScoreLeft = scoreLeft;
+                actualScoreRight = scoreRight;
+            }
+            
+            const scoreDiff = Math.abs(actualScoreLeft - actualScoreRight);
+            
+            console.log('checkVictory: Проверка победы:', { 
+                isViewMode, 
+                scoreLeft, 
+                scoreRight, 
+                actualScoreLeft, 
+                actualScoreRight, 
+                scoreDiff 
+            });
             
             // Специальное условие для бадминтона: если одна сторона набрала 30 очков - победа
             // (независимо от счёта соперника, который может быть 29 или 28)
-            if (scoreLeft >= maxPoints) {
+            if (actualScoreLeft >= maxPoints) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
-                console.log(`Победа Синей команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                console.log(`Победа Синей команды по правилу 30 очков: ${actualScoreLeft}:${actualScoreRight}`);
                 return true;
             }
             
-            if (scoreRight >= maxPoints) {
+            if (actualScoreRight >= maxPoints) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
-                console.log(`Победа Красной команды по правилу 30 очков: ${scoreLeft}:${scoreRight}`);
+                console.log(`Победа Красной команды по правилу 30 очков: ${actualScoreLeft}:${actualScoreRight}`);
                 return true;
             }
             
             // Обычное условие победы: набрать нужное количество очков И разница больше 1
-            if (scoreLeft >= pointsToWin && scoreDiff > 1) {
+            if (actualScoreLeft >= pointsToWin && scoreDiff > 1) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
                 return true;
             }
             
-            if (scoreRight >= pointsToWin && scoreDiff > 1) {
+            if (actualScoreRight >= pointsToWin && scoreDiff > 1) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
                 return true;

@@ -4237,3 +4237,143 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при отправке приглашений участникам матча: {e}")
             return jsonify({'success': False, 'error': f'Ошибка при отправке приглашений: {str(e)}'}), 500
+    
+    @app.route('/api/tournaments/<int:tournament_id>/updates', methods=['GET'])
+    def tournament_updates(tournament_id):
+        """API для частичного обновления данных турнира (только счёт матчей и статистика)"""
+        try:
+            tournament = Tournament.query.get_or_404(tournament_id)
+            
+            # Получаем участников турнира
+            participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
+            
+            # Получаем матчи турнира
+            matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+            
+            # Дедупликация матчей
+            seen_matches = set()
+            unique_matches = []
+            for match in matches:
+                match_key = (match.participant1_id, match.participant2_id, match.match_date, match.match_time)
+                if match_key not in seen_matches:
+                    seen_matches.add(match_key)
+                    unique_matches.append(match)
+            matches = unique_matches
+            
+            # Подготавливаем данные матчей для отправки
+            matches_data = []
+            for match in matches:
+                participant1 = Participant.query.get(match.participant1_id)
+                participant2 = Participant.query.get(match.participant2_id)
+                
+                # Формируем счёт
+                score = None
+                sets_details = None
+                
+                # Проверяем, есть ли счёт по сетам (sets_won_1, sets_won_2) или по текущим сетам
+                if match.status in ['завершен', 'в_процессе', 'играют']:
+                    # Сначала проверяем sets_won_1 и sets_won_2 (основной счёт)
+                    if match.sets_won_1 is not None and match.sets_won_2 is not None:
+                        score = f"{match.sets_won_1}:{match.sets_won_2}"
+                    # Если основного счёта нет, но есть счёт в текущем сете, формируем временный счёт
+                    elif match.status in ['в_процессе', 'играют']:
+                        # Подсчитываем выигранные сеты на основе завершенных сетов
+                        sets_won_1 = 0
+                        sets_won_2 = 0
+                        points_to_win = tournament.points_to_win or 21
+                        
+                        # Проверяем каждый сет
+                        if match.set1_score1 is not None and match.set1_score2 is not None:
+                            if match.set1_score1 >= points_to_win and match.set1_score1 > match.set1_score2:
+                                sets_won_1 += 1
+                            elif match.set1_score2 >= points_to_win and match.set1_score2 > match.set1_score1:
+                                sets_won_2 += 1
+                        
+                        if match.set2_score1 is not None and match.set2_score2 is not None:
+                            if match.set2_score1 >= points_to_win and match.set2_score1 > match.set2_score2:
+                                sets_won_1 += 1
+                            elif match.set2_score2 >= points_to_win and match.set2_score2 > match.set2_score1:
+                                sets_won_2 += 1
+                        
+                        if match.set3_score1 is not None and match.set3_score2 is not None:
+                            if match.set3_score1 >= points_to_win and match.set3_score1 > match.set3_score2:
+                                sets_won_1 += 1
+                            elif match.set3_score2 >= points_to_win and match.set3_score2 > match.set3_score1:
+                                sets_won_2 += 1
+                        
+                        # Если есть хотя бы один завершенный сет, показываем счёт
+                        if sets_won_1 > 0 or sets_won_2 > 0:
+                            score = f"{sets_won_1}:{sets_won_2}"
+                    
+                    # Детали сетов (показываем все сеты, которые начались)
+                    if score:
+                        sets_list = []
+                        points_to_win = tournament.points_to_win or 21
+                        if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
+                            sets_list.append(f"{match.set1_score1}:{match.set1_score2}")
+                        if match.set2_score1 is not None and match.set2_score2 is not None and (match.set2_score1 > 0 or match.set2_score2 > 0) and not (match.set2_score1 == 0 and match.set2_score2 == 0) and not (match.set2_score1 == points_to_win and match.set2_score2 == points_to_win):
+                            sets_list.append(f"{match.set2_score1}:{match.set2_score2}")
+                        if match.set3_score1 is not None and match.set3_score2 is not None and (match.set3_score1 > 0 or match.set3_score2 > 0) and not (match.set3_score1 == 0 and match.set3_score2 == 0) and not (match.set3_score1 == points_to_win and match.set3_score2 == points_to_win):
+                            sets_list.append(f"{match.set3_score1}:{match.set3_score2}")
+                        if sets_list:
+                            sets_details = ", ".join(sets_list)
+                
+                matches_data.append({
+                    'id': match.id,
+                    'participant1_id': match.participant1_id,
+                    'participant2_id': match.participant2_id,
+                    'participant1_name': participant1.name if participant1 else '',
+                    'participant2_name': participant2.name if participant2 else '',
+                    'score': score,
+                    'sets_details': sets_details,
+                    'status': match.status,
+                    'match_date': match.match_date.strftime('%Y-%m-%d') if match.match_date else None,
+                    'match_time': match.match_time.strftime('%H:%M') if match.match_time else None,
+                    'set1_score1': match.set1_score1,
+                    'set1_score2': match.set1_score2,
+                    'set2_score1': match.set2_score1,
+                    'set2_score2': match.set2_score2,
+                    'set3_score1': match.set3_score1,
+                    'set3_score2': match.set3_score2,
+                    'sets_won_1': match.sets_won_1,
+                    'sets_won_2': match.sets_won_2
+                })
+            
+            # Подсчитываем статистику участников (используем логику из tournament_spectator)
+            from routes.main import calculate_participant_ranking
+            final_ranking = calculate_participant_ranking(participants, matches, tournament)
+            
+            # Создаем словарь для быстрого поиска
+            ranking_data_by_id = {}
+            for p_data in final_ranking:
+                ranking_data_by_id[p_data['participant'].id] = p_data
+            
+            # Формируем статистику участников
+            participants_stats = []
+            for participant in participants:
+                ranking_data = ranking_data_by_id.get(participant.id, {})
+                participants_stats.append({
+                    'id': participant.id,
+                    'name': participant.name,
+                    'position': ranking_data.get('place', 999),
+                    'points': ranking_data.get('points', 0),
+                    'wins': ranking_data.get('wins', 0),
+                    'losses': ranking_data.get('losses', 0),
+                    'draws': ranking_data.get('draws', 0),
+                    'games': ranking_data.get('games', 0),
+                    'sets_difference': ranking_data.get('sets_won', 0) - ranking_data.get('sets_lost', 0),
+                    'goal_difference': ranking_data.get('set_difference', 0)
+                })
+            
+            # Сортируем по позиции
+            participants_stats.sort(key=lambda x: x['position'])
+            
+            return jsonify({
+                'success': True,
+                'matches': matches_data,
+                'participants_stats': participants_stats
+            })
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении обновлений турнира {tournament_id}: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500

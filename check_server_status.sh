@@ -24,3 +24,9 @@ journalctl -u tournaments -n 50 --no-pager
 
 
 
+
+
+
+
+
+

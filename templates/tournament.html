@@ -2925,13 +2925,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Результат матча сохранен
                         console.log('Результат успешно сохранен');
                         
+                        // Отправляем уведомление через BroadcastChannel для обновления других вкладок
+                        try {
+                            const broadcastChannel = new BroadcastChannel('match-score-updates');
+                            broadcastChannel.postMessage({
+                                type: 'score-updated',
+                                matchId: parseInt(matchId),
+                                timestamp: Date.now()
+                            });
+                            console.log('[Tournament] 📡 Сообщение об обновлении счёта отправлено другим вкладкам через BroadcastChannel');
+                            broadcastChannel.close();
+                        } catch (error) {
+                            console.warn('[Tournament] ⚠️ Не удалось отправить сообщение через BroadcastChannel:', error);
+                        }
+                        
                         // Проверяем, это автообновление или обычное сохранение
                         const isAutoUpdate = window.isAutoUpdateMode || false;
                         
                         if (isAutoUpdate) {
                             // При автообновлении обновляем только таблицы через API, без перезагрузки страницы
                             console.log('🔄 Автообновление: обновляем таблицы без перезагрузки страницы');
-                            const matchId = document.getElementById('matchId').value;
                             if (matchId) {
                                 // Обновляем счёт в расписании и турнирной таблице
                                 refreshMatchScore(parseInt(matchId));

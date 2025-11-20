@@ -94,6 +94,30 @@ body {
         inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
+.referee-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-color: var(--primary-color);
+    -webkit-mask-image: url('/static/icons/scale.png');
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+    mask-image: url('/static/icons/scale.png');
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+}
+
+.referee-label {
+    font-size: 0.75rem;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+    opacity: 0.95;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
 .icon-gradient {
     background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
     -webkit-background-clip: text;
@@ -619,8 +643,9 @@ body {
                 <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="adminLogin()" title="Вход для администратора системы" style="opacity: 0.4; border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.3);">
                     <i class="fas fa-user-shield"></i>
                 </button>
-                <button class="btn btn-gradient btn-sm rounded-pill" onclick="openReferee()" title="Открыть приложение судейства" style="background: transparent; border: none;">
-                    <img src="/static/icons/scale.png" alt="Судейство" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle;">
+                <button class="btn btn-gradient btn-sm rounded-pill d-flex align-items-center gap-2" onclick="openReferee()" title="Открыть приложение судейства" style="background: transparent; border: none;">
+                    <span class="referee-icon" aria-hidden="true"></span>
+                    <span class="referee-label">игра без турнира</span>
                 </button>
             </div>
         </div>
@@ -628,7 +653,7 @@ body {
         <div class="row g-4">
             <!-- 1. Создание нового турнира -->
             <div class="col-6 col-sm-6">
-                <div class="card card-modern h-100 pulse-animation pulse-delay-1" onclick="window.location.href='{{ url_for('request_token') }}'">
+                <a class="card card-modern h-100 pulse-animation pulse-delay-1 text-decoration-none" href="{{ url_for('request_token') }}">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
                             <div class="role-icon">🔑</div>
@@ -641,12 +666,12 @@ body {
                             <i class="fas fa-key me-1 me-sm-2"></i><span class="d-none d-sm-inline">Получить пароль</span><span class="d-sm-none">Пароль</span>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             
             <!-- 2. Вход как админ турнира -->
             <div class="col-6 col-sm-6">
-                <div class="card card-modern h-100 pulse-animation pulse-delay-2" onclick="window.location.href='{{ url_for('admin_tournament') }}'">
+                <a class="card card-modern h-100 pulse-animation pulse-delay-2 text-decoration-none" href="{{ url_for('admin_tournament') }}">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
                             <div class="role-icon">
@@ -661,7 +686,7 @@ body {
                             <i class="fas fa-sign-in-alt me-1 me-sm-2"></i><span class="d-none d-sm-inline">Войти с паролем</span><span class="d-sm-none">Войти с паролем</span>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             
             <!-- 3. Вход как участник турнира -->
@@ -686,7 +711,7 @@ body {
             
             <!-- 4. Просмотр всех турниров -->
             <div class="col-6 col-sm-6">
-                <div class="card card-modern h-100 pulse-animation pulse-delay-4" onclick="window.location.href='{{ url_for('tournaments_list') }}'">
+                <a class="card card-modern h-100 pulse-animation pulse-delay-4 text-decoration-none" href="{{ url_for('tournaments_list') }}">
                     <div class="card-body text-center p-3 p-sm-4">
                         <div class="mb-2 mb-sm-3">
                             <div class="role-icon">
@@ -701,7 +726,7 @@ body {
                             <i class="fas fa-eye me-1 me-sm-2"></i><span class="d-none d-sm-inline">Смотреть турниры</span><span class="d-sm-none">Турниры</span>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
         
