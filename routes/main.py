@@ -1150,6 +1150,17 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     @app.route('/admin-tournament', methods=['GET', 'POST'])
     def admin_tournament():
         """Страница входа для админов турниров"""
+        # Очищаем flash-сообщения при загрузке страницы
+        if request.method == 'GET':
+            from flask import get_flashed_messages
+            # Получаем и удаляем все flash-сообщения
+            messages = get_flashed_messages()
+            # Очищаем все flash-сообщения из сессии
+            if '_flashes' in session:
+                session.pop('_flashes', None)
+            # Дополнительная очистка через get_flashed_messages с with_categories
+            get_flashed_messages(with_categories=True)
+        
         # Проверяем, есть ли уже активная сессия администратора
         if request.method == 'GET':
             admin_email = session.get('admin_email')
@@ -1369,8 +1380,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                     session.pop('participant_logged_in', None)
                     session.pop('viewer_name', None)
                     session.pop('viewer_authenticated', None)
+                    # Очищаем flash-сообщения из сессии перед входом
+                    session.pop('_flashes', None)
                     
-                    flash(f'Добро пожаловать, {admin.name}!', 'success')
+                    # flash(f'Добро пожаловать, {admin.name}!', 'success')
                     return redirect(url_for('admin_dashboard'))
                 else:
                     # Ищем все токены с таким email для отладки
@@ -2463,7 +2476,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         session.pop('viewer_authenticated', None)
         
         logger.info(f"Участник {name} вошел в систему")
-        flash(f'Добро пожаловать, {name}!', 'success')
+        # flash(f'Добро пожаловать, {name}!', 'success')
         
         return redirect(url_for('participant_tournaments'))
 
@@ -2519,7 +2532,9 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         from flask import session
         session.pop('participant_name', None)
         session.pop('participant_logged_in', None)
-        flash('Вы вышли из системы', 'info')
+        # Очищаем flash-сообщения из сессии
+        session.pop('_flashes', None)
+        # flash('Вы вышли из системы', 'info')
         return redirect(url_for('index'))
     
     @app.route('/tournament-view/<int:tournament_id>')
@@ -3340,8 +3355,10 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         session.pop('admin_email', None)
         session.pop('is_system_admin', None)
         session.pop('session_token', None)
+        # Очищаем flash-сообщения из сессии
+        session.pop('_flashes', None)
         
-        flash('Вы вышли из системы', 'info')
+        # flash('Вы вышли из системы', 'info')
         return redirect(url_for('index'))
     
     @app.route('/admin/sessions')
@@ -3386,7 +3403,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 session.pop('admin_id', None)
                 session.pop('participant_name', None)
                 session.pop('participant_logged_in', None)
-                flash(f'Добро пожаловать, {name}!', 'success')
+                # flash(f'Добро пожаловать, {name}!', 'success')
                 return redirect(url_for('tournaments_list_viewer'))
             else:
                 flash('Неверные данные для входа', 'error')

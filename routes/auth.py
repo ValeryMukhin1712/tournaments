@@ -33,7 +33,7 @@ def create_auth_routes(app, db, User):
             if user and check_password_hash(user.password_hash, password):
                 login_user(user)
                 logger.info(f"Успешный вход пользователя: {username} (ID: {user.id}, Роль: {user.role})")
-                flash(f'Добро пожаловать, {username}!', 'success')
+                # flash(f'Добро пожаловать, {username}!', 'success')
                 return redirect(url_for('index'))
             else:
                 logger.warning(f"Неудачная попытка входа для пользователя: {username}")
@@ -47,5 +47,5 @@ def create_auth_routes(app, db, User):
         username = current_user.username
         logout_user()
         logger.info(f"Участник {username} вышел из системы")
-        flash('Вы успешно вышли из системы', 'info')
+        # flash('Вы успешно вышли из системы', 'info')
         return redirect(url_for('login'))
