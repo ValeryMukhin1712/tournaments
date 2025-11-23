@@ -205,6 +205,7 @@
                                     <select class="form-select" id="sport_type" name="sport_type" required>
                                         <option value="пинг-понг">Пинг-понг</option>
                                         <option value="бадминтон" selected>Бадминтон</option>
+                                        <option value="бадминтон пара">Бадминтон пара</option>
                                         <option value="волейбол">Волейбол</option>
                                     </select>
                                 </div>
@@ -331,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sportDefaults = {
         'пинг-понг': { matchDuration: 10, breakDuration: 5, pointsToWin: 11, setsToWin: 3 },
         'бадминтон': { matchDuration: 20, breakDuration: 5, pointsToWin: 21, setsToWin: 3 },
+        'бадминтон пара': { matchDuration: 20, breakDuration: 5, pointsToWin: 21, setsToWin: 3 },
         'волейбол': { matchDuration: 20, breakDuration: 5, pointsToWin: 25, setsToWin: 3 }
     };
     

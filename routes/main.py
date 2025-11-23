@@ -2031,45 +2031,103 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                 if match.status in ['завершен', 'в_процессе', 'играют']:
                     if match.sets_won_1 is not None and match.sets_won_2 is not None:
                         score = f"{match.sets_won_1}:{match.sets_won_2}"
-                    elif match.set1_score1 is not None and match.set1_score2 is not None:
+                    else:
                         # Если нет sets_won, но есть детали сетов, считаем выигранные сеты
-                        # с учетом правил волейбола (25+ очков и разница >= 2)
+                        # с учетом правил вида спорта
                         sets_won_1 = 0
                         sets_won_2 = 0
+                        
+                        # Определяем параметры в зависимости от вида спорта
+                        sport_type = tournament.sport_type.lower() if tournament.sport_type else ''
+                        if 'бадминтон' in sport_type or 'badminton' in sport_type:
+                            # Бадминтон: 21 очко и разница >= 2, либо 30 очков (независимо от счёта соперника)
+                            min_points = 21
+                            max_points = 30
+                        elif 'волейбол' in sport_type or 'volleyball' in sport_type:
+                            # Волейбол: 25+ очков и разница >= 2 (первые 2 сета), 15+ очков (3-й сет)
+                            min_points = 25
+                            max_points = None
+                        else:
+                            # Пинг-понг и другие: 11 очков и разница >= 2
+                            min_points = 11
+                            max_points = None
                         
                         # Проверка 1-го сета
                         if match.set1_score1 is not None and match.set1_score2 is not None:
                             s1, s2 = match.set1_score1, match.set1_score2
-                            # Волейбол: сет выигран при 25+ очках и разнице >= 2
-                            if s1 >= 25 and s1 - s2 >= 2:
-                                sets_won_1 += 1
-                            elif s2 >= 25 and s2 - s1 >= 2:
-                                sets_won_2 += 1
+                            if 'бадминтон' in sport_type or 'badminton' in sport_type:
+                                # Бадминтон: 21 очко и разница >= 2, либо 30 очков
+                                if s1 >= max_points or (s1 >= min_points and s1 - s2 >= 2):
+                                    sets_won_1 += 1
+                                elif s2 >= max_points or (s2 >= min_points and s2 - s1 >= 2):
+                                    sets_won_2 += 1
+                            elif 'волейбол' in sport_type or 'volleyball' in sport_type:
+                                # Волейбол: 25+ очков и разница >= 2
+                                if s1 >= min_points and s1 - s2 >= 2:
+                                    sets_won_1 += 1
+                                elif s2 >= min_points and s2 - s1 >= 2:
+                                    sets_won_2 += 1
+                            else:
+                                # Пинг-понг: 11 очков и разница >= 2
+                                if s1 >= min_points and s1 - s2 >= 2:
+                                    sets_won_1 += 1
+                                elif s2 >= min_points and s2 - s1 >= 2:
+                                    sets_won_2 += 1
                         
                         # Проверка 2-го сета
                         if match.set2_score1 is not None and match.set2_score2 is not None:
                             s1, s2 = match.set2_score1, match.set2_score2
-                            if s1 >= 25 and s1 - s2 >= 2:
-                                sets_won_1 += 1
-                            elif s2 >= 25 and s2 - s1 >= 2:
-                                sets_won_2 += 1
+                            if 'бадминтон' in sport_type or 'badminton' in sport_type:
+                                if s1 >= max_points or (s1 >= min_points and s1 - s2 >= 2):
+                                    sets_won_1 += 1
+                                elif s2 >= max_points or (s2 >= min_points and s2 - s1 >= 2):
+                                    sets_won_2 += 1
+                            elif 'волейбол' in sport_type or 'volleyball' in sport_type:
+                                if s1 >= min_points and s1 - s2 >= 2:
+                                    sets_won_1 += 1
+                                elif s2 >= min_points and s2 - s1 >= 2:
+                                    sets_won_2 += 1
+                            else:
+                                if s1 >= min_points and s1 - s2 >= 2:
+                                    sets_won_1 += 1
+                                elif s2 >= min_points and s2 - s1 >= 2:
+                                    sets_won_2 += 1
                         
-                        # Проверка 3-го сета (решающий - до 15 очков)
+                        # Проверка 3-го сета
                         if match.set3_score1 is not None and match.set3_score2 is not None:
                             s1, s2 = match.set3_score1, match.set3_score2
-                            if s1 >= 15 and s1 - s2 >= 2:
-                                sets_won_1 += 1
-                            elif s2 >= 15 and s2 - s1 >= 2:
-                                sets_won_2 += 1
+                            if 'бадминтон' in sport_type or 'badminton' in sport_type:
+                                if s1 >= max_points or (s1 >= min_points and s1 - s2 >= 2):
+                                    sets_won_1 += 1
+                                elif s2 >= max_points or (s2 >= min_points and s2 - s1 >= 2):
+                                    sets_won_2 += 1
+                            elif 'волейбол' in sport_type or 'volleyball' in sport_type:
+                                # 3-й сет волейбола: до 15 очков
+                                if s1 >= 15 and s1 - s2 >= 2:
+                                    sets_won_1 += 1
+                                elif s2 >= 15 and s2 - s1 >= 2:
+                                    sets_won_2 += 1
+                            else:
+                                if s1 >= min_points and s1 - s2 >= 2:
+                                    sets_won_1 += 1
+                                elif s2 >= min_points and s2 - s1 >= 2:
+                                    sets_won_2 += 1
                         
-                        score = f"{sets_won_1}:{sets_won_2}"
-                    else:
-                        # Для матчей в процессе без данных - показываем "0:0"
+                        # Для играющихся матчей показываем счет по завершенным сетам
+                        # (может быть "0:0" если сет еще не завершен, или "1:0" если один сет завершен)
                         if match.status in ['в_процессе', 'играют']:
-                            score = "0:0"
+                            # Если есть счет хотя бы в одном сете, показываем счет по завершенным сетам
+                            if (match.set1_score1 is not None and match.set1_score2 is not None) or \
+                               (match.set2_score1 is not None and match.set2_score2 is not None) or \
+                               (match.set3_score1 is not None and match.set3_score2 is not None):
+                                score = f"{sets_won_1}:{sets_won_2}"
+                        else:
+                            # Для завершенных матчей показываем счет только если есть завершенные сеты
+                            if sets_won_1 > 0 or sets_won_2 > 0:
+                                score = f"{sets_won_1}:{sets_won_2}"
                 
                 # Отладочная информация для счета
-                app.logger.info(f"Матч {match.id}: итоговый счет={score}")
+                app.logger.info(f"Матч {match.id}: итоговый счет={score}, статус={match.status}")
                 
                 # Формируем детали сетов (без номеров сетов) - только для завершенных и в процессе
                 sets_details = None
@@ -2804,7 +2862,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                             # Формируем детали сетов
                             sets_details = ""
                             sets_list = []
-                            points_to_win = 21 if tournament.sport_type == 'бадминтон' else 11
+                            points_to_win = 21 if tournament.sport_type and ('бадминтон' in tournament.sport_type.lower() or 'badminton' in tournament.sport_type.lower()) else 11
                             
                             if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                                 if match.participant1_id == participant.id:
@@ -2853,7 +2911,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
                                 # Формируем детали сетов
                                 sets_details = ""
                                 sets_list = []
-                                points_to_win = 21 if tournament.sport_type == 'бадминтон' else 11
+                                points_to_win = 21 if tournament.sport_type and ('бадминтон' in tournament.sport_type.lower() or 'badminton' in tournament.sport_type.lower()) else 11
                                 
                                 if match.set1_score1 is not None and match.set1_score2 is not None and (match.set1_score1 > 0 or match.set1_score2 > 0) and not (match.set1_score1 == 0 and match.set1_score2 == 0) and not (match.set1_score1 == points_to_win and match.set1_score2 == points_to_win):
                                     if match.participant1_id == participant.id:
