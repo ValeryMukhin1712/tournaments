@@ -13,7 +13,7 @@ import logging
 import secrets
 
 # Импорт моделей из модулей
-from models import db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player, UserActivity
+from models import db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player, UserActivity, Rally
 
 # Импорт и регистрация маршрутов
 from routes import register_routes
@@ -77,7 +77,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Импорт и регистрация маршрутов
-register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player)
+register_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player, Rally)
 
 @login_manager.user_loader
 def load_user(user_id):

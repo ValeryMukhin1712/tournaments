@@ -1866,6 +1866,131 @@
         }
         
         // Функция для перемещения индикатора подачи при выигрыше очка
+        // Функция для сохранения розыгрыша в базу данных
+        async function saveRallyToDatabase(scoringTeam, previousScoreLeft, previousScoreRight, servingPositionBefore) {
+            // Получаем параметры из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const setNumber = urlParams.get('set') || '1';
+            
+            // Если нет match_id, значит это не матч из турнира, не сохраняем
+            if (!matchId || matchId === '') {
+                return;
+            }
+            
+            try {
+                // Получаем данные матча для tournament_id и court_number
+                const matchResponse = await fetch(`/api/matches/${matchId}?_t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                const matchData = await matchResponse.json();
+                if (!matchData.success || !matchData.match) {
+                    console.warn('[Rally] Не удалось получить данные матча');
+                    return;
+                }
+                
+                const tournamentId = matchData.match.tournament_id;
+                const courtNumber = matchData.match.court_number;
+                
+                // Проверка типа спорта выполняется на сервере в API endpoint
+                // Здесь просто сохраняем данные, сервер проверит, что это бадминтон
+                
+                // Определяем, кто подавал до розыгрыша (используем сохранённую позицию)
+                const isServingLeft = servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_left';
+                const isServingRight = servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right';
+                
+                // Получаем имена игроков
+                const topLeftName = document.getElementById('top_left_player_input')?.value || '';
+                const bottomLeftName = document.getElementById('bottom_left_player_input')?.value || '';
+                const topRightName = document.getElementById('name_top_right')?.value || '';
+                const bottomRightName = document.getElementById('name_bottom_right')?.value || '';
+                
+                // Определяем имя подающего
+                let serverName = '';
+                let receiverName = '';
+                
+                if (isServingLeft) {
+                    // Подавал левый игрок
+                    if (bottomLeftName && bottomLeftName !== topLeftName) {
+                        serverName = bottomLeftName + ' - ' + topLeftName;
+                    } else {
+                        serverName = topLeftName || 'Игрок 1';
+                    }
+                    
+                    if (bottomRightName && bottomRightName !== topRightName) {
+                        receiverName = topRightName + ' - ' + bottomRightName;
+                    } else {
+                        receiverName = topRightName || 'Игрок 2';
+                    }
+                } else if (isServingRight) {
+                    // Подавал правый игрок
+                    if (bottomRightName && bottomRightName !== topRightName) {
+                        serverName = topRightName + ' - ' + bottomRightName;
+                    } else {
+                        serverName = topRightName || 'Игрок 2';
+                    }
+                    
+                    if (bottomLeftName && bottomLeftName !== topLeftName) {
+                        receiverName = bottomLeftName + ' - ' + topLeftName;
+                    } else {
+                        receiverName = topLeftName || 'Игрок 1';
+                    }
+                } else {
+                    // Если позиция не определена, используем имена по умолчанию
+                    serverName = topLeftName || 'Игрок 1';
+                    receiverName = topRightName || 'Игрок 2';
+                }
+                
+                // Определяем, выиграл ли подающий
+                const serverWon = (isServingLeft && scoringTeam === 'left') || (isServingRight && scoringTeam === 'right');
+                
+                // Формируем текущий счёт
+                const currentScore = `${scoreLeft}:${scoreRight}`;
+                
+                // Получаем CSRF токен
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (!csrfToken) {
+                    console.warn('[Rally] CSRF токен не найден');
+                    return;
+                }
+                
+                // Отправляем запрос на сохранение розыгрыша
+                const rallyData = {
+                    match_id: parseInt(matchId),
+                    tournament_id: tournamentId,
+                    set_number: parseInt(setNumber) || 1,
+                    court_number: courtNumber,
+                    server_name: serverName,
+                    receiver_name: receiverName,
+                    server_won: serverWon,
+                    score: currentScore
+                };
+                
+                const response = await fetch('/api/rallies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(rallyData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log('[Rally] ✅ Розыгрыш сохранён:', result.rally);
+                } else {
+                    console.warn('[Rally] ⚠️ Ошибка сохранения розыгрыша:', result.error);
+                }
+                
+            } catch (error) {
+                console.error('[Rally] ❌ Ошибка при сохранении розыгрыша:', error);
+            }
+        }
+        
         function handlePointScored(scoringTeam) {
             // Определяем, какая команда подавала
             const isServingLeft = shuttlecockPosition === 'top_left' || shuttlecockPosition === 'bottom_left';
@@ -1918,35 +2043,55 @@
         document.getElementById('court_left')?.addEventListener('click', function(e) {
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
             saveGameState();
+            const previousScoreLeft = scoreLeft;
+            const previousScoreRight = scoreRight;
+            const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
             scoreLeft++;
             handlePointScored('left');
             updateScore();
+            // Сохраняем розыгрыш
+            saveRallyToDatabase('left', previousScoreLeft, previousScoreRight, servingPositionBefore);
         });
         
         // Увеличение счета правой команды
         document.getElementById('court_right')?.addEventListener('click', function(e) {
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
             saveGameState();
+            const previousScoreLeft = scoreLeft;
+            const previousScoreRight = scoreRight;
+            const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
             scoreRight++;
             handlePointScored('right');
             updateScore();
+            // Сохраняем розыгрыш
+            saveRallyToDatabase('right', previousScoreLeft, previousScoreRight, servingPositionBefore);
         });
         
         // Увеличение счета при клике на цифры счёта (работает в режиме просмотра)
         document.getElementById('scoreLeft')?.addEventListener('click', function(e) {
             e.stopPropagation(); // Останавливаем всплытие события
             saveGameState();
+            const previousScoreLeft = scoreLeft;
+            const previousScoreRight = scoreRight;
+            const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
             scoreLeft++;
             handlePointScored('left');
             updateScore();
+            // Сохраняем розыгрыш
+            saveRallyToDatabase('left', previousScoreLeft, previousScoreRight, servingPositionBefore);
         });
         
         document.getElementById('scoreRight')?.addEventListener('click', function(e) {
             e.stopPropagation(); // Останавливаем всплытие события
             saveGameState();
+            const previousScoreLeft = scoreLeft;
+            const previousScoreRight = scoreRight;
+            const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
             scoreRight++;
             handlePointScored('right');
             updateScore();
+            // Сохраняем розыгрыш
+            saveRallyToDatabase('right', previousScoreLeft, previousScoreRight, servingPositionBefore);
         });
         
         // Поменять команды местами

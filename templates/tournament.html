@@ -1238,9 +1238,24 @@
                                                 <i class="fab fa-telegram"></i>
                                             </button>
                                             {% endif %}
+                                            {% if match.status in ['в_процессе', 'играют', 'завершен'] %}
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
+                                                    title="Просмотр журнала розыгрышей">
+                                                <i class="fas fa-book"></i>
+                                            </button>
+                                            {% endif %}
                                         </div>
                                         {% else %}
+                                        {% if match.status in ['в_процессе', 'играют', 'завершен'] %}
+                                        <button class="btn btn-sm btn-outline-info" 
+                                                onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
+                                                title="Просмотр журнала розыгрышей">
+                                            <i class="fas fa-book"></i>
+                                        </button>
+                                        {% else %}
                                         <span class="text-muted">—</span>
+                                        {% endif %}
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -1533,13 +1548,13 @@
                 <div class="tab-content mt-3" id="addParticipantTabContent">
                     <!-- Вкладка создания команды -->
                     <div class="tab-pane fade show active" id="players" role="tabpanel">
-                        <div class="mb-3">
+                            <div class="mb-3">
                             <div class="alert alert-info" id="playersTabInfo">
                                 <i class="fas fa-info-circle me-2"></i>
                                 <strong>Список игроков:</strong> Выберите игроков из списка ранее добавленных участников.
                             </div>
-                        </div>
-                        
+                    </div>
+                    
                         <!-- Для турнира "Бадминтон dbl" показываем специальный интерфейс -->
                         <div id="badmintonPairPlayersForm" style="display: none;">
                             <div class="row mb-3">
@@ -1560,7 +1575,7 @@
                                     <input type="text" class="form-control mt-2" id="pairPlayer2NewName" placeholder="Введите имя нового игрока" style="display: none;">
                                 </div>
                             </div>
-                            <div class="mb-3">
+                        <div class="mb-3">
                                 <button type="button" class="btn btn-primary" id="addPairTeamBtn" disabled>
                                     <i class="fas fa-user-plus me-2"></i>Создать команду
                                 </button>
@@ -1579,52 +1594,52 @@
                                     </button>
                                 </div>
                                 <small class="text-muted">Новый участник будет добавлен в список выбора</small>
-                            </div>
-                            
-                            <!-- Поиск игроков -->
-                            <div class="mb-3">
+                        </div>
+                        
+                        <!-- Поиск игроков -->
+                        <div class="mb-3">
                                 <label for="playerSearchInput" class="form-label">Поиск в списке</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <input type="text" class="form-control" id="playerSearchInput" placeholder="Поиск игроков...">
-                                </div>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="playerSearchInput" placeholder="Поиск игроков...">
                             </div>
-                            
-                            <!-- Список игроков -->
-                            <div class="table-responsive" style="max-height: 300px;">
-                                <table class="table table-hover" id="playersListTable">
-                                    <thead class="table-light sticky-top">
-                                        <tr>
-                                            <th width="50">
-                                                <input type="checkbox" id="selectAllPlayers" class="form-check-input">
-                                            </th>
-                                            <th>Имя игрока</th>
-                                            <th>Последнее участие</th>
-                                            <th>Действия</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="playersListTableBody">
-                                        <!-- Данные будут загружены через JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            
-                            <div id="noPlayersMessage" class="text-center text-muted py-3" style="display: none;">
-                                <i class="fas fa-users fa-2x mb-2"></i>
-                                <p>Список игроков пуст</p>
-                                <small>Игроки будут добавлены в список автоматически при добавлении участников в турниры</small>
-                            </div>
-                            
-                            <!-- Кнопки действий -->
-                            <div class="mt-3">
-                                <button type="button" class="btn btn-primary" id="addSelectedPlayersBtn" disabled>
+                        </div>
+                        
+                        <!-- Список игроков -->
+                        <div class="table-responsive" style="max-height: 300px;">
+                            <table class="table table-hover" id="playersListTable">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th width="50">
+                                            <input type="checkbox" id="selectAllPlayers" class="form-check-input">
+                                        </th>
+                                        <th>Имя игрока</th>
+                                        <th>Последнее участие</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="playersListTableBody">
+                                    <!-- Данные будут загружены через JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="noPlayersMessage" class="text-center text-muted py-3" style="display: none;">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <p>Список игроков пуст</p>
+                            <small>Игроки будут добавлены в список автоматически при добавлении участников в турниры</small>
+                        </div>
+                        
+                        <!-- Кнопки действий -->
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-primary" id="addSelectedPlayersBtn" disabled>
                                     <i class="fas fa-user-plus me-2"></i>Добавить выбранных (<span id="selectedCount">0</span>)
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" id="clearPlayerSelectionBtn">
-                                    <i class="fas fa-times me-2"></i>Очистить выбор
-                                </button>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearPlayerSelectionBtn">
+                                <i class="fas fa-times me-2"></i>Очистить выбор
+                            </button>
                             </div>
                         </div>
                     </div>
@@ -1694,6 +1709,33 @@
                 <button type="button" id="confirmRejectBtn" class="btn btn-danger">
                     <i class="fas fa-times me-2"></i>Отклонить заявку
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра журнала розыгрышей -->
+<div class="modal fade" id="rallyJournalModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i>Журнал розыгрышей
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div id="rallyJournalContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
     </div>
@@ -2547,43 +2589,43 @@ document.addEventListener('DOMContentLoaded', function() {
             loadPlayers();
         }
         
-        const addParticipantForm = document.getElementById('addParticipantForm');
-        if (addParticipantForm) {
-            addParticipantForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = {
-                    name: document.getElementById('participantName').value,
+    const addParticipantForm = document.getElementById('addParticipantForm');
+    if (addParticipantForm) {
+        addParticipantForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('participantName').value,
                     is_team: false
-                };
-                
-                fetch('/api/tournaments/{{ tournament.id }}/participants', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCSRFToken()
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => {
-                    console.log('1. Преобразование response.json() - статус:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('2. Данные ответа:', data);
-                    if (data.success) {
-                        console.log('3. СТАРТ ВЕТКИ "УСПЕШНЫЙ СЦЕНАРИЙ"');
-                        location.reload();
-                    } else {
-                        console.log('4. СЦЕНАРИЙ ОШИБОК - data.success = false, error:', data.error);
-                        alert('Ошибка: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.log('5. СЦЕНАРИЙ ОШИБОК - catch блок, error:', error);
-                    alert('Ошибка при добавлении участника: ' + error);
-                });
+            };
+            
+            fetch('/api/tournaments/{{ tournament.id }}/participants', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                console.log('1. Преобразование response.json() - статус:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('2. Данные ответа:', data);
+                if (data.success) {
+                    console.log('3. СТАРТ ВЕТКИ "УСПЕШНЫЙ СЦЕНАРИЙ"');
+                    location.reload();
+                } else {
+                    console.log('4. СЦЕНАРИЙ ОШИБОК - data.success = false, error:', data.error);
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.log('5. СЦЕНАРИЙ ОШИБОК - catch блок, error:', error);
+                alert('Ошибка при добавлении участника: ' + error);
             });
+        });
         }
     }
     
@@ -2622,8 +2664,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const playersTab = document.getElementById('players-tab');
         if (playersTab) {
             playersTab.addEventListener('shown.bs.tab', function() {
-                addWaitingBtn.style.display = 'none';
-            });
+            addWaitingBtn.style.display = 'none';
+        });
         }
         
         // Обработчик для вкладки "Лист ожидания"
@@ -4480,7 +4522,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // Для обычных турниров загружаем список игроков
                 if (typeof loadPlayers === 'function') {
-                    loadPlayers();
+            loadPlayers();
                 } else if (typeof loadPlayersList === 'function') {
                     if (typeof loadPlayers === 'function') {
                     loadPlayers();
@@ -6567,8 +6609,8 @@ function calculateMatchScore(matchData) {
         if ((matchData.set1_score1 !== null && matchData.set1_score2 !== null) ||
             (matchData.set2_score1 !== null && matchData.set2_score2 !== null) ||
             (matchData.set3_score1 !== null && matchData.set3_score2 !== null)) {
-            return `${sets_won_1}:${sets_won_2}`;
-        }
+        return `${sets_won_1}:${sets_won_2}`;
+    }
         // Если нет счета в сетах, возвращаем null (матч еще не начался)
         return null;
     }
@@ -6638,10 +6680,10 @@ function updateMatchScoreInSchedule(matchId, matchData) {
         if (actualStatus === 'в_процессе' || actualStatus === 'играют') {
             // Если есть счет (даже "0:0"), показываем его
             if (score !== null && score !== undefined) {
-                const scoreParts = score.split(':');
-                const score1 = parseInt(scoreParts[0]);
-                const score2 = parseInt(scoreParts[1]);
-                
+        const scoreParts = score.split(':');
+        const score1 = parseInt(scoreParts[0]);
+        const score2 = parseInt(scoreParts[1]);
+        
                 let html = `<span class="badge bg-warning text-dark match-score" style="background-color: #ffc107 !important; color: #000 !important;">${score}</span>`;
                 if (setsDetails) {
                     html += `<br><small class="text-muted">${setsDetails}</small>`;
@@ -6672,14 +6714,14 @@ function updateMatchScoreInSchedule(matchId, matchData) {
                 
                 const badgeClass = score1 > score2 ? 'bg-success text-white' : 'bg-danger text-white';
                 let html = `<span class="badge ${badgeClass} match-score">${score}</span>`;
-                if (setsDetails) {
-                    html += `<br><small class="text-muted">${setsDetails}</small>`;
-                }
-                
-                scoreCell.innerHTML = html;
-                
-                matchRow.setAttribute('data-score1', scoreParts[0]);
-                matchRow.setAttribute('data-score2', scoreParts[1]);
+        if (setsDetails) {
+            html += `<br><small class="text-muted">${setsDetails}</small>`;
+        }
+        
+        scoreCell.innerHTML = html;
+        
+        matchRow.setAttribute('data-score1', scoreParts[0]);
+        matchRow.setAttribute('data-score2', scoreParts[1]);
             } else {
                 scoreCell.innerHTML = '<span class="text-muted">—</span>';
             }
@@ -6955,8 +6997,8 @@ function startMatchScoreAutoRefresh() {
                                 const scoreHeaderIndex = headers.findIndex(th => th.textContent.includes('Счет') || th.textContent.includes('Счёт'));
                                 if (scoreHeaderIndex !== -1) {
                                     const scoreCell = row.querySelector(`td:nth-child(${scoreHeaderIndex + 1})`);
-                                    if (scoreCell && !scoreCell.textContent.includes('—') && scoreCell.textContent.trim().length > 0) {
-                                        foundActive = true;
+                        if (scoreCell && !scoreCell.textContent.includes('—') && scoreCell.textContent.trim().length > 0) {
+                            foundActive = true;
                                     }
                                 }
                             }
@@ -6993,6 +7035,154 @@ function setupScoreUpdateListener() {
         console.log('[Tournament] 📡 Слушатель обновлений счёта активирован');
     } catch (error) {
         console.warn('[Tournament] ⚠️ Не удалось создать BroadcastChannel:', error);
+    }
+}
+
+// Функция для открытия модального окна журнала розыгрышей
+function openRallyJournalModal(matchId, participant1, participant2) {
+    console.log('[Rally Journal] Открытие журнала для матча:', matchId);
+    
+    // Устанавливаем заголовок модального окна
+    const modal = document.getElementById('rallyJournalModal');
+    const modalTitle = modal.querySelector('.modal-title');
+    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: ${participant1} vs ${participant2}`;
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContent');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Открываем модальное окно
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Загружаем данные розыгрышей
+    loadRallyJournal(matchId);
+}
+
+// Функция для загрузки журнала розыгрышей
+async function loadRallyJournal(matchId) {
+    try {
+        const response = await fetch(`/api/matches/${matchId}/rallies`);
+        const data = await response.json();
+        
+        const content = document.getElementById('rallyJournalContent');
+        
+        if (!data.success) {
+            content.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${data.error || 'Не удалось загрузить журнал розыгрышей'}
+                </div>
+            `;
+            return;
+        }
+        
+        const rallies = data.rallies || [];
+        
+        if (rallies.length === 0) {
+            content.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Розыгрыши пока не зарегистрированы
+                </div>
+            `;
+            return;
+        }
+        
+        // Группируем розыгрыши по сетам
+        const ralliesBySet = {};
+        rallies.forEach(rally => {
+            const setNum = rally.set_number;
+            if (!ralliesBySet[setNum]) {
+                ralliesBySet[setNum] = [];
+            }
+            ralliesBySet[setNum].push(rally);
+        });
+        
+        // Формируем HTML
+        let html = '<div class="rally-journal">';
+        
+        // Сортируем сеты по номеру
+        const setNumbers = Object.keys(ralliesBySet).sort((a, b) => parseInt(a) - parseInt(b));
+        
+        setNumbers.forEach(setNum => {
+            const setRallies = ralliesBySet[setNum];
+            html += `
+                <div class="mb-4">
+                    <h6 class="border-bottom pb-2 mb-3">
+                        <i class="fas fa-trophy me-2"></i>Сет ${setNum}
+                        <span class="badge bg-secondary ms-2">${setRallies.length} розыгрышей</span>
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;">№</th>
+                                    <th style="width: 120px;">Время</th>
+                                    <th>Подающий</th>
+                                    <th>Принимающий</th>
+                                    <th style="width: 100px;" class="text-center">Результат</th>
+                                    <th style="width: 100px;" class="text-center">Счёт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            setRallies.forEach((rally, index) => {
+                const rallyTime = new Date(rally.rally_datetime);
+                const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                
+                // Результат: 1 если выиграл подающий, 0 если выиграл принимающий
+                const resultValue = rally.server_won ? '1' : '0';
+                const resultBadge = rally.server_won 
+                    ? '<span class="badge bg-success">1</span>'
+                    : '<span class="badge bg-danger">0</span>';
+                
+                html += `
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td><small>${timeStr}</small></td>
+                        <td><strong>${rally.server_name || 'Не указан'}</strong></td>
+                        <td><strong>${rally.receiver_name || 'Не указан'}</strong></td>
+                        <td class="text-center">${resultBadge}</td>
+                        <td class="text-center"><strong>${rally.score}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+        
+        console.log('[Rally Journal] Загружено розыгрышей:', rallies.length);
+        
+    } catch (error) {
+        console.error('[Rally Journal] Ошибка при загрузке журнала:', error);
+        const content = document.getElementById('rallyJournalContent');
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Ошибка при загрузке журнала розыгрышей: ${error.message}
+            </div>
+        `;
     }
 }
 

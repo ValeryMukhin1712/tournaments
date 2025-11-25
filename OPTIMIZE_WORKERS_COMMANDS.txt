@@ -1,0 +1,26 @@
+# Команды для оптимизации workers на сервере
+# Выполните эти команды на сервере deploy@132742
+
+# 1. Создать бэкап конфигурации
+sudo cp /etc/systemd/system/tournaments.service /etc/systemd/system/tournaments.service.backup
+
+# 2. Изменить workers с 4 на 2
+sudo sed -i 's/--workers 4/--workers 2/g' /etc/systemd/system/tournaments.service
+
+# 3. Проверить, что изменение применилось
+grep workers /etc/systemd/system/tournaments.service
+
+# 4. Применить изменения
+sudo systemctl daemon-reload
+sudo systemctl restart tournaments
+
+# 5. Проверить статус (подождите 3-5 секунд)
+sleep 3
+sudo systemctl status tournaments
+
+# 6. Проверить использование памяти
+free -h
+
+# 7. Проверить, что приложение работает
+curl -s http://localhost:5000 | head -20
+

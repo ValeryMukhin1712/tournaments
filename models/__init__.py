@@ -18,6 +18,7 @@ from .waiting_list import WaitingList
 from .settings import Settings
 from .player import Player
 from .user_activity import UserActivity
+from .rally import Rally
 
 def create_models(db_instance):
     """Возвращает словарь с моделями (для обратной совместимости)"""
@@ -32,5 +33,6 @@ def create_models(db_instance):
         'WaitingList': WaitingList,
         'Settings': Settings,
         'Player': Player,
-        'UserActivity': UserActivity
+        'UserActivity': UserActivity,
+        'Rally': Rally
     }

@@ -480,7 +480,7 @@ def add_minutes_to_time(time_obj, minutes):
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
 
-def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player):
+def create_api_routes(app, db, User, Tournament, Participant, Match, Notification, MatchLog, Token, WaitingList, Settings, Player, Rally):
     """Создает API маршруты приложения"""
     
     # Получаем объект CSRF из приложения
@@ -4376,4 +4376,158 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
         except Exception as e:
             logger.error(f"Ошибка при получении обновлений турнира {tournament_id}: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    # ===== РОЗЫГРЫШИ БАДМИНТОНА =====
+    
+    @app.route('/api/rallies', methods=['POST'])
+    def create_rally():
+        """Создание нового розыгрыша для бадминтона"""
+        try:
+            # CSRF из заголовка
+            csrf_token = request.headers.get('X-CSRFToken')
+            if not csrf_token:
+                return jsonify({'success': False, 'error': 'Отсутствует CSRF токен'}), 400
+            
+            # Проверяем CSRF токен
+            try:
+                from flask_wtf.csrf import validate_csrf
+                validate_csrf(csrf_token)
+            except Exception as e:
+                logger.warning(f"CSRF validation failed (rally create): {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            # Получаем данные из запроса
+            data = request.get_json()
+            if not data:
+                return jsonify({'success': False, 'error': 'Отсутствуют данные'}), 400
+            
+            # Проверяем обязательные поля
+            required_fields = ['match_id', 'tournament_id', 'set_number', 'server_name', 'receiver_name', 'server_won', 'score']
+            missing = [f for f in required_fields if f not in data]
+            if missing:
+                return jsonify({'success': False, 'error': f'Отсутствуют обязательные поля: {", ".join(missing)}'}), 400
+            
+            # Проверяем, что матч существует
+            match = Match.query.get(data['match_id'])
+            if not match:
+                return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Проверяем, что турнир существует
+            tournament = Tournament.query.get(data['tournament_id'])
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Проверяем, что это бадминтон
+            sport_type = tournament.sport_type.lower()
+            if 'бадминтон' not in sport_type and 'badminton' not in sport_type:
+                return jsonify({'success': False, 'error': 'Розыгрыши можно сохранять только для бадминтона'}), 400
+            
+            # Создаем розыгрыш
+            rally_datetime = datetime.now()
+            rally = Rally(
+                match_id=int(data['match_id']),
+                tournament_id=int(data['tournament_id']),
+                set_number=int(data['set_number']),
+                rally_date=rally_datetime.date(),
+                rally_time=rally_datetime.time(),
+                rally_datetime=rally_datetime,
+                court_number=data.get('court_number'),  # опционально
+                server_name=str(data['server_name']),
+                receiver_name=str(data['receiver_name']),
+                server_won=bool(data['server_won']),
+                score=str(data['score']),
+                notes=data.get('notes')  # опционально
+            )
+            
+            db.session.add(rally)
+            db.session.commit()
+            
+            logger.info(f"Создан розыгрыш {rally.id} для матча {data['match_id']}, сет {data['set_number']}")
+            return jsonify({'success': True, 'rally': rally.to_dict()}), 201
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при создании розыгрыша: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': f'Ошибка при создании розыгрыша: {str(e)}'}), 500
+    
+    @app.route('/api/matches/<int:match_id>/rallies', methods=['GET'])
+    def get_match_rallies(match_id):
+        """Получение всех розыгрышей для матча"""
+        try:
+            # Проверяем, что матч существует
+            match = Match.query.get(match_id)
+            if not match:
+                return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Получаем параметры запроса
+            set_number = request.args.get('set_number', type=int)
+            
+            # Запрос розыгрышей
+            query = Rally.query.filter_by(match_id=match_id)
+            if set_number:
+                query = query.filter_by(set_number=set_number)
+            
+            rallies = query.order_by(Rally.rally_datetime.asc()).all()
+            
+            return jsonify({
+                'success': True,
+                'match_id': match_id,
+                'rallies': [rally.to_dict() for rally in rallies],
+                'count': len(rallies)
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении розыгрышей матча {match_id}: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/rallies/<int:rally_id>', methods=['GET'])
+    def get_rally(rally_id):
+        """Получение конкретного розыгрыша"""
+        try:
+            rally = Rally.query.get(rally_id)
+            if not rally:
+                return jsonify({'success': False, 'error': 'Розыгрыш не найден'}), 404
+            
+            return jsonify({
+                'success': True,
+                'rally': rally.to_dict()
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении розыгрыша {rally_id}: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/rallies/<int:rally_id>', methods=['DELETE'])
+    def delete_rally(rally_id):
+        """Удаление розыгрыша"""
+        try:
+            # CSRF из заголовка
+            csrf_token = request.headers.get('X-CSRFToken')
+            if not csrf_token:
+                return jsonify({'success': False, 'error': 'Отсутствует CSRF токен'}), 400
+            
+            # Проверяем CSRF токен
+            try:
+                from flask_wtf.csrf import validate_csrf
+                validate_csrf(csrf_token)
+            except Exception as e:
+                logger.warning(f"CSRF validation failed (rally delete): {e}")
+                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
+            
+            rally = Rally.query.get(rally_id)
+            if not rally:
+                return jsonify({'success': False, 'error': 'Розыгрыш не найден'}), 404
+            
+            db.session.delete(rally)
+            db.session.commit()
+            
+            logger.info(f"Удален розыгрыш {rally_id}")
+            return jsonify({'success': True, 'message': 'Розыгрыш удален'}), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка при удалении розыгрыша {rally_id}: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500

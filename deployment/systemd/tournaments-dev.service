@@ -1,0 +1,27 @@
+[Unit]
+Description=Quick Score Tournaments - Development Flask Application
+After=network.target
+
+[Service]
+Type=notify
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/quick-score-dev
+Environment="PATH=/home/deploy/quick-score-dev/venv/bin"
+Environment="FLASK_APP=app.py"
+Environment="FLASK_ENV=development"
+ExecStart=/home/deploy/quick-score-dev/venv/bin/gunicorn \
+    --bind 127.0.0.1:5001 \
+    --workers 1 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level info \
+    app:app
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
