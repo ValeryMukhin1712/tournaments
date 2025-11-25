@@ -36,7 +36,7 @@ log_error() {
 
 # Переменные
 APP_DIR="/home/deploy/quick-score-dev"
-BRANCH="main"
+BRANCH="dev"
 
 # Проверка, что запущено не от root
 if [[ $EUID -eq 0 ]]; then
