@@ -31,7 +31,10 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{ tournament.name }}</h5>
                                     <p class="card-text">
-                                        <strong>Вид спорта:</strong> {{ tournament.sport_type }}<br>
+                                        <strong>Вид спорта:</strong> 
+                                        {% if tournament.sport_type == 'бадминтон' or tournament.sport_type == 'Бадминтон' %}Бадминтон single
+                                        {% elif tournament.sport_type == 'бадминтон пара' or tournament.sport_type == 'Бадминтон пара' %}Бадминтон dbl
+                                        {% else %}{{ tournament.sport_type }}{% endif %}<br>
                                         <strong>Дата начала:</strong> 
                                         {% if tournament.start_date %}
                                             {{ tournament.start_date.strftime('%d.%m.%Y') }}

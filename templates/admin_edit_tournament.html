@@ -39,12 +39,12 @@
                                     <select class="form-select" id="sport_type" name="sport_type">
                                         <option value="настольный теннис" {% if tournament.sport_type == 'настольный теннис' %}selected{% endif %}>Настольный теннис</option>
                                         <option value="теннис" {% if tournament.sport_type == 'теннис' %}selected{% endif %}>Теннис</option>
-                                        <option value="бадминтон" {% if tournament.sport_type == 'бадминтон' %}selected{% endif %}>Бадминтон</option>
-                                        <option value="бадминтон пара" {% if tournament.sport_type == 'бадминтон пара' %}selected{% endif %}>Бадминтон пара</option>
+                                        <option value="Бадминтон single" {% if tournament.sport_type == 'бадминтон' or tournament.sport_type == 'Бадминтон single' or tournament.sport_type == 'бадминтон single' %}selected{% endif %}>Бадминтон single</option>
+                                        <option value="Бадминтон dbl" {% if tournament.sport_type == 'бадминтон пара' or tournament.sport_type == 'Бадминтон пара' or tournament.sport_type == 'Бадминтон dbl' or tournament.sport_type == 'бадминтон dbl' %}selected{% endif %}>Бадминтон dbl</option>
                                         <option value="волейбол" {% if tournament.sport_type == 'волейбол' %}selected{% endif %}>Волейбол</option>
                                         <option value="футбол" {% if tournament.sport_type == 'футбол' %}selected{% endif %}>Футбол</option>
                                         <option value="баскетбол" {% if tournament.sport_type == 'баскетбол' %}selected{% endif %}>Баскетбол</option>
-                                        <option value="другой" {% if tournament.sport_type == 'другой' %}selected{% endif %}>Другой</option>
+                                        <option value="Да на вас не угодишь :))" {% if tournament.sport_type == 'другой' or tournament.sport_type == 'Другой' or tournament.sport_type == 'Да на вас не угодишь :))' %}selected{% endif %}>Да на вас не угодишь :))</option>
                                     </select>
                                 </div>
                             </div>

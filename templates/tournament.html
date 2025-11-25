@@ -747,7 +747,10 @@
                 {{ tournament.name }}
             </h1>
             <p class="lead text-muted">
-                <i class="fas fa-trophy me-2"></i>{{ tournament.sport_type }} • 
+                <i class="fas fa-trophy me-2"></i>
+                {% if tournament.sport_type == 'бадминтон' or tournament.sport_type == 'Бадминтон' %}Бадминтон single
+                {% elif tournament.sport_type == 'бадминтон пара' or tournament.sport_type == 'Бадминтон пара' %}Бадминтон dbl
+                {% else %}{{ tournament.sport_type }}{% endif %} • 
                 <i class="fas fa-calendar me-2"></i>
                 {% if tournament.start_date %}
                     {{ tournament.start_date.strftime('%d.%m.%Y') }}
@@ -768,10 +771,6 @@
                 {% elif tournament.status == 'активен' %}
                     <span class="badge bg-warning fs-6 px-3 py-2">
                         <i class="fas fa-play me-2"></i>Турнир активен
-                    </span>
-                {% else %}
-                    <span class="badge bg-info fs-6 px-3 py-2">
-                        <i class="fas fa-user-plus me-2"></i>Регистрация участников
                     </span>
                 {% endif %}
             </div>
@@ -1511,11 +1510,19 @@
             <div class="modal-body">
                 <!-- Вкладки для разных способов добавления -->
                 <ul class="nav nav-tabs" id="addParticipantTabs" role="tablist">
+                    {% if tournament.sport_type == 'Бадминтон dbl' or tournament.sport_type == 'бадминтон dbl' or tournament.sport_type == 'Бадминтон пара' or tournament.sport_type == 'бадминтон пара' %}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab">
                             <i class="fas fa-users me-2"></i>Создать команду
                         </button>
                     </li>
+                    {% else %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab">
+                            <i class="fas fa-list me-2"></i>Добавить из списка
+                        </button>
+                    </li>
+                    {% endif %}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="waiting-tab" data-bs-toggle="tab" data-bs-target="#waiting" type="button" role="tab">
                             <i class="fas fa-clock me-2"></i>Лист ожидания
@@ -1533,7 +1540,7 @@
                             </div>
                         </div>
                         
-                        <!-- Для турнира "Бадминтон пара" показываем специальный интерфейс -->
+                        <!-- Для турнира "Бадминтон dbl" показываем специальный интерфейс -->
                         <div id="badmintonPairPlayersForm" style="display: none;">
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -1562,8 +1569,21 @@
                         
                         <!-- Для обычных турниров показываем обычный интерфейс -->
                         <div id="regularPlayersForm">
+                            <!-- Добавление нового участника -->
+                            <div class="mb-3">
+                                <label for="newPlayerNameInput" class="form-label">Добавить нового участника</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="newPlayerNameInput" placeholder="Введите имя нового участника">
+                                    <button type="button" class="btn btn-outline-primary" id="addNewPlayerBtn">
+                                        <i class="fas fa-plus me-1"></i>Добавить в список
+                                    </button>
+                                </div>
+                                <small class="text-muted">Новый участник будет добавлен в список выбора</small>
+                            </div>
+                            
                             <!-- Поиск игроков -->
                             <div class="mb-3">
+                                <label for="playerSearchInput" class="form-label">Поиск в списке</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="fas fa-search"></i>
@@ -1600,7 +1620,7 @@
                             <!-- Кнопки действий -->
                             <div class="mt-3">
                                 <button type="button" class="btn btn-primary" id="addSelectedPlayersBtn" disabled>
-                                    <i class="fas fa-user-plus me-2"></i>Добавить выбранных игроков (<span id="selectedCount">0</span>)
+                                    <i class="fas fa-user-plus me-2"></i>Добавить выбранных (<span id="selectedCount">0</span>)
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary" id="clearPlayerSelectionBtn">
                                     <i class="fas fa-times me-2"></i>Очистить выбор
@@ -1755,7 +1775,7 @@
             const sportType = '{{ tournament.sport_type }}'.toLowerCase();
             let baseUrl;
             
-            if (sportType === 'бадминтон' || sportType === 'badminton' || sportType === 'бадминтон пара' || sportType === 'badminton pair') {
+            if (sportType === 'бадминтон' || sportType === 'badminton' || sportType === 'бадминтон single' || sportType === 'badminton single' || sportType === 'бадминтон dbl' || sportType === 'badminton dbl' || sportType === 'бадминтон пара' || sportType === 'badminton pair') {
                 baseUrl = '/referee-badminton';
             } else if (sportType === 'волейбол' || sportType === 'volleyball') {
                 baseUrl = '/referee-volleyball';
@@ -2248,10 +2268,10 @@ function inviteParticipantsToMatch(matchId, participant1Name, participant2Name, 
     });
 }
 
-// Проверка, является ли турнир "Бадминтон пара"
+// Проверка, является ли турнир "Бадминтон dbl"
 function isBadmintonPairTournament() {
     const sportType = '{{ tournament.sport_type }}'.toLowerCase();
-    return sportType === 'бадминтон пара' || sportType === 'badminton pair';
+    return sportType === 'бадминтон dbl' || sportType === 'badminton dbl' || sportType === 'бадминтон пара' || sportType === 'badminton pair';
 }
 
 // Загрузка игроков в выпадающие списки
@@ -2491,7 +2511,7 @@ function initPairPlayersFormHandlers() {
 
 // Обработка формы добавления участника
 document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация формы для "Бадминтон пара"
+    // Инициализация формы для "Бадминтон dbl"
     if (isBadmintonPairTournament()) {
         const badmintonPairForm = document.getElementById('badmintonPairForm');
         const regularForm = document.getElementById('regularForm');
@@ -2512,6 +2532,21 @@ document.addEventListener('DOMContentLoaded', function() {
         initPairPlayersFormHandlers();
     } else {
         // Обычная форма для других турниров
+        const badmintonPairPlayersForm = document.getElementById('badmintonPairPlayersForm');
+        const regularPlayersForm = document.getElementById('regularPlayersForm');
+        const playersTabInfo = document.getElementById('playersTabInfo');
+        
+        if (badmintonPairPlayersForm) badmintonPairPlayersForm.style.display = 'none';
+        if (regularPlayersForm) regularPlayersForm.style.display = 'block';
+        if (playersTabInfo) {
+            playersTabInfo.innerHTML = '<i class="fas fa-info-circle me-2"></i><strong>Список игроков:</strong> Выберите игроков из списка или добавьте нового участника.';
+        }
+        
+        // Загружаем список игроков для обычной формы
+        if (typeof loadPlayers === 'function') {
+            loadPlayers();
+        }
+        
         const addParticipantForm = document.getElementById('addParticipantForm');
         if (addParticipantForm) {
             addParticipantForm.addEventListener('submit', function(e) {
@@ -4292,8 +4327,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addParticipantModal) {
         addParticipantModal.addEventListener('shown.bs.modal', function() {
             toggleAddButton();
-            // Загружаем игроков при открытии модального окна для "Бадминтон пара"
+            
+            // Управление видимостью форм в зависимости от типа турнира
+            const badmintonPairPlayersForm = document.getElementById('badmintonPairPlayersForm');
+            const regularPlayersForm = document.getElementById('regularPlayersForm');
+            
             if (isBadmintonPairTournament()) {
+                // Для "Бадминтон dbl" показываем форму создания команды
+                if (badmintonPairPlayersForm) badmintonPairPlayersForm.style.display = 'block';
+                if (regularPlayersForm) regularPlayersForm.style.display = 'none';
+                
                 // Сбрасываем флаги инициализации при открытии модального окна
                 manualFormHandlersInitialized = false;
                 pairPlayersFormHandlersInitialized = false;
@@ -4303,6 +4346,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         initPairPlayersFormHandlers();
                     }, 100);
                 });
+            } else {
+                // Для обычных турниров показываем обычную форму
+                if (badmintonPairPlayersForm) badmintonPairPlayersForm.style.display = 'none';
+                if (regularPlayersForm) regularPlayersForm.style.display = 'block';
+                
+                // Загружаем список игроков для обычной формы
+                if (typeof loadPlayers === 'function') {
+                    loadPlayers();
+                }
             }
         });
         
@@ -4354,13 +4406,70 @@ document.addEventListener('DOMContentLoaded', function() {
         clearBtn.addEventListener('click', clearPlayerSelection);
     }
     
+    // Обработчик добавления нового участника
+    const addNewPlayerBtn = document.getElementById('addNewPlayerBtn');
+    const newPlayerNameInput = document.getElementById('newPlayerNameInput');
+    if (addNewPlayerBtn && newPlayerNameInput) {
+        addNewPlayerBtn.addEventListener('click', async function() {
+            const playerName = newPlayerNameInput.value.trim();
+            if (!playerName) {
+                alert('Пожалуйста, введите имя участника');
+                return;
+            }
+            
+            // Добавляем нового игрока в список через API
+            try {
+                const response = await fetch('/api/players', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ name: playerName })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // Добавляем нового игрока в список allPlayers
+                    const newPlayer = { id: data.player.id, name: data.player.name };
+                    allPlayers.push(newPlayer);
+                    
+                    // Добавляем в список выбора и автоматически выбираем
+                    selectedPlayers.add(newPlayer.id);
+                    
+                    // Обновляем отображение списка
+                    displayPlayers(allPlayers);
+                    updateAddButtonState();
+                    
+                    // Очищаем поле ввода
+                    newPlayerNameInput.value = '';
+                    
+                    showNotification(`Участник "${playerName}" добавлен в список и выбран`, 'success');
+                } else {
+                    alert('Ошибка: ' + (data.error || 'Не удалось добавить участника'));
+                }
+            } catch (error) {
+                console.error('Ошибка при добавлении нового участника:', error);
+                alert('Ошибка при добавлении участника');
+            }
+        });
+        
+        // Обработчик нажатия Enter в поле ввода
+        newPlayerNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addNewPlayerBtn.click();
+            }
+        });
+    }
+    
     // Обработчик клика по вкладке игроков
     const playersTab = document.getElementById('players-tab');
     if (playersTab) {
         playersTab.addEventListener('click', function() {
             console.log('Клик по вкладке игроков');
             if (isBadmintonPairTournament()) {
-                // Для "Бадминтон пара" загружаем игроков в выпадающие списки
+                // Для "Бадминтон dbl" загружаем игроков в выпадающие списки
                 loadPlayersToSelects().then(() => {
                     // Сбрасываем флаг и инициализируем обработчики после загрузки игроков
                     pairPlayersFormHandlersInitialized = false;
@@ -4370,7 +4479,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else {
                 // Для обычных турниров загружаем список игроков
-                loadPlayers();
+                if (typeof loadPlayers === 'function') {
+                    loadPlayers();
+                } else if (typeof loadPlayersList === 'function') {
+                    if (typeof loadPlayers === 'function') {
+                    loadPlayers();
+                }
+                }
             }
         });
     } else {

@@ -267,7 +267,11 @@
                             {% endif %}
                         </td>
                         <td>
-                            <span class="badge bg-info rounded-pill">{{ tournament.sport_type }}</span>
+                            <span class="badge bg-info rounded-pill">
+                                {% if tournament.sport_type == 'бадминтон' or tournament.sport_type == 'Бадминтон' %}Бадминтон single
+                                {% elif tournament.sport_type == 'бадминтон пара' or tournament.sport_type == 'Бадминтон пара' %}Бадминтон dbl
+                                {% else %}{{ tournament.sport_type }}{% endif %}
+                            </span>
                         </td>
                         <td>
                             <span class="badge bg-primary participants-badge rounded-pill" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#participantsModal{{ tournament.id }}">
