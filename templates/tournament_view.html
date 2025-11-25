@@ -415,7 +415,7 @@
                                             <td data-stat-position>{{ participant_position }}</td>
                                             <td>
                                                 <strong>{{ participant.name }}</strong>
-                                                {% if participant.is_team %}
+                                                {% if participant.is_team and tournament.sport_type != 'Бадминтон dbl' and tournament.sport_type != 'бадминтон dbl' and tournament.sport_type != 'Бадминтон пара' and tournament.sport_type != 'бадминтон пара' %}
                                                     <span class="badge bg-info ms-2">Команда</span>
                                                 {% endif %}
                                             </td>

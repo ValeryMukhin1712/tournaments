@@ -4531,3 +4531,106 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.rollback()
             logger.error(f"Ошибка при удалении розыгрыша {rally_id}: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @app.route('/api/admin/rallies', methods=['GET'])
+    def admin_get_all_rallies():
+        """Получение всех розыгрышей для администратора, сгруппированных по матчам"""
+        from flask import session
+        from collections import defaultdict
+        
+        # Проверяем авторизацию администратора
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        try:
+            # Получаем все розыгрыши с информацией о матчах и турнирах
+            rallies = Rally.query.order_by(Rally.rally_datetime.desc()).all()
+            
+            # Группируем розыгрыши по match_id
+            matches_dict = defaultdict(lambda: {
+                'match_id': None,
+                'tournament_id': None,
+                'tournament_name': '',
+                'rallies': [],
+                'first_rally_datetime': None,
+                'participants': set(),
+                'final_score': None
+            })
+            
+            for rally in rallies:
+                match_id = rally.match_id
+                match = Match.query.get(match_id)
+                tournament = Tournament.query.get(rally.tournament_id) if rally.tournament_id else None
+                
+                if match_id not in matches_dict:
+                    matches_dict[match_id]['match_id'] = match_id
+                    matches_dict[match_id]['tournament_id'] = rally.tournament_id
+                    matches_dict[match_id]['tournament_name'] = tournament.name if tournament else 'Неизвестный турнир'
+                    matches_dict[match_id]['first_rally_datetime'] = rally.rally_datetime
+                
+                # Добавляем розыгрыш
+                rally_data = {
+                    'id': rally.id,
+                    'set_number': rally.set_number,
+                    'server_name': rally.server_name,
+                    'receiver_name': rally.receiver_name,
+                    'server_won': rally.server_won,
+                    'score': rally.score,
+                    'rally_datetime': rally.rally_datetime.isoformat() if rally.rally_datetime else None
+                }
+                matches_dict[match_id]['rallies'].append(rally_data)
+                
+                # Собираем имена участников
+                if rally.server_name:
+                    matches_dict[match_id]['participants'].add(rally.server_name.split(' - ')[0].split(' (')[0])
+                if rally.receiver_name:
+                    matches_dict[match_id]['participants'].add(rally.receiver_name.split(' - ')[0].split(' (')[0])
+                
+                # Обновляем финальный счёт (последний розыгрыш)
+                if not matches_dict[match_id]['final_score']:
+                    matches_dict[match_id]['final_score'] = rally.score
+            
+            # Преобразуем в список и сортируем по дате первого розыгрыша
+            matches_data = []
+            for match_id, match_data in matches_dict.items():
+                match = Match.query.get(match_id)
+                
+                # Получаем имена участников из матча
+                participant1_name = match.participant1.name if match and match.participant1 else None
+                participant2_name = match.participant2.name if match and match.participant2 else None
+                
+                # Формируем строку участников в формате "имя1, имя2 - имя3, имя4"
+                # Если участник - команда (содержит " - "), разбиваем на отдельных игроков
+                participants_str = 'Не указаны'
+                if participant1_name and participant2_name:
+                    # Разбиваем имена участников (могут быть команды)
+                    team1_players = [p.strip() for p in participant1_name.split(' - ')] if ' - ' in participant1_name else [participant1_name]
+                    team2_players = [p.strip() for p in participant2_name.split(' - ')] if ' - ' in participant2_name else [participant2_name]
+                    
+                    # Формируем строку: "имя1, имя2 - имя3, имя4"
+                    team1_str = ', '.join(team1_players)
+                    team2_str = ', '.join(team2_players)
+                    participants_str = f'{team1_str} - {team2_str}'
+                elif participant1_name or participant2_name:
+                    # Если только один участник указан
+                    participants_str = participant1_name or participant2_name or 'Не указаны'
+                
+                matches_data.append({
+                    'match_id': match_id,
+                    'tournament_id': match_data['tournament_id'],
+                    'tournament_name': match_data['tournament_name'],
+                    'rally_datetime': match_data['first_rally_datetime'].isoformat() if match_data['first_rally_datetime'] else None,
+                    'participants': participants_str,
+                    'final_score': match_data['final_score'] or '0:0',
+                    'rallies_count': len(match_data['rallies']),
+                    'rallies': match_data['rallies']  # Все розыгрыши для выгрузки
+                })
+            
+            # Сортируем по дате (новые первыми)
+            matches_data.sort(key=lambda x: x['rally_datetime'] or '', reverse=True)
+            
+            return jsonify({'success': True, 'matches': matches_data}), 200
+            
+        except Exception as e:
+            logger.error(f"Ошибка при получении розыгрышей: {e}")
+            return jsonify({'success': False, 'error': 'Ошибка при получении розыгрышей'}), 500

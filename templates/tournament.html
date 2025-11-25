@@ -873,7 +873,7 @@
                                         <td>{{ participant_position }}</td>
                                         <td>
                                             <strong>{{ participant.name }}</strong>
-                                            {% if participant.is_team %}
+                                            {% if participant.is_team and tournament.sport_type != 'Бадминтон dbl' and tournament.sport_type != 'бадминтон dbl' and tournament.sport_type != 'Бадминтон пара' and tournament.sport_type != 'бадминтон пара' %}
                                                 <span class="badge bg-info ms-2">Команда</span>
                                             {% endif %}
                                         </td>
@@ -1722,7 +1722,12 @@
                 <h5 class="modal-title">
                     <i class="fas fa-book me-2"></i>Журнал розыгрышей
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-success me-2" id="exportRallyJournalBtn" onclick="exportRallyJournalToExcel()" title="Выгрузить в Excel" style="display: none;">
+                        <i class="fas fa-file-excel me-1"></i>Выгрузить в Excel
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
             </div>
             <div class="modal-body">
                 <div id="rallyJournalContent">
@@ -7047,6 +7052,15 @@ function openRallyJournalModal(matchId, participant1, participant2) {
     const modalTitle = modal.querySelector('.modal-title');
     modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: ${participant1} vs ${participant2}`;
     
+    // Сохраняем matchId для использования в loadRallyJournal
+    modal.setAttribute('data-match-id', matchId);
+    
+    // Показываем кнопку выгрузки в Excel
+    const exportBtn = document.getElementById('exportRallyJournalBtn');
+    if (exportBtn) {
+        exportBtn.style.display = 'inline-block';
+    }
+    
     // Показываем индикатор загрузки
     const content = document.getElementById('rallyJournalContent');
     content.innerHTML = `
@@ -7149,12 +7163,30 @@ async function loadRallyJournal(matchId) {
                     ? '<span class="badge bg-success">1</span>'
                     : '<span class="badge bg-danger">0</span>';
                 
+                // Форматируем имя подающего: разделяем имя и позицию
+                let serverNameHtml = '';
+                if (rally.server_name) {
+                    const serverParts = rally.server_name.split(' - ');
+                    if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
+                        // Есть позиция: имя жирным курсивом, позиция серым курсивом 80%
+                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: #6c757d; font-size: 80%;">- ${serverParts[1]}</span>`;
+                    } else {
+                        // Нет позиции: просто имя жирным курсивом
+                        serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;
+                    }
+                } else {
+                    serverNameHtml = '<strong style="font-style: italic;">Не указан</strong>';
+                }
+                
+                // Имя принимающего: жирным курсивом
+                const receiverNameHtml = `<strong style="font-style: italic;">${rally.receiver_name || 'Не указан'}</strong>`;
+                
                 html += `
                     <tr>
                         <td class="text-center">${index + 1}</td>
                         <td><small>${timeStr}</small></td>
-                        <td><strong>${rally.server_name || 'Не указан'}</strong></td>
-                        <td><strong>${rally.receiver_name || 'Не указан'}</strong></td>
+                        <td>${serverNameHtml}</td>
+                        <td>${receiverNameHtml}</td>
                         <td class="text-center">${resultBadge}</td>
                         <td class="text-center"><strong>${rally.score}</strong></td>
                     </tr>
@@ -7172,6 +7204,12 @@ async function loadRallyJournal(matchId) {
         html += '</div>';
         content.innerHTML = html;
         
+        // Сохраняем данные розыгрышей для выгрузки
+        const modal = document.getElementById('rallyJournalModal');
+        if (modal) {
+            modal.setAttribute('data-rallies', JSON.stringify(rallies));
+        }
+        
         console.log('[Rally Journal] Загружено розыгрышей:', rallies.length);
         
     } catch (error) {
@@ -7183,6 +7221,63 @@ async function loadRallyJournal(matchId) {
                 Ошибка при загрузке журнала розыгрышей: ${error.message}
             </div>
         `;
+    }
+}
+
+// Выгрузка журнала розыгрышей в Excel
+function exportRallyJournalToExcel() {
+    try {
+        const modal = document.getElementById('rallyJournalModal');
+        const matchId = modal ? modal.getAttribute('data-match-id') : null;
+        const ralliesData = modal ? modal.getAttribute('data-rallies') : null;
+        
+        if (!ralliesData) {
+            showAlert('Нет данных для выгрузки', 'warning');
+            return;
+        }
+        
+        const rallies = JSON.parse(ralliesData);
+        
+        if (!rallies || rallies.length === 0) {
+            showAlert('Нет розыгрышей для выгрузки', 'warning');
+            return;
+        }
+        
+        // Создаем CSV содержимое
+        let csvContent = '\uFEFF'; // BOM для правильной кодировки UTF-8
+        csvContent += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
+        
+        rallies.forEach((rally, index) => {
+            const rallyTime = new Date(rally.rally_datetime);
+            const dateStr = rallyTime.toLocaleDateString('ru-RU');
+            const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
+            const result = rally.server_won ? '1' : '0';
+            const serverName = rally.server_name || 'Не указан';
+            const receiverName = rally.receiver_name || 'Не указан';
+            
+            csvContent += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${rally.score}"\n`;
+        });
+        
+        // Создаем blob и скачиваем
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `match_${matchId}_journal.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert(`<strong>Успешно!</strong> Журнал матча ${matchId} выгружен в Excel.`, 'success');
+    } catch (error) {
+        console.error('Ошибка при выгрузке в Excel:', error);
+        showAlert('Ошибка при выгрузке в Excel: ' + error.message, 'danger');
     }
 }
 

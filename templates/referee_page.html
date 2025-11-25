@@ -1899,54 +1899,70 @@
                 // Проверка типа спорта выполняется на сервере в API endpoint
                 // Здесь просто сохраняем данные, сервер проверит, что это бадминтон
                 
-                // Определяем, кто подавал до розыгрыша (используем сохранённую позицию)
-                const isServingLeft = servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_left';
-                const isServingRight = servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right';
-                
                 // Получаем имена игроков
                 const topLeftName = document.getElementById('top_left_player_input')?.value || '';
                 const bottomLeftName = document.getElementById('bottom_left_player_input')?.value || '';
                 const topRightName = document.getElementById('name_top_right')?.value || '';
                 const bottomRightName = document.getElementById('name_bottom_right')?.value || '';
                 
-                // Определяем имя подающего
+                // Определяем подающего и принимающего на основе позиции относительно сетки
+                // Позиции относительно сетки:
+                // - top_left (левый верхний) = левый квадрат относительно сетки
+                // - bottom_left (левый нижний) = правый квадрат относительно сетки (на левой стороне корта)
+                // - top_right (правый верхний) = левый квадрат относительно сетки (на правой стороне корта)
+                // - bottom_right (правый нижний) = правый квадрат относительно сетки
+                
                 let serverName = '';
                 let receiverName = '';
+                let servePosition = ''; // "слева" или "справа" относительно сетки
                 
-                if (isServingLeft) {
-                    // Подавал левый игрок
-                    if (bottomLeftName && bottomLeftName !== topLeftName) {
-                        serverName = bottomLeftName + ' - ' + topLeftName;
-                    } else {
-                        serverName = topLeftName || 'Игрок 1';
-                    }
-                    
-                    if (bottomRightName && bottomRightName !== topRightName) {
-                        receiverName = topRightName + ' - ' + bottomRightName;
-                    } else {
-                        receiverName = topRightName || 'Игрок 2';
-                    }
-                } else if (isServingRight) {
-                    // Подавал правый игрок
-                    if (bottomRightName && bottomRightName !== topRightName) {
-                        serverName = topRightName + ' - ' + bottomRightName;
-                    } else {
-                        serverName = topRightName || 'Игрок 2';
-                    }
-                    
-                    if (bottomLeftName && bottomLeftName !== topLeftName) {
-                        receiverName = bottomLeftName + ' - ' + topLeftName;
-                    } else {
-                        receiverName = topLeftName || 'Игрок 1';
-                    }
+                if (servingPositionBefore === 'bottom_left') {
+                    // Подача из правого квадрата на левой стороне корта (правый квадрат относительно сетки)
+                    // Подаёт игрок из bottom_left, принимает игрок по диагонали (top_right)
+                    servePosition = 'справа';
+                    serverName = bottomLeftName || 'Игрок 1';
+                    receiverName = topRightName || 'Игрок 3';
+                } else if (servingPositionBefore === 'top_left') {
+                    // Подача из левого квадрата на левой стороне корта (левый квадрат относительно сетки)
+                    // Подаёт игрок из top_left, принимает игрок по диагонали (bottom_right)
+                    servePosition = 'слева';
+                    serverName = topLeftName || 'Игрок 1';
+                    receiverName = bottomRightName || 'Игрок 4';
+                } else if (servingPositionBefore === 'top_right') {
+                    // Подача из левого квадрата на правой стороне корта (левый квадрат относительно сетки)
+                    // Подаёт игрок из top_right, принимает игрок по диагонали (bottom_left)
+                    servePosition = 'слева';
+                    serverName = topRightName || 'Игрок 3';
+                    receiverName = bottomLeftName || 'Игрок 2';
+                } else if (servingPositionBefore === 'bottom_right') {
+                    // Подача из правого квадрата на правой стороне корта (правый квадрат относительно сетки)
+                    // Подаёт игрок из bottom_right, принимает игрок по диагонали (top_left)
+                    servePosition = 'справа';
+                    serverName = bottomRightName || 'Игрок 4';
+                    receiverName = topLeftName || 'Игрок 1';
                 } else {
                     // Если позиция не определена, используем имена по умолчанию
+                    servePosition = '';
                     serverName = topLeftName || 'Игрок 1';
                     receiverName = topRightName || 'Игрок 2';
                 }
                 
+                // Добавляем информацию о позиции подачи к имени подающего
+                // Формат: "Имя - позиция" (без скобок, через дефис)
+                if (servePosition) {
+                    serverName = `${serverName} - ${servePosition}`;
+                }
+                
                 // Определяем, выиграл ли подающий
-                const serverWon = (isServingLeft && scoringTeam === 'left') || (isServingRight && scoringTeam === 'right');
+                // Подающий выиграл, если команда, с которой он подавал, выиграла розыгрыш
+                let serverWon = false;
+                if (servingPositionBefore === 'bottom_left' || servingPositionBefore === 'top_left') {
+                    // Подавал игрок с левой стороны корта
+                    serverWon = (scoringTeam === 'left');
+                } else if (servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right') {
+                    // Подавал игрок с правой стороны корта
+                    serverWon = (scoringTeam === 'right');
+                }
                 
                 // Формируем текущий счёт
                 const currentScore = `${scoreLeft}:${scoreRight}`;

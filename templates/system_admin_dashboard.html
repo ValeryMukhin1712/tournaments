@@ -291,6 +291,82 @@
         </div>
     </div>
     
+    <!-- Секция журналов розыгрышей -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <h5 class="mb-2 mb-md-0">
+                        <i class="fas fa-book me-2"></i>Журналы розыгрышей
+                    </h5>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadAllRallies()">
+                        <i class="fas fa-sync-alt me-1"></i>Обновить
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="rallies-loading" class="text-center py-3" style="display: none;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Загрузка журналов...</p>
+                    </div>
+                    <div id="rallies-table-container" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="rallies-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px;">№ матча</th>
+                                        <th style="width: 180px;">Дата/Время</th>
+                                        <th>Участники</th>
+                                        <th style="width: 100px;" class="text-center">Счёт</th>
+                                        <th style="width: 120px;" class="text-center">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rallies-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="rallies-empty" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Журналы не найдены</h5>
+                        <p class="text-muted">Розыгрыши еще не были сохранены.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для просмотра журнала розыгрышей -->
+    <div class="modal fade" id="rallyJournalModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-book me-2"></i>Журнал розыгрышей
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <button type="button" class="btn btn-sm btn-outline-success me-2" id="exportRallyJournalBtn" onclick="exportRallyJournalToExcel()" title="Выгрузить в Excel" style="display: none;">
+                            <i class="fas fa-file-excel me-1"></i>Выгрузить в Excel
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div id="rallyJournalContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Модальное окно для переименования игрока -->
     <div class="modal fade" id="renamePlayerModal" tabindex="-1">
         <div class="modal-dialog">
@@ -322,6 +398,411 @@
 function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
+
+// Загрузка всех журналов розыгрышей (группированных по матчам)
+function loadAllRallies() {
+    const loadingEl = document.getElementById('rallies-loading');
+    const tableContainer = document.getElementById('rallies-table-container');
+    const emptyEl = document.getElementById('rallies-empty');
+    const tbody = document.getElementById('rallies-tbody');
+    
+    loadingEl.style.display = 'block';
+    tableContainer.style.display = 'none';
+    emptyEl.style.display = 'none';
+    tbody.innerHTML = '';
+    
+    fetch('/api/admin/rallies', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingEl.style.display = 'none';
+        
+        if (data.success && data.matches && data.matches.length > 0) {
+            tableContainer.style.display = 'block';
+            
+            data.matches.forEach((match, index) => {
+                const rallyTime = new Date(match.rally_datetime);
+                const dateStr = rallyTime.toLocaleDateString('ru-RU');
+                const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="text-center"><strong>${match.match_id}</strong></td>
+                    <td><small>${dateStr}<br>${timeStr}</small></td>
+                    <td>${match.participants}</td>
+                    <td class="text-center"><strong>${match.final_score}</strong></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="openRallyJournal(${match.match_id})" title="Открыть журнал">
+                            <i class="fas fa-book"></i> Журнал
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success me-2" onclick="exportMatchToExcel(${match.match_id}, ${JSON.stringify(match.rallies).replace(/"/g, '&quot;')})" title="Выгрузить в Excel">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button type="button" class="btn btn-sm p-0" style="width: 20px; height: 20px; border-radius: 50%; background-color: #dc3545; border: none;" onclick="deleteMatchRallies(${match.match_id}, this)" title="Удалить журнал">
+                            <i class="fas fa-times text-white" style="font-size: 10px;"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } else {
+            emptyEl.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при загрузке журналов:', error);
+        loadingEl.style.display = 'none';
+        showAlert('Ошибка при загрузке журналов: ' + error.message, 'danger');
+    });
+}
+
+// Выгрузка журнала матча в Excel
+function exportMatchToExcel(matchId, rallies) {
+    try {
+        // Создаем CSV содержимое
+        let csvContent = '\uFEFF'; // BOM для правильной кодировки UTF-8
+        csvContent += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
+        
+        rallies.forEach((rally, index) => {
+            const rallyTime = new Date(rally.rally_datetime);
+            const dateStr = rallyTime.toLocaleDateString('ru-RU');
+            const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
+            const result = rally.server_won ? '1' : '0';
+            const serverName = rally.server_name || 'Не указан';
+            const receiverName = rally.receiver_name || 'Не указан';
+            
+            csvContent += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${rally.score}"\n`;
+        });
+        
+        // Создаем blob и скачиваем
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `match_${matchId}_journal.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert(`<strong>Успешно!</strong> Журнал матча ${matchId} выгружен в Excel.`, 'success');
+    } catch (error) {
+        console.error('Ошибка при выгрузке в Excel:', error);
+        showAlert('Ошибка при выгрузке в Excel: ' + error.message, 'danger');
+    }
+}
+
+// Удаление всех розыгрышей матча
+function deleteMatchRallies(matchId, button) {
+    if (confirm(`Вы уверены, что хотите удалить все розыгрыши матча ${matchId}? Это действие нельзя отменить.`)) {
+        const originalHtml = button.innerHTML;
+        
+        // Показываем индикатор загрузки
+        button.innerHTML = '<i class="fas fa-spinner fa-spin text-white" style="font-size: 10px;"></i>';
+        button.disabled = true;
+        
+        // Получаем все розыгрыши матча
+        fetch(`/api/matches/${matchId}/rallies`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.rallies && data.rallies.length > 0) {
+                // Удаляем все розыгрыши
+                const deletePromises = data.rallies.map(rally => 
+                    fetch(`/api/rallies/${rally.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    })
+                );
+                
+                return Promise.all(deletePromises);
+            } else {
+                throw new Error('Розыгрыши не найдены');
+            }
+        })
+        .then(responses => {
+            // Проверяем результаты
+            const allSuccess = responses.every(response => response.ok);
+            if (allSuccess) {
+                // Удаляем строку из таблицы
+                button.closest('tr').remove();
+                
+                // Показываем уведомление об успехе
+                showAlert(`<strong>Успешно!</strong> Все розыгрыши матча ${matchId} удалены.`, 'success');
+                
+                // Если таблица пуста, показываем сообщение
+                const tbody = document.getElementById('rallies-tbody');
+                if (tbody.children.length === 0) {
+                    document.getElementById('rallies-table-container').style.display = 'none';
+                    document.getElementById('rallies-empty').style.display = 'block';
+                }
+            } else {
+                throw new Error('Ошибка при удалении некоторых розыгрышей');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка при удалении розыгрышей: ' + error.message, 'danger');
+            
+            // Восстанавливаем кнопку
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+        });
+    }
+}
+
+// Открытие журнала розыгрышей для матча
+async function openRallyJournal(matchId) {
+    const modal = document.getElementById('rallyJournalModal');
+    const modalTitle = modal.querySelector('.modal-title');
+    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: Матч ${matchId}`;
+    
+    // Сохраняем matchId для использования
+    modal.setAttribute('data-match-id', matchId);
+    
+    // Показываем кнопку выгрузки в Excel
+    const exportBtn = document.getElementById('exportRallyJournalBtn');
+    if (exportBtn) {
+        exportBtn.style.display = 'inline-block';
+    }
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContent');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Открываем модальное окно
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Загружаем журнал
+    await loadRallyJournalForAdmin(matchId);
+}
+
+// Загрузка журнала розыгрышей для администратора
+async function loadRallyJournalForAdmin(matchId) {
+    try {
+        const response = await fetch(`/api/matches/${matchId}/rallies`);
+        const data = await response.json();
+        
+        const content = document.getElementById('rallyJournalContent');
+        
+        if (!data.success) {
+            content.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${data.error || 'Не удалось загрузить журнал розыгрышей'}
+                </div>
+            `;
+            return;
+        }
+        
+        const rallies = data.rallies || [];
+        
+        if (rallies.length === 0) {
+            content.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Розыгрыши пока не зарегистрированы
+                </div>
+            `;
+            return;
+        }
+        
+        // Группируем розыгрыши по сетам
+        const ralliesBySet = {};
+        rallies.forEach(rally => {
+            const setNum = rally.set_number;
+            if (!ralliesBySet[setNum]) {
+                ralliesBySet[setNum] = [];
+            }
+            ralliesBySet[setNum].push(rally);
+        });
+        
+        // Формируем HTML
+        let html = '<div class="rally-journal">';
+        
+        // Сортируем сеты по номеру
+        const setNumbers = Object.keys(ralliesBySet).sort((a, b) => parseInt(a) - parseInt(b));
+        
+        setNumbers.forEach(setNum => {
+            const setRallies = ralliesBySet[setNum];
+            html += `
+                <div class="mb-4">
+                    <h6 class="border-bottom pb-2 mb-3">
+                        <i class="fas fa-trophy me-2"></i>Сет ${setNum}
+                        <span class="badge bg-secondary ms-2">${setRallies.length} розыгрышей</span>
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;">№</th>
+                                    <th style="width: 120px;">Время</th>
+                                    <th>Подающий</th>
+                                    <th>Принимающий</th>
+                                    <th style="width: 100px;" class="text-center">Результат</th>
+                                    <th style="width: 100px;" class="text-center">Счёт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            setRallies.forEach((rally, index) => {
+                const rallyTime = new Date(rally.rally_datetime);
+                const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                
+                const resultBadge = rally.server_won 
+                    ? '<span class="badge bg-success">1</span>'
+                    : '<span class="badge bg-danger">0</span>';
+                
+                // Форматируем имя подающего
+                let serverNameHtml = '';
+                if (rally.server_name) {
+                    const serverParts = rally.server_name.split(' - ');
+                    if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
+                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: #6c757d; font-size: 80%;">- ${serverParts[1]}</span>`;
+                    } else {
+                        serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;
+                    }
+                } else {
+                    serverNameHtml = '<strong style="font-style: italic;">Не указан</strong>';
+                }
+                
+                const receiverNameHtml = `<strong style="font-style: italic;">${rally.receiver_name || 'Не указан'}</strong>`;
+                
+                html += `
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td><small>${timeStr}</small></td>
+                        <td>${serverNameHtml}</td>
+                        <td>${receiverNameHtml}</td>
+                        <td class="text-center">${resultBadge}</td>
+                        <td class="text-center"><strong>${rally.score}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+        
+        // Сохраняем данные розыгрышей для выгрузки
+        const modal = document.getElementById('rallyJournalModal');
+        if (modal) {
+            modal.setAttribute('data-rallies', JSON.stringify(rallies));
+        }
+        
+    } catch (error) {
+        console.error('Ошибка при загрузке журнала:', error);
+        const content = document.getElementById('rallyJournalContent');
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Ошибка при загрузке журнала розыгрышей: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Выгрузка журнала розыгрышей в Excel (для страницы 9)
+function exportRallyJournalToExcel() {
+    try {
+        const modal = document.getElementById('rallyJournalModal');
+        const matchId = modal ? modal.getAttribute('data-match-id') : null;
+        const ralliesData = modal ? modal.getAttribute('data-rallies') : null;
+        
+        if (!ralliesData) {
+            showAlert('Нет данных для выгрузки', 'warning');
+            return;
+        }
+        
+        const rallies = JSON.parse(ralliesData);
+        
+        if (!rallies || rallies.length === 0) {
+            showAlert('Нет розыгрышей для выгрузки', 'warning');
+            return;
+        }
+        
+        // Создаем CSV содержимое
+        let csvContent = '\uFEFF';
+        csvContent += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
+        
+        rallies.forEach((rally, index) => {
+            const rallyTime = new Date(rally.rally_datetime);
+            const dateStr = rallyTime.toLocaleDateString('ru-RU');
+            const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
+            const result = rally.server_won ? '1' : '0';
+            const serverName = rally.server_name || 'Не указан';
+            const receiverName = rally.receiver_name || 'Не указан';
+            
+            csvContent += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${rally.score}"\n`;
+        });
+        
+        // Создаем blob и скачиваем
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `match_${matchId}_journal.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert(`<strong>Успешно!</strong> Журнал матча ${matchId} выгружен в Excel.`, 'success');
+    } catch (error) {
+        console.error('Ошибка при выгрузке в Excel:', error);
+        showAlert('Ошибка при выгрузке в Excel: ' + error.message, 'danger');
+    }
+}
+
+// Загружаем журналы при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    loadAllRallies();
+});
 
 function showAlert(message, type) {
     const alert = document.createElement('div');
