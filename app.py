@@ -62,17 +62,36 @@ class ScriptNameMiddleware:
         script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
         if script_name:
             environ['SCRIPT_NAME'] = script_name
-            # Удаляем префикс из PATH_INFO, так как Nginx уже его удалил через rewrite
-            # Но нам нужно сохранить его для генерации URL
         elif os.environ.get('FLASK_ENV') != 'production':
-            # Для dev окружения устанавливаем префикс /new_dev по умолчанию
-            environ['SCRIPT_NAME'] = '/new_dev'
+            # Для dev окружения проверяем, работает ли приложение под префиксом
+            # Проверяем по порту (dev работает на 5001)
+            # Или по переменной окружения
+            if os.environ.get('PORT') == '5001' or os.environ.get('FLASK_ENV') == 'development':
+                environ['SCRIPT_NAME'] = '/new_dev'
         
         return self.app(environ, start_response)
 
 # Применяем middleware
 app.wsgi_app = ScriptNameMiddleware(app.wsgi_app)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1, x_host=1, x_proto=1, x_port=1, x_for=1)
+
+# Устанавливаем APPLICATION_ROOT для правильной генерации URL
+# Это нужно для того, чтобы url_for() учитывал префикс
+@app.before_request
+def set_script_root():
+    from flask import request
+    script_name = request.environ.get('SCRIPT_NAME', '')
+    if script_name:
+        app.config['APPLICATION_ROOT'] = script_name
+        # Также устанавливаем в request для использования в шаблонах
+        request.script_root = script_name
+
+# Контекстный процессор для добавления префикса в шаблоны
+@app.context_processor
+def inject_script_root():
+    from flask import request
+    script_name = request.environ.get('SCRIPT_NAME', '')
+    return dict(script_root=script_name)
 
 # Настройки email (переопределяем для локальной разработки)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'

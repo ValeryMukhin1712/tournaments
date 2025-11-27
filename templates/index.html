@@ -811,7 +811,7 @@ function adminLogin() {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                     <button type="button" class="btn btn-danger" onclick="performAdminLogin()">
-                        <i class="fas fa-sign-in-alt me-2"></i>Открыть
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти
                     </button>
                 </div>
             </div>
@@ -872,7 +872,15 @@ function performAdminLogin() {
     .then(data => {
         if (data.success) {
             // Успешный вход - перенаправляем на панель управления
-            window.location.href = data.redirect_url;
+            // Учитываем префикс /new_dev, если мы на dev версии
+            let redirectUrl = data.redirect_url;
+            if (window.location.pathname.startsWith('/new_dev')) {
+                // Если мы на dev версии, добавляем префикс к URL
+                if (!redirectUrl.startsWith('/new_dev')) {
+                    redirectUrl = '/new_dev' + redirectUrl;
+                }
+            }
+            window.location.href = redirectUrl;
         } else {
             // Ошибка - восстанавливаем кнопку
             button.innerHTML = originalText;
