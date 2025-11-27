@@ -122,7 +122,7 @@ cd ~/quick-score-dev
 
 ```bash
 cd ~/quick-score-dev
-git pull origin main
+git pull origin dev
 source venv/bin/activate
 pip install -r requirements.txt
 sudo systemctl restart tournaments-dev
@@ -133,7 +133,7 @@ sudo systemctl restart tournaments-dev
 ```bash
 cd ~/quick-score-dev
 git fetch origin
-git reset --hard origin/main
+git reset --hard origin/dev
 source venv/bin/activate
 pip install -r requirements.txt
 sudo systemctl restart tournaments-dev
