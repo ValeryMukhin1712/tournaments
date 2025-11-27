@@ -89,11 +89,18 @@ def set_script_root():
 def inject_script_root():
     from flask import request
     try:
+        # Получаем префикс из environ (устанавливается middleware)
         script_name = request.environ.get('SCRIPT_NAME', '')
+        # Если префикс не установлен, проверяем переменную окружения
+        if not script_name and os.environ.get('FLASK_ENV') != 'production':
+            # Для dev окружения на сервере (порт 5001) используем префикс
+            port = os.environ.get('PORT', '')
+            if port == '5001':
+                script_name = '/new_dev'
     except RuntimeError:
         # Если request context недоступен, возвращаем пустую строку
         script_name = ''
-    return dict(script_root=script_name)
+    return dict(script_root=script_name, base_path=script_name)
 
 # Настройки email (переопределяем для локальной разработки)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'

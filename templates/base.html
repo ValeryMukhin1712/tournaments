@@ -968,6 +968,12 @@
     {% endif %}
     
     <script>
+    // Инициализация базового пути из шаблона (передается через контекстный процессор Flask)
+    // Это нужно для работы с префиксом /new_dev на dev сервере
+    if (typeof window.BASE_PATH === 'undefined') {
+        window.BASE_PATH = '{{ base_path|default("") }}';
+    }
+    
     // Функция для получения CSRF токена
     function getCSRFToken() {
         const token = document.querySelector('meta[name="csrf-token"]');

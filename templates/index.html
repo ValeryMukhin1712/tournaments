@@ -776,6 +776,9 @@ body {
 </div>
 
 <script>
+// Инициализация базового пути из шаблона (передается через контекстный процессор Flask)
+window.BASE_PATH = '{{ base_path|default("") }}';
+console.log('[Index] BASE_PATH установлен:', window.BASE_PATH);
 function adminLogin() {
     // Показываем модальное окно для входа админа
     const modal = document.createElement('div');
@@ -845,8 +848,8 @@ function performAdminLogin() {
     // Получаем CSRF токен
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
-    // Определяем базовый путь (учитываем префикс /new_dev для dev версии)
-    const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+    // Получаем базовый путь из шаблона (передается через контекстный процессор)
+    const basePath = window.BASE_PATH || '';
     
     // Отправляем запрос на сервер
     fetch(basePath + '/admin-system-login', {
@@ -875,13 +878,12 @@ function performAdminLogin() {
     .then(data => {
         if (data.success) {
             // Успешный вход - перенаправляем на панель управления
-            // Учитываем префикс /new_dev, если мы на dev версии
+            // Учитываем префикс из шаблона
+            const basePath = window.BASE_PATH || '';
             let redirectUrl = data.redirect_url;
-            if (window.location.pathname.startsWith('/new_dev')) {
-                // Если мы на dev версии, добавляем префикс к URL
-                if (!redirectUrl.startsWith('/new_dev')) {
-                    redirectUrl = '/new_dev' + redirectUrl;
-                }
+            // Если redirect_url не содержит префикс, добавляем его
+            if (basePath && !redirectUrl.startsWith(basePath)) {
+                redirectUrl = basePath + redirectUrl;
             }
             window.location.href = redirectUrl;
         } else {
@@ -911,7 +913,7 @@ function showParticipantLogin() {
         .then(data => {
             if (data.logged_in) {
                 // Участник уже авторизован, перенаправляем на страницу турниров
-                const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+                const basePath = window.BASE_PATH || '';
                 window.location.href = basePath + '/participant-tournaments';
                 return;
             }
@@ -989,8 +991,8 @@ function performParticipantLogin() {
     // Получаем CSRF токен
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
-    // Определяем базовый путь (учитываем префикс /new_dev для dev версии)
-    const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+    // Получаем базовый путь из шаблона (передается через контекстный процессор)
+    const basePath = window.BASE_PATH || '';
     
     // Сохраняем имя участника в сессии и перенаправляем
     fetch(basePath + '/participant-login', {
@@ -1004,7 +1006,7 @@ function performParticipantLogin() {
     .then(response => {
         if (response.ok) {
             // Успешный вход - перенаправляем на страницу участника
-            const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+            const basePath = window.BASE_PATH || '';
             window.location.href = basePath + '/participant-tournaments';
         } else {
             // Ошибка - восстанавливаем кнопку
