@@ -845,8 +845,11 @@ function performAdminLogin() {
     // Получаем CSRF токен
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
+    // Определяем базовый путь (учитываем префикс /new_dev для dev версии)
+    const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+    
     // Отправляем запрос на сервер
-    fetch('/admin-system-login', {
+    fetch(basePath + '/admin-system-login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -908,7 +911,8 @@ function showParticipantLogin() {
         .then(data => {
             if (data.logged_in) {
                 // Участник уже авторизован, перенаправляем на страницу турниров
-                window.location.href = '/participant-tournaments';
+                const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+                window.location.href = basePath + '/participant-tournaments';
                 return;
             }
             // Показываем модальное окно для входа участника
@@ -985,8 +989,11 @@ function performParticipantLogin() {
     // Получаем CSRF токен
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
+    // Определяем базовый путь (учитываем префикс /new_dev для dev версии)
+    const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+    
     // Сохраняем имя участника в сессии и перенаправляем
-    fetch('/participant-login', {
+    fetch(basePath + '/participant-login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -997,7 +1004,8 @@ function performParticipantLogin() {
     .then(response => {
         if (response.ok) {
             // Успешный вход - перенаправляем на страницу участника
-            window.location.href = '/participant-tournaments';
+            const basePath = window.location.pathname.startsWith('/new_dev') ? '/new_dev' : '';
+            window.location.href = basePath + '/participant-tournaments';
         } else {
             // Ошибка - восстанавливаем кнопку
             button.innerHTML = originalText;
