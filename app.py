@@ -83,14 +83,16 @@ def set_script_root():
     script_name = request.environ.get('SCRIPT_NAME', '')
     if script_name:
         app.config['APPLICATION_ROOT'] = script_name
-        # Также устанавливаем в request для использования в шаблонах
-        request.script_root = script_name
 
 # Контекстный процессор для добавления префикса в шаблоны
 @app.context_processor
 def inject_script_root():
     from flask import request
-    script_name = request.environ.get('SCRIPT_NAME', '')
+    try:
+        script_name = request.environ.get('SCRIPT_NAME', '')
+    except RuntimeError:
+        # Если request context недоступен, возвращаем пустую строку
+        script_name = ''
     return dict(script_root=script_name)
 
 # Настройки email (переопределяем для локальной разработки)
