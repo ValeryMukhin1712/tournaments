@@ -89,19 +89,10 @@ def set_script_root():
 def inject_script_root():
     from flask import request
     try:
-        # Получаем префикс из environ (устанавливается middleware из заголовка X-Script-Name)
+        # Получаем префикс из environ (устанавливается middleware из заголовка X-Script-Name от Nginx)
         script_name = request.environ.get('SCRIPT_NAME', '')
-        # Если префикс не установлен через middleware, проверяем только на сервере
-        # Локально (localhost) не используем префикс
-        if not script_name:
-            # Проверяем, что мы на сервере (не localhost) и на dev порту
-            host = request.environ.get('HTTP_HOST', '') or request.environ.get('SERVER_NAME', '')
-            port = os.environ.get('PORT', '')
-            # Используем префикс только если:
-            # 1. Порт 5001 (dev на сервере)
-            # 2. И НЕ localhost (чтобы локально не использовать префикс)
-            if port == '5001' and 'localhost' not in host.lower() and '127.0.0.1' not in host:
-                script_name = '/new_dev'
+        # Префикс устанавливается только через заголовок X-Script-Name от Nginx
+        # Локально и на prod (без заголовка) префикс будет пустым
     except RuntimeError:
         # Если request context недоступен, возвращаем пустую строку
         script_name = ''
