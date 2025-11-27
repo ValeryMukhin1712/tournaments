@@ -29,6 +29,16 @@ if os.environ.get('FLASK_ENV') == 'production':
 else:
     app.config.from_object(DevelopmentConfig)
 
+# Настройка префикса для dev окружения (если работает под /new_dev)
+# Проверяем переменную окружения или заголовок от Nginx
+script_name = os.environ.get('SCRIPT_NAME', '')
+if script_name:
+    app.config['APPLICATION_ROOT'] = script_name
+elif os.environ.get('FLASK_ENV') != 'production':
+    # Для dev окружения устанавливаем префикс /new_dev
+    # Это будет использоваться, если приложение запущено под префиксом
+    app.config['APPLICATION_ROOT'] = '/new_dev'
+
 # Переопределяем некоторые настройки для совместимости
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'tournament-system-secret-key-2024'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
@@ -37,6 +47,32 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
 app.config['SESSION_COOKIE_SECURE'] = False  # Для HTTP (Railway может не иметь HTTPS)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Настройка префикса для dev окружения (работа под /new_dev)
+# Обрабатываем заголовок X-Script-Name от Nginx
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Middleware для обработки префикса из заголовка X-Script-Name
+class ScriptNameMiddleware:
+    def __init__(self, app):
+        self.app = app
+    
+    def __call__(self, environ, start_response):
+        # Получаем префикс из заголовка X-Script-Name от Nginx
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
+        if script_name:
+            environ['SCRIPT_NAME'] = script_name
+            # Удаляем префикс из PATH_INFO, так как Nginx уже его удалил через rewrite
+            # Но нам нужно сохранить его для генерации URL
+        elif os.environ.get('FLASK_ENV') != 'production':
+            # Для dev окружения устанавливаем префикс /new_dev по умолчанию
+            environ['SCRIPT_NAME'] = '/new_dev'
+        
+        return self.app(environ, start_response)
+
+# Применяем middleware
+app.wsgi_app = ScriptNameMiddleware(app.wsgi_app)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1, x_host=1, x_proto=1, x_port=1, x_for=1)
 
 # Настройки email (переопределяем для локальной разработки)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
