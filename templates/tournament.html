@@ -1231,13 +1231,6 @@
                                                     title="Ввести результат матча">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            {% if match.status == 'запланирован' %}
-                                            <button class="btn btn-sm btn-outline-success" 
-                                                    onclick="event.stopPropagation(); inviteParticipantsToMatch({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}', '{{ match.time }}', {{ match.court or 0 }})"
-                                                    title="Пригласить участников в Telegram">
-                                                <i class="fab fa-telegram"></i>
-                                            </button>
-                                            {% endif %}
                                             {% if match.status in ['в_процессе', 'играют', 'завершен'] %}
                                             <button class="btn btn-sm btn-outline-info" 
                                                     onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
@@ -2038,10 +2031,23 @@ function openMatchResultModal(matchId, p1Name, p2Name) {
                     const p2 = participants.find(p => p.name === p2Name);
                     
                     console.log('P1 ID from form:', p1?.id, 'P2 ID from form:', p2?.id);
+                    console.log('Match participant1_id:', data.match.participant1_id, 'Match participant2_id:', data.match.participant2_id);
                     
                     // Определяем, нужно ли менять местами счет
+                    // needSwap = true, если Участник 1 в форме НЕ равен participant1 в матче
+                    // Т.е. если participant1_id в матче НЕ равен p1.id из формы
                     const needSwap = p1 && p2 && data.match.participant1_id !== p1.id;
-                    console.log('Need to swap scores:', needSwap);
+                    console.log('Need to swap scores:', needSwap, {
+                        'Участник 1 в форме': p1Name,
+                        'Участник 2 в форме': p2Name,
+                        'participant1_id в матче': data.match.participant1_id,
+                        'participant2_id в матче': data.match.participant2_id,
+                        'p1.id из формы': p1?.id,
+                        'p2.id из формы': p2?.id,
+                        'Логика': needSwap ? 
+                            `Участник 1 в форме (${p1Name}, id=${p1?.id}) НЕ равен participant1 в матче (id=${data.match.participant1_id}), меняем местами` :
+                            `Участник 1 в форме (${p1Name}, id=${p1?.id}) равен participant1 в матче (id=${data.match.participant1_id}), НЕ меняем местами`
+                    });
                     
                     // Сохраняем состояние needSwap в глобальной переменной для использования при сохранении
                     window.matchNeedSwap = needSwap;
@@ -3905,18 +3911,28 @@ function generateSchedule() {
                 'X-CSRFToken': csrfToken
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 alert('Расписание успешно составлено!');
                 location.reload(); // Перезагружаем страницу для отображения новых матчей
             } else {
-                alert('Ошибка при составлении расписания: ' + (data.error || 'Неизвестная ошибка'));
+                const errorMsg = data.error || 'Неизвестная ошибка';
+                console.error('Ошибка при составлении расписания:', errorMsg);
+                alert('Ошибка при составлении расписания:\n' + errorMsg);
             }
         })
         .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Ошибка при составлении расписания. Попробуйте еще раз.');
+            console.error('Ошибка при составлении расписания:', error);
+            const errorMsg = error.message || 'Неизвестная ошибка. Проверьте консоль браузера (F12) для деталей.';
+            alert('Ошибка при составлении расписания:\n' + errorMsg);
         });
     }
 }

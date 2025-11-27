@@ -191,12 +191,13 @@
                                                 <th>Участники</th>
                                                 <th style="width: 100px;">Счет</th>
                                                 <th class="d-none d-md-table-cell" style="width: 120px;">Статус</th>
+                                                <th style="width: 100px;">Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
                                             {% for date_str, day_data in schedule_display.items() %}
                                             <tr class="table-info">
-                                                <td colspan="6" class="fw-bold text-center py-2">
+                                                <td colspan="7" class="fw-bold text-center py-2">
                                                     <i class="fas fa-calendar-day me-2"></i>{{ day_data.date_display }}
                                     </td>
                                             </tr>
@@ -263,6 +264,17 @@
                                                         {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
                                                         {{ match.status }}
                                                     </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if match.status in ['в_процессе', 'играют', 'завершен'] %}
+                                                    <button class="btn btn-sm btn-outline-info" 
+                                                            onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
+                                                            title="Просмотр журнала розыгрышей">
+                                                        <i class="fas fa-book"></i>
+                                                    </button>
+                                                    {% else %}
+                                                    <span class="text-muted">—</span>
+                                                    {% endif %}
                                                 </td>
                                             </tr>
                                             {% endfor %}
@@ -1216,6 +1228,272 @@ function saveRefreshSettings() {
     localStorage.setItem('autoRefreshInterval', refreshIntervalSeconds.toString());
     localStorage.setItem('autoRefreshActive', isAutoRefreshActive.toString());
 }
+
+// Функция для открытия модального окна журнала розыгрышей
+function openRallyJournalModal(matchId, participant1, participant2) {
+    console.log('[Rally Journal] Открытие журнала для матча:', matchId);
+    
+    // Устанавливаем заголовок модального окна
+    const modal = document.getElementById('rallyJournalModal');
+    const modalTitle = modal.querySelector('.modal-title');
+    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: ${participant1} vs ${participant2}`;
+    
+    // Сохраняем matchId для использования в loadRallyJournal
+    modal.setAttribute('data-match-id', matchId);
+    
+    // Показываем кнопку выгрузки в Excel
+    const exportBtn = document.getElementById('exportRallyJournalBtn');
+    if (exportBtn) {
+        exportBtn.style.display = 'inline-block';
+    }
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContent');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Открываем модальное окно
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Загружаем данные розыгрышей
+    loadRallyJournal(matchId);
+}
+
+// Функция для загрузки журнала розыгрышей
+async function loadRallyJournal(matchId) {
+    try {
+        const response = await fetch(`/api/matches/${matchId}/rallies`);
+        const data = await response.json();
+        
+        const content = document.getElementById('rallyJournalContent');
+        
+        if (!data.success) {
+            content.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${data.error || 'Не удалось загрузить журнал розыгрышей'}
+                </div>
+            `;
+            return;
+        }
+        
+        const rallies = data.rallies || [];
+        
+        if (rallies.length === 0) {
+            content.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Розыгрыши пока не зарегистрированы
+                </div>
+            `;
+            return;
+        }
+        
+        // Группируем розыгрыши по сетам
+        const ralliesBySet = {};
+        rallies.forEach(rally => {
+            const setNum = rally.set_number;
+            if (!ralliesBySet[setNum]) {
+                ralliesBySet[setNum] = [];
+            }
+            ralliesBySet[setNum].push(rally);
+        });
+        
+        // Формируем HTML
+        let html = '<div class="rally-journal">';
+        
+        // Сортируем сеты по номеру
+        const setNumbers = Object.keys(ralliesBySet).sort((a, b) => parseInt(a) - parseInt(b));
+        
+        setNumbers.forEach(setNum => {
+            const setRallies = ralliesBySet[setNum];
+            html += `
+                <div class="mb-4">
+                    <h6 class="border-bottom pb-2 mb-3">
+                        <i class="fas fa-trophy me-2"></i>Сет ${setNum}
+                        <span class="badge bg-secondary ms-2">${setRallies.length} розыгрышей</span>
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;">№</th>
+                                    <th style="width: 120px;">Время</th>
+                                    <th>Подающий</th>
+                                    <th>Принимающий</th>
+                                    <th style="width: 100px;" class="text-center">Результат</th>
+                                    <th style="width: 100px;" class="text-center">Счёт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            setRallies.forEach((rally, index) => {
+                const rallyTime = new Date(rally.rally_datetime);
+                const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                
+                // Результат: 1 если выиграл подающий, 0 если выиграл принимающий
+                const resultValue = rally.server_won ? '1' : '0';
+                const resultBadge = rally.server_won 
+                    ? '<span class="badge bg-success">1</span>'
+                    : '<span class="badge bg-danger">0</span>';
+                
+                // Форматируем имя подающего: разделяем имя и позицию
+                let serverNameHtml = '';
+                if (rally.server_name) {
+                    const serverParts = rally.server_name.split(' - ');
+                    if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
+                        // Есть позиция: имя жирным курсивом, позиция серым курсивом 80%
+                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: #6c757d; font-size: 80%;">- ${serverParts[1]}</span>`;
+                    } else {
+                        // Нет позиции: просто имя жирным курсивом
+                        serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;
+                    }
+                } else {
+                    serverNameHtml = '<strong style="font-style: italic;">Не указан</strong>';
+                }
+                
+                // Имя принимающего: жирным курсивом
+                const receiverNameHtml = `<strong style="font-style: italic;">${rally.receiver_name || 'Не указан'}</strong>`;
+                
+                html += `
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td><small>${timeStr}</small></td>
+                        <td>${serverNameHtml}</td>
+                        <td>${receiverNameHtml}</td>
+                        <td class="text-center">${resultBadge}</td>
+                        <td class="text-center"><strong>${rally.score}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+        
+        // Сохраняем данные розыгрышей для выгрузки
+        const modal = document.getElementById('rallyJournalModal');
+        if (modal) {
+            modal.setAttribute('data-rallies', JSON.stringify(rallies));
+        }
+        
+        console.log('[Rally Journal] Загружено розыгрышей:', rallies.length);
+        
+    } catch (error) {
+        console.error('[Rally Journal] Ошибка при загрузке журнала:', error);
+        const content = document.getElementById('rallyJournalContent');
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Ошибка при загрузке журнала розыгрышей: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Выгрузка журнала розыгрышей в Excel
+function exportRallyJournalToExcel() {
+    try {
+        const modal = document.getElementById('rallyJournalModal');
+        const matchId = modal ? modal.getAttribute('data-match-id') : null;
+        const ralliesData = modal ? modal.getAttribute('data-rallies') : null;
+        
+        if (!ralliesData) {
+            alert('Нет данных для выгрузки');
+            return;
+        }
+        
+        const rallies = JSON.parse(ralliesData);
+        
+        // Формируем CSV
+        let csv = '\uFEFF'; // BOM для правильной кодировки UTF-8 в Excel
+        csv += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
+        
+        rallies.forEach((rally, index) => {
+            const rallyDate = new Date(rally.rally_datetime);
+            const dateStr = rallyDate.toLocaleDateString('ru-RU');
+            const timeStr = rallyDate.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
+            const serverName = rally.server_name || 'Не указан';
+            const receiverName = rally.receiver_name || 'Не указан';
+            const result = rally.server_won ? '1' : '0';
+            const score = rally.score || '0:0';
+            
+            csv += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${score}"\n`;
+        });
+        
+        // Создаём blob и скачиваем
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `rally_journal_match_${matchId}_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('[Rally Journal] Выгрузка завершена');
+    } catch (error) {
+        console.error('[Rally Journal] Ошибка при выгрузке:', error);
+        alert('Ошибка при выгрузке журнала: ' + error.message);
+    }
+}
 </script>
+
+<!-- Модальное окно для просмотра журнала розыгрышей -->
+<div class="modal fade" id="rallyJournalModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i>Журнал розыгрышей
+                </h5>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-success me-2" id="exportRallyJournalBtn" onclick="exportRallyJournalToExcel()" title="Выгрузить в Excel" style="display: none;">
+                        <i class="fas fa-file-excel me-1"></i>Выгрузить в Excel
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="rallyJournalContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
