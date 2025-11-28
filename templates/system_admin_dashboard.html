@@ -1068,7 +1068,10 @@ async function loadVersionInfo() {
     if (!versionInfoDiv) return;
     
     try {
-        const response = await fetch('/api/admin/version', {
+        // Используем BASE_PATH для учета префикса /new_dev
+        // BASE_PATH определяется в base.html через контекстный процессор Flask
+        const basePath = (typeof window.BASE_PATH !== 'undefined' ? window.BASE_PATH : '') || '';
+        const response = await fetch(basePath + '/api/admin/version', {
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCSRFToken()
