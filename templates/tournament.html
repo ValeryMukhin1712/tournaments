@@ -1141,14 +1141,13 @@
                                     <th class="d-none d-lg-table-cell" style="width: 80px;">Площадка</th>
                                     <th>Участники</th>
                                     <th class="d-none d-sm-table-cell" style="width: 100px;">Счет</th>
-                                    <th class="d-none d-md-table-cell" style="width: 120px;">Статус</th>
                                     <th style="width: 80px;">Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for date_str, day_data in schedule_display.items() %}
                                 <tr class="table-info">
-                                    <td colspan="7" class="fw-bold text-center py-2">
+                                    <td colspan="6" class="fw-bold text-center py-2">
                                         <i class="fas fa-calendar-day me-2"></i>{{ day_data.date_display }}
                                     </td>
                                 </tr>
@@ -1213,15 +1212,6 @@
                                         {% else %}
                                             <span class="text-muted">—</span>
                                         {% endif %}
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge 
-                                            {% if match.status == 'завершен' %}bg-success
-                                            {% elif match.status == 'запланирован' %}bg-info
-                                            {% else %}bg-secondary{% endif %}"
-                                            {% if match.status in ['в_процессе', 'играют'] %}style="background-color: #ffc107 !important; color: #000 !important;"{% endif %}>
-                                            {{ match.status }}
-                                        </span>
                                     </td>
                                     <td class="text-center">
                                         {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
@@ -4941,22 +4931,33 @@ var openRefereeForSet = window.openRefereeForSet;
                 console.log('Участники в форме:', participant1Name, 'vs', participant2Name);
                 console.log('Игроки от Referee:', result.participant1, 'vs', result.participant2);
                 
-                // Используем логику needSwap вместо логики сопоставления по именам
-                const needSwap = window.matchNeedSwap || false;
-                console.log('[Parent] applyRefereeResultToSet: needSwap =', needSwap);
+                // Получаем swap_count из результата (если есть)
+                const swap_count = result.swap_count !== undefined ? result.swap_count : 0;
+                console.log('[Parent] applyRefereeResultToSet: получен результат:', {
+                    scoreLeft: result.scoreLeft,
+                    scoreRight: result.scoreRight,
+                    swap_count: swap_count,
+                    'swap_count % 2': swap_count % 2,
+                    'swap_count из result': result.swap_count
+                });
                 
                 let score1, score2;
                 
-                if (needSwap) {
-                    // Меняем местами счет согласно needSwap
+                // Используем swap_count для определения соответствия счета участникам
+                // Если swap_count % 2 == 0: левый счёт → Участник 1, правый → Участник 2
+                // Если swap_count % 2 == 1: правый счёт → Участник 1, левый → Участник 2
+                if (swap_count % 2 == 1) {
+                    // Нечётное количество смен: правый счёт → Участник 1, левый → Участник 2
                     score1 = result.scoreRight;
                     score2 = result.scoreLeft;
-                    console.log('[Parent] applyRefereeResultToSet: Счет поменян местами согласно needSwap:', score1, ':', score2);
+                    console.log('[Parent] applyRefereeResultToSet: swap_count нечётное (1), правый счёт (' + result.scoreRight + ') → Участник 1, левый счёт (' + result.scoreLeft + ') → Участник 2');
+                    console.log('[Parent] applyRefereeResultToSet: итоговый счет для формы:', score1, ':', score2);
                 } else {
-                    // Обычный порядок
+                    // Чётное количество смен: левый счёт → Участник 1, правый → Участник 2
                     score1 = result.scoreLeft;
                     score2 = result.scoreRight;
-                    console.log('[Parent] applyRefereeResultToSet: Счет в обычном порядке:', score1, ':', score2);
+                    console.log('[Parent] applyRefereeResultToSet: swap_count чётное (0), левый счёт (' + result.scoreLeft + ') → Участник 1, правый счёт (' + result.scoreRight + ') → Участник 2');
+                    console.log('[Parent] applyRefereeResultToSet: итоговый счет для формы:', score1, ':', score2);
                 }
                 
                 // Убираем сложную логику сопоставления по именам, так как она конфликтует с needSwap
@@ -7194,8 +7195,13 @@ async function loadRallyJournal(matchId) {
                 if (rally.server_name) {
                     const serverParts = rally.server_name.split(' - ');
                     if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
-                        // Есть позиция: имя жирным курсивом, позиция серым курсивом 80%
-                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: #6c757d; font-size: 80%;">- ${serverParts[1]}</span>`;
+                        // Есть позиция: имя жирным курсивом, позиция стрелочкой 80%
+                        // "справа" → ↗ (из нижнего левого в верхний правый) - розовая, толстая
+                        // "слева" → ↘ (из левого верхнего в правый нижний) - голубая, толстая
+                        const arrow = serverParts[1] === 'справа' ? '↗' : '↘';
+                        const arrowColor = serverParts[1] === 'справа' ? '#ff69b4' : '#00bfff'; // розовый для ↗, голубой для ↘
+                        // Увеличиваем толщину стрелки в 4 раза через множественные text-shadow
+                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: ${arrowColor}; font-size: 80%; font-weight: 900; text-shadow: 1px 0 0 ${arrowColor}, -1px 0 0 ${arrowColor}, 0 1px 0 ${arrowColor}, 0 -1px 0 ${arrowColor}, 0.7px 0.7px 0 ${arrowColor}, -0.7px -0.7px 0 ${arrowColor}, 0.7px -0.7px 0 ${arrowColor}, -0.7px 0.7px 0 ${arrowColor}, 1px 0.5px 0 ${arrowColor}, -1px -0.5px 0 ${arrowColor}, 0.5px 1px 0 ${arrowColor}, -0.5px -1px 0 ${arrowColor};"> ${arrow}</span>`;
                     } else {
                         // Нет позиции: просто имя жирным курсивом
                         serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;

@@ -694,7 +694,12 @@ async function loadRallyJournalForAdmin(matchId) {
                 if (rally.server_name) {
                     const serverParts = rally.server_name.split(' - ');
                     if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
-                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: #6c757d; font-size: 80%;">- ${serverParts[1]}</span>`;
+                        // "справа" → ↗ (из нижнего левого в верхний правый) - розовая, толстая
+                        // "слева" → ↘ (из левого верхнего в правый нижний) - голубая, толстая
+                        const arrow = serverParts[1] === 'справа' ? '↗' : '↘';
+                        const arrowColor = serverParts[1] === 'справа' ? '#ff69b4' : '#00bfff'; // розовый для ↗, голубой для ↘
+                        // Увеличиваем толщину стрелки в 4 раза через множественные text-shadow
+                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: ${arrowColor}; font-size: 80%; font-weight: 900; text-shadow: 1px 0 0 ${arrowColor}, -1px 0 0 ${arrowColor}, 0 1px 0 ${arrowColor}, 0 -1px 0 ${arrowColor}, 0.7px 0.7px 0 ${arrowColor}, -0.7px -0.7px 0 ${arrowColor}, 0.7px -0.7px 0 ${arrowColor}, -0.7px 0.7px 0 ${arrowColor}, 1px 0.5px 0 ${arrowColor}, -1px -0.5px 0 ${arrowColor}, 0.5px 1px 0 ${arrowColor}, -0.5px -1px 0 ${arrowColor};"> ${arrow}</span>`;
                     } else {
                         serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;
                     }
