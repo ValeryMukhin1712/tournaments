@@ -30,14 +30,12 @@ else:
     app.config.from_object(DevelopmentConfig)
 
 # Настройка префикса для dev окружения (если работает под /new_dev)
-# Проверяем переменную окружения или заголовок от Nginx
-script_name = os.environ.get('SCRIPT_NAME', '')
+# Префикс устанавливается ТОЛЬКО через заголовок X-Script-Name от Nginx
+# или через переменную окружения FORCE_SCRIPT_NAME
+# Локально префикс НЕ устанавливается автоматически
+script_name = os.environ.get('FORCE_SCRIPT_NAME', '')
 if script_name:
     app.config['APPLICATION_ROOT'] = script_name
-elif os.environ.get('FLASK_ENV') != 'production':
-    # Для dev окружения устанавливаем префикс /new_dev
-    # Это будет использоваться, если приложение запущено под префиксом
-    app.config['APPLICATION_ROOT'] = '/new_dev'
 
 # Переопределяем некоторые настройки для совместимости
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'tournament-system-secret-key-2024'
@@ -58,16 +56,15 @@ class ScriptNameMiddleware:
         self.app = app
     
     def __call__(self, environ, start_response):
-        # Получаем префикс из заголовка X-Script-Name от Nginx
+        # Получаем префикс из заголовка X-Script-Name от Nginx (только на сервере)
         script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
         if script_name:
             environ['SCRIPT_NAME'] = script_name
-        elif os.environ.get('FLASK_ENV') != 'production':
-            # Для dev окружения проверяем, работает ли приложение под префиксом
-            # Проверяем по порту (dev работает на 5001)
-            # Или по переменной окружения
-            if os.environ.get('PORT') == '5001' or os.environ.get('FLASK_ENV') == 'development':
-                environ['SCRIPT_NAME'] = '/new_dev'
+        # Проверяем переменную окружения FORCE_SCRIPT_NAME (для явного указания префикса)
+        elif os.environ.get('FORCE_SCRIPT_NAME'):
+            environ['SCRIPT_NAME'] = os.environ.get('FORCE_SCRIPT_NAME')
+        # НЕ устанавливаем префикс автоматически для локального запуска
+        # Префикс устанавливается ТОЛЬКО через Nginx заголовок или FORCE_SCRIPT_NAME
         
         return self.app(environ, start_response)
 
@@ -90,9 +87,12 @@ def inject_script_root():
     from flask import request
     try:
         # Получаем префикс из environ (устанавливается middleware из заголовка X-Script-Name от Nginx)
+        # или из переменной окружения FORCE_SCRIPT_NAME
         script_name = request.environ.get('SCRIPT_NAME', '')
-        # Префикс устанавливается только через заголовок X-Script-Name от Nginx
-        # Локально и на prod (без заголовка) префикс будет пустым
+        # Префикс устанавливается ТОЛЬКО через:
+        # 1. Заголовок X-Script-Name от Nginx (на сервере)
+        # 2. Переменную окружения FORCE_SCRIPT_NAME (для явного указания)
+        # Локально (без заголовка и без FORCE_SCRIPT_NAME) префикс будет пустым
     except RuntimeError:
         # Если request context недоступен, возвращаем пустую строку
         script_name = ''
