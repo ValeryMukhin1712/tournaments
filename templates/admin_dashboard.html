@@ -359,16 +359,29 @@ function deleteTournament(tournamentId) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
         button.disabled = true;
         
-        fetch(`/api/tournaments/${tournamentId}`, {
+        const basePath = window.BASE_PATH || '';
+        const url = basePath + `/api/tournaments/${tournamentId}`;
+        console.log('Удаление турнира:', tournamentId, 'URL:', url, 'BASE_PATH:', basePath);
+        fetch(url, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Ответ сервера:', response.status, response.statusText);
+            if (!response.ok) {
+                // Если ответ не успешный, пытаемся получить текст ошибки
+                return response.text().then(text => {
+                    console.error('Ошибка сервера:', text);
+                    throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 // Удаляем строку из таблицы
                 button.closest('tr').remove();
                 
@@ -381,7 +394,7 @@ function deleteTournament(tournamentId) {
                 `;
                 document.querySelector('.container').insertBefore(alert, document.querySelector('.container').firstChild);
             } else {
-                throw new Error(data.error || 'Ошибка при удалении турнира');
+                throw new Error(data?.error || 'Ошибка при удалении турнира');
             }
         })
         .catch(error => {

@@ -63,8 +63,17 @@ class ScriptNameMiddleware:
         # Проверяем переменную окружения FORCE_SCRIPT_NAME (для явного указания префикса)
         elif os.environ.get('FORCE_SCRIPT_NAME'):
             environ['SCRIPT_NAME'] = os.environ.get('FORCE_SCRIPT_NAME')
+        # Временное решение: если работаем на порту 5001 (dev версия на сервере), устанавливаем префикс
+        # Это нужно, если Nginx не передает заголовок X-Script-Name
+        elif os.environ.get('PORT') == '5001' and os.environ.get('FLASK_ENV') != 'production':
+            # Проверяем, что это не локальный запуск (localhost)
+            server_name = environ.get('SERVER_NAME', '')
+            http_host = environ.get('HTTP_HOST', '')
+            # Если это не localhost, устанавливаем префикс
+            if 'localhost' not in server_name.lower() and '127.0.0.1' not in http_host:
+                environ['SCRIPT_NAME'] = '/new_dev'
         # НЕ устанавливаем префикс автоматически для локального запуска
-        # Префикс устанавливается ТОЛЬКО через Nginx заголовок или FORCE_SCRIPT_NAME
+        # Префикс устанавливается ТОЛЬКО через Nginx заголовок, FORCE_SCRIPT_NAME или порт 5001 на сервере
         
         return self.app(environ, start_response)
 
@@ -89,6 +98,11 @@ def inject_script_root():
         # Получаем префикс из environ (устанавливается middleware из заголовка X-Script-Name от Nginx)
         # или из переменной окружения FORCE_SCRIPT_NAME
         script_name = request.environ.get('SCRIPT_NAME', '')
+        
+        # Логирование для отладки (только на dev сервере)
+        if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('PORT') == '5001':
+            logger.debug(f"inject_script_root: SCRIPT_NAME={script_name}, HTTP_X_SCRIPT_NAME={request.environ.get('HTTP_X_SCRIPT_NAME', '')}")
+        
         # Префикс устанавливается ТОЛЬКО через:
         # 1. Заголовок X-Script-Name от Nginx (на сервере)
         # 2. Переменную окружения FORCE_SCRIPT_NAME (для явного указания)

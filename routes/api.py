@@ -921,13 +921,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             from models.match_log import MatchLog
             MatchLog.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 2. Удаляем матчи
+            # 2. Удаляем розыгрыши (Rally)
+            from models.rally import Rally
+            Rally.query.filter_by(tournament_id=tournament_id).delete()
+            
+            # 3. Удаляем матчи
             Match.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 3. Удаляем участников
+            # 4. Удаляем участников
             Participant.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 4. Удаляем турнир
+            # 5. Удаляем турнир
             tournament_name = tournament.name
             db.session.delete(tournament)
             
