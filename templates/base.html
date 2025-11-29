@@ -658,12 +658,124 @@
             font-family: 'Courier New', monospace;
             min-width: 40px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .page-number-debug:hover {
             background-color: rgba(220, 53, 69, 1);
             transform: scale(1.05);
             transition: all 0.2s ease;
+        }
+        
+        /* Кнопка информации о размерах страницы */
+        .page-size-info-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: white;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .page-size-info-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+        
+        /* Модальное окно с информацией о размерах */
+        .page-size-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-size-modal.show {
+            display: flex;
+        }
+        
+        .page-size-modal-content {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(2px);
+            padding: 10px 15px;
+            border-radius: 8px;
+            width: auto;
+            max-width: none;
+            min-width: 200px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .page-size-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .page-size-modal-header h5 {
+            margin: 0;
+        }
+        
+        .page-size-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-size-modal-close:hover {
+            color: #000;
+        }
+        
+        .page-size-info-item {
+            margin-bottom: 5px;
+            padding: 4px;
+            background: rgba(248, 249, 250, 0.5);
+            border-radius: 3px;
+        }
+        
+        .page-size-info-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 2px;
+            font-size: 0.5em;
+        }
+        
+        .page-size-info-value {
+            color: #212529;
+            font-family: 'Courier New', monospace;
+            font-size: 0.5em;
+        }
+        
+        .page-size-modal-header h5 {
+            font-size: 0.7em;
         }
         
         @media (max-width: 768px) {
@@ -673,6 +785,12 @@
                 padding: 6px 10px;
                 font-size: 12px;
                 min-width: 35px;
+            }
+            
+            .page-size-info-btn {
+                width: 18px;
+                height: 18px;
+                font-size: 9px;
             }
         }
         
@@ -787,7 +905,25 @@
     </div>
     
     <!-- Номер страницы для отладки -->
-    <div class="page-number-debug" id="pageNumberDebug">--</div>
+    <div class="page-number-debug" id="pageNumberDebug">
+        <span id="pageNumberText">--</span>
+        <button class="page-size-info-btn" id="pageSizeInfoBtn" title="Информация о размерах страницы" onclick="showPageSizeInfo()">
+            <i class="fas fa-info" style="font-size: 10px;"></i>
+        </button>
+    </div>
+    
+    <!-- Модальное окно с информацией о размерах страницы -->
+    <div class="page-size-modal" id="pageSizeModal" onclick="closePageSizeInfoOnBackdrop(event)">
+        <div class="page-size-modal-content" onclick="event.stopPropagation()">
+            <div class="page-size-modal-header">
+                <h5><i class="fas fa-ruler me-2"></i>Информация о размерах страницы</h5>
+                <button class="page-size-modal-close" onclick="closePageSizeInfo()" title="Закрыть">&times;</button>
+            </div>
+            <div id="pageSizeInfoContent">
+                <!-- Информация будет добавлена через JavaScript -->
+            </div>
+        </div>
+    </div>
     
     {% if request.endpoint == 'index' %}
     <!-- Полный navbar только на главной странице -->
@@ -1209,12 +1345,87 @@
         return 0;
     }
     
+    // Функция для отображения информации о размерах страницы
+    function showPageSizeInfo() {
+        const modal = document.getElementById('pageSizeModal');
+        const content = document.getElementById('pageSizeInfoContent');
+        
+        if (!modal || !content) return;
+        
+        // Получаем размеры
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        
+        // Определяем ориентацию
+        let orientation = 'Неизвестно';
+        if (viewportHeight > viewportWidth) {
+            orientation = 'Портретная (Portrait)';
+        } else if (viewportWidth > viewportHeight) {
+            orientation = 'Альбомная (Landscape)';
+        } else {
+            orientation = 'Квадратная';
+        }
+        
+        // Формируем HTML с информацией (без URL и ориентации)
+        content.innerHTML = `
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Viewport (видимая область):</div>
+                <div class="page-size-info-value">${viewportWidth} × ${viewportHeight} px</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Окно браузера:</div>
+                <div class="page-size-info-value">${windowWidth} × ${windowHeight} px</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Экран устройства:</div>
+                <div class="page-size-info-value">${screenWidth} × ${screenHeight} px</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Device Pixel Ratio:</div>
+                <div class="page-size-info-value">${devicePixelRatio.toFixed(2)}</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Номер страницы:</div>
+                <div class="page-size-info-value">${getPageNumber() || '?'}</div>
+            </div>
+        `;
+        
+        modal.classList.add('show');
+    }
+    
+    // Функция для закрытия модального окна
+    function closePageSizeInfo() {
+        const modal = document.getElementById('pageSizeModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+    
+    // Закрытие при клике на фон
+    function closePageSizeInfoOnBackdrop(event) {
+        if (event.target.id === 'pageSizeModal') {
+            closePageSizeInfo();
+        }
+    }
+    
+    // Закрытие по клавише Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closePageSizeInfo();
+        }
+    });
+    
     // Обновление номера страницы при загрузке
     document.addEventListener('DOMContentLoaded', function() {
         const pageNumber = getPageNumber();
-        const pageNumberElement = document.getElementById('pageNumberDebug');
-        if (pageNumberElement) {
-            pageNumberElement.textContent = pageNumber > 0 ? pageNumber : '?';
+        const pageNumberText = document.getElementById('pageNumberText');
+        if (pageNumberText) {
+            pageNumberText.textContent = pageNumber > 0 ? pageNumber : '?';
         }
     });
     </script>
