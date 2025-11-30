@@ -7076,11 +7076,21 @@ function openRallyJournalModal(matchId, participant1, participant2) {
     
     // Устанавливаем заголовок модального окна
     const modal = document.getElementById('rallyJournalModal');
+    if (!modal) {
+        console.error('[Rally Journal] Модальное окно не найдено');
+        return;
+    }
     const modalTitle = modal.querySelector('.modal-title');
-    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: ${participant1} vs ${participant2}`;
+    if (!modalTitle) {
+        console.error('[Rally Journal] Заголовок модального окна не найден');
+        return;
+    }
+    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: <span style="color: #007bff; font-style: italic;">${participant1}</span> vs <span style="color: #dc3545; font-style: italic;">${participant2}</span>`;
     
-    // Сохраняем matchId для использования в loadRallyJournal
+    // Сохраняем matchId и имена участников для использования в loadRallyJournal
     modal.setAttribute('data-match-id', matchId);
+    modal.setAttribute('data-participant1', participant1);
+    modal.setAttribute('data-participant2', participant2);
     
     // Показываем кнопку выгрузки в Excel
     const exportBtn = document.getElementById('exportRallyJournalBtn');
@@ -7110,8 +7120,97 @@ function openRallyJournalModal(matchId, participant1, participant2) {
 // Функция для загрузки журнала розыгрышей
 async function loadRallyJournal(matchId) {
     try {
-        const response = await fetch(`/api/matches/${matchId}/rallies`);
-        const data = await response.json();
+        // Получаем имена участников из data-атрибутов модального окна
+        const modal = document.getElementById('rallyJournalModal');
+        if (!modal) {
+            console.warn('[Rally Journal] Модальное окно не найдено');
+            return;
+        }
+        const participant1 = modal.getAttribute('data-participant1') || '';
+        const participant2 = modal.getAttribute('data-participant2') || '';
+        
+        // Функция для нормализации имени (убираем пробелы, приводим к нижнему регистру)
+        const normalizeName = (name) => {
+            if (!name) return '';
+            return name.trim().toLowerCase().replace(/\s+/g, ' ');
+        };
+        
+        // Функция для определения, к какому участнику относится имя
+        const getParticipantColor = (serverName) => {
+            if (!serverName || !participant1 || !participant2) return null;
+            
+            // Берем имя без позиции (если есть " - слева" или " - справа")
+            const serverParts = serverName.split(' - ');
+            const serverNameOnly = serverParts[0].trim();
+            
+            // Нормализуем имена для сравнения
+            const normalizedServerName = normalizeName(serverNameOnly);
+            const normalizedP1 = normalizeName(participant1);
+            const normalizedP2 = normalizeName(participant2);
+            
+            // Проверяем точное совпадение или вхождение частей
+            const p1Parts = normalizedP1.split(' - ').map(p => p.trim()).filter(p => p);
+            const p2Parts = normalizedP2.split(' - ').map(p => p.trim()).filter(p => p);
+            
+            const isParticipant1 = normalizedServerName === normalizedP1 || 
+                                  (p1Parts.length > 0 && p1Parts.some(part => normalizedServerName.includes(part) || part.includes(normalizedServerName)));
+            const isParticipant2 = normalizedServerName === normalizedP2 || 
+                                  (p2Parts.length > 0 && p2Parts.some(part => normalizedServerName.includes(part) || part.includes(normalizedServerName)));
+            
+            if (isParticipant1) return '#007bff'; // синий для participant1
+            if (isParticipant2) return '#dc3545'; // красный для participant2
+            return null; // цвет не определен
+        };
+        
+        // Функция для определения направления стрелки на основе счёта и команды
+        // Алгоритм:
+        // - Если игрок из синей команды (participant1) и левая часть счёта чётная → розовая стрелка (↗)
+        // - Если игрок из синей команды (participant1) и левая часть счёта нечётная → голубая стрелка (↘)
+        // - Если игрок из красной команды (participant2) и правая часть счёта чётная → розовая стрелка (↗)
+        // - Если игрок из красной команды (participant2) и правая часть счёта нечётная → голубая стрелка (↘)
+        const getArrowDirection = (serverName, score) => {
+            if (!serverName || !score) return null;
+            
+            // Определяем, к какой команде относится подающий
+            const serverColor = getParticipantColor(serverName);
+            if (!serverColor) return null;
+            
+            const isParticipant1 = serverColor === '#007bff'; // синий = participant1
+            const isParticipant2 = serverColor === '#dc3545'; // красный = participant2
+            
+            // Парсим счёт (формат "X:Y")
+            const scoreParts = score.split(':');
+            if (scoreParts.length !== 2) return null;
+            
+            const leftScore = parseInt(scoreParts[0]) || 0;
+            const rightScore = parseInt(scoreParts[1]) || 0;
+            
+            let isEven;
+            if (isParticipant1) {
+                // Для синей команды проверяем левую часть счёта
+                isEven = leftScore % 2 === 0;
+            } else if (isParticipant2) {
+                // Для красной команды проверяем правую часть счёта
+                isEven = rightScore % 2 === 0;
+            } else {
+                return null;
+            }
+            
+            // Чётное → розовая стрелка (↗), нечётное → голубая стрелка (↘)
+            return {
+                arrow: isEven ? '↗' : '↘',
+                color: isEven ? '#ff69b4' : '#00bfff' // розовый для ↗, голубой для ↘
+            };
+        };
+        
+        // Загружаем розыгрыши и данные матча параллельно
+        const [ralliesResponse, matchResponse] = await Promise.all([
+            fetch(`/api/matches/${matchId}/rallies`),
+            fetch(`/api/matches/${matchId}`)
+        ]);
+        
+        const data = await ralliesResponse.json();
+        const matchData = await matchResponse.json();
         
         const content = document.getElementById('rallyJournalContent');
         
@@ -7123,6 +7222,18 @@ async function loadRallyJournal(matchId) {
                 </div>
             `;
             return;
+        }
+        
+        // Получаем данные матча для финальных счётов сетов
+        const match = matchData.success ? matchData.match : null;
+        const setScores = {};
+        if (match) {
+            setScores[1] = match.set1_score1 !== null && match.set1_score2 !== null ? 
+                { score1: match.set1_score1, score2: match.set1_score2 } : null;
+            setScores[2] = match.set2_score1 !== null && match.set2_score2 !== null ? 
+                { score1: match.set2_score1, score2: match.set2_score2 } : null;
+            setScores[3] = match.set3_score1 !== null && match.set3_score2 !== null ? 
+                { score1: match.set3_score1, score2: match.set3_score2 } : null;
         }
         
         const rallies = data.rallies || [];
@@ -7190,21 +7301,28 @@ async function loadRallyJournal(matchId) {
                     ? '<span class="badge bg-success">1</span>'
                     : '<span class="badge bg-danger">0</span>';
                 
-                // Форматируем имя подающего: разделяем имя и позицию
+                // Форматируем имя подающего: разделяем имя и позицию, определяем цвет и направление стрелки
                 let serverNameHtml = '';
                 if (rally.server_name) {
                     const serverParts = rally.server_name.split(' - ');
-                    if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
-                        // Есть позиция: имя жирным курсивом, позиция стрелочкой 80%
-                        // "справа" → ↗ (из нижнего левого в верхний правый) - розовая, толстая
-                        // "слева" → ↘ (из левого верхнего в правый нижний) - голубая, толстая
-                        const arrow = serverParts[1] === 'справа' ? '↗' : '↘';
-                        const arrowColor = serverParts[1] === 'справа' ? '#ff69b4' : '#00bfff'; // розовый для ↗, голубой для ↘
+                    const serverNameColor = getParticipantColor(rally.server_name);
+                    const nameColorStyle = serverNameColor ? `color: ${serverNameColor};` : '';
+                    
+                    // Определяем направление стрелки на основе счёта и команды
+                    const arrowInfo = getArrowDirection(rally.server_name, rally.score);
+                    
+                    if (arrowInfo && serverParts.length >= 1) {
+                        // Есть информация о стрелке: имя жирным курсивом с цветом участника, позиция стрелочкой 80%
+                        // Чётный счёт → ↗ (розовая стрелка)
+                        // Нечётный счёт → ↘ (голубая стрелка)
+                        const serverNameOnly = serverParts[0].trim();
+                        const arrow = arrowInfo.arrow;
+                        const arrowColor = arrowInfo.color;
                         // Увеличиваем толщину стрелки в 4 раза через множественные text-shadow
-                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: ${arrowColor}; font-size: 80%; font-weight: 900; text-shadow: 1px 0 0 ${arrowColor}, -1px 0 0 ${arrowColor}, 0 1px 0 ${arrowColor}, 0 -1px 0 ${arrowColor}, 0.7px 0.7px 0 ${arrowColor}, -0.7px -0.7px 0 ${arrowColor}, 0.7px -0.7px 0 ${arrowColor}, -0.7px 0.7px 0 ${arrowColor}, 1px 0.5px 0 ${arrowColor}, -1px -0.5px 0 ${arrowColor}, 0.5px 1px 0 ${arrowColor}, -0.5px -1px 0 ${arrowColor};"> ${arrow}</span>`;
+                        serverNameHtml = `<strong style="font-style: italic; ${nameColorStyle}">${serverNameOnly}</strong> <span style="font-style: italic; color: ${arrowColor}; font-size: 80%; font-weight: 900; text-shadow: 1px 0 0 ${arrowColor}, -1px 0 0 ${arrowColor}, 0 1px 0 ${arrowColor}, 0 -1px 0 ${arrowColor}, 0.7px 0.7px 0 ${arrowColor}, -0.7px -0.7px 0 ${arrowColor}, 0.7px -0.7px 0 ${arrowColor}, -0.7px 0.7px 0 ${arrowColor}, 1px 0.5px 0 ${arrowColor}, -1px -0.5px 0 ${arrowColor}, 0.5px 1px 0 ${arrowColor}, -0.5px -1px 0 ${arrowColor};"> ${arrow}</span>`;
                     } else {
-                        // Нет позиции: просто имя жирным курсивом
-                        serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;
+                        // Нет информации о стрелке или позиции: просто имя жирным курсивом с цветом участника
+                        serverNameHtml = `<strong style="font-style: italic; ${nameColorStyle}">${rally.server_name}</strong>`;
                     }
                 } else {
                     serverNameHtml = '<strong style="font-style: italic;">Не указан</strong>';
@@ -7225,6 +7343,22 @@ async function loadRallyJournal(matchId) {
                 `;
             });
             
+            // Добавляем строку с финальным счётом сета, если сет завершён
+            const setNumInt = parseInt(setNum);
+            const finalSetScore = setScores[setNumInt];
+            if (finalSetScore) {
+                html += `
+                    <tr style="background-color: #e7f3ff; font-weight: bold;">
+                        <td colspan="5" class="text-end">
+                            <i class="fas fa-trophy me-2"></i>Сет завершён:
+                        </td>
+                        <td class="text-center">
+                            <strong style="color: #007bff;">${finalSetScore.score1}</strong> : <strong style="color: #dc3545;">${finalSetScore.score2}</strong>
+                        </td>
+                    </tr>
+                `;
+            }
+            
             html += `
                             </tbody>
                         </table>
@@ -7236,8 +7370,7 @@ async function loadRallyJournal(matchId) {
         html += '</div>';
         content.innerHTML = html;
         
-        // Сохраняем данные розыгрышей для выгрузки
-        const modal = document.getElementById('rallyJournalModal');
+        // Сохраняем данные розыгрышей для выгрузки (используем уже полученное модальное окно)
         if (modal) {
             modal.setAttribute('data-rallies', JSON.stringify(rallies));
         }
