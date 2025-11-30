@@ -7,6 +7,9 @@
 - **Production**: `https://quickscore.sytes.net/` → порт 5000
 - **Development**: `https://quickscore.sytes.net/new_dev` → порт 5001
 
+**Важно:** Префикс `/new_dev` устанавливается **только на сервере** через заголовок `X-Script-Name` от Nginx. 
+При локальном запуске приложение работает **без префикса** на `http://localhost:5000`.
+
 ## Предварительные требования
 
 1. Production версия уже настроена и работает
@@ -122,7 +125,7 @@ cd ~/quick-score-dev
 
 ```bash
 cd ~/quick-score-dev
-git pull origin main
+git pull origin dev
 source venv/bin/activate
 pip install -r requirements.txt
 sudo systemctl restart tournaments-dev
@@ -133,7 +136,7 @@ sudo systemctl restart tournaments-dev
 ```bash
 cd ~/quick-score-dev
 git fetch origin
-git reset --hard origin/main
+git reset --hard origin/dev
 source venv/bin/activate
 pip install -r requirements.txt
 sudo systemctl restart tournaments-dev
@@ -199,6 +202,9 @@ sudo systemctl restart tournaments
 - `FLASK_DEBUG=True`
 - `PORT=5001`
 - Используется отдельная база данных
+
+**Примечание о префиксе:** Префикс `/new_dev` устанавливается автоматически через заголовок `X-Script-Name` от Nginx. 
+Не нужно устанавливать переменную `FORCE_SCRIPT_NAME` на сервере - это делается только через конфигурацию Nginx.
 
 ### Логи
 
@@ -301,4 +307,6 @@ sudo systemctl restart nginx
 - Dev версия использует отдельную базу данных, поэтому изменения в dev не влияют на production
 - Всегда тестируйте изменения в dev перед деплоем в production
 - Не используйте dev версию для реальных данных
+- Префикс `/new_dev` устанавливается автоматически на сервере через Nginx. При локальном запуске приложение работает без префикса
+- Для локального тестирования см. файл `LOCAL_RUN.md`
 

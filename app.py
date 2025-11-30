@@ -29,6 +29,14 @@ if os.environ.get('FLASK_ENV') == 'production':
 else:
     app.config.from_object(DevelopmentConfig)
 
+# Настройка префикса для dev окружения (если работает под /new_dev)
+# Префикс устанавливается ТОЛЬКО через заголовок X-Script-Name от Nginx
+# или через переменную окружения FORCE_SCRIPT_NAME
+# Локально префикс НЕ устанавливается автоматически
+script_name = os.environ.get('FORCE_SCRIPT_NAME', '')
+if script_name:
+    app.config['APPLICATION_ROOT'] = script_name
+
 # Переопределяем некоторые настройки для совместимости
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'tournament-system-secret-key-2024'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
@@ -37,6 +45,72 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tournament.db'
 app.config['SESSION_COOKIE_SECURE'] = False  # Для HTTP (Railway может не иметь HTTPS)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Настройка префикса для dev окружения (работа под /new_dev)
+# Обрабатываем заголовок X-Script-Name от Nginx
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Middleware для обработки префикса из заголовка X-Script-Name
+class ScriptNameMiddleware:
+    def __init__(self, app):
+        self.app = app
+    
+    def __call__(self, environ, start_response):
+        # Получаем префикс из заголовка X-Script-Name от Nginx (только на сервере)
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
+        if script_name:
+            environ['SCRIPT_NAME'] = script_name
+        # Проверяем переменную окружения FORCE_SCRIPT_NAME (для явного указания префикса)
+        elif os.environ.get('FORCE_SCRIPT_NAME'):
+            environ['SCRIPT_NAME'] = os.environ.get('FORCE_SCRIPT_NAME')
+        # Временное решение: если работаем на порту 5001 (dev версия на сервере), устанавливаем префикс
+        # Это нужно, если Nginx не передает заголовок X-Script-Name
+        elif os.environ.get('PORT') == '5001' and os.environ.get('FLASK_ENV') != 'production':
+            # Проверяем, что это не локальный запуск (localhost)
+            server_name = environ.get('SERVER_NAME', '')
+            http_host = environ.get('HTTP_HOST', '')
+            # Если это не localhost, устанавливаем префикс
+            if 'localhost' not in server_name.lower() and '127.0.0.1' not in http_host:
+                environ['SCRIPT_NAME'] = '/new_dev'
+        # НЕ устанавливаем префикс автоматически для локального запуска
+        # Префикс устанавливается ТОЛЬКО через Nginx заголовок, FORCE_SCRIPT_NAME или порт 5001 на сервере
+        
+        return self.app(environ, start_response)
+
+# Применяем middleware
+app.wsgi_app = ScriptNameMiddleware(app.wsgi_app)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1, x_host=1, x_proto=1, x_port=1, x_for=1)
+
+# Устанавливаем APPLICATION_ROOT для правильной генерации URL
+# Это нужно для того, чтобы url_for() учитывал префикс
+@app.before_request
+def set_script_root():
+    from flask import request
+    script_name = request.environ.get('SCRIPT_NAME', '')
+    if script_name:
+        app.config['APPLICATION_ROOT'] = script_name
+
+# Контекстный процессор для добавления префикса в шаблоны
+@app.context_processor
+def inject_script_root():
+    from flask import request
+    try:
+        # Получаем префикс из environ (устанавливается middleware из заголовка X-Script-Name от Nginx)
+        # или из переменной окружения FORCE_SCRIPT_NAME
+        script_name = request.environ.get('SCRIPT_NAME', '')
+        
+        # Логирование для отладки (только на dev сервере)
+        if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('PORT') == '5001':
+            logger.debug(f"inject_script_root: SCRIPT_NAME={script_name}, HTTP_X_SCRIPT_NAME={request.environ.get('HTTP_X_SCRIPT_NAME', '')}")
+        
+        # Префикс устанавливается ТОЛЬКО через:
+        # 1. Заголовок X-Script-Name от Nginx (на сервере)
+        # 2. Переменную окружения FORCE_SCRIPT_NAME (для явного указания)
+        # Локально (без заголовка и без FORCE_SCRIPT_NAME) префикс будет пустым
+    except RuntimeError:
+        # Если request context недоступен, возвращаем пустую строку
+        script_name = ''
+    return dict(script_root=script_name, base_path=script_name)
 
 # Настройки email (переопределяем для локальной разработки)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'

@@ -1104,6 +1104,12 @@
     {% endif %}
     
     <script>
+    // Инициализация базового пути из шаблона (передается через контекстный процессор Flask)
+    // Это нужно для работы с префиксом /new_dev на dev сервере
+    if (typeof window.BASE_PATH === 'undefined') {
+        window.BASE_PATH = '{{ base_path|default("") }}';
+    }
+    
     // Функция для получения CSRF токена
     function getCSRFToken() {
         const token = document.querySelector('meta[name="csrf-token"]');
@@ -1282,7 +1288,14 @@
     
     // Функция для определения номера страницы по URL
     function getPageNumber() {
-        const path = window.location.pathname;
+        let path = window.location.pathname;
+        
+        // Убираем префикс BASE_PATH (например, /new_dev) если он есть
+        const basePath = window.BASE_PATH || '';
+        if (basePath && path.startsWith(basePath)) {
+            path = path.substring(basePath.length) || '/';
+        }
+        
         const pageMap = {
             '/': 1,
             '/index': 1,
@@ -1339,6 +1352,11 @@
         
         if (path.startsWith('/tournament-view/')) {
             return 18; // Просмотр турнира участником
+        }
+        
+        // Отладочный вывод (можно убрать после проверки)
+        if (path === '/system-admin-dashboard' || path.startsWith('/system-admin-dashboard')) {
+            return 9; // Системная административная панель
         }
         
         // Если не найдено, возвращаем 0

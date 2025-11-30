@@ -254,25 +254,43 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
     
     # Полностью очищаем match_log для этого турнира через raw SQL
     if match_ids:
-        db.session.execute(text("DELETE FROM match_log WHERE match_id IN :match_ids"), 
-                          {"match_ids": match_ids})
+        from sqlalchemy import bindparam
+        # Используем bindparam для каждого ID
+        params = {f'id_{i}': match_id for i, match_id in enumerate(match_ids)}
+        placeholders = ','.join([f':id_{i}' for i in range(len(match_ids))])
+        db.session.execute(text(f"DELETE FROM match_log WHERE match_id IN ({placeholders})"), params)
         logger.info(f"Очищены все записи match_log для {len(match_ids)} матчей турнира {tournament.id}")
+    
+    # Удаляем связанные записи rally
+    if match_ids:
+        from sqlalchemy import bindparam
+        # Используем bindparam для каждого ID
+        params = {f'id_{i}': match_id for i, match_id in enumerate(match_ids)}
+        placeholders = ','.join([f':id_{i}' for i in range(len(match_ids))])
+        db.session.execute(text(f"DELETE FROM rally WHERE match_id IN ({placeholders})"), params)
+        logger.info(f"Удалено записей rally для {len(match_ids)} матчей турнира {tournament.id}")
     
     # Удаляем матчи через raw SQL
     if match_ids:
-        db.session.execute(text("DELETE FROM match WHERE id IN :match_ids"), 
-                          {"match_ids": match_ids})
+        from sqlalchemy import bindparam
+        # Используем bindparam для каждого ID
+        params = {f'id_{i}': match_id for i, match_id in enumerate(match_ids)}
+        placeholders = ','.join([f':id_{i}' for i in range(len(match_ids))])
+        db.session.execute(text(f"DELETE FROM match WHERE id IN ({placeholders})"), params)
         logger.info(f"Удалено {len(match_ids)} существующих матчей через raw SQL")
     
     # Коммитим удаление, чтобы избежать проблем с autoflush
     db.session.commit()
     
     # Создаем круговое расписание по правильному алгоритму
-    rounds = create_round_robin_schedule(participants)
-    
-    logger.info(f"Создано {len(rounds)} туров для {len(participants)} участников")
-    for i, round_matches in enumerate(rounds, 1):
-        logger.info(f"Тур {i}: {[f'{m[0].name} vs {m[1].name}' for m in round_matches]}")
+    try:
+        rounds = create_round_robin_schedule(participants)
+        logger.info(f"Создано {len(rounds)} туров для {len(participants)} участников")
+        for i, round_matches in enumerate(rounds, 1):
+            logger.info(f"Тур {i}: {[f'{m[0].name} vs {m[1].name}' for m in round_matches]}")
+    except Exception as e:
+        logger.error(f"Ошибка при создании кругового расписания: {e}", exc_info=True)
+        raise
     
     # Проверяем на дубликаты
     all_matches = []
@@ -410,6 +428,15 @@ def create_smart_schedule(tournament, participants, Match, db, preserve_results=
             current_date += timedelta(days=1)
             current_time = start_time
     
+    # Коммитим все созданные матчи
+    try:
+        db.session.commit()
+        logger.info(f"Успешно создано и сохранено {len(scheduled_matches)} матчей")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Ошибка при сохранении матчей в БД: {e}", exc_info=True)
+        raise
+    
     return len(scheduled_matches)
 
 
@@ -475,7 +502,7 @@ def distribute_matches_to_courts(round_matches, num_courts):
 
 def add_minutes_to_time(time_obj, minutes):
     """Добавляет минуты к времени"""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, date
     dt = datetime.combine(date.today(), time_obj)
     new_dt = dt + timedelta(minutes=minutes)
     return new_dt.time()
@@ -894,13 +921,17 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             from models.match_log import MatchLog
             MatchLog.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 2. Удаляем матчи
+            # 2. Удаляем розыгрыши (Rally)
+            from models.rally import Rally
+            Rally.query.filter_by(tournament_id=tournament_id).delete()
+            
+            # 3. Удаляем матчи
             Match.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 3. Удаляем участников
+            # 4. Удаляем участников
             Participant.query.filter_by(tournament_id=tournament_id).delete()
             
-            # 4. Удаляем турнир
+            # 5. Удаляем турнир
             tournament_name = tournament.name
             db.session.delete(tournament)
             
@@ -2802,30 +2833,54 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if len(participants) < 2:
                 return jsonify({'success': False, 'error': 'Для составления расписания нужно минимум 2 участника'}), 400
             
-            # Удаляем существующие матчи
+            # Удаляем существующие матчи и связанные записи
             existing_matches = Match.query.filter_by(tournament_id=tournament_id).all()
+            match_ids = [match.id for match in existing_matches]
+            
+            # Удаляем связанные записи rally
+            if match_ids:
+                from sqlalchemy import text, bindparam
+                # Используем bindparam для каждого ID
+                params = {f'id_{i}': match_id for i, match_id in enumerate(match_ids)}
+                placeholders = ','.join([f':id_{i}' for i in range(len(match_ids))])
+                db.session.execute(text(f"DELETE FROM rally WHERE match_id IN ({placeholders})"), params)
+                logger.info(f"Удалено записей rally для {len(match_ids)} матчей")
+            
+            # Удаляем матчи
             for match in existing_matches:
                 db.session.delete(match)
             
-            # Создаем новое расписание с сохранением результатов
-            matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
+            # Коммитим удаление перед созданием нового расписания
+            db.session.commit()
             
-            if matches_created > 0:
-                # Изменяем статус турнира на "Регистрация участников"
-                tournament.status = 'Регистрация участников'
-                db.session.commit()
-                logger.info(f"Расписание составлено для турнира {tournament.name}: создано {matches_created} матчей, статус изменен на 'Регистрация участников'")
-                return jsonify({
-                    'success': True, 
-                    'message': f'Расписание успешно составлено! Создано {matches_created} матчей. Статус турнира изменен на "Регистрация участников".'
-                })
-            else:
-                return jsonify({'success': False, 'error': 'Не удалось создать расписание'}), 500
+            # Создаем новое расписание с сохранением результатов
+            try:
+                matches_created = create_smart_schedule(tournament, participants, Match, db, preserve_results=True)
+                logger.info(f"create_smart_schedule вернула: {matches_created} матчей")
+                
+                if matches_created > 0:
+                    # Изменяем статус турнира на "Регистрация участников"
+                    tournament.status = 'Регистрация участников'
+                    db.session.commit()
+                    logger.info(f"Расписание составлено для турнира {tournament.name}: создано {matches_created} матчей, статус изменен на 'Регистрация участников'")
+                    return jsonify({
+                        'success': True, 
+                        'message': f'Расписание успешно составлено! Создано {matches_created} матчей. Статус турнира изменен на "Регистрация участников".'
+                    })
+                else:
+                    logger.warning(f"create_smart_schedule вернула 0 матчей для турнира {tournament_id}")
+                    return jsonify({'success': False, 'error': 'Не удалось создать расписание: функция вернула 0 матчей'}), 500
+            except Exception as schedule_error:
+                db.session.rollback()
+                error_msg = str(schedule_error)
+                logger.error(f"Ошибка в create_smart_schedule: {error_msg}", exc_info=True)
+                raise  # Пробрасываем ошибку дальше для обработки в общем блоке except
                 
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Ошибка при составлении расписания: {e}")
-            return jsonify({'success': False, 'error': 'Ошибка при составлении расписания'}), 500
+            error_message = str(e)
+            logger.error(f"Ошибка при составлении расписания: {e}", exc_info=True)
+            return jsonify({'success': False, 'error': f'Ошибка при составлении расписания: {error_message}'}), 500
 
 
     @app.route('/api/tournaments/<int:tournament_id>/add-late-participant', methods=['POST'])
@@ -3839,10 +3894,15 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             score2 = data.get('score2', 0)
             set_number = data.get('set_number', 1)
             
-            # Находим матч
+            # Находим матч с загрузкой турнира
             match = Match.query.get(match_id)
             if not match:
                 return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Загружаем турнир
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
             
             # Обновляем счет в соответствующем сете
             if set_number == 1:
@@ -3855,11 +3915,86 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 match.set3_score1 = score1
                 match.set3_score2 = score2
             
+            # Пересчитываем выигранные сеты на основе текущих счетов
+            if tournament:
+                sets_won_1 = 0
+                sets_won_2 = 0
+                sport_type = tournament.sport_type.lower() if tournament.sport_type else ''
+                points_to_win = tournament.points_to_win or 21
+                
+                # Определяем правила для бадминтона
+                if 'бадминтон' in sport_type or 'badminton' in sport_type:
+                    max_score = 30
+                    # Проверяем каждый сет
+                    for set_num in [1, 2, 3]:
+                        if set_num == 1:
+                            s1, s2 = match.set1_score1, match.set1_score2
+                        elif set_num == 2:
+                            s1, s2 = match.set2_score1, match.set2_score2
+                        else:
+                            s1, s2 = match.set3_score1, match.set3_score2
+                        
+                        if s1 is not None and s2 is not None:
+                            # Логирование для отладки
+                            logger.info(f"[auto-save-score] Сет {set_num}: s1={s1}, s2={s2}, points_to_win={points_to_win}, max_score={max_score}")
+                            
+                            # Правило 30 очков
+                            if s1 >= max_score:
+                                sets_won_1 += 1
+                                logger.info(f"[auto-save-score] Сет {set_num}: participant1 выиграл по правилу 30 очков (s1={s1})")
+                            elif s2 >= max_score:
+                                sets_won_2 += 1
+                                logger.info(f"[auto-save-score] Сет {set_num}: participant2 выиграл по правилу 30 очков (s2={s2})")
+                            # Правило 21 очко с разницей >= 2
+                            elif s1 >= points_to_win and s1 - s2 >= 2:
+                                sets_won_1 += 1
+                                logger.info(f"[auto-save-score] Сет {set_num}: participant1 выиграл (s1={s1}, s2={s2}, разница={s1-s2})")
+                            elif s2 >= points_to_win and s2 - s1 >= 2:
+                                sets_won_2 += 1
+                                logger.info(f"[auto-save-score] Сет {set_num}: participant2 выиграл (s1={s1}, s2={s2}, разница={s2-s1})")
+                            else:
+                                logger.info(f"[auto-save-score] Сет {set_num}: сет не завершён (s1={s1}, s2={s2})")
+                else:
+                    # Для других видов спорта
+                    for set_num in [1, 2, 3]:
+                        if set_num == 1:
+                            s1, s2 = match.set1_score1, match.set1_score2
+                        elif set_num == 2:
+                            s1, s2 = match.set2_score1, match.set2_score2
+                        else:
+                            s1, s2 = match.set3_score1, match.set3_score2
+                        
+                        if s1 is not None and s2 is not None:
+                            if s1 >= points_to_win and s1 - s2 >= 2:
+                                sets_won_1 += 1
+                            elif s2 >= points_to_win and s2 - s1 >= 2:
+                                sets_won_2 += 1
+                
+                # Обновляем выигранные сеты
+                match.sets_won_1 = sets_won_1
+                match.sets_won_2 = sets_won_2
+                
+                # Обновляем счёт матча
+                match.score = f"{sets_won_1}:{sets_won_2}"
+                
+                # Логирование для отладки
+                logger.info(f"[auto-save-score] Матч {match_id}, сет {set_number}: set1_score1={match.set1_score1}, set1_score2={match.set1_score2}, sets_won_1={sets_won_1}, sets_won_2={sets_won_2}, score={match.score}")
+                
+                # Определяем статус матча
+                sets_to_win = tournament.sets_to_win or 2
+                if sets_won_1 >= sets_to_win or sets_won_2 >= sets_to_win:
+                    if match.status != 'завершен':
+                        match.status = 'завершен'
+                        logger.info(f"[auto-save-score] Матч {match_id} завершен: {sets_won_1}:{sets_won_2}")
+                elif match.status not in ['в_процессе', 'играют', 'завершен']:
+                    match.status = 'в_процессе'
+            
             # Устанавливаем реальное время начала матча при первом сохранении счета
             # Используем локальное время для учета часового пояса пользователя
             if not match.actual_start_time:
                 match.actual_start_time = datetime.now()
-                match.status = 'в_процессе'
+                if match.status not in ['в_процессе', 'играют', 'завершен']:
+                    match.status = 'в_процессе'
                 logger.info(f"[РЕАЛЬНОЕ ВРЕМЯ] Начало матча {match_id} (первое действие): {match.actual_start_time}")
             
             # Обновляем время последнего изменения
@@ -3868,8 +4003,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             # Сохраняем изменения
             db.session.commit()
             
-            logger.info(f"Автоматически сохранен счет для матча {match_id}, сет {set_number}: {score1}:{score2}")
-            return jsonify({'success': True, 'message': f'Счет сохранен: {score1}:{score2}'})
+            logger.info(f"Автоматически сохранен счет для матча {match_id}, сет {set_number}: {score1}:{score2}, sets_won: {match.sets_won_1}:{match.sets_won_2}")
+            return jsonify({'success': True, 'message': f'Счет сохранен: {score1}:{score2}', 'sets_won': {'sets_won_1': match.sets_won_1, 'sets_won_2': match.sets_won_2}})
             
         except Exception as e:
             db.session.rollback()

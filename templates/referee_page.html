@@ -1369,6 +1369,11 @@
             </button>
             <div class="score score-right" id="scoreRight">0</div>
         </div>
+        <!-- Временное отображение swap_count и teamsSwapped для отладки -->
+        <div id="swapCountDisplay" style="position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 15px; border-radius: 5px; font-size: 18px; font-weight: bold; z-index: 10000;">
+            swap_count: <span id="swapCountValue">0</span><br>
+            teamsSwapped: <span id="teamsSwappedValue">false</span>
+        </div>
         <!-- Кнопка Back для режима просмотра -->
         <button class="back-btn-view" onclick="handleBack()" title="Назад" style="display: none;">
             <i class="fas fa-arrow-left"></i>
@@ -1493,6 +1498,8 @@
         // Переменные
         let scoreLeft = 0;
         let scoreRight = 0;
+        let teamsSwapped = false; // Флаг для отслеживания, были ли команды поменяны местами
+        let swap_count = 0; // Счётчик смен половин корта (инициализируется при открытии страницы для сета)
         let gameHistory = [];
         let shuttlecockPosition = 'bottom_left'; // Позиция воланчика
         let isViewMode = false;
@@ -1520,7 +1527,9 @@
             gameHistory.push({
                 scoreLeft: scoreLeft,
                 scoreRight: scoreRight,
-                shuttlecockPosition: shuttlecockPosition
+                swap_count: swap_count,
+                shuttlecockPosition: shuttlecockPosition,
+                teamsSwapped: teamsSwapped
             });
             // Ограничиваем историю 50 записями
             if (gameHistory.length > 50) {
@@ -1545,22 +1554,87 @@
             }
             
             // Получаем текущий счёт
-            // В режиме просмотра команды отражены визуально, но в базе данных они остаются в исходном порядке
-            // score1 в БД = левая команда (participant1)
-            // score2 в БД = правая команда (participant2)
+            // ВАЖНО: Логика записи счёта:
+            //        - Если слева синий цвет → Участнику 1 (participant1, score1) записать счёт с левой половины корта
+            //        - Если слева красный цвет → Участнику 2 (participant2, score2) записать счёт с левой половины корта
+            //        - Если справа синий цвет → Участнику 1 (participant1, score1) записать счёт с правой половины корта
+            //        - Если справа красный цвет → Участнику 2 (participant2, score2) записать счёт с правой половины корта
+            //        Для страницы "Демонстрация" или "Просмотр" (view-mode) - наоборот, так как это зеркальная страница
+            
+            // Определяем, какой счёт синий, а какой красный по цвету на экране
+            const scoreLeftEl = document.getElementById('scoreLeft');
+            const scoreRightEl = document.getElementById('scoreRight');
+            
+            if (!scoreLeftEl || !scoreRightEl) {
+                console.error('[Referee] ❌ Элементы счёта не найдены');
+                return;
+            }
+            
+            // Проверяем классы элементов напрямую (более надёжный способ)
+            // score-left = синий цвет (#0066ff), score-right = красный цвет (#ff3333)
+            const leftScoreClasses = scoreLeftEl.className || '';
+            const rightScoreClasses = scoreRightEl.className || '';
+            
+            // Получаем цвет счёта с экрана (для логирования)
+            const leftScoreColor = window.getComputedStyle(scoreLeftEl).color;
+            const rightScoreColor = window.getComputedStyle(scoreRightEl).color;
+            
+            // ВАЖНО: Классы элементов НЕ меняются при переключении команд!
+            // scoreLeft всегда имеет класс 'score-left' (синий)
+            // scoreRight всегда имеет класс 'score-right' (красный)
+            // Но при переключении команд значения scoreLeft и scoreRight меняются местами!
+            
+            // Определяем режим просмотра (зеркальная страница)
+            const isViewMode = document.body.classList.contains('view-mode');
+            
+            // Определяем счёт для participant1 (score1) и participant2 (score2)
+            // Используем swap_count для определения соответствия
+            // Если swap_count % 2 == 0: левый счёт → participant1, правый → participant2
+            // Если swap_count % 2 == 1: правый счёт → participant1, левый → participant2
             let score1, score2;
             
-            if (document.body.classList.contains('view-mode')) {
-                // В режиме просмотра команды визуально поменялись местами:
-                // scoreLeft отображает правую команду (participant2) -> score2 в БД
-                // scoreRight отображает левую команду (participant1) -> score1 в БД
-                score1 = scoreRight;  // В режиме просмотра правый счёт = левая команда в БД
-                score2 = scoreLeft;   // В режиме просмотра левый счёт = правая команда в БД
+            if (swap_count % 2 == 0) {
+                // Чётное количество смен: левый счёт → participant1, правый → participant2
+                score1 = scoreLeft;
+                score2 = scoreRight;
             } else {
-                // В обычном режиме счёт соответствует командам напрямую
-                score1 = scoreLeft;   // Левая команда (participant1)
-                score2 = scoreRight;  // Правая команда (participant2)
+                // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                score1 = scoreRight;
+                score2 = scoreLeft;
             }
+            
+            // Получаем имена для логирования
+            const topLeftName = document.getElementById('top_left_player_input')?.value || '';
+            const bottomLeftName = document.getElementById('bottom_left_player_input')?.value || '';
+            const topRightName = document.getElementById('name_top_right')?.value || '';
+            const bottomRightName = document.getElementById('name_bottom_right')?.value || '';
+            
+            let leftTeamName = topLeftName;
+            if (bottomLeftName && bottomLeftName !== topLeftName) {
+                leftTeamName = `${bottomLeftName} - ${topLeftName}`;
+            } else if (!leftTeamName) {
+                leftTeamName = bottomLeftName;
+            }
+            
+            let rightTeamName = topRightName;
+            if (bottomRightName && bottomRightName !== topRightName) {
+                rightTeamName = `${topRightName} - ${bottomRightName}`;
+            } else if (!rightTeamName) {
+                rightTeamName = bottomRightName;
+            }
+            
+            // Логирование для отладки
+            console.log('[Referee] 💾 Сохранение счёта в БД:', {
+                swap_count,
+                swap_count_mod_2: swap_count % 2,
+                teamsSwapped,
+                'Текущий счёт на экране': `scoreLeft = ${scoreLeft}, scoreRight = ${scoreRight}`,
+                'Команды на экране': `Слева: ${leftTeamName}, Справа: ${rightTeamName}`,
+                'Логика применения': swap_count % 2 == 0 ? 'Чётное: score1=scoreLeft, score2=scoreRight' : 'Нечётное: score1=scoreRight, score2=scoreLeft',
+                'Сохранение в БД': `score1 (participant1) = ${score1}, score2 (participant2) = ${score2}`,
+                'Проверка': swap_count % 2 == 1 ? `При swap_count=1: score1 должен быть правым (${scoreRight}), score2 должен быть левым (${scoreLeft})` : 'OK',
+                'Победитель': score1 > score2 ? 'participant1' : score2 > score1 ? 'participant2' : 'Ничья'
+            });
             
             // Получаем CSRF токен
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -1575,6 +1649,20 @@
                 score2: score2,
                 set_number: parseInt(setNumber) || 1
             };
+            
+            // Детальное логирование перед отправкой
+            console.log('[Referee] 📤 Отправка данных в БД:', {
+                swap_count,
+                swap_count_mod_2: swap_count % 2,
+                'scoreLeft на экране': scoreLeft,
+                'scoreRight на экране': scoreRight,
+                'score1 (participant1)': score1,
+                'score2 (participant2)': score2,
+                'Проверка логики': swap_count % 2 == 1 ? 
+                    `При swap_count=1: score1 должен быть scoreRight (${scoreRight}), score2 должен быть scoreLeft (${scoreLeft})` :
+                    `При swap_count=0: score1 должен быть scoreLeft (${scoreLeft}), score2 должен быть scoreRight (${scoreRight})`,
+                'Отправляемые данные': data
+            });
             
             // Отправляем запрос на сохранение
             fetch(`/api/matches/${matchId}/auto-save-score`, {
@@ -1631,7 +1719,8 @@
                                     scoreRight: currentScoreRight,
                                     participant1: participant1Name,
                                     participant2: participant2Name,
-                                    tournament_name: urlParams.get('tournament') || ''
+                                    tournament_name: urlParams.get('tournament') || '',
+                                    swap_count: swap_count || 0  // Добавляем swap_count для правильной обработки
                                 }
                             };
                             
@@ -1672,9 +1761,55 @@
             });
         }
         
+        // Функция для определения правильной позиции воланчика на основе счета
+        function calculateShuttlecockPositionFromScore() {
+            // Алгоритм определения позиции метки подачи:
+            // - Левая команда: чётное количество очков → bottom_left, нечётное → top_left
+            // - Правая команда: чётное количество очков → top_right, нечётное → bottom_right
+            
+            // Определяем, какая команда должна подавать
+            // Если общий счет (scoreLeft + scoreRight) четный, то подает правая команда
+            // Если нечетный, то подает левая команда
+            const totalScore = scoreLeft + scoreRight;
+            const isRightTeamServing = (totalScore % 2 === 0);
+            
+            if (isRightTeamServing) {
+                // Подает правая команда
+                if (scoreRight % 2 === 0) {
+                    shuttlecockPosition = 'top_right'; // Чётное → верхний правый
+                } else {
+                    shuttlecockPosition = 'bottom_right'; // Нечётное → нижний правый
+                }
+            } else {
+                // Подает левая команда
+                if (scoreLeft % 2 === 0) {
+                    shuttlecockPosition = 'bottom_left'; // Чётное → нижний левый
+                } else {
+                    shuttlecockPosition = 'top_left'; // Нечётное → верхний левый
+                }
+            }
+            
+            console.log('[Referee] 🎯 Позиция воланчика рассчитана:', {
+                scoreLeft,
+                scoreRight,
+                totalScore,
+                isRightTeamServing,
+                shuttlecockPosition
+            });
+        }
+        
         function updateScore() {
             document.getElementById('scoreLeft').textContent = scoreLeft;
             document.getElementById('scoreRight').textContent = scoreRight;
+            // Временное отображение swap_count и teamsSwapped для отладки
+            const swapCountElement = document.getElementById('swapCountValue');
+            if (swapCountElement) {
+                swapCountElement.textContent = swap_count + ' (mod 2: ' + (swap_count % 2) + ')';
+            }
+            const teamsSwappedElement = document.getElementById('teamsSwappedValue');
+            if (teamsSwappedElement) {
+                teamsSwappedElement.textContent = teamsSwapped ? 'true' : 'false';
+            }
             updateShuttlecockPosition();
             checkVictory();
             
@@ -1695,56 +1830,82 @@
             const pointsToWin = 21; // Можно сделать настраиваемым
             const maxPoints = 30; // Максимальный счёт для бадминтона
             
-            // В режиме Просмотр команды и счёт отражены зеркально
-            // Нужно использовать исходные значения счёта для правильного определения победителя
-            let actualScoreLeft, actualScoreRight;
+            // ВАЖНО: Логика определения счёта:
+            //        - Если слева синий цвет → Участнику 1 (participant1, score1) счёт с левой половины корта
+            //        - Если слева красный цвет → Участнику 2 (participant2, score2) счёт с левой половины корта
+            //        - Если справа синий цвет → Участнику 1 (participant1, score1) счёт с правой половины корта
+            //        - Если справа красный цвет → Участнику 2 (participant2, score2) счёт с правой половины корта
+            //        Для страницы "Демонстрация" или "Просмотр" (view-mode) - наоборот
             
-            if (isViewMode) {
-                // В режиме Просмотр: отражённый левый счёт = исходный правый счёт
-                // отражённый правый счёт = исходный левый счёт
-                actualScoreLeft = scoreRight;  // Исходный левый (Синяя команда)
-                actualScoreRight = scoreLeft;  // Исходный правый (Красная команда)
-            } else {
-                // В обычном режиме используем текущие значения
-                actualScoreLeft = scoreLeft;
-                actualScoreRight = scoreRight;
+            // Определяем, какой счёт синий, а какой красный по цвету на экране
+            const scoreLeftEl = document.getElementById('scoreLeft');
+            const scoreRightEl = document.getElementById('scoreRight');
+            
+            if (!scoreLeftEl || !scoreRightEl) {
+                console.error('[Referee] ❌ Элементы счёта не найдены в checkVictory');
+                return false;
             }
             
-            const scoreDiff = Math.abs(actualScoreLeft - actualScoreRight);
+            // Проверяем классы элементов напрямую (более надёжный способ)
+            // score-left = синий цвет (#0066ff), score-right = красный цвет (#ff3333)
+            const leftScoreClasses = scoreLeftEl.className || '';
+            const rightScoreClasses = scoreRightEl.className || '';
+            
+            // Получаем цвет счёта с экрана (для логирования)
+            const leftScoreColor = window.getComputedStyle(scoreLeftEl).color;
+            const rightScoreColor = window.getComputedStyle(scoreRightEl).color;
+            
+            // Используем swap_count для определения соответствия
+            // Если swap_count % 2 == 0: левый счёт → participant1 (синий), правый → participant2 (красный)
+            // Если swap_count % 2 == 1: правый счёт → participant1 (синий), левый → participant2 (красный)
+            let blueTeamScore, redTeamScore; // blueTeamScore = participant1, redTeamScore = participant2
+            
+            if (swap_count % 2 == 0) {
+                // Чётное количество смен: левый счёт → participant1 (синий), правый → participant2 (красный)
+                blueTeamScore = scoreLeft;
+                redTeamScore = scoreRight;
+            } else {
+                // Нечётное количество смен: правый счёт → participant1 (синий), левый → participant2 (красный)
+                blueTeamScore = scoreRight;
+                redTeamScore = scoreLeft;
+            }
+            
+            const scoreDiff = Math.abs(blueTeamScore - redTeamScore);
             
             console.log('checkVictory: Проверка победы:', { 
-                isViewMode, 
+                swap_count,
+                swap_count_mod_2: swap_count % 2,
                 scoreLeft, 
                 scoreRight, 
-                actualScoreLeft, 
-                actualScoreRight, 
+                blueTeamScore,
+                redTeamScore,
                 scoreDiff 
             });
             
             // Специальное условие для бадминтона: если одна сторона набрала 30 очков - победа
             // (независимо от счёта соперника, который может быть 29 или 28)
-            if (actualScoreLeft >= maxPoints) {
+            if (blueTeamScore >= maxPoints) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
-                console.log(`Победа Синей команды по правилу 30 очков: ${actualScoreLeft}:${actualScoreRight}`);
+                console.log(`Победа Синей команды по правилу 30 очков: ${blueTeamScore}:${redTeamScore}`);
                 return true;
             }
             
-            if (actualScoreRight >= maxPoints) {
+            if (redTeamScore >= maxPoints) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
-                console.log(`Победа Красной команды по правилу 30 очков: ${actualScoreLeft}:${actualScoreRight}`);
+                console.log(`Победа Красной команды по правилу 30 очков: ${blueTeamScore}:${redTeamScore}`);
                 return true;
             }
             
             // Обычное условие победы: набрать нужное количество очков И разница больше 1
-            if (actualScoreLeft >= pointsToWin && scoreDiff > 1) {
+            if (blueTeamScore >= pointsToWin && scoreDiff > 1) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Синей команды!', scoreLeft, scoreRight);
                 return true;
             }
             
-            if (actualScoreRight >= pointsToWin && scoreDiff > 1) {
+            if (redTeamScore >= pointsToWin && scoreDiff > 1) {
                 // Показываем сообщение о победе
                 showVictoryMessage('Победа Красной команды!', scoreLeft, scoreRight);
                 return true;
@@ -1867,7 +2028,7 @@
         
         // Функция для перемещения индикатора подачи при выигрыше очка
         // Функция для сохранения розыгрыша в базу данных
-        async function saveRallyToDatabase(scoringTeam, previousScoreLeft, previousScoreRight, servingPositionBefore) {
+        async function saveRallyToDatabase(scoringTeam, previousScoreLeft, previousScoreRight, servingPositionBefore, playerNamesBeforeSwap) {
             // Получаем параметры из URL
             const urlParams = new URLSearchParams(window.location.search);
             const matchId = urlParams.get('match_id');
@@ -1875,8 +2036,19 @@
             
             // Если нет match_id, значит это не матч из турнира, не сохраняем
             if (!matchId || matchId === '') {
+                console.log('[Rally] ℹ️ Нет match_id, пропускаем сохранение розыгрыша');
                 return;
             }
+            
+            console.log('[Rally] 🔄 Начало сохранения розыгрыша:', {
+                matchId,
+                setNumber,
+                scoringTeam,
+                previousScoreLeft,
+                previousScoreRight,
+                servingPositionBefore,
+                playerNamesBeforeSwap
+            });
             
             try {
                 // Получаем данные матча для tournament_id и court_number
@@ -1899,11 +2071,52 @@
                 // Проверка типа спорта выполняется на сервере в API endpoint
                 // Здесь просто сохраняем данные, сервер проверит, что это бадминтон
                 
-                // Получаем имена игроков
-                const topLeftName = document.getElementById('top_left_player_input')?.value || '';
-                const bottomLeftName = document.getElementById('bottom_left_player_input')?.value || '';
-                const topRightName = document.getElementById('name_top_right')?.value || '';
-                const bottomRightName = document.getElementById('name_bottom_right')?.value || '';
+                // Получаем исходные имена участников из URL (до переключения команд)
+                const originalParticipant1 = urlParams.get('p1') || urlParams.get('team1_name') || '';
+                const originalParticipant2 = urlParams.get('p2') || urlParams.get('team2_name') || '';
+                
+                // Используем имена игроков ДО смены (если переданы), иначе получаем из полей ввода
+                // Это важно, так как swapPlayersInTeam может изменить имена в полях до сохранения розыгрыша
+                const topLeftName = playerNamesBeforeSwap?.topLeftName || document.getElementById('top_left_player_input')?.value || '';
+                const bottomLeftName = playerNamesBeforeSwap?.bottomLeftName || document.getElementById('bottom_left_player_input')?.value || '';
+                const topRightName = playerNamesBeforeSwap?.topRightName || document.getElementById('name_top_right')?.value || '';
+                const bottomRightName = playerNamesBeforeSwap?.bottomRightName || document.getElementById('name_bottom_right')?.value || '';
+                
+                // Определяем, где сейчас находится participant1 (синяя команда) и participant2 (красная команда)
+                // Формируем имена команд для сравнения
+                let leftTeamName = topLeftName;
+                if (bottomLeftName && bottomLeftName !== topLeftName) {
+                    leftTeamName = `${bottomLeftName} - ${topLeftName}`;
+                } else if (!leftTeamName) {
+                    leftTeamName = bottomLeftName;
+                }
+                
+                let rightTeamName = topRightName;
+                if (bottomRightName && bottomRightName !== topRightName) {
+                    rightTeamName = `${topRightName} - ${bottomRightName}`;
+                } else if (!rightTeamName) {
+                    rightTeamName = bottomRightName;
+                }
+                
+                // Используем swap_count для определения соответствия
+                // Если swap_count % 2 == 0: левый счёт → participant1, правый → participant2
+                // Если swap_count % 2 == 1: правый счёт → participant1, левый → participant2
+                let participant1Name, participant2Name; // participant1 = синий, participant2 = красный
+                let isParticipant1OnLeft, isParticipant1OnRight;
+                
+                if (swap_count % 2 == 0) {
+                    // Чётное количество смен: левый счёт → participant1, правый → participant2
+                    participant1Name = leftTeamName || originalParticipant1;
+                    participant2Name = rightTeamName || originalParticipant2;
+                    isParticipant1OnLeft = true;
+                    isParticipant1OnRight = false;
+                } else {
+                    // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                    participant1Name = rightTeamName || originalParticipant1;
+                    participant2Name = leftTeamName || originalParticipant2;
+                    isParticipant1OnLeft = false;
+                    isParticipant1OnRight = true;
+                }
                 
                 // Определяем подающего и принимающего на основе позиции относительно сетки
                 // Позиции относительно сетки:
@@ -1916,56 +2129,192 @@
                 let receiverName = '';
                 let servePosition = ''; // "слева" или "справа" относительно сетки
                 
-                if (servingPositionBefore === 'bottom_left') {
-                    // Подача из правого квадрата на левой стороне корта (правый квадрат относительно сетки)
-                    // Подаёт игрок из bottom_left, принимает игрок по диагонали (top_right)
-                    servePosition = 'справа';
-                    serverName = bottomLeftName || 'Игрок 1';
-                    receiverName = topRightName || 'Игрок 3';
-                } else if (servingPositionBefore === 'top_left') {
-                    // Подача из левого квадрата на левой стороне корта (левый квадрат относительно сетки)
-                    // Подаёт игрок из top_left, принимает игрок по диагонали (bottom_right)
-                    servePosition = 'слева';
-                    serverName = topLeftName || 'Игрок 1';
-                    receiverName = bottomRightName || 'Игрок 4';
+                // Определяем подающего и принимающего на основе позиции метки подачи (воланчика)
+                // Подающий - это игрок, рядом с именем которого расположена метка подачи
+                // Принимающий - это игрок, который стоит по диагонали к подающему
+                
+                // Определяем имя подающего игрока на основе позиции метки подачи
+                let serverPlayerName = '';
+                let receiverPlayerName = '';
+                
+                // Подающий - это игрок, рядом с именем которого находится метка подачи
+                // Принимающий - это игрок, который стоит по диагонали к подающему
+                // Диагональные пары:
+                // - top_left (левый верхний) ↔ bottom_right (правый нижний)
+                // - bottom_left (левый нижний) ↔ top_right (правый верхний)
+                if (servingPositionBefore === 'top_left') {
+                    serverPlayerName = topLeftName || '';
+                    // Принимающий - игрок по диагонали (bottom_right)
+                    receiverPlayerName = bottomRightName || '';
+                } else if (servingPositionBefore === 'bottom_left') {
+                    serverPlayerName = bottomLeftName || '';
+                    // Принимающий - игрок по диагонали (top_right)
+                    receiverPlayerName = topRightName || '';
                 } else if (servingPositionBefore === 'top_right') {
-                    // Подача из левого квадрата на правой стороне корта (левый квадрат относительно сетки)
-                    // Подаёт игрок из top_right, принимает игрок по диагонали (bottom_left)
-                    servePosition = 'слева';
-                    serverName = topRightName || 'Игрок 3';
-                    receiverName = bottomLeftName || 'Игрок 2';
+                    serverPlayerName = topRightName || '';
+                    // Принимающий - игрок по диагонали (bottom_left)
+                    receiverPlayerName = bottomLeftName || '';
                 } else if (servingPositionBefore === 'bottom_right') {
-                    // Подача из правого квадрата на правой стороне корта (правый квадрат относительно сетки)
-                    // Подаёт игрок из bottom_right, принимает игрок по диагонали (top_left)
-                    servePosition = 'справа';
-                    serverName = bottomRightName || 'Игрок 4';
-                    receiverName = topLeftName || 'Игрок 1';
-                } else {
-                    // Если позиция не определена, используем имена по умолчанию
-                    servePosition = '';
-                    serverName = topLeftName || 'Игрок 1';
-                    receiverName = topRightName || 'Игрок 2';
+                    serverPlayerName = bottomRightName || '';
+                    // Принимающий - игрок по диагонали (top_left)
+                    receiverPlayerName = topLeftName || '';
                 }
                 
-                // Добавляем информацию о позиции подачи к имени подающего
-                // Формат: "Имя - позиция" (без скобок, через дефис)
-                if (servePosition) {
-                    serverName = `${serverName} - ${servePosition}`;
+                // Если имена не определены, используем имена команд как fallback
+                if (!serverPlayerName) {
+                    if (servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_left') {
+                        serverPlayerName = leftTeamName || participant1Name || 'Игрок 1';
+                    } else if (servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right') {
+                        serverPlayerName = rightTeamName || participant2Name || 'Игрок 2';
+                    } else {
+                        serverPlayerName = participant1Name || 'Игрок 1';
+                    }
                 }
+                
+                if (!receiverPlayerName) {
+                    if (servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_left') {
+                        receiverPlayerName = rightTeamName || participant2Name || 'Игрок 2';
+                    } else if (servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right') {
+                        receiverPlayerName = leftTeamName || participant1Name || 'Игрок 1';
+                    } else {
+                        receiverPlayerName = participant2Name || 'Игрок 2';
+                    }
+                }
+                
+                // Определяем позицию подачи относительно сетки для добавления к имени подающего
+                // Алгоритм:
+                // - bottom_left (левый нижний) = правый квадрат относительно сетки → "- справа"
+                // - top_left (левый верхний) = левый квадрат относительно сетки → "- слева"
+                // - bottom_right (правый нижний) = правый квадрат относительно сетки → "- слева"
+                // - top_right (правый верхний) = левый квадрат относительно сетки → "- слева"
+                let servePositionText = '';
+                if (servingPositionBefore === 'bottom_left') {
+                    servePositionText = ' - справа';
+                } else if (servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_right' || servingPositionBefore === 'top_right') {
+                    servePositionText = ' - слева';
+                }
+                
+                // Проверяем, что имена игроков определены
+                if (!serverPlayerName || serverPlayerName.trim() === '') {
+                    console.warn('[Rally] ⚠️ Имя подающего не определено, используем fallback');
+                    if (servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_left') {
+                        serverPlayerName = leftTeamName || participant1Name || 'Игрок 1';
+                    } else {
+                        serverPlayerName = rightTeamName || participant2Name || 'Игрок 2';
+                    }
+                }
+                
+                if (!receiverPlayerName || receiverPlayerName.trim() === '') {
+                    console.warn('[Rally] ⚠️ Имя принимающего не определено, используем fallback');
+                    if (servingPositionBefore === 'top_left' || servingPositionBefore === 'bottom_left') {
+                        receiverPlayerName = rightTeamName || participant2Name || 'Игрок 2';
+                    } else {
+                        receiverPlayerName = leftTeamName || participant1Name || 'Игрок 1';
+                    }
+                }
+                
+                // Используем имена конкретных игроков (не команд) и добавляем позицию подачи
+                serverName = serverPlayerName + servePositionText;
+                receiverName = receiverPlayerName;
+                
+                console.log('[Rally] 🔍 Финальные имена:', {
+                    serverPlayerName,
+                    receiverPlayerName,
+                    serverName,
+                    receiverName,
+                    servePositionText,
+                    servingPositionBefore
+                });
                 
                 // Определяем, выиграл ли подающий
                 // Подающий выиграл, если команда, с которой он подавал, выиграла розыгрыш
+                // Используем уже определённые serverName и receiverName
+                // serverName соответствует participant1 (синяя) или participant2 (красная)
                 let serverWon = false;
-                if (servingPositionBefore === 'bottom_left' || servingPositionBefore === 'top_left') {
-                    // Подавал игрок с левой стороны корта
-                    serverWon = (scoringTeam === 'left');
-                } else if (servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right') {
-                    // Подавал игрок с правой стороны корта
-                    serverWon = (scoringTeam === 'right');
+                
+                // Определяем, какая команда выиграла розыгрыш (левая или правая сторона корта)
+                const leftTeamScored = (scoringTeam === 'left');
+                const rightTeamScored = (scoringTeam === 'right');
+                
+                // Определяем, кто подавал: participant1 (синяя) или participant2 (красная)
+                // Функция для нормализации имени (убираем пробелы, приводим к нижнему регистру)
+                const normalizeName = (name) => {
+                    if (!name) return '';
+                    return name.trim().toLowerCase().replace(/\s+/g, ' ');
+                };
+                
+                const normalizedServerName = normalizeName(serverName.split(' - ')[0]); // Убираем позицию из имени
+                const normalizedP1 = normalizeName(originalParticipant1);
+                const p1Parts = normalizedP1.split(' - ').map(p => p.trim()).filter(p => p);
+                const isServerParticipant1 = normalizedServerName === normalizedP1 || 
+                                            (p1Parts.length > 0 && p1Parts.some(part => normalizedServerName.includes(part)));
+                
+                // Определяем, на какой стороне корта находится participant1 (синяя)
+                const participant1OnLeft = isParticipant1OnLeft;
+                const participant1OnRight = isParticipant1OnRight;
+                
+                // Определяем, выиграл ли подающий
+                if (isServerParticipant1) {
+                    // Подавал participant1 (синяя)
+                    if (participant1OnLeft) {
+                        // participant1 (синяя) слева → выиграл, если выиграла левая сторона
+                        serverWon = leftTeamScored;
+                    } else if (participant1OnRight) {
+                        // participant1 (синяя) справа → выиграл, если выиграла правая сторона
+                        serverWon = rightTeamScored;
+                    }
+                } else {
+                    // Подавал participant2 (красная)
+                    if (participant1OnLeft) {
+                        // participant1 (синяя) слева → participant2 (красная) справа → выиграл, если выиграла правая сторона
+                        serverWon = rightTeamScored;
+                    } else if (participant1OnRight) {
+                        // participant1 (синяя) справа → participant2 (красная) слева → выиграл, если выиграла левая сторона
+                        serverWon = leftTeamScored;
+                    }
                 }
                 
-                // Формируем текущий счёт
-                const currentScore = `${scoreLeft}:${scoreRight}`;
+                // Формируем текущий счёт с учётом swap_count
+                // Если swap_count % 2 == 0: левый счёт → participant1, правый → participant2
+                // Если swap_count % 2 == 1: правый счёт → participant1, левый → participant2
+                let score1, score2;
+                
+                if (swap_count % 2 == 0) {
+                    // Чётное количество смен: левый счёт → participant1, правый → participant2
+                    score1 = scoreLeft;
+                    score2 = scoreRight;
+                } else {
+                    // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                    score1 = scoreRight;
+                    score2 = scoreLeft;
+                }
+                
+                const currentScore = `${score1}:${score2}`;
+                
+                // Определяем, с какой стороны была подача (для логирования)
+                const servedFromLeftSide = (servingPositionBefore === 'bottom_left' || servingPositionBefore === 'top_left');
+                const servedFromRightSide = (servingPositionBefore === 'top_right' || servingPositionBefore === 'bottom_right');
+                
+                // Логирование для отладки
+                console.log('[Rally] 💾 Сохранение розыгрыша:', {
+                    swap_count,
+                    swap_count_mod_2: swap_count % 2,
+                    'Счёт на экране': `${scoreLeft}:${scoreRight}`,
+                    'Счёт в БД': currentScore,
+                    'participant1Name': participant1Name,
+                    'participant2Name': participant2Name,
+                    'isParticipant1OnLeft': isParticipant1OnLeft,
+                    'isParticipant1OnRight': isParticipant1OnRight,
+                    scoringTeam,
+                    servedFromLeftSide,
+                    servedFromRightSide,
+                    serverWon,
+                    serverName,
+                    receiverName,
+                    'score1': score1,
+                    'score2': score2,
+                    'servingPositionBefore': servingPositionBefore
+                });
                 
                 // Получаем CSRF токен
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -1986,7 +2335,10 @@
                     score: currentScore
                 };
                 
-                const response = await fetch('/api/rallies', {
+                console.log('[Rally] 📤 Отправка данных розыгрыша:', rallyData);
+                
+                const basePath = window.BASE_PATH || '';
+                const response = await fetch(basePath + '/api/rallies', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1995,15 +2347,26 @@
                     body: JSON.stringify(rallyData)
                 });
                 
+                console.log('[Rally] 📡 Ответ сервера:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('[Rally] ❌ Ошибка HTTP:', response.status, errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
                 const result = await response.json();
                 if (result.success) {
                     console.log('[Rally] ✅ Розыгрыш сохранён:', result.rally);
                 } else {
                     console.warn('[Rally] ⚠️ Ошибка сохранения розыгрыша:', result.error);
+                    console.warn('[Rally] ⚠️ Отправленные данные:', rallyData);
                 }
                 
             } catch (error) {
                 console.error('[Rally] ❌ Ошибка при сохранении розыгрыша:', error);
+                console.error('[Rally] ❌ Stack trace:', error.stack);
+                console.error('[Rally] ❌ Данные, которые пытались отправить:', rallyData);
             }
         }
         
@@ -2025,11 +2388,11 @@
                     }
                 } else {
                     // Подавала правая команда - подача переходит на левую сторону
-                    // К правому игроку (top_left), если счет четный, к левому (bottom_left), если нечетный
+                    // Алгоритм: если у левой команды чётное количество очков → bottom_left, если нечётное → top_left
                     if (scoreLeft % 2 === 0) {
-                        shuttlecockPosition = 'top_left';
+                        shuttlecockPosition = 'bottom_left'; // Чётное → нижний левый
                     } else {
-                        shuttlecockPosition = 'bottom_left';
+                        shuttlecockPosition = 'top_left'; // Нечётное → верхний левый
                     }
                 }
             } else {
@@ -2045,11 +2408,11 @@
                     }
                 } else {
                     // Подавала левая команда - подача переходит на правую сторону
-                    // К правому игроку (top_right), если счет четный, к левому (bottom_right), если нечетный
+                    // Алгоритм: если у правой команды чётное количество очков → top_right, если нечётное → bottom_right
                     if (scoreRight % 2 === 0) {
-                        shuttlecockPosition = 'top_right';
+                        shuttlecockPosition = 'top_right'; // Чётное → верхний правый
                     } else {
-                        shuttlecockPosition = 'bottom_right';
+                        shuttlecockPosition = 'bottom_right'; // Нечётное → нижний правый
                     }
                 }
             }
@@ -2062,11 +2425,18 @@
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
             const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
+            // Сохраняем имена игроков ДО смены (swapPlayersInTeam может изменить их)
+            const playerNamesBeforeSwap = {
+                topLeftName: document.getElementById('top_left_player_input')?.value || '',
+                bottomLeftName: document.getElementById('bottom_left_player_input')?.value || '',
+                topRightName: document.getElementById('name_top_right')?.value || '',
+                bottomRightName: document.getElementById('name_bottom_right')?.value || ''
+            };
             scoreLeft++;
             handlePointScored('left');
             updateScore();
-            // Сохраняем розыгрыш
-            saveRallyToDatabase('left', previousScoreLeft, previousScoreRight, servingPositionBefore);
+            // Сохраняем розыгрыш с именами ДО смены
+            saveRallyToDatabase('left', previousScoreLeft, previousScoreRight, servingPositionBefore, playerNamesBeforeSwap);
         });
         
         // Увеличение счета правой команды
@@ -2076,11 +2446,18 @@
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
             const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
+            // Сохраняем имена игроков ДО смены (swapPlayersInTeam может изменить их)
+            const playerNamesBeforeSwap = {
+                topLeftName: document.getElementById('top_left_player_input')?.value || '',
+                bottomLeftName: document.getElementById('bottom_left_player_input')?.value || '',
+                topRightName: document.getElementById('name_top_right')?.value || '',
+                bottomRightName: document.getElementById('name_bottom_right')?.value || ''
+            };
             scoreRight++;
             handlePointScored('right');
             updateScore();
-            // Сохраняем розыгрыш
-            saveRallyToDatabase('right', previousScoreLeft, previousScoreRight, servingPositionBefore);
+            // Сохраняем розыгрыш с именами ДО смены
+            saveRallyToDatabase('right', previousScoreLeft, previousScoreRight, servingPositionBefore, playerNamesBeforeSwap);
         });
         
         // Увеличение счета при клике на цифры счёта (работает в режиме просмотра)
@@ -2090,11 +2467,18 @@
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
             const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
+            // Сохраняем имена игроков ДО смены (swapPlayersInTeam может изменить их)
+            const playerNamesBeforeSwap = {
+                topLeftName: document.getElementById('top_left_player_input')?.value || '',
+                bottomLeftName: document.getElementById('bottom_left_player_input')?.value || '',
+                topRightName: document.getElementById('name_top_right')?.value || '',
+                bottomRightName: document.getElementById('name_bottom_right')?.value || ''
+            };
             scoreLeft++;
             handlePointScored('left');
             updateScore();
-            // Сохраняем розыгрыш
-            saveRallyToDatabase('left', previousScoreLeft, previousScoreRight, servingPositionBefore);
+            // Сохраняем розыгрыш с именами ДО смены
+            saveRallyToDatabase('left', previousScoreLeft, previousScoreRight, servingPositionBefore, playerNamesBeforeSwap);
         });
         
         document.getElementById('scoreRight')?.addEventListener('click', function(e) {
@@ -2103,21 +2487,47 @@
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
             const servingPositionBefore = shuttlecockPosition; // Сохраняем позицию ДО изменения
+            // Сохраняем имена игроков ДО смены (swapPlayersInTeam может изменить их)
+            const playerNamesBeforeSwap = {
+                topLeftName: document.getElementById('top_left_player_input')?.value || '',
+                bottomLeftName: document.getElementById('bottom_left_player_input')?.value || '',
+                topRightName: document.getElementById('name_top_right')?.value || '',
+                bottomRightName: document.getElementById('name_bottom_right')?.value || ''
+            };
             scoreRight++;
             handlePointScored('right');
             updateScore();
-            // Сохраняем розыгрыш
-            saveRallyToDatabase('right', previousScoreLeft, previousScoreRight, servingPositionBefore);
+            // Сохраняем розыгрыш с именами ДО смены
+            saveRallyToDatabase('right', previousScoreLeft, previousScoreRight, servingPositionBefore, playerNamesBeforeSwap);
         });
         
         // Поменять команды местами
         function swapTeams() {
             saveGameState();
             
+            // Увеличиваем счётчик смен половин корта
+            swap_count++;
+            
+            // Переключаем флаг перестановки команд
+            const wasSwapped = teamsSwapped;
+            teamsSwapped = !teamsSwapped;
+            
             // Меняем счет местами
             const tempScore = scoreLeft;
             scoreLeft = scoreRight;
             scoreRight = tempScore;
+            
+            // Логирование для отладки
+            console.log('[Referee] 🔄 Переключение команд:', {
+                'swap_count': swap_count,
+                'swap_count % 2': swap_count % 2,
+                'Было переключено': wasSwapped,
+                'Стало переключено': teamsSwapped,
+                'Новый счёт': `${scoreLeft} : ${scoreRight}`,
+                'Примечание': swap_count % 2 == 0 ? 
+                    'Чётное: левый→p1, правый→p2' :
+                    'Нечётное: правый→p1, левый→p2'
+            });
             
             // Меняем имена по диагонали: top_left <-> bottom_right, bottom_left <-> top_right
             const tempNameTopLeft = document.getElementById('top_left_player_input').value;
@@ -2160,6 +2570,25 @@
             topRightName.style.setProperty('color', topLeftColor, 'important');
             bottomRightName.style.setProperty('color', bottomLeftColor, 'important');
             
+            // Переносим метку подачи на другую сторону по диагонали
+            // При переключении команд метка подачи должна перейти на противоположную сторону по диагонали:
+            // top_left → bottom_right
+            // bottom_left → top_right
+            // top_right → bottom_left
+            // bottom_right → top_left
+            if (shuttlecockPosition === 'top_left') {
+                shuttlecockPosition = 'bottom_right';
+            } else if (shuttlecockPosition === 'bottom_left') {
+                shuttlecockPosition = 'top_right';
+            } else if (shuttlecockPosition === 'top_right') {
+                shuttlecockPosition = 'bottom_left';
+            } else if (shuttlecockPosition === 'bottom_right') {
+                shuttlecockPosition = 'top_left';
+            }
+            
+            // Обновляем отображение метки подачи
+            updateShuttlecockPosition();
+            
             updateScore();
         }
         
@@ -2174,6 +2603,7 @@
             scoreLeft = previousState.scoreLeft;
             scoreRight = previousState.scoreRight;
             shuttlecockPosition = previousState.shuttlecockPosition;
+            teamsSwapped = previousState.teamsSwapped !== undefined ? previousState.teamsSwapped : false;
             updateScore();
         }
         
@@ -2412,6 +2842,7 @@
                 }
                 
                 // Отправляем счёт в родительское окно через postMessage
+                // Включаем swap_count для правильного определения соответствия счета участникам
                 const resultData = {
                     type: 'refereeResult',
                     result: {
@@ -2421,11 +2852,21 @@
                         scoreRight: currentScoreRight,
                         participant1: participant1Name,
                         participant2: participant2Name,
-                        tournament_name: urlParams.get('tournament') || ''
+                        tournament_name: urlParams.get('tournament') || '',
+                        swap_count: swap_count || 0  // Добавляем swap_count для правильной обработки
                     }
                 };
                 
                 console.log('[Referee] Отправляем результат в родительское окно:', resultData);
+                console.log('[Referee] 🔍 Детали отправки:', {
+                    swap_count: swap_count,
+                    'swap_count % 2': swap_count % 2,
+                    scoreLeft: currentScoreLeft,
+                    scoreRight: currentScoreRight,
+                    'Логика': swap_count % 2 == 1 ? 
+                        'При swap_count=1: правый счёт (' + currentScoreRight + ') → Участник 1, левый счёт (' + currentScoreLeft + ') → Участник 2' :
+                        'При swap_count=0: левый счёт (' + currentScoreLeft + ') → Участник 1, правый счёт (' + currentScoreRight + ') → Участник 2'
+                });
                 try {
                     window.opener.postMessage(resultData, window.location.origin);
                     console.log('[Referee] ✅ Результат отправлен успешно');
@@ -2642,6 +3083,14 @@
                 if (score1Param !== null && score2Param !== null) {
                     scoreLeft = parseInt(score1Param, 10) || 0;
                     scoreRight = parseInt(score2Param, 10) || 0;
+                    
+                    // Если счёт по умолчанию 21:21, устанавливаем 0:0
+                    if (scoreLeft === 21 && scoreRight === 21) {
+                        scoreLeft = 0;
+                        scoreRight = 0;
+                        console.log('[Referee] 🔄 Счёт 21:21 заменён на 0:0 (из URL параметров)');
+                    }
+                    
                     console.log('[Referee] Счёт загружен из URL параметров:', scoreLeft, ':', scoreRight);
                     updateScore();
                     return;
@@ -2688,6 +3137,13 @@
                     scoreLeft = currentScore1;
                     scoreRight = currentScore2;
                     
+                    // Если счёт по умолчанию 21:21, устанавливаем 0:0
+                    if (scoreLeft === 21 && scoreRight === 21) {
+                        scoreLeft = 0;
+                        scoreRight = 0;
+                        console.log(`[Referee] 🔄 Счёт 21:21 заменён на 0:0 для матча ${matchId}, сет ${setNum}`);
+                    }
+                    
                     console.log(`[Referee] ✅ Счёт загружен из БД для матча ${matchId}, сет ${setNum}:`, scoreLeft, ':', scoreRight);
                     updateScore();
                 } else {
@@ -2700,6 +3156,14 @@
                     if (score1Param !== null && score2Param !== null) {
                         scoreLeft = parseInt(score1Param, 10) || 0;
                         scoreRight = parseInt(score2Param, 10) || 0;
+                        
+                        // Если счёт по умолчанию 21:21, устанавливаем 0:0
+                        if (scoreLeft === 21 && scoreRight === 21) {
+                            scoreLeft = 0;
+                            scoreRight = 0;
+                            console.log('[Referee] 🔄 Счёт 21:21 заменён на 0:0 (из URL параметров, резервный вариант)');
+                        }
+                        
                         console.log('[Referee] Счёт загружен из URL параметров (резервный вариант):', scoreLeft, ':', scoreRight);
                         updateScore();
                     }
@@ -2714,6 +3178,14 @@
                 if (score1Param !== null && score2Param !== null) {
                     scoreLeft = parseInt(score1Param, 10) || 0;
                     scoreRight = parseInt(score2Param, 10) || 0;
+                    
+                    // Если счёт по умолчанию 21:21, устанавливаем 0:0
+                    if (scoreLeft === 21 && scoreRight === 21) {
+                        scoreLeft = 0;
+                        scoreRight = 0;
+                        console.log('[Referee] 🔄 Счёт 21:21 заменён на 0:0 (из URL параметров, резервный вариант)');
+                    }
+                    
                     console.log('[Referee] Счёт загружен из URL параметров (резервный вариант):', scoreLeft, ':', scoreRight);
                     updateScore();
                 }
@@ -2723,7 +3195,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Загружаем счёт из базы данных или URL параметров
             loadScoreFromDatabase().then(() => {
-                // После загрузки счёта обновляем отображение
+                // После загрузки счёта рассчитываем правильную позицию воланчика
+                calculateShuttlecockPositionFromScore();
+                // Обновляем отображение
                 updateScore();
             });
             

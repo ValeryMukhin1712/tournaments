@@ -411,7 +411,8 @@ function loadAllRallies() {
     emptyEl.style.display = 'none';
     tbody.innerHTML = '';
     
-    fetch('/api/admin/rallies', {
+    const basePath = window.BASE_PATH || '';
+    fetch(basePath + '/api/admin/rallies', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -515,7 +516,8 @@ function deleteMatchRallies(matchId, button) {
         button.disabled = true;
         
         // Получаем все розыгрыши матча
-        fetch(`/api/matches/${matchId}/rallies`, {
+        const basePath = window.BASE_PATH || '';
+        fetch(basePath + `/api/matches/${matchId}/rallies`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -526,7 +528,7 @@ function deleteMatchRallies(matchId, button) {
             if (data.success && data.rallies && data.rallies.length > 0) {
                 // Удаляем все розыгрыши
                 const deletePromises = data.rallies.map(rally => 
-                    fetch(`/api/rallies/${rally.id}`, {
+                    fetch(basePath + `/api/rallies/${rally.id}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
@@ -608,7 +610,8 @@ async function openRallyJournal(matchId) {
 // Загрузка журнала розыгрышей для администратора
 async function loadRallyJournalForAdmin(matchId) {
     try {
-        const response = await fetch(`/api/matches/${matchId}/rallies`);
+        const basePath = window.BASE_PATH || '';
+        const response = await fetch(basePath + `/api/matches/${matchId}/rallies`);
         const data = await response.json();
         
         const content = document.getElementById('rallyJournalContent');
@@ -691,7 +694,12 @@ async function loadRallyJournalForAdmin(matchId) {
                 if (rally.server_name) {
                     const serverParts = rally.server_name.split(' - ');
                     if (serverParts.length === 2 && (serverParts[1] === 'слева' || serverParts[1] === 'справа')) {
-                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: #6c757d; font-size: 80%;">- ${serverParts[1]}</span>`;
+                        // "справа" → ↗ (из нижнего левого в верхний правый) - розовая, толстая
+                        // "слева" → ↘ (из левого верхнего в правый нижний) - голубая, толстая
+                        const arrow = serverParts[1] === 'справа' ? '↗' : '↘';
+                        const arrowColor = serverParts[1] === 'справа' ? '#ff69b4' : '#00bfff'; // розовый для ↗, голубой для ↘
+                        // Увеличиваем толщину стрелки в 4 раза через множественные text-shadow
+                        serverNameHtml = `<strong style="font-style: italic;">${serverParts[0]}</strong> <span style="font-style: italic; color: ${arrowColor}; font-size: 80%; font-weight: 900; text-shadow: 1px 0 0 ${arrowColor}, -1px 0 0 ${arrowColor}, 0 1px 0 ${arrowColor}, 0 -1px 0 ${arrowColor}, 0.7px 0.7px 0 ${arrowColor}, -0.7px -0.7px 0 ${arrowColor}, 0.7px -0.7px 0 ${arrowColor}, -0.7px 0.7px 0 ${arrowColor}, 1px 0.5px 0 ${arrowColor}, -1px -0.5px 0 ${arrowColor}, 0.5px 1px 0 ${arrowColor}, -0.5px -1px 0 ${arrowColor};"> ${arrow}</span>`;
                     } else {
                         serverNameHtml = `<strong style="font-style: italic;">${rally.server_name}</strong>`;
                     }
@@ -823,7 +831,8 @@ function deleteTournament(tournamentId) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
         button.disabled = true;
         
-        fetch(`/api/tournaments/${tournamentId}`, {
+        const basePath = window.BASE_PATH || '';
+        fetch(basePath + `/api/tournaments/${tournamentId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -895,7 +904,8 @@ function deleteTournamentAdmin(adminId) {
         const csrfToken = getCSRFToken();
         console.log('CSRF токен:', csrfToken);
         
-        fetch(`/api/admin/tournament-admins/${adminId}`, {
+        const basePath = window.BASE_PATH || '';
+        fetch(basePath + `/api/admin/tournament-admins/${adminId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -941,7 +951,8 @@ function deletePlayer(playerId, playerName) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
         button.disabled = true;
         
-        fetch(`/api/admin/players/${playerId}`, {
+        const basePath = window.BASE_PATH || '';
+        fetch(basePath + `/api/admin/players/${playerId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -1015,7 +1026,8 @@ async function renamePlayer() {
     confirmBtn.disabled = true;
     
     try {
-        const response = await fetch(`/api/players/${playerId}`, {
+        const basePath = window.BASE_PATH || '';
+        const response = await fetch(basePath + `/api/players/${playerId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -1068,7 +1080,10 @@ async function loadVersionInfo() {
     if (!versionInfoDiv) return;
     
     try {
-        const response = await fetch('/api/admin/version', {
+        // Используем BASE_PATH для учета префикса /new_dev
+        // BASE_PATH определяется в base.html через контекстный процессор Flask
+        const basePath = (typeof window.BASE_PATH !== 'undefined' ? window.BASE_PATH : '') || '';
+        const response = await fetch(basePath + '/api/admin/version', {
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCSRFToken()
