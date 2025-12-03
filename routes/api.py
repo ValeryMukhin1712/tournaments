@@ -3356,8 +3356,15 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                     'error': 'Имя игрока не может быть пустым'
                 }), 400
             
-            # Проверяем, существует ли игрок с таким именем
-            existing_player = Player.query.filter_by(name=name).first()
+            # Проверяем, существует ли игрок с таким именем (без учета регистра)
+            # Получаем всех игроков и сравниваем в Python для совместимости с SQLite
+            all_players = Player.query.all()
+            existing_player = None
+            for player in all_players:
+                if player.name.lower() == name.lower():
+                    existing_player = player
+                    break
+            
             if existing_player:
                 # Обновляем время последнего использования
                 existing_player.last_used_at = datetime.utcnow()

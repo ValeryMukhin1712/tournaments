@@ -1548,6 +1548,8 @@
                                         <option value="__new__">+ Добавить нового игрока</option>
                                     </select>
                                     <input type="text" class="form-control mt-2" id="pairPlayer1NewName" placeholder="Введите имя нового игрока" style="display: none;">
+                                    <div class="invalid-feedback" id="pairPlayer1NewNameFeedback" style="display: none;"></div>
+                                    <div class="valid-feedback" id="pairPlayer1NewNameValidFeedback" style="display: none;">Имя доступно</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="pairPlayer2Select" class="form-label">2-й игрок *</label>
@@ -1556,6 +1558,8 @@
                                         <option value="__new__">+ Добавить нового игрока</option>
                                     </select>
                                     <input type="text" class="form-control mt-2" id="pairPlayer2NewName" placeholder="Введите имя нового игрока" style="display: none;">
+                                    <div class="invalid-feedback" id="pairPlayer2NewNameFeedback" style="display: none;"></div>
+                                    <div class="valid-feedback" id="pairPlayer2NewNameValidFeedback" style="display: none;">Имя доступно</div>
                                 </div>
                             </div>
                         <div class="mb-3">
@@ -1723,6 +1727,9 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="updateRallyJournalBtn" onclick="updateRallyJournal()">
+                    <i class="fas fa-sync-alt me-1"></i>Update
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
@@ -2317,6 +2324,9 @@ function isBadmintonPairTournament() {
     return sportType === 'бадминтон dbl' || sportType === 'badminton dbl' || sportType === 'бадминтон пара' || sportType === 'badminton pair';
 }
 
+// Глобальная переменная для хранения списка игроков для select-элементов
+let playersForSelects = [];
+
 // Загрузка игроков в выпадающие списки
 async function loadPlayersToSelects() {
     try {
@@ -2325,6 +2335,31 @@ async function loadPlayersToSelects() {
         const data = await response.json();
         
         if (data.success && data.players) {
+            // Получаем список имен участников турнира
+            const participantNames = getTournamentParticipantsNames();
+            // Получаем список имен игроков, участвующих в командах
+            const playersInTeams = getPlayersInTeams();
+            
+            // Фильтруем команды (имена с " - "), уже участвующих игроков и игроков из команд
+            const filteredPlayers = data.players.filter(player => {
+                // Исключаем команды
+                if (player.name.includes(' - ')) {
+                    return false;
+                }
+                // Исключаем уже участвующих в турнире игроков (как отдельные участники)
+                if (participantNames.has(player.name)) {
+                    return false;
+                }
+                // Исключаем игроков, которые участвуют в составе команд
+                if (playersInTeams.has(player.name)) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // Сохраняем отфильтрованный список игроков в глобальной переменной
+            playersForSelects = filteredPlayers;
+            
             const pairPlayer1Select = document.getElementById('pairPlayer1Select');
             const pairPlayer2Select = document.getElementById('pairPlayer2Select');
             
@@ -2341,8 +2376,8 @@ async function loadPlayersToSelects() {
                     select.remove(2);
                 }
                 
-                // Добавляем игроков
-                data.players.forEach(player => {
+                // Добавляем только отфильтрованных игроков (без команд и уже участвующих)
+                filteredPlayers.forEach(player => {
                     const option = document.createElement('option');
                     option.value = player.name;
                     option.textContent = player.name;
@@ -2379,6 +2414,70 @@ function getPlayerName(selectId, inputId) {
 // Флаг для предотвращения повторной отправки
 let isCreatingTeam = false;
 
+// Функция для добавления нового игрока в список через API
+async function addNewPlayerToDatabase(playerName) {
+    try {
+        const basePath = window.BASE_PATH || '';
+        const response = await fetch(basePath + '/api/players', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({ name: playerName })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            // Обновляем список игроков (только если это не команда)
+            if (data.player && !data.player.name.includes(' - ')) {
+                const existingPlayer = playersForSelects.find(p => p.id === data.player.id);
+                if (!existingPlayer) {
+                    playersForSelects.push({
+                        id: data.player.id,
+                        name: data.player.name,
+                        created_at: data.player.created_at,
+                        last_used_at: data.player.last_used_at
+                    });
+                    
+                    // Обновляем select-элементы, добавляя нового игрока
+                    const pairPlayer1Select = document.getElementById('pairPlayer1Select');
+                    const pairPlayer2Select = document.getElementById('pairPlayer2Select');
+                    
+                    [pairPlayer1Select, pairPlayer2Select].forEach(select => {
+                        if (select) {
+                            // Проверяем, нет ли уже такого игрока в списке
+                            const optionExists = Array.from(select.options).some(
+                                opt => opt.value === data.player.name
+                            );
+                            if (!optionExists) {
+                                const option = document.createElement('option');
+                                option.value = data.player.name;
+                                option.textContent = data.player.name;
+                                // Вставляем перед опцией "__new__"
+                                const newOptionIndex = Array.from(select.options).findIndex(
+                                    opt => opt.value === '__new__'
+                                );
+                                if (newOptionIndex > 0) {
+                                    select.insertBefore(option, select.options[newOptionIndex]);
+                                } else {
+                                    select.appendChild(option);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            return { success: true, player: data.player };
+        } else {
+            return { success: false, error: data.error };
+        }
+    } catch (error) {
+        console.error('Ошибка при добавлении игрока:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 // Создание команды из двух игроков
 async function createPairTeam(player1Name, player2Name) {
     // Предотвращаем повторную отправку
@@ -2394,6 +2493,57 @@ async function createPairTeam(player1Name, player2Name) {
     
     if (player1Name === player2Name) {
         alert('Игроки должны быть разными');
+        return;
+    }
+    
+    // Проверка на участие в турнире (как отдельный участник или в составе команды)
+    const participantNames = getTournamentParticipantsNames();
+    const playersInTeams = getPlayersInTeams();
+    
+    if (participantNames.has(player1Name) || playersInTeams.has(player1Name)) {
+        const reason = playersInTeams.has(player1Name)
+            ? `Игрок "${player1Name}" уже участвует в турнире в составе команды`
+            : `Игрок "${player1Name}" уже участвует в турнире`;
+        alert(reason);
+        return;
+    }
+    if (participantNames.has(player2Name) || playersInTeams.has(player2Name)) {
+        const reason = playersInTeams.has(player2Name)
+            ? `Игрок "${player2Name}" уже участвует в турнире в составе команды`
+            : `Игрок "${player2Name}" уже участвует в турнире`;
+        alert(reason);
+        return;
+    }
+    
+    // Проверка на уникальность имен игроков
+    const player1Exists = playersForSelects.find(p => p.name.toLowerCase() === player1Name.toLowerCase());
+    const player2Exists = playersForSelects.find(p => p.name.toLowerCase() === player2Name.toLowerCase());
+    
+    // Проверяем, нужно ли добавить новых игроков в базу данных
+    const pairPlayer1Select = document.getElementById('pairPlayer1Select');
+    const pairPlayer2Select = document.getElementById('pairPlayer2Select');
+    
+    // Если игрок 1 новый (выбран опция __new__), добавляем его в базу
+    if (pairPlayer1Select && pairPlayer1Select.value === '__new__' && !player1Exists) {
+        const result = await addNewPlayerToDatabase(player1Name);
+        if (!result.success) {
+            alert(`Ошибка при добавлении игрока "${player1Name}": ${result.error}`);
+            return;
+        }
+    }
+    
+    // Если игрок 2 новый (выбран опция __new__), добавляем его в базу
+    if (pairPlayer2Select && pairPlayer2Select.value === '__new__' && !player2Exists) {
+        const result = await addNewPlayerToDatabase(player2Name);
+        if (!result.success) {
+            alert(`Ошибка при добавлении игрока "${player2Name}": ${result.error}`);
+            return;
+        }
+    }
+    
+    // Проверка на команды (имена с " - ")
+    if (player1Name.includes(' - ') || player2Name.includes(' - ')) {
+        alert('Имена игроков не могут содержать " - ". Это формат для команд.');
         return;
     }
     
@@ -2486,6 +2636,14 @@ function initPairPlayersFormHandlers() {
                     pairPlayer1NewNameEl.style.display = 'none';
                     pairPlayer1NewNameEl.required = false;
                     pairPlayer1NewNameEl.value = '';
+                    // Сбрасываем валидацию
+                    pairPlayer1NewNameEl.classList.remove('is-invalid', 'is-valid');
+                    pairPlayer1NewNameEl.setCustomValidity('');
+                    // Скрываем сообщения обратной связи
+                    const feedback = document.getElementById('pairPlayer1NewNameFeedback');
+                    const validFeedback = document.getElementById('pairPlayer1NewNameValidFeedback');
+                    if (feedback) feedback.style.display = 'none';
+                    if (validFeedback) validFeedback.style.display = 'none';
                 }
             }
             updatePairButtonState();
@@ -2508,18 +2666,107 @@ function initPairPlayersFormHandlers() {
                     pairPlayer2NewNameEl.style.display = 'none';
                     pairPlayer2NewNameEl.required = false;
                     pairPlayer2NewNameEl.value = '';
+                    // Сбрасываем валидацию
+                    pairPlayer2NewNameEl.classList.remove('is-invalid', 'is-valid');
+                    pairPlayer2NewNameEl.setCustomValidity('');
+                    // Скрываем сообщения обратной связи
+                    const feedback = document.getElementById('pairPlayer2NewNameFeedback');
+                    const validFeedback = document.getElementById('pairPlayer2NewNameValidFeedback');
+                    if (feedback) feedback.style.display = 'none';
+                    if (validFeedback) validFeedback.style.display = 'none';
                 }
             }
             updatePairButtonState();
         });
     }
     
-    // Обработчики ввода новых имен
+    // Функция для проверки уникальности имени при вводе
+    function validatePlayerName(input, selectId, feedbackId, validFeedbackId) {
+        const playerName = input.value.trim();
+        const feedback = document.getElementById(feedbackId);
+        const validFeedback = document.getElementById(validFeedbackId);
+        
+        if (!playerName) {
+            input.classList.remove('is-invalid', 'is-valid');
+            if (feedback) feedback.style.display = 'none';
+            if (validFeedback) validFeedback.style.display = 'none';
+            input.setCustomValidity('');
+            return;
+        }
+        
+        // Проверка на команды (имена с " - ")
+        if (playerName.includes(' - ')) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            if (feedback) {
+                feedback.textContent = 'Имя не может содержать " - ". Это формат для команд.';
+                feedback.style.display = 'block';
+            }
+            if (validFeedback) validFeedback.style.display = 'none';
+            input.setCustomValidity('Имя не может содержать " - ". Это формат для команд.');
+            return;
+        }
+        
+        // Проверка на участие в турнире (как отдельный участник или в составе команды)
+        const participantNames = getTournamentParticipantsNames();
+        const playersInTeams = getPlayersInTeams();
+        
+        if (participantNames.has(playerName) || playersInTeams.has(playerName)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const reason = playersInTeams.has(playerName) 
+                ? `Игрок "${playerName}" уже участвует в турнире в составе команды`
+                : `Игрок "${playerName}" уже участвует в турнире`;
+            if (feedback) {
+                feedback.textContent = reason;
+                feedback.style.display = 'block';
+            }
+            if (validFeedback) validFeedback.style.display = 'none';
+            input.setCustomValidity(reason);
+            updatePairButtonState();
+            return;
+        }
+        
+        // Проверка на уникальность в списке игроков
+        const existingPlayer = playersForSelects.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+        if (existingPlayer) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            if (feedback) {
+                feedback.textContent = `Игрок с именем "${playerName}" уже существует в списке`;
+                feedback.style.display = 'block';
+            }
+            if (validFeedback) validFeedback.style.display = 'none';
+            input.setCustomValidity(`Игрок с именем "${playerName}" уже существует в списке`);
+        } else {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            if (feedback) feedback.style.display = 'none';
+            if (validFeedback) validFeedback.style.display = 'block';
+            input.setCustomValidity('');
+        }
+        
+        updatePairButtonState();
+    }
+    
+    // Обработчики ввода новых имен с проверкой уникальности
     if (pairPlayer1NewName) {
-        pairPlayer1NewName.addEventListener('input', updatePairButtonState);
+        pairPlayer1NewName.addEventListener('input', function() {
+            validatePlayerName(this, 'pairPlayer1Select', 'pairPlayer1NewNameFeedback', 'pairPlayer1NewNameValidFeedback');
+            updatePairButtonState();
+        });
+        pairPlayer1NewName.addEventListener('blur', function() {
+            validatePlayerName(this, 'pairPlayer1Select', 'pairPlayer1NewNameFeedback', 'pairPlayer1NewNameValidFeedback');
+        });
     }
     if (pairPlayer2NewName) {
-        pairPlayer2NewName.addEventListener('input', updatePairButtonState);
+        pairPlayer2NewName.addEventListener('input', function() {
+            validatePlayerName(this, 'pairPlayer2Select', 'pairPlayer2NewNameFeedback', 'pairPlayer2NewNameValidFeedback');
+            updatePairButtonState();
+        });
+        pairPlayer2NewName.addEventListener('blur', function() {
+            validatePlayerName(this, 'pairPlayer2Select', 'pairPlayer2NewNameFeedback', 'pairPlayer2NewNameValidFeedback');
+        });
     }
     
     // Обработчик клика на кнопку "Создать команду"
@@ -4013,6 +4260,66 @@ function addLateParticipant() {
 let allPlayers = [];
 let selectedPlayers = new Set();
 
+// Получение списка имен участников турнира
+function getTournamentParticipantsNames() {
+    const participants = {{ participants_data|tojson }};
+    return new Set(participants.map(p => p.name));
+}
+
+// Получение списка имен команд (участников с is_team=true)
+function getTournamentTeamNames() {
+    const participants = {{ participants_data|tojson }};
+    return new Set(participants.filter(p => p.is_team === true).map(p => p.name));
+}
+
+// Получение списка имен игроков, участвующих в командах
+function getPlayersInTeams() {
+    const participants = {{ participants_data|tojson }};
+    const playersInTeams = new Set();
+    
+    // Проходим по всем участникам-командам
+    participants.filter(p => p.is_team === true).forEach(team => {
+        // Разбиваем имя команды на имена игроков (формат: "Игрок1 - Игрок2")
+        if (team.name.includes(' - ')) {
+            const playerNames = team.name.split(' - ').map(name => name.trim());
+            playerNames.forEach(name => {
+                if (name) {
+                    playersInTeams.add(name);
+                }
+            });
+        }
+    });
+    
+    return playersInTeams;
+}
+
+// Фильтрация игроков, исключая уже добавленных в турнир и команды
+function filterPlayersNotInTournament(players) {
+    const participantNames = getTournamentParticipantsNames();
+    const teamNames = getTournamentTeamNames();
+    const playersInTeams = getPlayersInTeams();
+    return players.filter(player => {
+        // Исключаем уже добавленных участников
+        if (participantNames.has(player.name)) {
+            return false;
+        }
+        // Исключаем команды из списка участников турнира
+        if (teamNames.has(player.name)) {
+            return false;
+        }
+        // Исключаем игроков, которые участвуют в составе команд
+        if (playersInTeams.has(player.name)) {
+            return false;
+        }
+        // Также исключаем игроков, чье имя содержит " - " (формат команды)
+        // Это дополнительная проверка на случай, если команда была добавлена как Player
+        if (player.name.includes(' - ')) {
+            return false;
+        }
+        return true;
+    });
+}
+
 // Загрузка списка игроков
 async function loadPlayers() {
     try {
@@ -4030,6 +4337,7 @@ async function loadPlayers() {
         if (data.success) {
             allPlayers = data.players;
             console.log('Найдено игроков:', allPlayers.length);
+            // displayPlayers автоматически отфильтрует уже добавленных участников
             displayPlayers(allPlayers);
         } else {
             console.error('Ошибка загрузки списка игроков:', data.error);
@@ -4052,18 +4360,21 @@ function displayPlayers(players) {
         return;
     }
     
-    if (players.length === 0) {
-        console.log('Список игроков пуст');
+    // Фильтруем игроков, исключая уже добавленных в турнир
+    const filteredPlayers = filterPlayersNotInTournament(players);
+    
+    if (filteredPlayers.length === 0) {
+        console.log('Список игроков пуст после фильтрации');
         tbody.innerHTML = '';
         noMessage.style.display = 'block';
         return;
     }
     
-    console.log(`Отображаем ${players.length} игроков`);
+    console.log(`Отображаем ${filteredPlayers.length} игроков (после фильтрации)`);
     noMessage.style.display = 'none';
     tbody.innerHTML = '';
     
-    players.forEach(player => {
+    filteredPlayers.forEach(player => {
         const row = document.createElement('tr');
         const isSelected = selectedPlayers.has(player.id);
         
@@ -4112,7 +4423,9 @@ function showPlayersMessage(message) {
 // Поиск игроков
 async function searchPlayers(query) {
     if (!query.trim()) {
-        displayPlayers(allPlayers);
+        // Фильтруем игроков, исключая уже добавленных в турнир
+        const filteredPlayers = filterPlayersNotInTournament(allPlayers);
+        displayPlayers(filteredPlayers);
         return;
     }
     
@@ -4128,14 +4441,16 @@ async function searchPlayers(query) {
         console.log('Результаты поиска:', data);
         
         if (data.success) {
+            // Фильтруем результаты поиска, исключая уже добавленных в турнир
             displayPlayers(data.players);
         } else {
             console.error('Ошибка поиска игроков:', data.error);
         }
     } catch (error) {
         console.error('Ошибка при поиске игроков:', error);
-        // При ошибке поиска показываем всех игроков
-        displayPlayers(allPlayers);
+        // При ошибке поиска показываем всех игроков (после фильтрации)
+        const filteredPlayers = filterPlayersNotInTournament(allPlayers);
+        displayPlayers(filteredPlayers);
     }
 }
 
@@ -4477,6 +4792,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Проверка на уникальность имени на клиенте
+            const existingPlayer = allPlayers.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+            if (existingPlayer) {
+                alert(`Игрок с именем "${playerName}" уже существует в списке`);
+                newPlayerNameInput.focus();
+                newPlayerNameInput.select();
+                return;
+            }
+            
+            // Проверка на команды (имена с " - ")
+            if (playerName.includes(' - ')) {
+                alert('Имя не может содержать " - ". Это формат для команд.');
+                newPlayerNameInput.focus();
+                newPlayerNameInput.select();
+                return;
+            }
+            
             // Добавляем нового игрока в список через API
             try {
                 const basePath = window.BASE_PATH || '';
@@ -4491,21 +4823,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await response.json();
                 if (data.success) {
-                    // Добавляем нового игрока в список allPlayers
-                    const newPlayer = { id: data.player.id, name: data.player.name };
-                    allPlayers.push(newPlayer);
-                    
-                    // Добавляем в список выбора и автоматически выбираем
-                    selectedPlayers.add(newPlayer.id);
-                    
-                    // Обновляем отображение списка
-                    displayPlayers(allPlayers);
-                    updateAddButtonState();
-                    
-                    // Очищаем поле ввода
-                    newPlayerNameInput.value = '';
-                    
-                    showNotification(`Участник "${playerName}" добавлен в список и выбран`, 'success');
+                    // Проверяем, не был ли это уже существующий игрок
+                    if (data.message && data.message.includes('уже существует')) {
+                        // Игрок уже существует, обновляем список и выбираем его
+                        const existingPlayer = allPlayers.find(p => p.id === data.player.id);
+                        if (!existingPlayer) {
+                            allPlayers.push({
+                                id: data.player.id,
+                                name: data.player.name,
+                                created_at: data.player.created_at,
+                                last_used_at: data.player.last_used_at
+                            });
+                        }
+                        selectedPlayers.add(data.player.id);
+                        displayPlayers(allPlayers);
+                        updateAddButtonState();
+                        newPlayerNameInput.value = '';
+                        showNotification(`Игрок "${playerName}" уже существует в списке и выбран`, 'info');
+                    } else {
+                        // Новый игрок успешно добавлен
+                        const newPlayer = { 
+                            id: data.player.id, 
+                            name: data.player.name,
+                            created_at: data.player.created_at,
+                            last_used_at: data.player.last_used_at
+                        };
+                        allPlayers.push(newPlayer);
+                        
+                        // Добавляем в список выбора и автоматически выбираем
+                        selectedPlayers.add(newPlayer.id);
+                        
+                        // Обновляем отображение списка
+                        displayPlayers(allPlayers);
+                        updateAddButtonState();
+                        
+                        // Очищаем поле ввода
+                        newPlayerNameInput.value = '';
+                        
+                        showNotification(`Участник "${playerName}" добавлен в список и выбран`, 'success');
+                    }
                 } else {
                     alert('Ошибка: ' + (data.error || 'Не удалось добавить участника'));
                 }
@@ -7162,14 +7518,15 @@ async function loadRallyJournal(matchId) {
             return null; // цвет не определен
         };
         
-        // Функция для определения направления стрелки на основе счёта и команды
+        // Функция для определения направления стрелки на основе счёта, команды и результата розыгрыша
         // Алгоритм:
-        // - Если игрок из синей команды (participant1) и левая часть счёта чётная → розовая стрелка (↗)
-        // - Если игрок из синей команды (participant1) и левая часть счёта нечётная → голубая стрелка (↘)
-        // - Если игрок из красной команды (participant2) и правая часть счёта чётная → розовая стрелка (↗)
-        // - Если игрок из красной команды (participant2) и правая часть счёта нечётная → голубая стрелка (↘)
-        const getArrowDirection = (serverName, score) => {
-            if (!serverName || !score) return null;
+        // - Если игрок из синей команды (participant1) и (левая часть счёта + результат) % 2 === 0 → розовая стрелка (↗)
+        // - Если игрок из синей команды (participant1) и (левая часть счёта + результат) % 2 !== 0 → голубая стрелка (↘)
+        // - Если игрок из красной команды (participant2) и (правая часть счёта + результат) % 2 === 0 → розовая стрелка (↗)
+        // - Если игрок из красной команды (participant2) и (правая часть счёта + результат) % 2 !== 0 → голубая стрелка (↘)
+        // где результат = 1 если подающий выиграл, 0 если проиграл
+        const getArrowDirection = (serverName, score, result) => {
+            if (!serverName || !score || result === undefined) return null;
             
             // Определяем, к какой команде относится подающий
             const serverColor = getParticipantColor(serverName);
@@ -7185,13 +7542,16 @@ async function loadRallyJournal(matchId) {
             const leftScore = parseInt(scoreParts[0]) || 0;
             const rightScore = parseInt(scoreParts[1]) || 0;
             
+            // Преобразуем результат в число (1 или 0)
+            const resultValue = result ? 1 : 0;
+            
             let isEven;
             if (isParticipant1) {
-                // Для синей команды проверяем левую часть счёта
-                isEven = leftScore % 2 === 0;
+                // Для синей команды проверяем левую часть счёта: (score + result) % 2 === 0
+                isEven = (leftScore + resultValue) % 2 === 0;
             } else if (isParticipant2) {
-                // Для красной команды проверяем правую часть счёта
-                isEven = rightScore % 2 === 0;
+                // Для красной команды проверяем правую часть счёта: (score + result) % 2 === 0
+                isEven = (rightScore + resultValue) % 2 === 0;
             } else {
                 return null;
             }
@@ -7308,8 +7668,9 @@ async function loadRallyJournal(matchId) {
                     const serverNameColor = getParticipantColor(rally.server_name);
                     const nameColorStyle = serverNameColor ? `color: ${serverNameColor};` : '';
                     
-                    // Определяем направление стрелки на основе счёта и команды
-                    const arrowInfo = getArrowDirection(rally.server_name, rally.score);
+                    // Определяем направление стрелки на основе счёта, команды и результата розыгрыша
+                    const resultValueForArrow = rally.server_won ? 1 : 0; // 1 если подающий выиграл, 0 если проиграл
+                    const arrowInfo = getArrowDirection(rally.server_name, rally.score, resultValueForArrow);
                     
                     if (arrowInfo && serverParts.length >= 1) {
                         // Есть информация о стрелке: имя жирным курсивом с цветом участника, позиция стрелочкой 80%
@@ -7343,21 +7704,6 @@ async function loadRallyJournal(matchId) {
                 `;
             });
             
-            // Добавляем строку с финальным счётом сета, если сет завершён
-            const setNumInt = parseInt(setNum);
-            const finalSetScore = setScores[setNumInt];
-            if (finalSetScore) {
-                html += `
-                    <tr style="background-color: #e7f3ff; font-weight: bold;">
-                        <td colspan="5" class="text-end">
-                            <i class="fas fa-trophy me-2"></i>Сет завершён:
-                        </td>
-                        <td class="text-center">
-                            <strong style="color: #007bff;">${finalSetScore.score1}</strong> : <strong style="color: #dc3545;">${finalSetScore.score2}</strong>
-                        </td>
-                    </tr>
-                `;
-            }
             
             html += `
                             </tbody>
@@ -7387,6 +7733,35 @@ async function loadRallyJournal(matchId) {
             </div>
         `;
     }
+}
+
+// Функция для обновления журнала розыгрышей
+function updateRallyJournal() {
+    const modal = document.getElementById('rallyJournalModal');
+    if (!modal) {
+        console.error('[Rally Journal] Модальное окно не найдено');
+        return;
+    }
+    
+    const matchId = modal.getAttribute('data-match-id');
+    if (!matchId) {
+        console.error('[Rally Journal] MatchId не найден');
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContent');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Обновление...</span>
+            </div>
+            <p class="mt-2 text-muted">Обновление журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Загружаем данные розыгрышей заново
+    loadRallyJournal(matchId);
 }
 
 // Выгрузка журнала розыгрышей в Excel

@@ -361,6 +361,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="updateRallyJournalBtn" onclick="updateRallyJournal()">
+                        <i class="fas fa-sync-alt me-1"></i>Update
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 </div>
             </div>
@@ -748,6 +751,35 @@ async function loadRallyJournalForAdmin(matchId) {
             </div>
         `;
     }
+}
+
+// Функция для обновления журнала розыгрышей
+function updateRallyJournal() {
+    const modal = document.getElementById('rallyJournalModal');
+    if (!modal) {
+        console.error('[Rally Journal] Модальное окно не найдено');
+        return;
+    }
+    
+    const matchId = modal.getAttribute('data-match-id');
+    if (!matchId) {
+        console.error('[Rally Journal] MatchId не найден');
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContent');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Обновление...</span>
+            </div>
+            <p class="mt-2 text-muted">Обновление журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Загружаем данные розыгрышей заново
+    loadRallyJournalForAdmin(matchId);
 }
 
 // Выгрузка журнала розыгрышей в Excel (для страницы 9)

@@ -1323,12 +1323,13 @@ async function loadRallyJournal(matchId) {
         
         // Функция для определения направления стрелки на основе счёта и команды
         // Алгоритм:
-        // - Если игрок из синей команды (participant1) и левая часть счёта чётная → розовая стрелка (↗)
-        // - Если игрок из синей команды (participant1) и левая часть счёта нечётная → голубая стрелка (↘)
-        // - Если игрок из красной команды (participant2) и правая часть счёта чётная → розовая стрелка (↗)
-        // - Если игрок из красной команды (participant2) и правая часть счёта нечётная → голубая стрелка (↘)
-        const getArrowDirection = (serverName, score) => {
-            if (!serverName || !score) return null;
+        // - Если игрок из синей команды (participant1) и (левая часть счёта + результат) % 2 === 0 → розовая стрелка (↗)
+        // - Если игрок из синей команды (participant1) и (левая часть счёта + результат) % 2 !== 0 → голубая стрелка (↘)
+        // - Если игрок из красной команды (participant2) и (правая часть счёта + результат) % 2 === 0 → розовая стрелка (↗)
+        // - Если игрок из красной команды (participant2) и (правая часть счёта + результат) % 2 !== 0 → голубая стрелка (↘)
+        // где результат = 1 если подающий выиграл, 0 если проиграл
+        const getArrowDirection = (serverName, score, result) => {
+            if (!serverName || !score || result === undefined) return null;
             
             // Определяем, к какой команде относится подающий
             const serverColor = getParticipantColor(serverName);
@@ -1344,13 +1345,16 @@ async function loadRallyJournal(matchId) {
             const leftScore = parseInt(scoreParts[0]) || 0;
             const rightScore = parseInt(scoreParts[1]) || 0;
             
+            // Преобразуем результат в число (1 или 0)
+            const resultValue = result ? 1 : 0;
+            
             let isEven;
             if (isParticipant1) {
-                // Для синей команды проверяем левую часть счёта
-                isEven = leftScore % 2 === 0;
+                // Для синей команды проверяем левую часть счёта: (score + result) % 2 === 0
+                isEven = (leftScore + resultValue) % 2 === 0;
             } else if (isParticipant2) {
-                // Для красной команды проверяем правую часть счёта
-                isEven = rightScore % 2 === 0;
+                // Для красной команды проверяем правую часть счёта: (score + result) % 2 === 0
+                isEven = (rightScore + resultValue) % 2 === 0;
             } else {
                 return null;
             }
@@ -1467,8 +1471,9 @@ async function loadRallyJournal(matchId) {
                     const serverNameColor = getParticipantColor(rally.server_name);
                     const nameColorStyle = serverNameColor ? `color: ${serverNameColor};` : '';
                     
-                    // Определяем направление стрелки на основе счёта и команды
-                    const arrowInfo = getArrowDirection(rally.server_name, rally.score);
+                    // Определяем направление стрелки на основе счёта, команды и результата розыгрыша
+                    const resultValue = rally.server_won ? 1 : 0; // 1 если подающий выиграл, 0 если проиграл
+                    const arrowInfo = getArrowDirection(rally.server_name, rally.score, resultValue);
                     
                     if (arrowInfo && serverParts.length >= 1) {
                         // Есть информация о стрелке: имя жирным курсивом с цветом участника, позиция стрелочкой 80%
@@ -1502,21 +1507,6 @@ async function loadRallyJournal(matchId) {
                 `;
             });
             
-            // Добавляем строку с финальным счётом сета, если сет завершён
-            const setNumInt = parseInt(setNum);
-            const finalSetScore = setScores[setNumInt];
-            if (finalSetScore) {
-                html += `
-                    <tr style="background-color: #e7f3ff; font-weight: bold;">
-                        <td colspan="5" class="text-end">
-                            <i class="fas fa-trophy me-2"></i>Сет завершён:
-                        </td>
-                        <td class="text-center">
-                            <strong style="color: #007bff;">${finalSetScore.score1}</strong> : <strong style="color: #dc3545;">${finalSetScore.score2}</strong>
-                        </td>
-                    </tr>
-                `;
-            }
             
             html += `
                             </tbody>
@@ -1546,6 +1536,35 @@ async function loadRallyJournal(matchId) {
             </div>
         `;
     }
+}
+
+// Функция для обновления журнала розыгрышей
+function updateRallyJournal() {
+    const modal = document.getElementById('rallyJournalModal');
+    if (!modal) {
+        console.error('[Rally Journal] Модальное окно не найдено');
+        return;
+    }
+    
+    const matchId = modal.getAttribute('data-match-id');
+    if (!matchId) {
+        console.error('[Rally Journal] MatchId не найден');
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContent');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Обновление...</span>
+            </div>
+            <p class="mt-2 text-muted">Обновление журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Загружаем данные розыгрышей заново
+    loadRallyJournal(matchId);
 }
 
 // Выгрузка журнала розыгрышей в Excel
@@ -1628,6 +1647,9 @@ function exportRallyJournalToExcel() {
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="updateRallyJournalBtn" onclick="updateRallyJournal()">
+                    <i class="fas fa-sync-alt me-1"></i>Update
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>

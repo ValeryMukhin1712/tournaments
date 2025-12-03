@@ -877,29 +877,35 @@
                 transform: none !important;
             }
             
-            /* Кнопка Back в режиме просмотра - круг диаметром 50px со стрелкой, внизу по середине */
+            /* Кнопка Back в режиме просмотра - круг диаметром 60px со стрелкой, вверху по центру */
             .view-mode .back-btn-view {
                 position: fixed !important;
-                bottom: 20px !important;
+                top: 60px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                width: 50px !important;
-                height: 50px !important;
+                width: 60px !important;
+                height: 60px !important;
                 border-radius: 50% !important;
-                background: rgba(102, 102, 102, 0.8) !important;
+                background: rgba(46, 125, 50, 0.9) !important;
                 color: white !important;
-                border: none !important;
+                border: 2px solid rgba(255, 255, 255, 0.3) !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 font-size: 24px !important;
                 cursor: pointer !important;
-                z-index: 1000 !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+                z-index: 10000 !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+                transition: background 0.3s, transform 0.2s !important;
             }
             
             .view-mode .back-btn-view:hover {
-                background: rgba(102, 102, 102, 1) !important;
+                background: rgba(46, 125, 50, 1) !important;
+                transform: translateX(-50%) scale(1.1) !important;
+            }
+            
+            .view-mode .back-btn-view:active {
+                transform: translateX(-50%) scale(0.95) !important;
             }
         }
         
@@ -1031,29 +1037,35 @@
                 transform: none !important;
             }
             
-            /* Кнопка Back в режиме просмотра - круг диаметром 50px со стрелкой, внизу по середине */
+            /* Кнопка Back в режиме просмотра - круг диаметром 60px со стрелкой, вверху по центру */
             .view-mode .back-btn-view {
                 position: fixed !important;
-                bottom: 20px !important;
+                top: 60px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
-                width: 50px !important;
-                height: 50px !important;
+                width: 60px !important;
+                height: 60px !important;
                 border-radius: 50% !important;
-                background: rgba(102, 102, 102, 0.8) !important;
+                background: rgba(46, 125, 50, 0.9) !important;
                 color: white !important;
-                border: none !important;
+                border: 2px solid rgba(255, 255, 255, 0.3) !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 font-size: 24px !important;
                 cursor: pointer !important;
-                z-index: 1000 !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+                z-index: 10000 !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+                transition: background 0.3s, transform 0.2s !important;
             }
             
             .view-mode .back-btn-view:hover {
-                background: rgba(102, 102, 102, 1) !important;
+                background: rgba(46, 125, 50, 1) !important;
+                transform: translateX(-50%) scale(1.1) !important;
+            }
+            
+            .view-mode .back-btn-view:active {
+                transform: translateX(-50%) scale(0.95) !important;
             }
         }
         
@@ -1308,6 +1320,70 @@
             color: #d4edda;
             font-style: italic;
         }
+        
+        /* Кнопка возврата на страницу Судейство */
+        .back-to-referee-btn {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000 !important;
+            display: none;
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+        
+        .back-to-referee-btn:hover {
+            background: #1B5E20;
+        }
+        
+        .back-to-referee-btn:active {
+            background: #0D4E12;
+        }
+        
+        /* Скрываем кнопку "Возврат на страницу Судейство" в режиме просмотра */
+        .view-mode .back-to-referee-btn {
+            display: none !important;
+        }
+        
+        /* Кнопка Back в режиме просмотра - круг диаметром 60px со стрелкой, вверху по центру */
+        .view-mode .back-btn-view {
+            position: fixed !important;
+            top: 60px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            background: rgba(46, 125, 50, 0.9) !important;
+            color: white !important;
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 24px !important;
+            cursor: pointer !important;
+            z-index: 10000 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+            transition: background 0.3s, transform 0.2s !important;
+        }
+        
+        .view-mode .back-btn-view:hover {
+            background: rgba(46, 125, 50, 1) !important;
+            transform: translateX(-50%) scale(1.1) !important;
+        }
+        
+        .view-mode .back-btn-view:active {
+            transform: translateX(-50%) scale(0.95) !important;
+        }
     </style>
 </head>
 <body>
@@ -1318,6 +1394,11 @@
             Показать свойства экрана
         </label>
     </div>
+    
+    <!-- Кнопка возврата на страницу Судейство -->
+    <button class="back-to-referee-btn" onclick="handleBackFromViewMode()" title="Возврат на страницу Судейство">
+        ← Возврат на страницу Судейство
+    </button>
     
     <div class="container">
         <!-- Панель управления -->
@@ -1375,7 +1456,7 @@
             teamsSwapped: <span id="teamsSwappedValue">false</span>
         </div>
         <!-- Кнопка Back для режима просмотра -->
-        <button class="back-btn-view" onclick="handleBack()" title="Назад" style="display: none;">
+        <button class="back-btn-view" onclick="handleBackFromViewMode()" title="Вернуться на страницу Судейство" style="display: none;">
             <i class="fas fa-arrow-left"></i>
         </button>
             
@@ -2748,15 +2829,21 @@
             isViewMode = !isViewMode;
             document.body.classList.toggle('view-mode', isViewMode);
             
-            // Показываем/скрываем кнопку Back для режима просмотра
+            // Увеличиваем swap_count при переходе в режим просмотра и при выходе из него
+            swap_count++;
+            console.log('[Referee] swap_count увеличен до:', swap_count, '(mod 2:', swap_count % 2 + ')');
+            
+            // Обновляем отображение swap_count, если элемент существует
+            const swapCountElement = document.getElementById('swapCountValue');
+            if (swapCountElement) {
+                swapCountElement.textContent = swap_count + ' (mod 2: ' + (swap_count % 2) + ')';
+            }
+            
+            // Показываем/скрываем кнопку Back для режима просмотра (всегда в центре экрана)
             const backBtn = document.querySelector('.back-btn-view');
             if (backBtn) {
-                // Проверяем, попадаем ли мы под медиа-запрос для 793x305
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                const isSmallScreen = viewportWidth <= 793 && viewportHeight <= 305;
-                
-                if (isViewMode && isSmallScreen) {
+                // Кнопка всегда показывается в режиме просмотра (управляется через CSS класс .view-mode)
+                if (isViewMode) {
                     backBtn.style.display = 'flex';
                 } else {
                     backBtn.style.display = 'none';
@@ -2918,6 +3005,59 @@
             }
         }
         
+        // Флаг для предотвращения автоматической отправки результатов при выходе из режима просмотра
+        let isExitingViewMode = false;
+        
+        // Обработка кнопки Back из режима просмотра
+        function handleBackFromViewMode() {
+            console.log('[Referee] Кнопка Back из режима просмотра');
+            
+            // Если страница в режиме просмотра, просто выходим из режима просмотра
+            if (document.body.classList.contains('view-mode')) {
+                console.log('[Referee] Выход из режима просмотра');
+                isExitingViewMode = true; // Устанавливаем флаг, чтобы не отправлять результаты
+                toggleViewMode();
+                // Сбрасываем флаг после небольшой задержки
+                setTimeout(() => {
+                    isExitingViewMode = false;
+                }, 100);
+                return;
+            }
+            
+            // Если не в режиме просмотра, используем обычную логику возврата
+            goToRefereePage();
+        }
+        
+        // Возврат на страницу Судейство (всегда, не в форму Результат)
+        function goToRefereePage() {
+            console.log('[Referee] Переход на страницу выбора судейства');
+            
+            // Получаем базовый путь (префикс, например /new_dev)
+            const basePath = window.BASE_PATH || '';
+            
+            // Всегда переходим на страницу выбора судейства /referee
+            // Игнорируем window.opener, чтобы не возвращаться в форму Результат
+            const refereeUrl = basePath + '/referee';
+            console.log('[Referee] URL перехода:', refereeUrl);
+            
+            // Переходим на страницу выбора судейства
+            window.location.href = refereeUrl;
+        }
+        
+        // Возврат на предыдущую страницу (для кнопки Back в режиме просмотра)
+        function goBackToPreviousPage() {
+            console.log('[Referee] Возврат на предыдущую страницу');
+            
+            // Простой возврат на предыдущую страницу через history
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Если нет истории, переходим на страницу выбора судейства
+                const basePath = window.BASE_PATH || '';
+                window.location.href = basePath + '/referee';
+            }
+        }
+        
         // Позиционирование полей имен относительно линий разметки
         function positionPlayerNameFields() {
             const courtArea = document.querySelector('.court-area');
@@ -3056,6 +3196,12 @@
         // Инициализация обработчиков событий
         // Автоматическая передача счёта при закрытии окна
         window.addEventListener('beforeunload', function(e) {
+            // Не отправляем результаты, если это выход из режима просмотра
+            if (isExitingViewMode) {
+                console.log('[Referee] Пропускаем отправку результатов при выходе из режима просмотра');
+                return;
+            }
+            
             // Если страница открыта из формы Результат, передаем счёт при закрытии
             if (window.opener && !window.opener.closed) {
                 // Используем sendBeacon для надежной передачи данных при закрытии окна
@@ -3190,6 +3336,24 @@
                     updateScore();
                 }
             }
+        }
+        
+        // Инициализация BASE_PATH для работы с префиксом (например, /new_dev)
+        // Получаем из контекста шаблона (передается через контекстный процессор Flask)
+        if (typeof window.BASE_PATH === 'undefined') {
+            // Используем значение из шаблона (передается через контекстный процессор)
+            // Если не передано, определяем из текущего URL
+            {% if base_path is defined %}
+            window.BASE_PATH = '{{ base_path|default("") }}';
+            {% else %}
+            const currentPath = window.location.pathname;
+            if (currentPath.startsWith('/new_dev')) {
+                window.BASE_PATH = '/new_dev';
+            } else {
+                window.BASE_PATH = '';
+            }
+            {% endif %}
+            console.log('[Referee] BASE_PATH инициализирован:', window.BASE_PATH);
         }
         
         document.addEventListener('DOMContentLoaded', function() {
