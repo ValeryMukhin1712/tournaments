@@ -1450,8 +1450,8 @@
             </button>
             <div class="score score-right" id="scoreRight">0</div>
         </div>
-        <!-- Временное отображение swap_count и teamsSwapped для отладки -->
-        <div id="swapCountDisplay" style="position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 15px; border-radius: 5px; font-size: 18px; font-weight: bold; z-index: 10000;">
+        <!-- Временное отображение swap_count и teamsSwapped для отладки (скрыто) -->
+        <div id="swapCountDisplay" style="display: none !important; position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 15px; border-radius: 5px; font-size: 18px; font-weight: bold; z-index: 10000;">
             swap_count: <span id="swapCountValue">0</span><br>
             teamsSwapped: <span id="teamsSwappedValue">false</span>
         </div>
@@ -2110,6 +2110,9 @@
         // Функция для перемещения индикатора подачи при выигрыше очка
         // Функция для сохранения розыгрыша в базу данных
         async function saveRallyToDatabase(scoringTeam, previousScoreLeft, previousScoreRight, servingPositionBefore, playerNamesBeforeSwap) {
+            // Используем текущий счёт ПОСЛЕ добавления очка для сохранения
+            // Но для определения направления стрелки нужно использовать счёт ДО розыгрыша
+            const scoreAfterRally = { left: scoreLeft, right: scoreRight };
             // Получаем параметры из URL
             const urlParams = new URLSearchParams(window.location.search);
             const matchId = urlParams.get('match_id');
@@ -2404,6 +2407,9 @@
                     return;
                 }
                 
+                // Получаем текущее время на клиенте с точностью до миллисекунд
+                const clientDateTime = new Date().toISOString();
+                
                 // Отправляем запрос на сохранение розыгрыша
                 const rallyData = {
                     match_id: parseInt(matchId),
@@ -2413,7 +2419,9 @@
                     server_name: serverName,
                     receiver_name: receiverName,
                     server_won: serverWon,
-                    score: currentScore
+                    score: currentScore,
+                    swap_count: swap_count,  // Сохраняем swap_count для правильного определения направления стрелки
+                    rally_datetime: clientDateTime  // Отправляем время с клиента для более точной записи
                 };
                 
                 console.log('[Rally] 📤 Отправка данных розыгрыша:', rallyData);

@@ -36,6 +36,9 @@ class Rally(db.Model):
     # Общий счёт после этого розыгрыша (формат "21:19")
     score = db.Column(db.String(20), nullable=False)  # общий счёт после розыгрыша
     
+    # Счётчик смен половин корта для правильного определения направления стрелки
+    swap_count = db.Column(db.Integer, nullable=True, default=0)  # счётчик смен половин корта
+    
     # Дополнительная информация
     notes = db.Column(db.Text, nullable=True)  # дополнительные заметки о розыгрыше
     
@@ -64,6 +67,7 @@ class Rally(db.Model):
             'receiver_name': self.receiver_name,
             'server_won': self.server_won,
             'score': self.score,
+            'swap_count': self.swap_count,
             'notes': self.notes,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }

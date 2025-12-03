@@ -7668,9 +7668,67 @@ async function loadRallyJournal(matchId) {
                     const serverNameColor = getParticipantColor(rally.server_name);
                     const nameColorStyle = serverNameColor ? `color: ${serverNameColor};` : '';
                     
-                    // Определяем направление стрелки на основе счёта, команды и результата розыгрыша
+                    // Определяем направление стрелки на основе счёта ДО розыгрыша, команды и результата розыгрыша
+                    // Используем swap_count для правильного определения, какой счёт соответствует participant1
                     const resultValueForArrow = rally.server_won ? 1 : 0; // 1 если подающий выиграл, 0 если проиграл
-                    const arrowInfo = getArrowDirection(rally.server_name, rally.score, resultValueForArrow);
+                    
+                    // Парсим счёт ПОСЛЕ розыгрыша
+                    const scoreParts = rally.score.split(':');
+                    let scoreBefore = rally.score; // По умолчанию используем счёт ПОСЛЕ
+                    
+                    if (scoreParts.length === 2) {
+                        let scoreAfterLeft = parseInt(scoreParts[0]) || 0;
+                        let scoreAfterRight = parseInt(scoreParts[1]) || 0;
+                        
+                        // Получаем swap_count из данных розыгрыша (если сохранён)
+                        const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                        
+                        // Определяем, кто выиграл розыгрыш, чтобы вычислить счёт ДО розыгрыша
+                        const serverColor = getParticipantColor(rally.server_name);
+                        const receiverColor = getParticipantColor(rally.receiver_name);
+                        const isServerParticipant1 = serverColor === '#007bff'; // синий = participant1
+                        const isServerParticipant2 = serverColor === '#dc3545'; // красный = participant2
+                        const isReceiverParticipant1 = receiverColor === '#007bff';
+                        const isReceiverParticipant2 = receiverColor === '#dc3545';
+                        
+                        // Определяем, какой счёт (левый или правый) соответствует participant1 на основе swap_count
+                        let participant1Score, participant2Score;
+                        if (swapCount % 2 === 0) {
+                            // Чётное количество смен: левый счёт → participant1, правый → participant2
+                            participant1Score = scoreAfterLeft;
+                            participant2Score = scoreAfterRight;
+                        } else {
+                            // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                            participant1Score = scoreAfterRight;
+                            participant2Score = scoreAfterLeft;
+                        }
+                        
+                        // Вычисляем счёт ДО розыгрыша
+                        if (rally.server_won) {
+                            // Выиграл подающий - его счёт увеличился на 1
+                            if (isServerParticipant1) {
+                                participant1Score = Math.max(0, participant1Score - 1);
+                            } else if (isServerParticipant2) {
+                                participant2Score = Math.max(0, participant2Score - 1);
+                            }
+                        } else {
+                            // Выиграл принимающий - его счёт увеличился на 1
+                            if (isReceiverParticipant1) {
+                                participant1Score = Math.max(0, participant1Score - 1);
+                            } else if (isReceiverParticipant2) {
+                                participant2Score = Math.max(0, participant2Score - 1);
+                            }
+                        }
+                        
+                        // Формируем счёт ДО розыгрыша с учётом swap_count
+                        if (swapCount % 2 === 0) {
+                            scoreBefore = `${participant1Score}:${participant2Score}`;
+                        } else {
+                            scoreBefore = `${participant2Score}:${participant1Score}`;
+                        }
+                    }
+                    
+                    const arrowInfo = getArrowDirection(rally.server_name, scoreBefore, resultValueForArrow);
                     
                     if (arrowInfo && serverParts.length >= 1) {
                         // Есть информация о стрелке: имя жирным курсивом с цветом участника, позиция стрелочкой 80%

@@ -264,8 +264,8 @@
                                 <div class="mb-3">
                                     <label for="sport_type" class="form-label">Вид спорта *</label>
                                     <select class="form-select" id="sport_type" name="sport_type" required>
-                                        <option value="Бадминтон single" selected>Бадминтон single</option>
-                                        <option value="Бадминтон dbl">Бадминтон dbl</option>
+                                        <option value="Бадминтон dbl" selected>Бадминтон dbl</option>
+                                        <option value="Бадминтон single">Бадминтон single</option>
                                         <option value="Волейбол">Волейбол</option>
                                         <option value="Пинг-понг">Пинг-понг</option>
                                         <option value="custom">Да на вас не угодишь :))</option>
@@ -388,8 +388,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const setsToWinInput = document.getElementById('sets_to_win');
     
     const sportDefaults = {
-        'Бадминтон single': { matchDuration: 20, breakDuration: 2, pointsToWin: 21, setsToWin: 2 },
         'Бадминтон dbl': { matchDuration: 20, breakDuration: 2, pointsToWin: 21, setsToWin: 2 },
+        'Бадминтон single': { matchDuration: 20, breakDuration: 2, pointsToWin: 21, setsToWin: 2 },
         'Волейбол': { matchDuration: 20, breakDuration: 2, pointsToWin: 25, setsToWin: 2 },
         'Пинг-понг': { matchDuration: 15, breakDuration: 2, pointsToWin: 11, setsToWin: 2 }
     };
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Select options:', sportTypeSelect.querySelectorAll('option').length);
     
     // Устанавливаем значения по умолчанию для бадминтона при загрузке страницы
-    const defaultSport = 'Бадминтон single';
+    const defaultSport = 'Бадминтон dbl';
     if (sportDefaults[defaultSport]) {
         const defaults = sportDefaults[defaultSport];
         matchDurationInput.value = defaults.matchDuration;

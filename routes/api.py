@@ -4566,7 +4566,23 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 return jsonify({'success': False, 'error': 'Розыгрыши можно сохранять только для бадминтона'}), 400
             
             # Создаем розыгрыш
-            rally_datetime = datetime.now()
+            # Используем время с клиента, если оно передано (более точно отражает момент события)
+            # Иначе используем серверное время
+            if 'rally_datetime' in data and data['rally_datetime']:
+                try:
+                    # Парсим ISO формат времени с клиента (формат: "2023-12-03T14:27:10.123Z")
+                    rally_datetime_str = data['rally_datetime']
+                    # Удаляем 'Z' в конце, если есть, и парсим
+                    if rally_datetime_str.endswith('Z'):
+                        rally_datetime_str = rally_datetime_str[:-1] + '+00:00'
+                    rally_datetime = datetime.fromisoformat(rally_datetime_str.replace('Z', ''))
+                except (ValueError, TypeError, AttributeError) as e:
+                    # Если не удалось распарсить, используем серверное время
+                    logger.warning(f"Не удалось распарсить время с клиента: {e}, используем серверное время")
+                    rally_datetime = datetime.now()
+            else:
+                rally_datetime = datetime.now()
+            
             rally = Rally(
                 match_id=int(data['match_id']),
                 tournament_id=int(data['tournament_id']),
@@ -4579,6 +4595,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 receiver_name=str(data['receiver_name']),
                 server_won=bool(data['server_won']),
                 score=str(data['score']),
+                swap_count=int(data.get('swap_count', 0)) if data.get('swap_count') is not None else 0,  # сохраняем swap_count
                 notes=data.get('notes')  # опционально
             )
             
