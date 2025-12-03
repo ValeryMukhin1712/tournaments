@@ -891,17 +891,34 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         from flask import session
         from flask_wtf.csrf import validate_csrf
         
+        logger.info(f"[delete_tournament] Запрос на удаление турнира {tournament_id}")
+        
         tournament = Tournament.query.get_or_404(tournament_id)
+        logger.info(f"[delete_tournament] Турнир найден: {tournament.name}")
         
         # Проверяем CSRF токен
+        csrf_token = request.headers.get('X-CSRFToken')
+        logger.info(f"[delete_tournament] CSRF токен получен: {csrf_token[:50] if csrf_token else 'None'}...")
+        if not csrf_token:
+            logger.warning("[delete_tournament] CSRF токен отсутствует в запросе")
+            return jsonify({'error': 'CSRF токен отсутствует в запросе'}), 400
+        
         try:
-            validate_csrf(request.headers.get('X-CSRFToken'))
+            validate_csrf(csrf_token)
+            logger.info("[delete_tournament] CSRF токен валиден")
         except Exception as e:
-            logger.warning(f"CSRF validation failed: {e}")
-            return jsonify({'error': 'Неверный CSRF токен'}), 400
+            logger.warning(f"[delete_tournament] CSRF validation failed: {e}")
+            logger.warning(f"[delete_tournament] CSRF token (полный): {csrf_token}")
+            # На VDS может быть проблема с сессиями, но все равно возвращаем ошибку
+            # для безопасности, но с более подробным сообщением
+            return jsonify({
+                'error': f'Неверный CSRF токен: {str(e)}. Попробуйте обновить страницу и повторить попытку.'
+            }), 400
         
         # Проверяем авторизацию через сессию
+        logger.info(f"[delete_tournament] Сессия: admin_id={session.get('admin_id')}, admin_email={session.get('admin_email')}")
         if 'admin_id' not in session:
+            logger.warning("[delete_tournament] Нет авторизации в сессии")
             return jsonify({'error': 'Необходима авторизация'}), 401
         
         # Простая заглушка для админа

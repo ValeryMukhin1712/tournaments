@@ -399,7 +399,17 @@
 
 <script>
 function getCSRFToken() {
-    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (!metaTag) {
+        console.error('CSRF токен не найден в meta теге!');
+        return '';
+    }
+    const token = metaTag.getAttribute('content');
+    if (!token) {
+        console.error('CSRF токен пустой!');
+        return '';
+    }
+    return token;
 }
 
 // Загрузка всех журналов розыгрышей (группированных по матчам)
@@ -864,15 +874,40 @@ function deleteTournament(tournamentId) {
         button.disabled = true;
         
         const basePath = window.BASE_PATH || '';
+        const csrfToken = getCSRFToken();
+        console.log('CSRF Token из базового шаблона:', csrfToken);
+        console.log('Удаление турнира:', tournamentId, 'URL:', basePath + `/api/tournaments/${tournamentId}`);
+        
         fetch(basePath + `/api/tournaments/${tournamentId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
+                'X-CSRFToken': csrfToken
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Ответ сервера:', response.status, response.statusText);
+            if (!response.ok) {
+                // Если ответ не успешный, пытаемся получить текст ошибки
+                return response.text().then(text => {
+                    console.error('Ошибка сервера (текст):', text);
+                    let errorMessage = `Ошибка сервера: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = JSON.parse(text);
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (e) {
+                        // Если не JSON, используем текст как есть
+                        if (text) {
+                            errorMessage = text;
+                        }
+                    }
+                    throw new Error(errorMessage);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Данные ответа:', data);
             if (data.success) {
                 // Удаляем строку из таблицы
                 button.closest('tr').remove();
