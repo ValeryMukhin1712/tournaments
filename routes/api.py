@@ -949,17 +949,24 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 logger.warning(f"[delete_tournament] Ошибка при удалении MatchLog (возможно, таблица не существует): {e}")
                 # Продолжаем, если таблица не существует
             
-            # 2. Удаляем розыгрыши (Rally)
+            # 2. Удаляем розыгрыши (Rally) - используем raw SQL, чтобы избежать проблем с отсутствующими столбцами
             try:
-                from models.rally import Rally
-                rallies_count = Rally.query.filter_by(tournament_id=tournament_id).count()
-                logger.info(f"[delete_tournament] Найдено записей Rally: {rallies_count}")
-                if rallies_count > 0:
-                    Rally.query.filter_by(tournament_id=tournament_id).delete()
-                    logger.info(f"[delete_tournament] Удалено {rallies_count} записей Rally")
+                from sqlalchemy import text
+                # Используем raw SQL для удаления, чтобы избежать проблем с отсутствующими столбцами в модели
+                result = db.session.execute(
+                    text("DELETE FROM rally WHERE tournament_id = :tournament_id"),
+                    {"tournament_id": tournament_id}
+                )
+                rallies_deleted = result.rowcount
+                logger.info(f"[delete_tournament] Удалено {rallies_deleted} записей Rally через raw SQL")
             except Exception as e:
-                logger.warning(f"[delete_tournament] Ошибка при удалении Rally (возможно, таблица не существует): {e}")
-                # Продолжаем, если таблица не существует
+                error_str = str(e)
+                if "no such table" in error_str.lower() or "no such column" in error_str.lower():
+                    logger.warning(f"[delete_tournament] Таблица rally не существует или имеет другую структуру: {e}")
+                    # Продолжаем, если таблица не существует или имеет другую структуру
+                else:
+                    logger.warning(f"[delete_tournament] Ошибка при удалении Rally: {e}")
+                    # Продолжаем, если возникла другая ошибка
             
             # 3. Удаляем матчи
             matches_count = Match.query.filter_by(tournament_id=tournament_id).count()
