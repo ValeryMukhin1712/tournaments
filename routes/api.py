@@ -933,25 +933,75 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'error': 'Недостаточно прав для удаления турнира'}), 403
         
         try:
-            # Удаляем все связанные данные
+            tournament_name = tournament.name
+            logger.info(f"[delete_tournament] Начинаем удаление связанных данных для турнира {tournament_id}")
+            
+            # Удаляем все связанные данные в правильном порядке
             # 1. Удаляем записи журнала матчей
-            from models.match_log import MatchLog
-            MatchLog.query.filter_by(tournament_id=tournament_id).delete()
+            try:
+                from models.match_log import MatchLog
+                match_logs_count = MatchLog.query.filter_by(tournament_id=tournament_id).count()
+                logger.info(f"[delete_tournament] Найдено записей MatchLog: {match_logs_count}")
+                if match_logs_count > 0:
+                    MatchLog.query.filter_by(tournament_id=tournament_id).delete()
+                    logger.info(f"[delete_tournament] Удалено {match_logs_count} записей MatchLog")
+            except Exception as e:
+                logger.warning(f"[delete_tournament] Ошибка при удалении MatchLog (возможно, таблица не существует): {e}")
+                # Продолжаем, если таблица не существует
             
             # 2. Удаляем розыгрыши (Rally)
-            from models.rally import Rally
-            Rally.query.filter_by(tournament_id=tournament_id).delete()
+            try:
+                from models.rally import Rally
+                rallies_count = Rally.query.filter_by(tournament_id=tournament_id).count()
+                logger.info(f"[delete_tournament] Найдено записей Rally: {rallies_count}")
+                if rallies_count > 0:
+                    Rally.query.filter_by(tournament_id=tournament_id).delete()
+                    logger.info(f"[delete_tournament] Удалено {rallies_count} записей Rally")
+            except Exception as e:
+                logger.warning(f"[delete_tournament] Ошибка при удалении Rally (возможно, таблица не существует): {e}")
+                # Продолжаем, если таблица не существует
             
             # 3. Удаляем матчи
-            Match.query.filter_by(tournament_id=tournament_id).delete()
+            matches_count = Match.query.filter_by(tournament_id=tournament_id).count()
+            logger.info(f"[delete_tournament] Найдено матчей: {matches_count}")
+            if matches_count > 0:
+                Match.query.filter_by(tournament_id=tournament_id).delete()
+                logger.info(f"[delete_tournament] Удалено {matches_count} матчей")
             
-            # 4. Удаляем участников
-            Participant.query.filter_by(tournament_id=tournament_id).delete()
+            # 4. Удаляем записи из листа ожидания
+            try:
+                waiting_list_count = WaitingList.query.filter_by(tournament_id=tournament_id).count()
+                logger.info(f"[delete_tournament] Найдено записей WaitingList: {waiting_list_count}")
+                if waiting_list_count > 0:
+                    WaitingList.query.filter_by(tournament_id=tournament_id).delete()
+                    logger.info(f"[delete_tournament] Удалено {waiting_list_count} записей WaitingList")
+            except Exception as e:
+                logger.warning(f"[delete_tournament] Ошибка при удалении WaitingList: {e}")
+                # Продолжаем, если таблица не существует
             
-            # 5. Удаляем турнир
-            tournament_name = tournament.name
+            # 5. Удаляем уведомления
+            try:
+                notifications_count = Notification.query.filter_by(tournament_id=tournament_id).count()
+                logger.info(f"[delete_tournament] Найдено уведомлений: {notifications_count}")
+                if notifications_count > 0:
+                    Notification.query.filter_by(tournament_id=tournament_id).delete()
+                    logger.info(f"[delete_tournament] Удалено {notifications_count} уведомлений")
+            except Exception as e:
+                logger.warning(f"[delete_tournament] Ошибка при удалении Notification: {e}")
+                # Продолжаем, если таблица не существует
+            
+            # 6. Удаляем участников
+            participants_count = Participant.query.filter_by(tournament_id=tournament_id).count()
+            logger.info(f"[delete_tournament] Найдено участников: {participants_count}")
+            if participants_count > 0:
+                Participant.query.filter_by(tournament_id=tournament_id).delete()
+                logger.info(f"[delete_tournament] Удалено {participants_count} участников")
+            
+            # 7. Удаляем турнир
+            logger.info(f"[delete_tournament] Удаляем турнир {tournament_id}")
             db.session.delete(tournament)
             
+            logger.info(f"[delete_tournament] Выполняем commit")
             db.session.commit()
             
             logger.info(f"Турнир '{tournament_name}' (ID: {tournament_id}) удален админом {admin_email}")
@@ -962,8 +1012,13 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Ошибка при удалении турнира {tournament_id}: {str(e)}")
-            return jsonify({'error': 'Ошибка при удалении турнира'}), 500
+            error_message = str(e)
+            error_type = type(e).__name__
+            logger.error(f"[delete_tournament] Ошибка при удалении турнира {tournament_id}: {error_type}: {error_message}")
+            logger.error(f"[delete_tournament] Traceback:", exc_info=True)
+            return jsonify({
+                'error': f'Ошибка при удалении турнира: {error_type}: {error_message}'
+            }), 500
 
     # ===== МАТЧИ (дополнительные маршруты) =====
     

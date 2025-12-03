@@ -891,12 +891,15 @@ function deleteTournament(tournamentId) {
                 // Если ответ не успешный, пытаемся получить текст ошибки
                 return response.text().then(text => {
                     console.error('Ошибка сервера (текст):', text);
+                    console.error('Статус ответа:', response.status, response.statusText);
                     let errorMessage = `Ошибка сервера: ${response.status} ${response.statusText}`;
                     try {
                         const errorData = JSON.parse(text);
                         errorMessage = errorData.error || errorMessage;
+                        console.error('Ошибка из JSON:', errorData);
                     } catch (e) {
                         // Если не JSON, используем текст как есть
+                        console.error('Не удалось распарсить JSON, используем текст:', text);
                         if (text) {
                             errorMessage = text;
                         }
