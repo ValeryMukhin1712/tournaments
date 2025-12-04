@@ -1322,12 +1322,12 @@ async function loadRallyJournal(matchId) {
         };
         
         // Функция для определения направления стрелки на основе счёта и команды
-        // Алгоритм:
-        // - Если игрок из синей команды (participant1) и (левая часть счёта + результат) % 2 === 0 → розовая стрелка (↗)
-        // - Если игрок из синей команды (participant1) и (левая часть счёта + результат) % 2 !== 0 → голубая стрелка (↘)
-        // - Если игрок из красной команды (participant2) и (правая часть счёта + результат) % 2 === 0 → розовая стрелка (↗)
-        // - Если игрок из красной команды (participant2) и (правая часть счёта + результат) % 2 !== 0 → голубая стрелка (↘)
-        // где результат = 1 если подающий выиграл, 0 если проиграл
+        // Алгоритм (ВРЕМЕННО ИЗМЕНЁН ДЛЯ ТЕСТИРОВАНИЯ):
+        // - Если игрок из синей команды (participant1) и (левая часть счёта) % 2 === 0 → розовая стрелка (↗)
+        // - Если игрок из синей команды (participant1) и (левая часть счёта) % 2 !== 0 → голубая стрелка (↘)
+        // - Если игрок из красной команды (participant2) и (правая часть счёта) % 2 === 0 → розовая стрелка (↗)
+        // - Если игрок из красной команды (participant2) и (правая часть счёта) % 2 !== 0 → голубая стрелка (↘)
+        // ВАЖНО: Формула временно изменена с (score + result) на (score) для тестирования
         const getArrowDirection = (serverName, score, result) => {
             if (!serverName || !score || result === undefined) return null;
             
@@ -1350,11 +1350,11 @@ async function loadRallyJournal(matchId) {
             
             let isEven;
             if (isParticipant1) {
-                // Для синей команды проверяем левую часть счёта: (score + result) % 2 === 0
-                isEven = (leftScore + resultValue) % 2 === 0;
+                // Для синей команды проверяем левую часть счёта: score % 2 === 0
+                isEven = (leftScore) % 2 === 0;
             } else if (isParticipant2) {
-                // Для красной команды проверяем правую часть счёта: (score + result) % 2 === 0
-                isEven = (rightScore + resultValue) % 2 === 0;
+                // Для красной команды проверяем правую часть счёта: score % 2 === 0
+                isEven = (rightScore) % 2 === 0;
             } else {
                 return null;
             }
@@ -1429,10 +1429,17 @@ async function loadRallyJournal(matchId) {
         
         setNumbers.forEach(setNum => {
             const setRallies = ralliesBySet[setNum];
+            const setNumInt = parseInt(setNum);
+            const finalScore = setScores[setNumInt];
+            let scoreBadge = '';
+            if (finalScore && finalScore.score1 !== null && finalScore.score2 !== null) {
+                scoreBadge = `<span class="badge bg-primary ms-2">${finalScore.score1}:${finalScore.score2}</span>`;
+            }
             html += `
                 <div class="mb-4">
                     <h6 class="border-bottom pb-2 mb-3">
                         <i class="fas fa-trophy me-2"></i>Сет ${setNum}
+                        ${scoreBadge}
                         <span class="badge bg-secondary ms-2">${setRallies.length} розыгрышей</span>
                     </h6>
                     <div class="table-responsive">
@@ -1464,6 +1471,65 @@ async function loadRallyJournal(matchId) {
                     ? '<span class="badge bg-success">1</span>'
                     : '<span class="badge bg-danger">0</span>';
                 
+                // Вычисляем счёт ДО розыгрыша (выносим за пределы блока if для доступности)
+                const resultValueForArrow = rally.server_won ? 1 : 0; // 1 если подающий выиграл, 0 если проиграл
+                
+                // Парсим счёт ПОСЛЕ розыгрыша
+                const scoreParts = rally.score.split(':');
+                let scoreBefore = rally.score; // По умолчанию используем счёт ПОСЛЕ
+                
+                if (scoreParts.length === 2) {
+                    let scoreAfterLeft = parseInt(scoreParts[0]) || 0;
+                    let scoreAfterRight = parseInt(scoreParts[1]) || 0;
+                    
+                    // Получаем swap_count из данных розыгрыша (если сохранён)
+                    const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                    
+                    // Определяем, кто выиграл розыгрыш, чтобы вычислить счёт ДО розыгрыша
+                    const serverColor = getParticipantColor(rally.server_name);
+                    const receiverColor = getParticipantColor(rally.receiver_name);
+                    const isServerParticipant1 = serverColor === '#007bff'; // синий = participant1
+                    const isServerParticipant2 = serverColor === '#dc3545'; // красный = participant2
+                    const isReceiverParticipant1 = receiverColor === '#007bff';
+                    const isReceiverParticipant2 = receiverColor === '#dc3545';
+                    
+                    // Определяем, какой счёт (левый или правый) соответствует participant1 на основе swap_count
+                    let participant1Score, participant2Score;
+                    if (swapCount % 2 === 0) {
+                        // Чётное количество смен: левый счёт → participant1, правый → participant2
+                        participant1Score = scoreAfterLeft;
+                        participant2Score = scoreAfterRight;
+                    } else {
+                        // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                        participant1Score = scoreAfterRight;
+                        participant2Score = scoreAfterLeft;
+                    }
+                    
+                    // Вычисляем счёт ДО розыгрыша
+                    if (rally.server_won) {
+                        // Выиграл подающий - его счёт увеличился на 1
+                        if (isServerParticipant1) {
+                            participant1Score = Math.max(0, participant1Score - 1);
+                        } else if (isServerParticipant2) {
+                            participant2Score = Math.max(0, participant2Score - 1);
+                        }
+                    } else {
+                        // Выиграл принимающий - его счёт увеличился на 1
+                        if (isReceiverParticipant1) {
+                            participant1Score = Math.max(0, participant1Score - 1);
+                        } else if (isReceiverParticipant2) {
+                            participant2Score = Math.max(0, participant2Score - 1);
+                        }
+                    }
+                    
+                    // Формируем счёт ДО розыгрыша с учётом swap_count
+                    if (swapCount % 2 === 0) {
+                        scoreBefore = `${participant1Score}:${participant2Score}`;
+                    } else {
+                        scoreBefore = `${participant2Score}:${participant1Score}`;
+                    }
+                }
+                
                 // Форматируем имя подающего: разделяем имя и позицию, определяем цвет и направление стрелки
                 let serverNameHtml = '';
                 if (rally.server_name) {
@@ -1471,67 +1537,7 @@ async function loadRallyJournal(matchId) {
                     const serverNameColor = getParticipantColor(rally.server_name);
                     const nameColorStyle = serverNameColor ? `color: ${serverNameColor};` : '';
                     
-                    // Определяем направление стрелки на основе счёта ДО розыгрыша, команды и результата розыгрыша
-                    // Используем swap_count для правильного определения, какой счёт соответствует participant1
-                    const resultValue = rally.server_won ? 1 : 0; // 1 если подающий выиграл, 0 если проиграл
-                    
-                    // Парсим счёт ПОСЛЕ розыгрыша
-                    const scoreParts = rally.score.split(':');
-                    let scoreBefore = rally.score; // По умолчанию используем счёт ПОСЛЕ
-                    
-                    if (scoreParts.length === 2) {
-                        let scoreAfterLeft = parseInt(scoreParts[0]) || 0;
-                        let scoreAfterRight = parseInt(scoreParts[1]) || 0;
-                        
-                        // Получаем swap_count из данных розыгрыша (если сохранён)
-                        const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
-                        
-                        // Определяем, кто выиграл розыгрыш, чтобы вычислить счёт ДО розыгрыша
-                        const serverColor = getParticipantColor(rally.server_name);
-                        const receiverColor = getParticipantColor(rally.receiver_name);
-                        const isServerParticipant1 = serverColor === '#007bff'; // синий = participant1
-                        const isServerParticipant2 = serverColor === '#dc3545'; // красный = participant2
-                        const isReceiverParticipant1 = receiverColor === '#007bff';
-                        const isReceiverParticipant2 = receiverColor === '#dc3545';
-                        
-                        // Определяем, какой счёт (левый или правый) соответствует participant1 на основе swap_count
-                        let participant1Score, participant2Score;
-                        if (swapCount % 2 === 0) {
-                            // Чётное количество смен: левый счёт → participant1, правый → participant2
-                            participant1Score = scoreAfterLeft;
-                            participant2Score = scoreAfterRight;
-                        } else {
-                            // Нечётное количество смен: правый счёт → participant1, левый → participant2
-                            participant1Score = scoreAfterRight;
-                            participant2Score = scoreAfterLeft;
-                        }
-                        
-                        // Вычисляем счёт ДО розыгрыша
-                        if (rally.server_won) {
-                            // Выиграл подающий - его счёт увеличился на 1
-                            if (isServerParticipant1) {
-                                participant1Score = Math.max(0, participant1Score - 1);
-                            } else if (isServerParticipant2) {
-                                participant2Score = Math.max(0, participant2Score - 1);
-                            }
-                        } else {
-                            // Выиграл принимающий - его счёт увеличился на 1
-                            if (isReceiverParticipant1) {
-                                participant1Score = Math.max(0, participant1Score - 1);
-                            } else if (isReceiverParticipant2) {
-                                participant2Score = Math.max(0, participant2Score - 1);
-                            }
-                        }
-                        
-                        // Формируем счёт ДО розыгрыша с учётом swap_count
-                        if (swapCount % 2 === 0) {
-                            scoreBefore = `${participant1Score}:${participant2Score}`;
-                        } else {
-                            scoreBefore = `${participant2Score}:${participant1Score}`;
-                        }
-                    }
-                    
-                    const arrowInfo = getArrowDirection(rally.server_name, scoreBefore, resultValue);
+                    const arrowInfo = getArrowDirection(rally.server_name, scoreBefore, resultValueForArrow);
                     
                     if (arrowInfo && serverParts.length >= 1) {
                         // Есть информация о стрелке: имя жирным курсивом с цветом участника, позиция стрелочкой 80%
@@ -1560,11 +1566,42 @@ async function loadRallyJournal(matchId) {
                         <td>${serverNameHtml}</td>
                         <td>${receiverNameHtml}</td>
                         <td class="text-center">${resultBadge}</td>
-                        <td class="text-center"><strong>${rally.score}</strong></td>
+                        <td class="text-center"><strong>${scoreBefore}</strong></td>
                     </tr>
                 `;
             });
             
+            // Добавляем финальный счёт сета после последней записи
+            if (finalScore && finalScore.score1 !== null && finalScore.score2 !== null) {
+                // Определяем swap_count из последнего розыгрыша сета (если есть)
+                const lastRally = setRallies[setRallies.length - 1];
+                const swapCount = lastRally && lastRally.swap_count !== undefined && lastRally.swap_count !== null ? lastRally.swap_count : 0;
+                
+                // Определяем, какой счёт соответствует participant1 (синий) и participant2 (красный)
+                let blueScore, redScore;
+                if (swapCount % 2 === 0) {
+                    // Чётное количество смен: score1 → participant1 (синий), score2 → participant2 (красный)
+                    blueScore = finalScore.score1;
+                    redScore = finalScore.score2;
+                } else {
+                    // Нечётное количество смен: score2 → participant1 (синий), score1 → participant2 (красный)
+                    blueScore = finalScore.score2;
+                    redScore = finalScore.score1;
+                }
+                
+                html += `
+                    <tr style="background-color: #f8f9fa; font-weight: bold;">
+                        <td colspan="5" class="text-end"><strong>Финальный счёт сета:</strong></td>
+                        <td class="text-center">
+                            <strong>
+                                <span style="color: #007bff;">${blueScore}</span>
+                                <span>:</span>
+                                <span style="color: #dc3545;">${redScore}</span>
+                            </strong>
+                        </td>
+                    </tr>
+                `;
+            }
             
             html += `
                             </tbody>
@@ -1639,6 +1676,28 @@ function exportRallyJournalToExcel() {
         
         const rallies = JSON.parse(ralliesData);
         
+        // Получаем данные участников из модального окна для вычисления scoreBefore
+        const participant1 = modal ? (modal.getAttribute('data-participant1') || '') : '';
+        const participant2 = modal ? (modal.getAttribute('data-participant2') || '') : '';
+        
+        // Функция для определения цвета участника (упрощённая версия)
+        const getParticipantColor = (serverName) => {
+            if (!serverName || !participant1 || !participant2) return null;
+            const serverParts = serverName.split(' - ');
+            const serverNameOnly = serverParts[0].trim();
+            const normalizedServerName = serverNameOnly.toLowerCase().trim();
+            const normalizedP1 = participant1.toLowerCase().trim();
+            const normalizedP2 = participant2.toLowerCase().trim();
+            
+            if (normalizedServerName === normalizedP1 || normalizedServerName.includes(normalizedP1) || normalizedP1.includes(normalizedServerName)) {
+                return '#007bff'; // синий для participant1
+            }
+            if (normalizedServerName === normalizedP2 || normalizedServerName.includes(normalizedP2) || normalizedP2.includes(normalizedServerName)) {
+                return '#dc3545'; // красный для participant2
+            }
+            return null;
+        };
+        
         // Формируем CSV
         let csv = '\uFEFF'; // BOM для правильной кодировки UTF-8 в Excel
         csv += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
@@ -1655,9 +1714,54 @@ function exportRallyJournalToExcel() {
             const serverName = rally.server_name || 'Не указан';
             const receiverName = rally.receiver_name || 'Не указан';
             const result = rally.server_won ? '1' : '0';
-            const score = rally.score || '0:0';
             
-            csv += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${score}"\n`;
+            // Вычисляем счёт ДО розыгрыша
+            let scoreBefore = rally.score || '0:0'; // По умолчанию используем счёт ПОСЛЕ
+            const scoreParts = (rally.score || '0:0').split(':');
+            if (scoreParts.length === 2) {
+                let scoreAfterLeft = parseInt(scoreParts[0]) || 0;
+                let scoreAfterRight = parseInt(scoreParts[1]) || 0;
+                
+                const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                
+                const serverColor = getParticipantColor(rally.server_name);
+                const receiverColor = getParticipantColor(rally.receiver_name);
+                const isServerParticipant1 = serverColor === '#007bff';
+                const isServerParticipant2 = serverColor === '#dc3545';
+                const isReceiverParticipant1 = receiverColor === '#007bff';
+                const isReceiverParticipant2 = receiverColor === '#dc3545';
+                
+                let participant1Score, participant2Score;
+                if (swapCount % 2 === 0) {
+                    participant1Score = scoreAfterLeft;
+                    participant2Score = scoreAfterRight;
+                } else {
+                    participant1Score = scoreAfterRight;
+                    participant2Score = scoreAfterLeft;
+                }
+                
+                if (rally.server_won) {
+                    if (isServerParticipant1) {
+                        participant1Score = Math.max(0, participant1Score - 1);
+                    } else if (isServerParticipant2) {
+                        participant2Score = Math.max(0, participant2Score - 1);
+                    }
+                } else {
+                    if (isReceiverParticipant1) {
+                        participant1Score = Math.max(0, participant1Score - 1);
+                    } else if (isReceiverParticipant2) {
+                        participant2Score = Math.max(0, participant2Score - 1);
+                    }
+                }
+                
+                if (swapCount % 2 === 0) {
+                    scoreBefore = `${participant1Score}:${participant2Score}`;
+                } else {
+                    scoreBefore = `${participant2Score}:${participant1Score}`;
+                }
+            }
+            
+            csv += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${scoreBefore}"\n`;
         });
         
         // Создаём blob и скачиваем

@@ -25,6 +25,85 @@
             position: fixed;
         }
         
+        /* Сообщение о необходимости повернуть экран */
+        .rotate-screen-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            z-index: 99999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .rotate-screen-message .icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: rotate 2s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(90deg);
+            }
+        }
+        
+        .rotate-screen-message h2 {
+            font-size: 24px;
+            color: #2E7D32;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .rotate-screen-message p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        /* Скрываем основной контент при вертикальной ориентации */
+        @media screen and (max-height: 500px) and (orientation: portrait) {
+            .container {
+                display: none !important;
+            }
+            
+            .rotate-screen-message {
+                display: flex !important;
+            }
+        }
+        
+        /* Также для случаев, когда высота viewport <= 500px независимо от ориентации */
+        @media screen and (max-height: 500px) {
+            .container {
+                display: none !important;
+            }
+            
+            .rotate-screen-message {
+                display: flex !important;
+            }
+        }
+        
+        /* Скрываем основной контент при ширине viewport <= 500px */
+        @media screen and (max-width: 500px) {
+            .container {
+                display: none !important;
+            }
+            
+            .rotate-screen-message {
+                display: flex !important;
+            }
+        }
+        
         .container {
             width: 100%;
             height: 100%;
@@ -1387,6 +1466,13 @@
     </style>
 </head>
 <body>
+    <!-- Сообщение о необходимости повернуть экран -->
+    <div class="rotate-screen-message" id="rotateScreenMessage">
+        <div class="icon">📱</div>
+        <h2>Поверните экран</h2>
+        <p>Для удобной работы с судейством<br>поверните устройство в горизонтальное положение</p>
+    </div>
+    
     <!-- Чекбокс для показа свойств экрана -->
     <div class="screen-info-checkbox-container">
         <label for="showScreenInfo">
@@ -3404,8 +3490,31 @@
                 });
             }
             
+            // Функция для проверки ориентации и показа/скрытия сообщения о повороте экрана
+            function checkOrientation() {
+                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+                const rotateMessage = document.getElementById('rotateScreenMessage');
+                const container = document.querySelector('.container');
+                
+                if (rotateMessage && container) {
+                    // Показываем сообщение, если высота viewport <= 500px или ширина viewport <= 500px
+                    if (viewportHeight <= 500 || viewportWidth <= 500) {
+                        rotateMessage.style.display = 'flex';
+                        container.style.display = 'none';
+                    } else {
+                        rotateMessage.style.display = 'none';
+                        container.style.display = 'flex';
+                    }
+                }
+            }
+            
+            // Проверяем ориентацию при загрузке страницы
+            checkOrientation();
+            
             // Обновляем информацию при изменении размера окна
             window.addEventListener('resize', function() {
+                checkOrientation(); // Проверяем ориентацию при изменении размера
                 if (debugScreenInfo && debugScreenInfo.classList.contains('visible')) {
                     updateDebugScreenInfo();
                 }
@@ -3414,6 +3523,7 @@
             });
             window.addEventListener('orientationchange', function() {
                 setTimeout(function() {
+                    checkOrientation(); // Проверяем ориентацию при изменении ориентации
                     if (debugScreenInfo && debugScreenInfo.classList.contains('visible')) {
                         updateDebugScreenInfo();
                     }
