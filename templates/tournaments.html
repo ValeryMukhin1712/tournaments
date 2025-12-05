@@ -373,8 +373,8 @@
                         <label for="participantName{{ tournament.id }}" class="form-label">Введите ваше имя</label>
                         <input type="text" class="form-control" id="participantName{{ tournament.id }}" 
                                name="participant_name"
-                               placeholder="Введите ваше имя (необязательно при заявке через Telegram)">
-                        <div class="form-text"><i class="fas fa-info-circle me-1"></i>Либо введите имя, либо выберите подачу через Telegram ниже</div>
+                               placeholder="Введите ваше имя">
+                        <div class="form-text"><i class="fas fa-info-circle me-1"></i>Введите ваше имя для подачи заявки</div>
                     </div>
                     <div class="mb-3">
                         <label for="skillLevel{{ tournament.id }}" class="form-label">Оцените ваш уровень *</label>
@@ -388,7 +388,8 @@
                             <option value="супер адвансер">супер адвансер</option>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <!-- Временно скрыто: чекбокс Telegram -->
+                    <div class="mb-3" style="display: none;">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="enableTelegram{{ tournament.id }}" 
                                    name="enable_telegram" value="true">
@@ -710,7 +711,7 @@ function submitJoinRequest(tournamentId) {
     const enableTelegram = document.getElementById('enableTelegram' + tournamentId).checked;
     
     if (!enableTelegram && !participantName) {
-        alert('Пожалуйста, введите ваше имя или выберите подачу через Telegram');
+        alert('Пожалуйста, введите ваше имя');
         return;
     }
     
