@@ -876,36 +876,55 @@ async function loadRallyJournalForAdmin(matchId) {
                 `;
             });
             
-            // Добавляем финальный счёт сета после последней записи
+            // Добавляем финальный счёт сета после последней записи только если сет завершён
             if (finalScore && finalScore.score1 !== null && finalScore.score2 !== null) {
-                // Определяем swap_count из последнего розыгрыша сета (если есть)
-                const lastRally = setRallies[setRallies.length - 1];
-                const swapCount = lastRally && lastRally.swap_count !== undefined && lastRally.swap_count !== null ? lastRally.swap_count : 0;
+                // Проверяем, завершён ли сет
+                const score1 = finalScore.score1;
+                const score2 = finalScore.score2;
+                const difference = Math.abs(score1 - score2);
+                const pointsToWin = 21; // Стандартное значение для бадминтона
                 
-                // Определяем, какой счёт соответствует participant1 (синий) и participant2 (красный)
-                let blueScore, redScore;
-                if (swapCount % 2 === 0) {
-                    // Чётное количество смен: score1 → participant1 (синий), score2 → participant2 (красный)
-                    blueScore = finalScore.score1;
-                    redScore = finalScore.score2;
-                } else {
-                    // Нечётное количество смен: score2 → participant1 (синий), score1 → participant2 (красный)
-                    blueScore = finalScore.score2;
-                    redScore = finalScore.score1;
+                // Проверяем, есть ли розыгрыши в следующем сете (более надёжная проверка)
+                const hasRalliesInNextSet = ralliesBySet[setNumInt + 1] && ralliesBySet[setNumInt + 1].length > 0;
+                
+                // Сет завершён, если:
+                // 1. Есть розыгрыши в следующем сете (значит текущий сет точно завершён)
+                // 2. ИЛИ (разница >= 2 И один из счётов >= pointsToWin) - стандартное правило бадминтона
+                // 3. ИЛИ один из счётов >= 30 (максимальный счёт)
+                const isSetCompleted = hasRalliesInNextSet || 
+                    (difference >= 2 && (score1 >= pointsToWin || score2 >= pointsToWin)) ||
+                    (score1 >= 30 || score2 >= 30);
+                
+                if (isSetCompleted) {
+                    // Определяем swap_count из последнего розыгрыша сета (если есть)
+                    const lastRally = setRallies[setRallies.length - 1];
+                    const swapCount = lastRally && lastRally.swap_count !== undefined && lastRally.swap_count !== null ? lastRally.swap_count : 0;
+                    
+                    // Определяем, какой счёт соответствует participant1 (синий) и participant2 (красный)
+                    let blueScore, redScore;
+                    if (swapCount % 2 === 0) {
+                        // Чётное количество смен: score1 → participant1 (синий), score2 → participant2 (красный)
+                        blueScore = finalScore.score1;
+                        redScore = finalScore.score2;
+                    } else {
+                        // Нечётное количество смен: score2 → participant1 (синий), score1 → participant2 (красный)
+                        blueScore = finalScore.score2;
+                        redScore = finalScore.score1;
+                    }
+                    
+                    html += `
+                        <tr style="background-color: #f8f9fa; font-weight: bold;">
+                            <td colspan="5" class="text-end"><strong>Счёт сета:</strong></td>
+                            <td class="text-center">
+                                <strong>
+                                    <span style="color: #007bff;">${blueScore}</span>
+                                    <span>:</span>
+                                    <span style="color: #dc3545;">${redScore}</span>
+                                </strong>
+                            </td>
+                        </tr>
+                    `;
                 }
-                
-                html += `
-                    <tr style="background-color: #f8f9fa; font-weight: bold;">
-                        <td colspan="5" class="text-end"><strong>Финальный счёт сета:</strong></td>
-                        <td class="text-center">
-                            <strong>
-                                <span style="color: #007bff;">${blueScore}</span>
-                                <span>:</span>
-                                <span style="color: #dc3545;">${redScore}</span>
-                            </strong>
-                        </td>
-                    </tr>
-                `;
             }
             
             html += `
