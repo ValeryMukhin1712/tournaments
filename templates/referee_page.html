@@ -23,12 +23,15 @@
             width: 100vw;
             overflow: hidden;
             position: fixed;
+            max-width: 100vw; /* Предотвращаем выход за границы экрана */
         }
         
         .container {
             width: 100%;
             height: 100%;
             display: flex;
+            max-width: 100vw; /* Предотвращаем выход за границы экрана */
+            overflow: hidden;
         }
         
         /* Панель управления слева */
@@ -142,6 +145,8 @@
             position: relative;
             background: #ADDFAD;
             overflow: hidden;
+            min-width: 0; /* Позволяет flex-элементу сжиматься */
+            max-width: 100%; /* Не выходит за границы контейнера */
         }
         
         /* Сетка корта */
@@ -199,6 +204,8 @@
             align-items: center;
             gap: 20px;
             z-index: 10;
+            max-width: 95vw; /* Предотвращаем выход за границы экрана */
+            box-sizing: border-box;
         }
         
         .score {
@@ -208,6 +215,8 @@
             text-align: center;
             cursor: pointer;
             user-select: none; /* Предотвращает выделение текста при клике */
+            max-width: 100%; /* Не выходит за границы контейнера */
+            box-sizing: border-box;
         }
         
         .score-left {
@@ -1205,6 +1214,190 @@
             #bottom_left_player_input,
             #name_bottom_right {
                 bottom: 100px !important;
+            }
+        }
+        
+        /* Адаптация для узких экранов - уменьшаем все элементы пропорционально */
+        @media screen and (max-width: 800px) {
+            /* Уменьшаем размер счёта */
+            .score {
+                font-size: 15vw !important; /* Адаптивный размер относительно ширины экрана */
+                min-width: 10vw !important;
+            }
+            
+            /* Уменьшаем gap между элементами счёта */
+            .scoreboard {
+                gap: 10px !important;
+            }
+            
+            /* Уменьшаем кнопку сброса */
+            .reset-btn {
+                padding: 10px 15px !important;
+                font-size: 12px !important;
+            }
+            
+            /* Уменьшаем размер полей ввода имён */
+            .player-name {
+                font-size: 3vw !important;
+                width: 12vw !important;
+                max-width: 120px !important; /* Ограничиваем максимальную ширину */
+                padding: 6px 10px !important;
+            }
+            
+            /* Адаптируем позиционирование полей имён для узких экранов */
+            #top_left_player_input,
+            #bottom_left_player_input {
+                left: 5% !important; /* Уменьшаем отступ слева */
+            }
+            
+            #name_top_right,
+            #name_bottom_right {
+                right: 5% !important; /* Уменьшаем отступ справа */
+            }
+            
+            /* Уменьшаем панель управления */
+            .control-panel {
+                width: 60px !important;
+            }
+            
+            .control-panel button {
+                width: 50px !important;
+                height: 50px !important;
+                font-size: 16px !important;
+            }
+            
+            /* Уменьшаем индикаторы подачи */
+            .server-indicator img {
+                width: 30px !important;
+                height: 30px !important;
+            }
+            
+            /* Адаптация для режима просмотра */
+            .view-mode .score {
+                font-size: 18vw !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 4vw !important;
+            }
+        }
+        
+        /* Адаптация для очень узких экранов */
+        @media screen and (max-width: 600px) {
+            /* Ещё больше уменьшаем размер счёта */
+            .score {
+                font-size: 12vw !important;
+                min-width: 8vw !important;
+            }
+            
+            .scoreboard {
+                gap: 5px !important;
+            }
+            
+            .reset-btn {
+                padding: 8px 12px !important;
+                font-size: 10px !important;
+            }
+            
+            .reset-btn-text {
+                display: none !important; /* Скрываем текст на очень узких экранах */
+            }
+            
+            .player-name {
+                font-size: 2.5vw !important;
+                width: 10vw !important;
+                max-width: 100px !important;
+                padding: 4px 8px !important;
+            }
+            
+            #top_left_player_input,
+            #bottom_left_player_input {
+                left: 3% !important;
+            }
+            
+            #name_top_right,
+            #name_bottom_right {
+                right: 3% !important;
+            }
+            
+            .control-panel {
+                width: 50px !important;
+            }
+            
+            .control-panel button {
+                width: 42px !important;
+                height: 42px !important;
+                font-size: 14px !important;
+            }
+            
+            .server-indicator img {
+                width: 25px !important;
+                height: 25px !important;
+            }
+            
+            .view-mode .score {
+                font-size: 15vw !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 3.5vw !important;
+            }
+        }
+        
+        /* Адаптация для экстремально узких экранов */
+        @media screen and (max-width: 400px) {
+            .score {
+                font-size: 10vw !important;
+                min-width: 6vw !important;
+            }
+            
+            .scoreboard {
+                gap: 3px !important;
+            }
+            
+            .reset-btn {
+                padding: 6px 10px !important;
+                font-size: 9px !important;
+            }
+            
+            .player-name {
+                font-size: 2vw !important;
+                width: 8vw !important;
+                max-width: 80px !important;
+                padding: 3px 6px !important;
+            }
+            
+            #top_left_player_input,
+            #bottom_left_player_input {
+                left: 2% !important;
+            }
+            
+            #name_top_right,
+            #name_bottom_right {
+                right: 2% !important;
+            }
+            
+            .control-panel {
+                width: 40px !important;
+            }
+            
+            .control-panel button {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 12px !important;
+            }
+            
+            .server-indicator img {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            
+            .view-mode .score {
+                font-size: 12vw !important;
+            }
+            
+            .view-mode .player-name {
+                font-size: 3vw !important;
             }
         }
         
