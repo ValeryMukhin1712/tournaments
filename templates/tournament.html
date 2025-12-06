@@ -2474,24 +2474,35 @@ async function addNewPlayerToDatabase(playerName) {
         }
     } catch (error) {
         console.error('Ошибка при добавлении игрока:', error);
-        return { success: false, error: error.message };
+        // Улучшаем сообщение об ошибке
+        let errorMessage = 'Ошибка при добавлении игрока';
+        if (error.message) {
+            errorMessage = error.message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
+        } else {
+            errorMessage = 'Неизвестная ошибка при добавлении игрока';
+        }
+        return { success: false, error: errorMessage };
     }
 }
 
 // Создание команды из двух игроков
 async function createPairTeam(player1Name, player2Name) {
-    // Предотвращаем повторную отправку
-    if (isCreatingTeam) {
-        console.log('Команда уже создается, пропускаем повторный вызов');
-        return;
-    }
+    // Флаг isCreatingTeam уже проверен в обработчике клика, здесь не проверяем
     
     if (!player1Name || !player2Name) {
+        isCreatingTeam = false;
+        const addPairTeamBtn = document.getElementById('addPairTeamBtn');
+        if (addPairTeamBtn) addPairTeamBtn.disabled = false;
         alert('Пожалуйста, выберите или введите имена обоих игроков');
         return;
     }
     
     if (player1Name === player2Name) {
+        isCreatingTeam = false;
+        const addPairTeamBtn = document.getElementById('addPairTeamBtn');
+        if (addPairTeamBtn) addPairTeamBtn.disabled = false;
         alert('Игроки должны быть разными');
         return;
     }
@@ -2501,6 +2512,9 @@ async function createPairTeam(player1Name, player2Name) {
     const playersInTeams = getPlayersInTeams();
     
     if (participantNames.has(player1Name) || playersInTeams.has(player1Name)) {
+        isCreatingTeam = false;
+        const addPairTeamBtn = document.getElementById('addPairTeamBtn');
+        if (addPairTeamBtn) addPairTeamBtn.disabled = false;
         const reason = playersInTeams.has(player1Name)
             ? `Игрок "${player1Name}" уже участвует в турнире в составе команды`
             : `Игрок "${player1Name}" уже участвует в турнире`;
@@ -2508,6 +2522,9 @@ async function createPairTeam(player1Name, player2Name) {
         return;
     }
     if (participantNames.has(player2Name) || playersInTeams.has(player2Name)) {
+        isCreatingTeam = false;
+        const addPairTeamBtn = document.getElementById('addPairTeamBtn');
+        if (addPairTeamBtn) addPairTeamBtn.disabled = false;
         const reason = playersInTeams.has(player2Name)
             ? `Игрок "${player2Name}" уже участвует в турнире в составе команды`
             : `Игрок "${player2Name}" уже участвует в турнире`;
@@ -2527,7 +2544,11 @@ async function createPairTeam(player1Name, player2Name) {
     if (pairPlayer1Select && pairPlayer1Select.value === '__new__' && !player1Exists) {
         const result = await addNewPlayerToDatabase(player1Name);
         if (!result.success) {
-            alert(`Ошибка при добавлении игрока "${player1Name}": ${result.error}`);
+            // Сбрасываем флаг при ошибке
+            isCreatingTeam = false;
+            if (addPairTeamBtn) addPairTeamBtn.disabled = false;
+            const errorMessage = result.error || 'Неизвестная ошибка';
+            alert(`Ошибка при добавлении игрока "${player1Name}": ${errorMessage}`);
             return;
         }
     }
@@ -2536,25 +2557,28 @@ async function createPairTeam(player1Name, player2Name) {
     if (pairPlayer2Select && pairPlayer2Select.value === '__new__' && !player2Exists) {
         const result = await addNewPlayerToDatabase(player2Name);
         if (!result.success) {
-            alert(`Ошибка при добавлении игрока "${player2Name}": ${result.error}`);
+            // Сбрасываем флаг при ошибке
+            isCreatingTeam = false;
+            if (addPairTeamBtn) addPairTeamBtn.disabled = false;
+            const errorMessage = result.error || 'Неизвестная ошибка';
+            alert(`Ошибка при добавлении игрока "${player2Name}": ${errorMessage}`);
             return;
         }
     }
     
     // Проверка на команды (имена с " - ")
     if (player1Name.includes(' - ') || player2Name.includes(' - ')) {
+        isCreatingTeam = false;
+        const addPairTeamBtn = document.getElementById('addPairTeamBtn');
+        if (addPairTeamBtn) addPairTeamBtn.disabled = false;
         alert('Имена игроков не могут содержать " - ". Это формат для команд.');
         return;
     }
     
     const teamName = `${player1Name} - ${player2Name}`;
     
-    // Устанавливаем флаг
-    isCreatingTeam = true;
-    
-    // Отключаем кнопку
-    const addPairTeamBtn = document.getElementById('addPairTeamBtn');
-    if (addPairTeamBtn) addPairTeamBtn.disabled = true;
+    // Флаг уже установлен в обработчике клика
+    // Кнопка уже отключена в обработчике клика
     
     try {
         const basePath = window.BASE_PATH || '';
@@ -2601,10 +2625,11 @@ function initPairPlayersFormHandlers() {
         return;
     }
     
-    // Если обработчики уже инициализированы, не добавляем их снова
-    if (pairPlayersFormHandlersInitialized) {
-        console.log('Обработчики формы "Создать команду" уже инициализированы');
-        return;
+    // Если обработчики уже инициализированы, удаляем старый обработчик перед добавлением нового
+    if (pairPlayersFormHandlersInitialized && pairTeamClickHandler) {
+        console.log('Обработчики формы "Создать команду" уже инициализированы, удаляем старый обработчик');
+        addPairTeamBtn.removeEventListener('click', pairTeamClickHandler);
+        pairTeamClickHandler = null;
     }
     
     const pairPlayer1Select = document.getElementById('pairPlayer1Select');
@@ -2770,15 +2795,18 @@ function initPairPlayersFormHandlers() {
     }
     
     // Обработчик клика на кнопку "Создать команду"
-    addPairTeamBtn.addEventListener('click', function(e) {
+    pairTeamClickHandler = function(e) {
         e.preventDefault();
         e.stopPropagation();
         
-        // Предотвращаем повторную отправку
+        // Предотвращаем повторную отправку - устанавливаем флаг СРАЗУ
         if (isCreatingTeam) {
             console.log('Команда уже создается, пропускаем клик');
             return false;
         }
+        
+        // Устанавливаем флаг ДО выполнения любых операций
+        isCreatingTeam = true;
         
         console.log('Клик на кнопку "Создать команду"');
         
@@ -2789,13 +2817,26 @@ function initPairPlayersFormHandlers() {
         
         if (player1Name && player2Name && player1Name !== player2Name) {
             console.log('Создаем команду:', player1Name, player2Name);
-            createPairTeam(player1Name, player2Name);
+            // Отключаем кнопку сразу
+            addPairTeamBtn.disabled = true;
+            createPairTeam(player1Name, player2Name).catch(error => {
+                // Обработка ошибок, если промис был отклонен
+                console.error('Ошибка при создании команды:', error);
+                isCreatingTeam = false;
+                addPairTeamBtn.disabled = false;
+                alert('Ошибка при создании команды: ' + (error.message || error));
+            });
         } else {
+            // Сбрасываем флаг, если валидация не прошла
+            isCreatingTeam = false;
             alert('Пожалуйста, выберите или введите имена двух разных игроков');
         }
         
         return false;
-    });
+    };
+    
+    // Добавляем обработчик
+    addPairTeamBtn.addEventListener('click', pairTeamClickHandler);
     
     pairPlayersFormHandlersInitialized = true;
     console.log('Обработчики формы "Создать команду" инициализированы');
