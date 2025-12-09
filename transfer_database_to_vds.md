@@ -36,12 +36,21 @@
 
 3. **На VDS сервере:**
    ```bash
+   # Подключитесь к серверу через SSH
    ssh deploy@ваш_сервер
-   cd ~/quick-score
    
-   # Установите правильные права доступа
+   # Перейдите в директорию проекта
+   cd ~/quick-score
+   # или полный путь:
+   # cd /home/deploy/quick-score
+   
+   # Установите правильные права доступа на файл БД
    chmod 644 instance/tournament.db
    chown deploy:deploy instance/tournament.db
+   
+   # Проверьте права (опционально)
+   ls -lh instance/tournament.db
+   # Должно показать: -rw-r--r-- 1 deploy deploy ... tournament.db
    
    # Перезапустите приложение
    sudo systemctl start tournaments
@@ -49,6 +58,12 @@
    # Проверьте статус
    sudo systemctl status tournaments
    ```
+   
+   **Пояснение:**
+   - Команды выполняются **НА СЕРВЕРЕ** после подключения через SSH
+   - `chmod 644` - права: владелец читает/пишет, остальные только читают
+   - `chown deploy:deploy` - владелец и группа = `deploy`
+   - Путь `instance/tournament.db` - относительно директории `~/quick-score`
 
 ## 📋 Способ 2: Применение миграций (альтернатива)
 
@@ -110,8 +125,9 @@
    tar -xzf /tmp/tournament_db_backup.tar.gz -C instance/
    ```
 
-4. **Установите права:**
+4. **Установите права (на сервере):**
    ```bash
+   # На сервере, в директории ~/quick-score
    chmod 644 instance/tournament.db
    chown deploy:deploy instance/tournament.db
    ```
@@ -143,6 +159,7 @@
 cd ~/quick-score
 sudo systemctl stop tournaments
 cp ~/backups/tournament_backup_YYYYMMDD_HHMMSS.db instance/tournament.db
+# Установите права доступа
 chmod 644 instance/tournament.db
 chown deploy:deploy instance/tournament.db
 sudo systemctl start tournaments
