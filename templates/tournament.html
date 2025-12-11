@@ -1222,28 +1222,18 @@
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             {% if match.status in ['в_процессе', 'играют', 'завершен'] %}
-                                            <button class="btn btn-sm btn-outline-info" 
-                                                    onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
-                                                    title="Просмотр журнала розыгрышей">
-                                                <i class="fas fa-book"></i>
-                                            </button>
                                             <button class="btn btn-sm btn-outline-warning" 
                                                     onclick="event.stopPropagation(); openRallyJournalModalV2({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
-                                                    title="Просмотр журнала розыгрышей (Вариант 2)">
+                                                    title="Просмотр журнала розыгрышей">
                                                 <i class="fas fa-book-open"></i>
                                             </button>
                                             {% endif %}
                                         </div>
                                         {% else %}
                                         {% if match.status in ['в_процессе', 'играют', 'завершен'] %}
-                                        <button class="btn btn-sm btn-outline-info" 
-                                                onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
-                                                title="Просмотр журнала розыгрышей">
-                                            <i class="fas fa-book"></i>
-                                        </button>
                                         <button class="btn btn-sm btn-outline-warning" 
                                                 onclick="event.stopPropagation(); openRallyJournalModalV2({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
-                                                title="Просмотр журнала розыгрышей (Вариант 2)">
+                                                title="Просмотр журнала розыгрышей">
                                             <i class="fas fa-book-open"></i>
                                         </button>
                                         {% else %}
@@ -1759,7 +1749,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-book me-2"></i>Журнал розыгрышей (Вариант 2)
+                    <i class="fas fa-book me-2"></i>Журнал розыгрышей
                 </h5>
                 <div class="d-flex align-items-center">
                     <button type="button" class="btn btn-sm btn-outline-success me-2" id="exportRallyJournalBtnV2" onclick="exportRallyJournalToExcel()" title="Выгрузить в Excel" style="display: none;">
@@ -7995,7 +7985,7 @@ if (typeof showAlert === 'undefined') {
     };
 }
 
-function exportRallyJournalToExcel() {
+async function exportRallyJournalToExcel() {
     try {
         // Проверяем, какое модальное окно открыто - обычное или V2
         const modal = document.getElementById('rallyJournalModal');
@@ -8015,23 +8005,128 @@ function exportRallyJournalToExcel() {
         console.log('[exportRallyJournalToExcel] Активное модальное окно:', activeModal ? activeModal.id : 'не найдено');
         
         const matchId = activeModal ? activeModal.getAttribute('data-match-id') : null;
-        const ralliesData = activeModal ? activeModal.getAttribute('data-rallies') : null;
         
-        if (!ralliesData) {
-            showAlert('Нет данных для выгрузки', 'warning');
+        if (!matchId) {
+            showAlert('Не указан ID матча', 'warning');
             return;
         }
         
-        const rallies = JSON.parse(ralliesData);
+        // ВАЖНО: Загружаем актуальные данные розыгрышей из API перед выгрузкой
+        // Это гарантирует, что последний розыгрыш будет включен в файл
+        console.log('[exportRallyJournalToExcel] Загрузка актуальных данных розыгрышей из API для матча', matchId);
+        
+        // Добавляем небольшую задержку, чтобы убедиться, что последний розыгрыш сохранён в БД
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        let rallies;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+            try {
+                const apiUrl = `/api/matches/${matchId}/rallies?_t=${Date.now()}&_r=${Math.random()}&_retry=${retryCount}`;
+                console.log(`[exportRallyJournalToExcel] Запрос к API (попытка ${retryCount + 1}/${maxRetries}):`, apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('[exportRallyJournalToExcel] Ответ от API:', {
+                    success: data.success,
+                    count: data.count,
+                    ralliesCount: data.rallies ? data.rallies.length : 0,
+                    attempt: retryCount + 1
+                });
+                
+                if (!data.success || !data.rallies) {
+                    // Если API не вернул данные, пробуем использовать сохранённые данные
+                    const ralliesData = activeModal ? activeModal.getAttribute('data-rallies') : null;
+                    if (ralliesData) {
+                        console.warn('[exportRallyJournalToExcel] Используем сохранённые данные, так как API не вернул данные');
+                        rallies = JSON.parse(ralliesData);
+                        break;
+                    } else {
+                        throw new Error('Не удалось загрузить данные розыгрышей');
+                    }
+                } else {
+                    rallies = data.rallies;
+                    console.log('[exportRallyJournalToExcel] Загружено розыгрышей из API:', rallies.length);
+                    
+                    // Логируем последние 3 розыгрыша для отладки
+                    if (rallies.length > 0) {
+                        console.log('[exportRallyJournalToExcel] Последние розыгрыши из API:');
+                        const lastRallies = rallies.slice(-3);
+                        lastRallies.forEach((rally, idx) => {
+                            const rallyIndex = rallies.length - lastRallies.length + idx + 1;
+                            console.log(`  [${rallyIndex}] Сет ${rally.set_number}, Счёт: ${rally.score}, Подающий: ${rally.server_name}, Результат: ${rally.server_won ? '1' : '0'}, Время: ${rally.rally_datetime}`);
+                        });
+                    }
+                    
+                    // Если получили данные, выходим из цикла
+                    break;
+                }
+            } catch (error) {
+                retryCount++;
+                console.error(`[exportRallyJournalToExcel] Ошибка при загрузке данных из API (попытка ${retryCount}/${maxRetries}):`, error);
+                
+                if (retryCount >= maxRetries) {
+                    // Пробуем использовать сохранённые данные как резервный вариант
+                    const ralliesData = activeModal ? activeModal.getAttribute('data-rallies') : null;
+                    if (ralliesData) {
+                        console.warn('[exportRallyJournalToExcel] Используем сохранённые данные из-за ошибки API');
+                        rallies = JSON.parse(ralliesData);
+                    } else {
+                        showAlert('Не удалось загрузить данные розыгрышей: ' + error.message, 'danger');
+                        return;
+                    }
+                } else {
+                    // Ждём перед повторной попыткой
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+            }
+        }
         
         if (!rallies || rallies.length === 0) {
             showAlert('Нет розыгрышей для выгрузки', 'warning');
             return;
         }
         
+        console.log('[exportRallyJournalToExcel] Всего розыгрышей для выгрузки:', rallies.length);
+        if (rallies.length > 0) {
+            const lastRally = rallies[rallies.length - 1];
+            console.log('[exportRallyJournalToExcel] Последний розыгрыш для выгрузки:', {
+                index: rallies.length,
+                set: lastRally.set_number,
+                score: lastRally.score,
+                server: lastRally.server_name,
+                result: lastRally.server_won ? '1' : '0',
+                datetime: lastRally.rally_datetime
+            });
+        }
+        
+        // Определяем, какой журнал открыт (V1 или V2)
+        const isV2 = activeModal && activeModal.id === 'rallyJournalModalV2';
+        console.log('[exportRallyJournalToExcel] Используется формат:', isV2 ? 'V2 (интервалы времени, изменённый счёт)' : 'V1 (время, счёт до подачи)');
+        
         // Создаем CSV содержимое
         let csvContent = '\uFEFF'; // BOM для правильной кодировки UTF-8
-        csvContent += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
+        
+        if (isV2) {
+            // Формат V2: интервал времени и изменённый счёт в двух колонках
+            csvContent += '№,Сет,Интервал (сек),Подающий,Принимающий,Результат,Счёт (левая),Счёт (правая)\n';
+        } else {
+            // Формат V1: время и счёт до подачи
+            csvContent += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
+        }
         
         // Получаем данные участников из модального окна для вычисления scoreBefore
         const participant1 = activeModal ? (activeModal.getAttribute('data-participant1') || '') : '';
@@ -8055,67 +8150,227 @@ function exportRallyJournalToExcel() {
             return null;
         };
         
-        rallies.forEach((rally, index) => {
-            const rallyTime = new Date(rally.rally_datetime);
-            const dateStr = rallyTime.toLocaleDateString('ru-RU');
-            const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
+        // Группируем розыгрыши по сетам для V2
+        const ralliesBySet = {};
+        if (isV2) {
+            rallies.forEach(rally => {
+                const setNum = rally.set_number;
+                if (!ralliesBySet[setNum]) {
+                    ralliesBySet[setNum] = [];
+                }
+                ralliesBySet[setNum].push(rally);
             });
+        }
+        
+        let processedCount = 0;
+        
+        if (isV2) {
+            // Обработка для формата V2: интервалы времени и изменённый счёт
+            const setNumbers = Object.keys(ralliesBySet).sort((a, b) => parseInt(a) - parseInt(b));
             
-            const result = rally.server_won ? '1' : '0';
-            const serverName = rally.server_name || 'Не указан';
-            const receiverName = rally.receiver_name || 'Не указан';
-            
-            // Вычисляем счёт ДО розыгрыша
-            let scoreBefore = rally.score; // По умолчанию используем счёт ПОСЛЕ
-            const scoreParts = rally.score.split(':');
-            if (scoreParts.length === 2) {
-                let scoreAfterLeft = parseInt(scoreParts[0]) || 0;
-                let scoreAfterRight = parseInt(scoreParts[1]) || 0;
+            setNumbers.forEach(setNum => {
+                const setRallies = ralliesBySet[setNum];
                 
-                const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                // Вычисляем счёт последовательно для каждого сета (начиная с 0:0)
+                let computedScoreLeft = 0;
+                let computedScoreRight = 0;
                 
-                const serverColor = getParticipantColor(rally.server_name);
-                const receiverColor = getParticipantColor(rally.receiver_name);
-                const isServerParticipant1 = serverColor === '#007bff';
-                const isServerParticipant2 = serverColor === '#dc3545';
-                const isReceiverParticipant1 = receiverColor === '#007bff';
-                const isReceiverParticipant2 = receiverColor === '#dc3545';
-                
-                let participant1Score, participant2Score;
-                if (swapCount % 2 === 0) {
-                    participant1Score = scoreAfterLeft;
-                    participant2Score = scoreAfterRight;
-                } else {
-                    participant1Score = scoreAfterRight;
-                    participant2Score = scoreAfterLeft;
-                }
-                
-                if (rally.server_won) {
-                    if (isServerParticipant1) {
-                        participant1Score = Math.max(0, participant1Score - 1);
-                    } else if (isServerParticipant2) {
-                        participant2Score = Math.max(0, participant2Score - 1);
+                setRallies.forEach((rally, index) => {
+                    try {
+                        if (!rally || !rally.rally_datetime || !rally.score) {
+                            console.warn(`[exportRallyJournalToExcel] ⚠️ Пропущен розыгрыш ${index + 1} сета ${setNum}: отсутствуют обязательные данные`, rally);
+                            return;
+                        }
+                        
+                        const rallyTime = new Date(rally.rally_datetime);
+                        if (isNaN(rallyTime.getTime())) {
+                            console.warn(`[exportRallyJournalToExcel] ⚠️ Пропущен розыгрыш ${index + 1} сета ${setNum}: неверная дата`, rally.rally_datetime);
+                            return;
+                        }
+                        
+                        // Вычисляем интервал в секундах от предыдущего розыгрыша
+                        let timeIntervalStr = '0';
+                        if (index > 0) {
+                            const prevRally = setRallies[index - 1];
+                            const prevRallyTime = new Date(prevRally.rally_datetime);
+                            const intervalSeconds = Math.round((rallyTime - prevRallyTime) / 1000);
+                            timeIntervalStr = String(intervalSeconds);
+                        }
+                        
+                        const result = rally.server_won ? '1' : '0';
+                        const serverName = rally.server_name || 'Не указан';
+                        const receiverName = rally.receiver_name || 'Не указан';
+                        
+                        // Вычисляем счёт последовательно (как в loadRallyJournalV2)
+                        const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                        const serverColor = getParticipantColor(rally.server_name);
+                        const receiverColor = getParticipantColor(rally.receiver_name);
+                        const isServerParticipant1 = serverColor === '#007bff';
+                        const isServerParticipant2 = serverColor === '#dc3545';
+                        const isReceiverParticipant1 = receiverColor === '#007bff';
+                        const isReceiverParticipant2 = receiverColor === '#dc3545';
+                        
+                        // Сохраняем счёт ДО розыгрыша
+                        const scoreBeforeLeft = computedScoreLeft;
+                        const scoreBeforeRight = computedScoreRight;
+                        
+                        // Определяем, какой счёт соответствует participant1 и participant2
+                        let participant1ScoreBefore, participant2ScoreBefore;
+                        if (swapCount % 2 === 0) {
+                            participant1ScoreBefore = scoreBeforeLeft;
+                            participant2ScoreBefore = scoreBeforeRight;
+                        } else {
+                            participant1ScoreBefore = scoreBeforeRight;
+                            participant2ScoreBefore = scoreBeforeLeft;
+                        }
+                        
+                        // Увеличиваем счёт того, кто выиграл
+                        if (rally.server_won) {
+                            if (isServerParticipant1) {
+                                participant1ScoreBefore++;
+                            } else if (isServerParticipant2) {
+                                participant2ScoreBefore++;
+                            }
+                        } else {
+                            if (isReceiverParticipant1) {
+                                participant1ScoreBefore++;
+                            } else if (isReceiverParticipant2) {
+                                participant2ScoreBefore++;
+                            }
+                        }
+                        
+                        // Обновляем вычисленный счёт
+                        if (swapCount % 2 === 0) {
+                            computedScoreLeft = participant1ScoreBefore;
+                            computedScoreRight = participant2ScoreBefore;
+                        } else {
+                            computedScoreLeft = participant2ScoreBefore;
+                            computedScoreRight = participant1ScoreBefore;
+                        }
+                        
+                        // Определяем, какая команда получила очко и показываем только изменённое значение
+                        let scoreLeft = '';
+                        let scoreRight = '';
+                        
+                        if (swapCount % 2 === 0) {
+                            if (rally.server_won && isServerParticipant1 || !rally.server_won && isReceiverParticipant1) {
+                                scoreLeft = String(computedScoreLeft);
+                                scoreRight = '';
+                            } else if (rally.server_won && isServerParticipant2 || !rally.server_won && isReceiverParticipant2) {
+                                scoreLeft = '';
+                                scoreRight = String(computedScoreRight);
+                            }
+                        } else {
+                            if (rally.server_won && isServerParticipant1 || !rally.server_won && isReceiverParticipant1) {
+                                scoreLeft = '';
+                                scoreRight = String(computedScoreRight);
+                            } else if (rally.server_won && isServerParticipant2 || !rally.server_won && isReceiverParticipant2) {
+                                scoreLeft = String(computedScoreLeft);
+                                scoreRight = '';
+                            }
+                        }
+                        
+                        csvContent += `${processedCount + 1},${setNum},${timeIntervalStr},"${serverName}","${receiverName}",${result},"${scoreLeft}","${scoreRight}"\n`;
+                        processedCount++;
+                        
+                        if (index >= setRallies.length - 3) {
+                            console.log(`[exportRallyJournalToExcel] ✅ V2: Розыгрыш ${processedCount}/${rallies.length} (сет ${setNum}, №${index + 1}): Интервал ${timeIntervalStr}с, Счёт левая: "${scoreLeft}", правая: "${scoreRight}"`);
+                        }
+                    } catch (error) {
+                        console.error(`[exportRallyJournalToExcel] ❌ Ошибка при обработке розыгрыша ${index + 1} сета ${setNum}:`, error, rally);
                     }
-                } else {
-                    if (isReceiverParticipant1) {
-                        participant1Score = Math.max(0, participant1Score - 1);
-                    } else if (isReceiverParticipant2) {
-                        participant2Score = Math.max(0, participant2Score - 1);
+                });
+            });
+        } else {
+            // Обработка для формата V1: время и счёт до подачи
+            rallies.forEach((rally, index) => {
+                try {
+                    if (!rally || !rally.rally_datetime || !rally.score) {
+                        console.warn(`[exportRallyJournalToExcel] ⚠️ Пропущен розыгрыш ${index + 1}: отсутствуют обязательные данные`, rally);
+                        return;
                     }
+                    
+                    const rallyTime = new Date(rally.rally_datetime);
+                    if (isNaN(rallyTime.getTime())) {
+                        console.warn(`[exportRallyJournalToExcel] ⚠️ Пропущен розыгрыш ${index + 1}: неверная дата`, rally.rally_datetime);
+                        return;
+                    }
+                    
+                    const dateStr = rallyTime.toLocaleDateString('ru-RU');
+                    const timeStr = rallyTime.toLocaleTimeString('ru-RU', { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit' 
+                    });
+                    
+                    const result = rally.server_won ? '1' : '0';
+                    const serverName = rally.server_name || 'Не указан';
+                    const receiverName = rally.receiver_name || 'Не указан';
+                    
+                    // Вычисляем счёт ДО розыгрыша
+                    let scoreBefore = rally.score;
+                    const scoreParts = rally.score ? rally.score.split(':') : [];
+                    if (scoreParts.length === 2) {
+                        let scoreAfterLeft = parseInt(scoreParts[0]) || 0;
+                        let scoreAfterRight = parseInt(scoreParts[1]) || 0;
+                        
+                        const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                        const serverColor = getParticipantColor(rally.server_name);
+                        const receiverColor = getParticipantColor(rally.receiver_name);
+                        const isServerParticipant1 = serverColor === '#007bff';
+                        const isServerParticipant2 = serverColor === '#dc3545';
+                        const isReceiverParticipant1 = receiverColor === '#007bff';
+                        const isReceiverParticipant2 = receiverColor === '#dc3545';
+                        
+                        let participant1Score, participant2Score;
+                        if (swapCount % 2 === 0) {
+                            participant1Score = scoreAfterLeft;
+                            participant2Score = scoreAfterRight;
+                        } else {
+                            participant1Score = scoreAfterRight;
+                            participant2Score = scoreAfterLeft;
+                        }
+                        
+                        if (rally.server_won) {
+                            if (isServerParticipant1) {
+                                participant1Score = Math.max(0, participant1Score - 1);
+                            } else if (isServerParticipant2) {
+                                participant2Score = Math.max(0, participant2Score - 1);
+                            }
+                        } else {
+                            if (isReceiverParticipant1) {
+                                participant1Score = Math.max(0, participant1Score - 1);
+                            } else if (isReceiverParticipant2) {
+                                participant2Score = Math.max(0, participant2Score - 1);
+                            }
+                        }
+                        
+                        if (swapCount % 2 === 0) {
+                            scoreBefore = `${participant1Score}:${participant2Score}`;
+                        } else {
+                            scoreBefore = `${participant2Score}:${participant1Score}`;
+                        }
+                    }
+                    
+                    csvContent += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${scoreBefore}"\n`;
+                    processedCount++;
+                    
+                    if (index >= rallies.length - 3) {
+                        console.log(`[exportRallyJournalToExcel] ✅ V1: Розыгрыш ${index + 1}/${rallies.length}: Сет ${rally.set_number}, Счёт до: ${scoreBefore}, Счёт после: ${rally.score}`);
+                    }
+                } catch (error) {
+                    console.error(`[exportRallyJournalToExcel] ❌ Ошибка при обработке розыгрыша ${index + 1}:`, error, rally);
                 }
-                
-                if (swapCount % 2 === 0) {
-                    scoreBefore = `${participant1Score}:${participant2Score}`;
-                } else {
-                    scoreBefore = `${participant2Score}:${participant1Score}`;
-                }
-            }
-            
-            csvContent += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${scoreBefore}"\n`;
-        });
+            });
+        }
+        
+        console.log('[exportRallyJournalToExcel] Обработано розыгрышей:', processedCount, 'из', rallies.length);
+        if (processedCount !== rallies.length) {
+            console.warn(`[exportRallyJournalToExcel] ⚠️ Не все розыгрыши обработаны! Обработано: ${processedCount}, Всего: ${rallies.length}`);
+        }
+        
+        console.log('[exportRallyJournalToExcel] CSV сформирован, всего строк розыгрышей:', rallies.length);
+        console.log('[exportRallyJournalToExcel] Последний розыгрыш в CSV:', rallies.length > 0 ? `Сет ${rallies[rallies.length - 1].set_number}, Счёт: ${rallies[rallies.length - 1].score}` : 'нет');
         
         // Получаем название турнира из модального окна или из шаблона
         let tournamentName = activeModal ? activeModal.getAttribute('data-tournament-name') : null;
@@ -8169,7 +8424,7 @@ function openRallyJournalModalV2(matchId, participant1, participant2) {
         console.error('[Rally Journal V2] Заголовок модального окна не найден');
         return;
     }
-    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей (Вариант 2): <span style="color: #007bff; font-style: italic;">${participant1}</span> vs <span style="color: #dc3545; font-style: italic;">${participant2}</span>`;
+    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: <span style="color: #007bff; font-style: italic;">${participant1}</span> vs <span style="color: #dc3545; font-style: italic;">${participant2}</span>`;
     
     // Сохраняем matchId, имена участников и название турнира для использования в loadRallyJournalV2
     modal.setAttribute('data-match-id', matchId);
