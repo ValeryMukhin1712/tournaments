@@ -679,7 +679,13 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
     @app.route('/api/matches/<int:match_id>', methods=['GET'])
     def get_match(match_id):
         """Получение информации о матче"""
-        from flask import session
+        from flask import session, request
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Логируем запрос для отладки
+        cache_buster = request.args.get('_t', 'N/A')
+        logger.info(f"[API] GET /api/matches/{match_id} - cache_buster: {cache_buster}, referer: {request.referrer}")
         
         # Проверяем авторизацию через сессию
         if 'admin_id' not in session:
@@ -691,6 +697,11 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'error': 'Неверная авторизация'}), 401
         
         match = Match.query.get_or_404(match_id)
+        
+        # Дополнительная проверка: убеждаемся, что запрашиваемый match_id соответствует найденному матчу
+        if match.id != match_id:
+            logger.error(f"[API] ❌ Несоответствие ID матча! Запрошен: {match_id}, Найден: {match.id}")
+            return jsonify({'error': f'Несоответствие ID матча: запрошен {match_id}, найден {match.id}'}), 400
         
         # Проверяем права (создатель турнира или системный админ)
         tournament = Tournament.query.get(match.tournament_id)
@@ -3958,6 +3969,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         from flask import session
         from datetime import datetime
         try:
+            # Логируем входящий запрос
+            logger.info(f"[auto-save-score] 📥 Получен запрос для матча {match_id}")
+            
             # CSRF из заголовка, аналогично другим POST API
             csrf_token = request.headers.get('X-CSRFToken')
             if not csrf_token:
@@ -3980,26 +3994,48 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             score2 = data.get('score2', 0)
             set_number = data.get('set_number', 1)
             
+            logger.info(f"[auto-save-score] 📊 Матч {match_id}: получены данные - score1={score1}, score2={score2}, set_number={set_number}")
+            
             # Находим матч с загрузкой турнира
             match = Match.query.get(match_id)
             if not match:
+                logger.error(f"[auto-save-score] ❌ Матч {match_id} не найден в БД")
                 return jsonify({'success': False, 'error': 'Матч не найден'}), 404
+            
+            # Проверяем, что найденный матч соответствует запрошенному
+            if match.id != match_id:
+                logger.error(f"[auto-save-score] ❌ Несоответствие ID матча! Запрошен: {match_id}, Найден: {match.id}")
+                return jsonify({'success': False, 'error': f'Несоответствие ID матча: запрошен {match_id}, найден {match.id}'}), 400
             
             # Загружаем турнир
             tournament = Tournament.query.get(match.tournament_id)
             if not tournament:
                 return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
             
+            # Логируем текущие значения счёта перед обновлением
+            logger.info(f"[auto-save-score] 📊 Матч {match_id}, сет {set_number}: Текущие значения в БД:")
+            if set_number == 1:
+                logger.info(f"  set1_score1={match.set1_score1}, set1_score2={match.set1_score2}")
+            elif set_number == 2:
+                logger.info(f"  set2_score1={match.set2_score1}, set2_score2={match.set2_score2}")
+            elif set_number == 3:
+                logger.info(f"  set3_score1={match.set3_score1}, set3_score2={match.set3_score2}")
+            
             # Обновляем счет в соответствующем сете
             if set_number == 1:
                 match.set1_score1 = score1
                 match.set1_score2 = score2
+                logger.info(f"[auto-save-score] ✅ Матч {match_id}, сет 1: Обновлено - set1_score1={score1}, set1_score2={score2}")
             elif set_number == 2:
                 match.set2_score1 = score1
                 match.set2_score2 = score2
+                logger.info(f"[auto-save-score] ✅ Матч {match_id}, сет 2: Обновлено - set2_score1={score1}, set2_score2={score2}")
             elif set_number == 3:
                 match.set3_score1 = score1
                 match.set3_score2 = score2
+                logger.info(f"[auto-save-score] ✅ Матч {match_id}, сет 3: Обновлено - set3_score1={score1}, set3_score2={score2}")
+            else:
+                logger.warning(f"[auto-save-score] ⚠️ Матч {match_id}: Неизвестный номер сета {set_number}")
             
             # Пересчитываем выигранные сеты на основе текущих счетов
             if tournament:

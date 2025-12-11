@@ -1265,6 +1265,22 @@
                 height: 50px !important;
                 font-size: 16px !important;
             }
+        }
+        
+        /* Специальная адаптация для экранов шириной 800px - сдвигаем имена игроков вправо от кнопок */
+        @media screen and (max-width: 800px) {
+            /* Сдвигаем имена игроков левой команды вправо, чтобы не перекрывать кнопки */
+            /* Панель управления на экранах 800px имеет ширину 60px */
+            #top_left_player_input,
+            #bottom_left_player_input {
+                left: calc(60px + 15px) !important; /* Ширина панели управления (60px) + отступ (15px) */
+            }
+            
+            /* Увеличиваем ширину полей имён на 50% для экранов менее 800px */
+            .player-name {
+                width: 18vw !important; /* Было 12vw (из медиа-запроса 900px), увеличили на 50% = 18vw */
+                max-width: min(180px, calc(100vw - 90px)) !important; /* Было 120px, увеличили на 50% = 180px, но не более доступного пространства */
+            }
             
             /* Уменьшаем индикаторы подачи */
             .server-indicator img {
@@ -1817,14 +1833,33 @@
         
         // Функция для сохранения счёта в базу данных
         function saveScoreToDatabase() {
-            // Получаем параметры из URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('match_id');
-            const setNumber = urlParams.get('set') || '1';
+            // ВАЖНО: Используем сохранённые значения match_id и setNumber, а не из URL
+            // Это гарантирует, что мы сохраняем в правильный матч и сет
+            const matchId = currentMatchId || getUrlParams().matchId;
+            const setNumber = currentSetNumber || getUrlParams().setNumber || '1';
+            
+            console.log(`[Referee] 💾 Сохранение счёта: match_id=${matchId}, set=${setNumber}`);
+            console.log(`[Referee] 💾 Проверка: currentMatchId=${currentMatchId}, currentSetNumber=${currentSetNumber}`);
             
             // Если нет match_id, значит это не матч из турнира, не сохраняем
-            if (!matchId || matchId === '') {
+            if (!matchId || matchId === '' || matchId === 'null') {
+                console.warn(`[Referee] ⚠️ Нет match_id для сохранения! Пропускаем сохранение.`);
                 return;
+            }
+            
+            // Дополнительная проверка: убеждаемся, что match_id и setNumber не изменились
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlMatchId = urlParams.get('match_id');
+            const urlSetNumber = urlParams.get('set') || '1';
+            
+            if (urlMatchId && urlMatchId !== matchId) {
+                console.error(`[Referee] ❌ Несоответствие match_id! URL: ${urlMatchId}, Сохранённый: ${matchId}`);
+                console.error(`[Referee] ❌ Используем сохранённый match_id: ${matchId}`);
+            }
+            
+            if (urlSetNumber && urlSetNumber !== setNumber) {
+                console.error(`[Referee] ❌ Несоответствие setNumber! URL: ${urlSetNumber}, Сохранённый: ${setNumber}`);
+                console.error(`[Referee] ❌ Используем сохранённый setNumber: ${setNumber}`);
             }
             
             // Получаем текущий счёт
@@ -1918,14 +1953,17 @@
             }
             
             // Подготавливаем данные для отправки
+            const finalSetNumber = parseInt(setNumber) || 1;
             const data = {
                 score1: score1,
                 score2: score2,
-                set_number: parseInt(setNumber) || 1
+                set_number: finalSetNumber
             };
             
             // Детальное логирование перед отправкой
             console.log('[Referee] 📤 Отправка данных в БД:', {
+                'match_id': matchId,
+                'set_number': finalSetNumber,
                 swap_count,
                 swap_count_mod_2: swap_count % 2,
                 'scoreLeft на экране': scoreLeft,
@@ -1935,7 +1973,8 @@
                 'Проверка логики': swap_count % 2 == 1 ? 
                     `При swap_count=1: score1 должен быть scoreRight (${scoreRight}), score2 должен быть scoreLeft (${scoreLeft})` :
                     `При swap_count=0: score1 должен быть scoreLeft (${scoreLeft}), score2 должен быть scoreRight (${scoreRight})`,
-                'Отправляемые данные': data
+                'Отправляемые данные': data,
+                'API endpoint': `/api/matches/${matchId}/auto-save-score`
             });
             
             // Отправляем запрос на сохранение
@@ -1951,7 +1990,8 @@
             .then(result => {
                 if (result.success) {
                     console.log('[Referee] ✅ Счёт сохранён в БД:', result.message);
-                    console.log('[Referee] 📊 Текущий счёт:', score1, ':', score2, 'для матча', matchId, 'сет', setNumber);
+                    console.log('[Referee] 📊 Текущий счёт:', score1, ':', score2, 'для матча', matchId, 'сет', finalSetNumber);
+                    console.log('[Referee] ✅ Проверка сохранения: match_id=', matchId, ', set_number=', finalSetNumber);
                     
                     // Получаем параметры из URL
                     const urlParams = new URLSearchParams(window.location.search);
@@ -3416,14 +3456,33 @@
         
         // Функция для загрузки счёта из базы данных
         async function loadScoreFromDatabase() {
-            // Получаем параметры из URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('match_id');
-            const setNumber = urlParams.get('set') || '1';
+            // ВАЖНО: Сбрасываем счёт перед загрузкой нового матча
+            scoreLeft = 0;
+            scoreRight = 0;
+            updateScore(); // Обновляем отображение сразу
             
-            // Если нет match_id, значит это не матч из турнира, используем счёт из URL или 0:0
+            // Получаем параметры из URL и сохраняем их
+            const { matchId, setNumber } = getUrlParams();
+            
+            // Проверяем, что match_id действительно извлечён
+            if (!matchId || matchId === '' || matchId === 'null') {
+                console.warn(`[Referee] ⚠️ match_id не найден в URL! URL: ${window.location.href}`);
+                const urlParams = new URLSearchParams(window.location.search);
+                console.warn(`[Referee] ⚠️ Все параметры URL:`, Array.from(urlParams.entries()));
+            }
+            
+            // Используем сохранённые значения, если они есть
+            const finalMatchId = currentMatchId || matchId;
+            const finalSetNumber = currentSetNumber || setNumber;
+            
+            console.log(`[Referee] 🔄 Загрузка счёта для матча ${finalMatchId}, сет ${finalSetNumber}`);
+            console.log(`[Referee] 🔄 Полный URL: ${window.location.href}`);
+            console.log(`[Referee] 🔄 Используемые значения: match_id=${finalMatchId}, set=${finalSetNumber}`);
+            
+            // ВАЖНО: Если есть match_id, ВСЕГДА загружаем из базы данных, игнорируя параметры score1/score2 из URL
+            // Параметры score1/score2 могут содержать устаревшие данные из формы предыдущего матча
             if (!matchId || matchId === '') {
-                // Пробуем загрузить из URL параметров
+                // Только если нет match_id, пробуем загрузить из URL параметров
                 const score1Param = urlParams.get('score1');
                 const score2Param = urlParams.get('score2');
                 
@@ -3438,31 +3497,61 @@
                         console.log('[Referee] 🔄 Счёт 21:21 заменён на 0:0 (из URL параметров)');
                     }
                     
-                    console.log('[Referee] Счёт загружен из URL параметров:', scoreLeft, ':', scoreRight);
+                    console.log('[Referee] Счёт загружен из URL параметров (нет match_id):', scoreLeft, ':', scoreRight);
                     updateScore();
                     return;
                 }
                 
                 // Если нет параметров, оставляем 0:0
+                console.log('[Referee] Нет match_id и нет параметров score1/score2, оставляем 0:0');
                 return;
             }
             
+            // Если есть match_id, игнорируем параметры score1/score2 из URL и загружаем из базы
+            console.log('[Referee] ⚠️ Игнорируем параметры score1/score2 из URL, загружаем из БД для match_id:', finalMatchId);
+            
             // Загружаем счёт из базы данных
             try {
-                const response = await fetch(`/api/matches/${matchId}?_t=${Date.now()}`, {
+                // Добавляем match_id в URL для предотвращения кеширования
+                const cacheBuster = Date.now();
+                const apiUrl = `/api/matches/${finalMatchId}?_t=${cacheBuster}&_match=${finalMatchId}&_r=${Math.random()}`;
+                console.log(`[Referee] 📡 Запрос к API: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
                     cache: 'no-store',
                     headers: {
-                        'Cache-Control': 'no-cache'
-                    }
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
+                console.log(`[Referee] 📥 Получены данные матча ${matchId}:`, data);
+                
                 if (data.success && data.match) {
+                    // Проверяем, что это правильный матч
+                    if (data.match.id !== parseInt(finalMatchId)) {
+                        console.error(`[Referee] ❌ Несоответствие ID матча! Ожидался ${finalMatchId}, получен ${data.match.id}`);
+                        scoreLeft = 0;
+                        scoreRight = 0;
+                        updateScore();
+                        return;
+                    }
+                    
                     let currentScore1, currentScore2;
                     
                     // Получаем счёт для соответствующего сета из базы данных
-                    const setNum = parseInt(setNumber) || 1;
+                    const setNum = parseInt(finalSetNumber) || 1;
+                    console.log(`[Referee] 📊 Загрузка счёта для сета ${setNum} матча ${finalMatchId}`);
                     
                     if (setNum === 1) {
                         currentScore1 = data.match.set1_score1 !== null ? data.match.set1_score1 : 0;
@@ -3478,6 +3567,8 @@
                         currentScore2 = 0;
                     }
                     
+                    console.log(`[Referee] 📊 Счёт из БД для матча ${finalMatchId}, сет ${setNum}: ${currentScore1}:${currentScore2}`);
+                    
                     // Устанавливаем счёт
                     // score1 в БД = левая команда (participant1) = scoreLeft
                     // score2 в БД = правая команда (participant2) = scoreRight
@@ -3488,54 +3579,34 @@
                     if (scoreLeft === 21 && scoreRight === 21) {
                         scoreLeft = 0;
                         scoreRight = 0;
-                        console.log(`[Referee] 🔄 Счёт 21:21 заменён на 0:0 для матча ${matchId}, сет ${setNum}`);
+                        console.log(`[Referee] 🔄 Счёт 21:21 заменён на 0:0 для матча ${finalMatchId}, сет ${setNum}`);
                     }
                     
-                    console.log(`[Referee] ✅ Счёт загружен из БД для матча ${matchId}, сет ${setNum}:`, scoreLeft, ':', scoreRight);
+                    // Сохраняем счёт в sessionStorage для проверки
+                    sessionStorage.setItem('referee_score_left', scoreLeft.toString());
+                    sessionStorage.setItem('referee_score_right', scoreRight.toString());
+                    sessionStorage.setItem('referee_match_id', finalMatchId);
+                    sessionStorage.setItem('referee_set_number', finalSetNumber);
+                    
+                    console.log(`[Referee] ✅ Счёт загружен из БД для матча ${finalMatchId}, сет ${setNum}:`, scoreLeft, ':', scoreRight);
+                    console.log(`[Referee] ✅ Проверка: match_id в БД = ${data.match.id}, запрошенный = ${finalMatchId}`);
+                    console.log(`[Referee] ✅ Сохранено в sessionStorage: match_id=${finalMatchId}, set=${finalSetNumber}, score=${scoreLeft}:${scoreRight}`);
                     updateScore();
                 } else {
-                    console.warn('[Referee] ⚠️ Не удалось загрузить данные матча из БД');
-                    
-                    // Пробуем загрузить из URL параметров как резервный вариант
-                    const score1Param = urlParams.get('score1');
-                    const score2Param = urlParams.get('score2');
-                    
-                    if (score1Param !== null && score2Param !== null) {
-                        scoreLeft = parseInt(score1Param, 10) || 0;
-                        scoreRight = parseInt(score2Param, 10) || 0;
-                        
-                        // Если счёт по умолчанию 21:21, устанавливаем 0:0
-                        if (scoreLeft === 21 && scoreRight === 21) {
-                            scoreLeft = 0;
-                            scoreRight = 0;
-                            console.log('[Referee] 🔄 Счёт 21:21 заменён на 0:0 (из URL параметров, резервный вариант)');
-                        }
-                        
-                        console.log('[Referee] Счёт загружен из URL параметров (резервный вариант):', scoreLeft, ':', scoreRight);
-                        updateScore();
-                    }
-                }
-            } catch (error) {
-                console.error('[Referee] ❌ Ошибка при загрузке счёта из БД:', error);
-                
-                // Пробуем загрузить из URL параметров как резервный вариант
-                const score1Param = urlParams.get('score1');
-                const score2Param = urlParams.get('score2');
-                
-                if (score1Param !== null && score2Param !== null) {
-                    scoreLeft = parseInt(score1Param, 10) || 0;
-                    scoreRight = parseInt(score2Param, 10) || 0;
-                    
-                    // Если счёт по умолчанию 21:21, устанавливаем 0:0
-                    if (scoreLeft === 21 && scoreRight === 21) {
-                        scoreLeft = 0;
-                        scoreRight = 0;
-                        console.log('[Referee] 🔄 Счёт 21:21 заменён на 0:0 (из URL параметров, резервный вариант)');
-                    }
-                    
-                    console.log('[Referee] Счёт загружен из URL параметров (резервный вариант):', scoreLeft, ':', scoreRight);
+                    console.warn(`[Referee] ⚠️ Не удалось загрузить данные матча ${finalMatchId} из БД. Оставляем счёт 0:0.`);
+                    // НЕ используем параметры score1/score2 из URL, так как они могут содержать счёт из предыдущего матча
+                    // Оставляем 0:0, чтобы избежать отображения неправильного счёта
+                    scoreLeft = 0;
+                    scoreRight = 0;
                     updateScore();
                 }
+            } catch (error) {
+                console.error(`[Referee] ❌ Ошибка при загрузке счёта из БД для матча ${finalMatchId}:`, error);
+                // НЕ используем параметры score1/score2 из URL, так как они могут содержать счёт из предыдущего матча
+                // Оставляем 0:0, чтобы избежать отображения неправильного счёта
+                scoreLeft = 0;
+                scoreRight = 0;
+                updateScore();
             }
         }
         
@@ -3557,13 +3628,94 @@
             console.log('[Referee] BASE_PATH инициализирован:', window.BASE_PATH);
         }
         
+        // Глобальные переменные для отслеживания текущего match_id и setNumber
+        let currentMatchId = null;
+        let currentSetNumber = null;
+        
+        // Функция для получения и сохранения параметров из URL
+        function getUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('match_id');
+            const setNumber = urlParams.get('set') || '1';
+            
+            // Сохраняем значения в глобальные переменные
+            if (matchId && matchId !== 'null' && matchId !== '') {
+                currentMatchId = matchId;
+            }
+            if (setNumber) {
+                currentSetNumber = setNumber;
+            }
+            
+            console.log(`[Referee] 📋 Параметры из URL: match_id=${matchId}, set=${setNumber}`);
+            console.log(`[Referee] 📋 Сохранённые параметры: currentMatchId=${currentMatchId}, currentSetNumber=${currentSetNumber}`);
+            
+            return { matchId, setNumber };
+        }
+        
+        // Очищаем sessionStorage при закрытии/перезагрузке страницы
+        window.addEventListener('beforeunload', function() {
+            console.log(`[Referee] 🧹 Очистка данных перед закрытием страницы`);
+            sessionStorage.removeItem('referee_match_id');
+            sessionStorage.removeItem('referee_score_left');
+            sessionStorage.removeItem('referee_score_right');
+        });
+        
         document.addEventListener('DOMContentLoaded', function() {
+            // Получаем параметры из URL СРАЗУ при загрузке страницы
+            const { matchId: matchIdFromUrl, setNumber: setNumberFromUrl } = getUrlParams();
+            
+            console.log(`[Referee] 🚀 DOMContentLoaded. match_id из URL: ${matchIdFromUrl}, set из URL: ${setNumberFromUrl}`);
+            console.log(`[Referee] 🚀 Текущий match_id в памяти: ${currentMatchId}, set в памяти: ${currentSetNumber}`);
+            console.log(`[Referee] 🚀 match_id из sessionStorage: ${sessionStorage.getItem('referee_match_id')}`);
+            console.log(`[Referee] 🚀 set из sessionStorage: ${sessionStorage.getItem('referee_set_number')}`);
+            
+            // Проверяем, не загружаем ли мы данные для другого матча
+            const storedMatchId = sessionStorage.getItem('referee_match_id');
+            const storedSetNumber = sessionStorage.getItem('referee_set_number');
+            if (storedMatchId && storedMatchId !== matchIdFromUrl && matchIdFromUrl) {
+                console.log(`[Referee] ⚠️ Обнаружено изменение match_id в sessionStorage! Старый: ${storedMatchId}, Новый: ${matchIdFromUrl}`);
+                console.log(`[Referee] 🔄 Очищаем sessionStorage и принудительно перезагружаем страницу`);
+                sessionStorage.clear();
+                // Принудительно перезагружаем страницу, чтобы очистить все переменные
+                window.location.reload();
+                return;
+            }
+            
+            // Если match_id изменился в памяти, принудительно сбрасываем всё
+            if (currentMatchId !== null && currentMatchId !== matchIdFromUrl && matchIdFromUrl) {
+                console.log(`[Referee] ⚠️ Обнаружено изменение match_id в памяти! Старый: ${currentMatchId}, Новый: ${matchIdFromUrl}`);
+                console.log(`[Referee] 🔄 Принудительно сбрасываем все данные и перезагружаем страницу`);
+                // Принудительно перезагружаем страницу, чтобы очистить все переменные
+                window.location.reload();
+                return;
+            }
+            
+            // Обновляем текущие значения
+            if (matchIdFromUrl && matchIdFromUrl !== 'null' && matchIdFromUrl !== '') {
+                currentMatchId = matchIdFromUrl;
+                sessionStorage.setItem('referee_match_id', matchIdFromUrl);
+            }
+            if (setNumberFromUrl) {
+                currentSetNumber = setNumberFromUrl;
+                sessionStorage.setItem('referee_set_number', setNumberFromUrl);
+            }
+            
+            // ВАЖНО: Сбрасываем счёт при загрузке страницы для предотвращения отображения счёта из предыдущего матча
+            scoreLeft = 0;
+            scoreRight = 0;
+            updateScore(); // Обновляем отображение сразу
+            
+            console.log(`[Referee] 🔄 Начинаем загрузку счёта для match_id: ${matchIdFromUrl}`);
+            
             // Загружаем счёт из базы данных или URL параметров
             loadScoreFromDatabase().then(() => {
                 // После загрузки счёта рассчитываем правильную позицию воланчика
                 calculateShuttlecockPositionFromScore();
                 // Обновляем отображение
                 updateScore();
+                console.log(`[Referee] ✅ Загрузка счёта завершена. Текущий счёт: ${scoreLeft}:${scoreRight}`);
+            }).catch(error => {
+                console.error(`[Referee] ❌ Ошибка при загрузке счёта:`, error);
             });
             
             // Создаем маркировку линий разметки

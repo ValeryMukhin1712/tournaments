@@ -1227,6 +1227,11 @@
                                                     title="Просмотр журнала розыгрышей">
                                                 <i class="fas fa-book"></i>
                                             </button>
+                                            <button class="btn btn-sm btn-outline-warning" 
+                                                    onclick="event.stopPropagation(); openRallyJournalModalV2({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
+                                                    title="Просмотр журнала розыгрышей (Вариант 2)">
+                                                <i class="fas fa-book-open"></i>
+                                            </button>
                                             {% endif %}
                                         </div>
                                         {% else %}
@@ -1235,6 +1240,11 @@
                                                 onclick="event.stopPropagation(); openRallyJournalModal({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
                                                 title="Просмотр журнала розыгрышей">
                                             <i class="fas fa-book"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" 
+                                                onclick="event.stopPropagation(); openRallyJournalModalV2({{ match.id }}, '{{ match.participant1 }}', '{{ match.participant2 }}')"
+                                                title="Просмотр журнала розыгрышей (Вариант 2)">
+                                            <i class="fas fa-book-open"></i>
                                         </button>
                                         {% else %}
                                         <span class="text-muted">—</span>
@@ -1336,17 +1346,24 @@
                                     }
                                     console.log('[openRefereeForSet] URL params:', params.toString());
                                     
-                                    // Добавляем текущий счет активного сета (для обратной совместимости)
-                                    const s1El = document.getElementById('set' + setNumber + 'Score1');
-                                    const s2El = document.getElementById('set' + setNumber + 'Score2');
-                                    const s1 = (s1El && parseInt(s1El.value)) || 0;
-                                    const s2 = (s2El && parseInt(s2El.value)) || 0;
-                                    params.append('score1', s1);
-                                    params.append('score2', s2);
+                                    // НЕ добавляем score1/score2 в URL, если есть match_id
+                                    // Эти параметры могут содержать устаревшие данные из формы предыдущего матча
+                                    // Счёт будет загружен из базы данных на странице судейства
+                                    // Добавляем только для обратной совместимости, если нет match_id
+                                    if (!matchId || matchId === '') {
+                                        const s1El = document.getElementById('set' + setNumber + 'Score1');
+                                        const s2El = document.getElementById('set' + setNumber + 'Score2');
+                                        const s1 = (s1El && parseInt(s1El.value)) || 0;
+                                        const s2 = (s2El && parseInt(s2El.value)) || 0;
+                                        params.append('score1', s1);
+                                        params.append('score2', s2);
+                                    }
                                     
                                     const refereeUrl = getRefereeUrl(params);
                                     if (!refereeUrl) return;
-                                    const w = window.open(refereeUrl, 'referee', 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
+                                    // Используем уникальное имя окна для каждого матча, чтобы избежать переиспользования окна
+                                    const windowName = 'referee_' + matchId + '_' + setNumber + '_' + Date.now();
+                                    const w = window.open(refereeUrl, windowName, 'width=1920,height=1080,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no,directories=no,fullscreen=yes,titlebar=no');
                                     window.refereeWindow = w;
                                 } catch(e) {
                                     console.error('Не удалось открыть страницу судейства:', e);
@@ -1728,6 +1745,41 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="updateRallyJournalBtn" onclick="updateRallyJournal()">
+                    <i class="fas fa-sync-alt me-1"></i>Update
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра журнала розыгрышей (Вариант 2 - копия для редактирования) -->
+<div class="modal fade" id="rallyJournalModalV2" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i>Журнал розыгрышей (Вариант 2)
+                </h5>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-success me-2" id="exportRallyJournalBtnV2" onclick="exportRallyJournalToExcel()" title="Выгрузить в Excel" style="display: none;">
+                        <i class="fas fa-file-excel me-1"></i>Выгрузить в Excel
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="rallyJournalContentV2">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="updateRallyJournalBtnV2" onclick="updateRallyJournalV2()">
                     <i class="fas fa-sync-alt me-1"></i>Update
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
@@ -7484,10 +7536,11 @@ function openRallyJournalModal(matchId, participant1, participant2) {
     }
     modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: <span style="color: #007bff; font-style: italic;">${participant1}</span> vs <span style="color: #dc3545; font-style: italic;">${participant2}</span>`;
     
-    // Сохраняем matchId и имена участников для использования в loadRallyJournal
+    // Сохраняем matchId, имена участников и название турнира для использования в loadRallyJournal
     modal.setAttribute('data-match-id', matchId);
     modal.setAttribute('data-participant1', participant1);
     modal.setAttribute('data-participant2', participant2);
+    modal.setAttribute('data-tournament-name', '{{ tournament.name }}');
     
     // Показываем кнопку выгрузки в Excel
     const exportBtn = document.getElementById('exportRallyJournalBtn');
@@ -7920,11 +7973,49 @@ function updateRallyJournal() {
 }
 
 // Выгрузка журнала розыгрышей в Excel
+// Функция для отображения уведомлений (если не определена)
+if (typeof showAlert === 'undefined') {
+    window.showAlert = function(message, type) {
+        // Используем Bootstrap toast или alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Автоматически удаляем через 5 секунд
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    };
+}
+
 function exportRallyJournalToExcel() {
     try {
+        // Проверяем, какое модальное окно открыто - обычное или V2
         const modal = document.getElementById('rallyJournalModal');
-        const matchId = modal ? modal.getAttribute('data-match-id') : null;
-        const ralliesData = modal ? modal.getAttribute('data-rallies') : null;
+        const modalV2 = document.getElementById('rallyJournalModalV2');
+        
+        // Определяем активное модальное окно: проверяем, какое из них видимо
+        let activeModal = null;
+        if (modalV2 && (modalV2.classList.contains('show') || window.getComputedStyle(modalV2).display !== 'none')) {
+            activeModal = modalV2;
+        } else if (modal && (modal.classList.contains('show') || window.getComputedStyle(modal).display !== 'none')) {
+            activeModal = modal;
+        } else {
+            // Если ни одно не открыто явно, пробуем оба
+            activeModal = modalV2 || modal;
+        }
+        
+        console.log('[exportRallyJournalToExcel] Активное модальное окно:', activeModal ? activeModal.id : 'не найдено');
+        
+        const matchId = activeModal ? activeModal.getAttribute('data-match-id') : null;
+        const ralliesData = activeModal ? activeModal.getAttribute('data-rallies') : null;
         
         if (!ralliesData) {
             showAlert('Нет данных для выгрузки', 'warning');
@@ -7943,8 +8034,8 @@ function exportRallyJournalToExcel() {
         csvContent += '№,Сет,Дата,Время,Подающий,Принимающий,Результат,Счёт\n';
         
         // Получаем данные участников из модального окна для вычисления scoreBefore
-        const participant1 = modal ? (modal.getAttribute('data-participant1') || '') : '';
-        const participant2 = modal ? (modal.getAttribute('data-participant2') || '') : '';
+        const participant1 = activeModal ? (activeModal.getAttribute('data-participant1') || '') : '';
+        const participant2 = activeModal ? (activeModal.getAttribute('data-participant2') || '') : '';
         
         // Функция для определения цвета участника (упрощённая версия)
         const getParticipantColor = (serverName) => {
@@ -8026,12 +8117,29 @@ function exportRallyJournalToExcel() {
             csvContent += `${index + 1},${rally.set_number},"${dateStr}","${timeStr}","${serverName}","${receiverName}",${result},"${scoreBefore}"\n`;
         });
         
+        // Получаем название турнира из модального окна или из шаблона
+        let tournamentName = activeModal ? activeModal.getAttribute('data-tournament-name') : null;
+        if (!tournamentName) {
+            // Пробуем получить из шаблона, если доступно
+            tournamentName = typeof window.tournamentName !== 'undefined' ? window.tournamentName : '{{ tournament.name|default("") }}';
+        }
+        
+        // Очищаем название турнира для использования в имени файла (убираем спецсимволы)
+        const sanitizedTournamentName = tournamentName 
+            ? tournamentName.replace(/[<>:"/\\|?*]/g, '_').replace(/\s+/g, '_').substring(0, 50) // Ограничиваем длину
+            : '';
+        
+        // Формируем имя файла с названием турнира
+        const fileName = sanitizedTournamentName 
+            ? `${sanitizedTournamentName}_match_${matchId}_journal.csv`
+            : `match_${matchId}_journal.csv`;
+        
         // Создаем blob и скачиваем
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `match_${matchId}_journal.csv`);
+        link.setAttribute('download', fileName);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -8042,6 +8150,513 @@ function exportRallyJournalToExcel() {
         console.error('Ошибка при выгрузке в Excel:', error);
         showAlert('Ошибка при выгрузке в Excel: ' + error.message, 'danger');
     }
+}
+
+// ==================== КОПИЯ ЖУРНАЛА РОЗЫГРЫШЕЙ (ВАРИАНТ 2) ====================
+
+// Функция для открытия модального окна журнала розыгрышей (вариант 2)
+function openRallyJournalModalV2(matchId, participant1, participant2) {
+    console.log('[Rally Journal V2] Открытие журнала для матча:', matchId);
+    
+    // Устанавливаем заголовок модального окна
+    const modal = document.getElementById('rallyJournalModalV2');
+    if (!modal) {
+        console.error('[Rally Journal V2] Модальное окно не найдено');
+        return;
+    }
+    const modalTitle = modal.querySelector('.modal-title');
+    if (!modalTitle) {
+        console.error('[Rally Journal V2] Заголовок модального окна не найден');
+        return;
+    }
+    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей (Вариант 2): <span style="color: #007bff; font-style: italic;">${participant1}</span> vs <span style="color: #dc3545; font-style: italic;">${participant2}</span>`;
+    
+    // Сохраняем matchId, имена участников и название турнира для использования в loadRallyJournalV2
+    modal.setAttribute('data-match-id', matchId);
+    modal.setAttribute('data-participant1', participant1);
+    modal.setAttribute('data-participant2', participant2);
+    modal.setAttribute('data-tournament-name', '{{ tournament.name }}');
+    
+    // Показываем кнопку выгрузки в Excel
+    const exportBtn = document.getElementById('exportRallyJournalBtnV2');
+    if (exportBtn) {
+        exportBtn.style.display = 'inline-block';
+    }
+    
+    // Показываем индикатор загрузки
+    const content = document.getElementById('rallyJournalContentV2');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2 text-muted">Загрузка журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    // Открываем модальное окно
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Загружаем данные розыгрышей
+    loadRallyJournalV2(matchId);
+}
+
+// Функция для загрузки журнала розыгрышей (вариант 2 - копия для редактирования)
+async function loadRallyJournalV2(matchId) {
+    try {
+        // Получаем имена участников из data-атрибутов модального окна
+        const modal = document.getElementById('rallyJournalModalV2');
+        if (!modal) {
+            console.warn('[Rally Journal V2] Модальное окно не найдено');
+            return;
+        }
+        const participant1 = modal.getAttribute('data-participant1') || '';
+        const participant2 = modal.getAttribute('data-participant2') || '';
+        
+        // Функция для нормализации имени (убираем пробелы, приводим к нижнему регистру)
+        const normalizeName = (name) => {
+            if (!name) return '';
+            return name.trim().toLowerCase().replace(/\s+/g, ' ');
+        };
+        
+        // Функция для определения, к какому участнику относится имя
+        const getParticipantColor = (serverName) => {
+            if (!serverName || !participant1 || !participant2) return null;
+            
+            // Берем имя без позиции (если есть " - слева" или " - справа")
+            const serverParts = serverName.split(' - ');
+            const serverNameOnly = serverParts[0].trim();
+            
+            // Нормализуем имена для сравнения
+            const normalizedServerName = normalizeName(serverNameOnly);
+            const normalizedP1 = normalizeName(participant1);
+            const normalizedP2 = normalizeName(participant2);
+            
+            // Проверяем точное совпадение или вхождение частей
+            const p1Parts = normalizedP1.split(' - ').map(p => p.trim()).filter(p => p);
+            const p2Parts = normalizedP2.split(' - ').map(p => p.trim()).filter(p => p);
+            
+            const isParticipant1 = normalizedServerName === normalizedP1 || 
+                                  (p1Parts.length > 0 && p1Parts.some(part => normalizedServerName.includes(part) || part.includes(normalizedServerName)));
+            const isParticipant2 = normalizedServerName === normalizedP2 || 
+                                  (p2Parts.length > 0 && p2Parts.some(part => normalizedServerName.includes(part) || part.includes(normalizedServerName)));
+            
+            if (isParticipant1) return '#007bff'; // синий для participant1
+            if (isParticipant2) return '#dc3545'; // красный для participant2
+            return null; // цвет не определен
+        };
+        
+        // Функция для определения направления стрелки на основе счёта, команды и результата розыгрыша
+        const getArrowDirection = (serverName, score, result) => {
+            if (!serverName || !score || result === undefined) return null;
+            
+            // Определяем, к какой команде относится подающий
+            const serverColor = getParticipantColor(serverName);
+            if (!serverColor) return null;
+            
+            const isParticipant1 = serverColor === '#007bff'; // синий = participant1
+            const isParticipant2 = serverColor === '#dc3545'; // красный = participant2
+            
+            // Парсим счёт (формат "X:Y")
+            const scoreParts = score.split(':');
+            if (scoreParts.length !== 2) return null;
+            
+            const leftScore = parseInt(scoreParts[0]) || 0;
+            const rightScore = parseInt(scoreParts[1]) || 0;
+            
+            // Преобразуем результат в число (1 или 0)
+            const resultValue = result ? 1 : 0;
+            
+            let isEven;
+            if (isParticipant1) {
+                // Для синей команды проверяем левую часть счёта: score % 2 === 0
+                isEven = (leftScore) % 2 === 0;
+            } else if (isParticipant2) {
+                // Для красной команды проверяем правую часть счёта: score % 2 === 0
+                isEven = (rightScore) % 2 === 0;
+            } else {
+                return null;
+            }
+            
+            // Чётное → розовая стрелка (↗), нечётное → голубая стрелка (↘)
+            return {
+                arrow: isEven ? '↗' : '↘',
+                color: isEven ? '#ff69b4' : '#00bfff' // розовый для ↗, голубой для ↘
+            };
+        };
+        
+        // Загружаем розыгрыши и данные матча параллельно
+        const [ralliesResponse, matchResponse] = await Promise.all([
+            fetch(`/api/matches/${matchId}/rallies`),
+            fetch(`/api/matches/${matchId}`)
+        ]);
+        
+        const data = await ralliesResponse.json();
+        const matchData = await matchResponse.json();
+        
+        const content = document.getElementById('rallyJournalContentV2');
+        
+        if (!data.success) {
+            content.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${data.error || 'Не удалось загрузить журнал розыгрышей'}
+                </div>
+            `;
+            return;
+        }
+        
+        // Получаем данные матча для финальных счётов сетов
+        const match = matchData.success ? matchData.match : null;
+        const setScores = {};
+        if (match) {
+            setScores[1] = match.set1_score1 !== null && match.set1_score2 !== null ? 
+                { score1: match.set1_score1, score2: match.set1_score2 } : null;
+            setScores[2] = match.set2_score1 !== null && match.set2_score2 !== null ? 
+                { score1: match.set2_score1, score2: match.set2_score2 } : null;
+            setScores[3] = match.set3_score1 !== null && match.set3_score2 !== null ? 
+                { score1: match.set3_score1, score2: match.set3_score2 } : null;
+        }
+        
+        const rallies = data.rallies || [];
+        
+        if (rallies.length === 0) {
+            content.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Розыгрыши пока не зарегистрированы
+                </div>
+            `;
+            return;
+        }
+        
+        // Группируем розыгрыши по сетам
+        const ralliesBySet = {};
+        rallies.forEach(rally => {
+            const setNum = rally.set_number;
+            if (!ralliesBySet[setNum]) {
+                ralliesBySet[setNum] = [];
+            }
+            ralliesBySet[setNum].push(rally);
+        });
+        
+        // Формируем HTML (ВАРИАНТ 2 - МОЖНО РЕДАКТИРОВАТЬ)
+        let html = '<div class="rally-journal">';
+        
+        // Сортируем сеты по номеру
+        const setNumbers = Object.keys(ralliesBySet).sort((a, b) => parseInt(a) - parseInt(b));
+        
+        setNumbers.forEach(setNum => {
+            const setRallies = ralliesBySet[setNum];
+            const setNumInt = parseInt(setNum);
+            const finalScore = setScores[setNumInt];
+            let scoreBadge = '';
+            if (finalScore && finalScore.score1 !== null && finalScore.score2 !== null) {
+                scoreBadge = `<span class="badge bg-primary ms-2">${finalScore.score1}:${finalScore.score2}</span>`;
+            }
+            html += `
+                <div class="mb-4">
+                    <h6 class="border-bottom pb-2 mb-3">
+                        <i class="fas fa-trophy me-2"></i>Сет ${setNum}
+                        ${scoreBadge}
+                        <span class="badge bg-secondary ms-2">${setRallies.length} розыгрышей</span>
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;">№</th>
+                                    <th style="width: 120px;">Время</th>
+                                    <th>Подающий</th>
+                                    <th>Принимающий</th>
+                                    <th style="width: 100px;" class="text-center">Результат</th>
+                                    <th colspan="2" style="width: 100px;" class="text-center">Счёт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Вычисляем счёт последовательно для надёжности при быстрых розыгрышах
+            let computedScoreLeft = 0;
+            let computedScoreRight = 0;
+            
+            setRallies.forEach((rally, index) => {
+                const rallyTime = new Date(rally.rally_datetime);
+                
+                // Вычисляем интервал в секундах от предыдущего розыгрыша
+                let timeIntervalStr = '-';
+                if (index > 0) {
+                    const prevRally = setRallies[index - 1];
+                    const prevRallyTime = new Date(prevRally.rally_datetime);
+                    const intervalSeconds = Math.round((rallyTime - prevRallyTime) / 1000);
+                    timeIntervalStr = `${intervalSeconds} с`;
+                } else {
+                    timeIntervalStr = '0 с';
+                }
+                
+                // Результат: 1 если выиграл подающий, 0 если выиграл принимающий
+                const resultValue = rally.server_won ? '1' : '0';
+                const resultBadge = rally.server_won 
+                    ? '<span class="badge bg-success">1</span>'
+                    : '<span class="badge bg-danger">0</span>';
+                
+                // Вычисляем счёт последовательно на основе результатов розыгрышей
+                // Это более надёжно при быстрых кликах
+                const swapCount = rally.swap_count !== undefined && rally.swap_count !== null ? rally.swap_count : 0;
+                const serverColor = getParticipantColor(rally.server_name);
+                const receiverColor = getParticipantColor(rally.receiver_name);
+                const isServerParticipant1 = serverColor === '#007bff';
+                const isServerParticipant2 = serverColor === '#dc3545';
+                const isReceiverParticipant1 = receiverColor === '#007bff';
+                const isReceiverParticipant2 = receiverColor === '#dc3545';
+                
+                // Сохраняем счёт ДО розыгрыша для стрелок
+                const scoreBeforeLeft = computedScoreLeft;
+                const scoreBeforeRight = computedScoreRight;
+                
+                // Определяем, какой счёт соответствует participant1 и participant2 на основе swap_count
+                let participant1ScoreBefore, participant2ScoreBefore;
+                if (swapCount % 2 === 0) {
+                    // Чётное количество смен: левый счёт → participant1, правый → participant2
+                    participant1ScoreBefore = scoreBeforeLeft;
+                    participant2ScoreBefore = scoreBeforeRight;
+                } else {
+                    // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                    participant1ScoreBefore = scoreBeforeRight;
+                    participant2ScoreBefore = scoreBeforeLeft;
+                }
+                
+                // Увеличиваем счёт того, кто выиграл
+                if (rally.server_won) {
+                    if (isServerParticipant1) {
+                        participant1ScoreBefore++;
+                    } else if (isServerParticipant2) {
+                        participant2ScoreBefore++;
+                    }
+                } else {
+                    if (isReceiverParticipant1) {
+                        participant1ScoreBefore++;
+                    } else if (isReceiverParticipant2) {
+                        participant2ScoreBefore++;
+                    }
+                }
+                
+                // Обновляем вычисленный счёт
+                if (swapCount % 2 === 0) {
+                    computedScoreLeft = participant1ScoreBefore;
+                    computedScoreRight = participant2ScoreBefore;
+                } else {
+                    computedScoreLeft = participant2ScoreBefore;
+                    computedScoreRight = participant1ScoreBefore;
+                }
+                
+                // Формируем счёт ДО розыгрыша для стрелок
+                let scoreBefore = '';
+                if (swapCount % 2 === 0) {
+                    scoreBefore = `${scoreBeforeLeft}:${scoreBeforeRight}`;
+                } else {
+                    scoreBefore = `${scoreBeforeRight}:${scoreBeforeLeft}`;
+                }
+                
+                // Форматируем имя подающего
+                let serverNameHtml = '';
+                if (rally.server_name) {
+                    const serverParts = rally.server_name.split(' - ');
+                    const serverNameColor = getParticipantColor(rally.server_name);
+                    const nameColorStyle = serverNameColor ? `color: ${serverNameColor};` : '';
+                    
+                    const resultValueForArrow = rally.server_won ? 1 : 0;
+                    const arrowInfo = getArrowDirection(rally.server_name, scoreBefore, resultValueForArrow);
+                    
+                    if (arrowInfo && serverParts.length >= 1) {
+                        const serverNameOnly = serverParts[0].trim();
+                        const arrow = arrowInfo.arrow;
+                        const arrowColor = arrowInfo.color;
+                        serverNameHtml = `<strong style="font-style: italic; ${nameColorStyle}">${serverNameOnly}</strong> <span style="font-style: italic; color: ${arrowColor}; font-size: 80%; font-weight: 900; text-shadow: 1px 0 0 ${arrowColor}, -1px 0 0 ${arrowColor}, 0 1px 0 ${arrowColor}, 0 -1px 0 ${arrowColor}, 0.7px 0.7px 0 ${arrowColor}, -0.7px -0.7px 0 ${arrowColor}, 0.7px -0.7px 0 ${arrowColor}, -0.7px 0.7px 0 ${arrowColor}, 1px 0.5px 0 ${arrowColor}, -1px -0.5px 0 ${arrowColor}, 0.5px 1px 0 ${arrowColor}, -0.5px -1px 0 ${arrowColor};"> ${arrow}</span>`;
+                    } else {
+                        serverNameHtml = `<strong style="font-style: italic; ${nameColorStyle}">${rally.server_name}</strong>`;
+                    }
+                } else {
+                    serverNameHtml = '<strong style="font-style: italic;">Не указан</strong>';
+                }
+                
+                const receiverNameHtml = `<strong style="font-style: italic;">${rally.receiver_name || 'Не указан'}</strong>`;
+                
+                // Определяем, какая команда получила очко и её новый счёт
+                let scoreLeft = '';
+                let scoreRight = '';
+                
+                // Определяем, кто получил очко и показываем только измененное значение
+                // Левая колонка - для participant1 (синий), правая - для participant2 (красный)
+                if (swapCount % 2 === 0) {
+                    // Чётное количество смен: левый счёт → participant1, правый → participant2
+                    if (rally.server_won && isServerParticipant1 || !rally.server_won && isReceiverParticipant1) {
+                        scoreLeft = String(computedScoreLeft).padStart(2, ' ');
+                        scoreRight = '  ';
+                    } else if (rally.server_won && isServerParticipant2 || !rally.server_won && isReceiverParticipant2) {
+                        scoreLeft = '  ';
+                        scoreRight = String(computedScoreRight).padStart(2, ' ');
+                    } else {
+                        scoreLeft = '  ';
+                        scoreRight = '  ';
+                    }
+                } else {
+                    // Нечётное количество смен: правый счёт → participant1, левый → participant2
+                    if (rally.server_won && isServerParticipant1 || !rally.server_won && isReceiverParticipant1) {
+                        scoreLeft = '  ';
+                        scoreRight = String(computedScoreRight).padStart(2, ' ');
+                    } else if (rally.server_won && isServerParticipant2 || !rally.server_won && isReceiverParticipant2) {
+                        scoreLeft = String(computedScoreLeft).padStart(2, ' ');
+                        scoreRight = '  ';
+                    } else {
+                        scoreLeft = '  ';
+                        scoreRight = '  ';
+                    }
+                }
+                
+                // Формируем ячейки со счётом: выводим рамку только если есть реальное значение (не пробелы)
+                const scoreLeftHtml = scoreLeft.trim() !== '' 
+                    ? `<strong style="display: inline-block; border: 1px solid #d0d0d0; padding: 2px 4px; border-radius: 2px;">${scoreLeft}</strong>`
+                    : '';
+                const scoreRightHtml = scoreRight.trim() !== '' 
+                    ? `<strong style="display: inline-block; border: 1px solid #d0d0d0; padding: 2px 4px; border-radius: 2px;">${scoreRight}</strong>`
+                    : '';
+                
+                html += `
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td class="text-center"><small>${timeIntervalStr}</small></td>
+                        <td>${serverNameHtml}</td>
+                        <td>${receiverNameHtml}</td>
+                        <td class="text-center">${resultBadge}</td>
+                        <td class="text-center" style="width: 2ch; font-family: monospace; padding: 2px;">${scoreLeftHtml}</td>
+                        <td class="text-center" style="width: 2ch; font-family: monospace; padding: 2px; padding-left: 0.5ch;">${scoreRightHtml}</td>
+                    </tr>
+                `;
+            });
+            
+            // Добавляем общий текущий счёт после последней записи
+            // Используем вычисленный счёт для надёжности
+            if (setRallies.length > 0) {
+                const lastRally = setRallies[setRallies.length - 1];
+                const lastSwapCount = lastRally.swap_count !== undefined && lastRally.swap_count !== null ? lastRally.swap_count : 0;
+                let currentBlueScore, currentRedScore;
+                
+                // Используем вычисленный счёт вместо сохранённого
+                if (lastSwapCount % 2 === 0) {
+                    currentBlueScore = computedScoreLeft;
+                    currentRedScore = computedScoreRight;
+                } else {
+                    currentBlueScore = computedScoreRight;
+                    currentRedScore = computedScoreLeft;
+                }
+                    
+                html += `
+                    <tr style="background-color: #e9ecef;">
+                        <td colspan="5"></td>
+                        <td colspan="2" class="text-center" style="font-family: monospace; padding: 2px;">
+                            <strong style="font-size: 140%; font-style: italic; font-weight: 900; color: #007bff;">${String(currentBlueScore).padStart(2, ' ')}</strong>
+                            <span style="font-size: 140%; font-style: italic; font-weight: 900;"> : </span>
+                            <strong style="font-size: 140%; font-style: italic; font-weight: 900; color: #dc3545;">${String(currentRedScore).padStart(2, ' ')}</strong>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // Добавляем финальный счёт сета
+            if (finalScore && finalScore.score1 !== null && finalScore.score2 !== null) {
+                const score1 = finalScore.score1;
+                const score2 = finalScore.score2;
+                const difference = Math.abs(score1 - score2);
+                const pointsToWin = 21;
+                const hasRalliesInNextSet = ralliesBySet[setNumInt + 1] && ralliesBySet[setNumInt + 1].length > 0;
+                const isSetCompleted = hasRalliesInNextSet || 
+                    (difference >= 2 && (score1 >= pointsToWin || score2 >= pointsToWin)) ||
+                    (score1 >= 30 || score2 >= 30);
+                
+                if (isSetCompleted) {
+                    const lastRally = setRallies[setRallies.length - 1];
+                    const swapCount = lastRally && lastRally.swap_count !== undefined && lastRally.swap_count !== null ? lastRally.swap_count : 0;
+                    
+                    let blueScore, redScore;
+                    if (swapCount % 2 === 0) {
+                        blueScore = finalScore.score1;
+                        redScore = finalScore.score2;
+                    } else {
+                        blueScore = finalScore.score2;
+                        redScore = finalScore.score1;
+                    }
+                    
+                    html += `
+                        <tr style="background-color: #f8f9fa; font-weight: bold;">
+                            <td colspan="5" class="text-end"><strong>Счёт сета:</strong></td>
+                            <td class="text-center" style="width: 2ch; font-family: monospace; padding: 2px;">
+                                <strong style="display: inline-block; color: #007bff; border: 1px solid #d0d0d0; padding: 2px 4px; border-radius: 2px;">${String(blueScore).padStart(2, ' ')}</strong>
+                            </td>
+                            <td class="text-center" style="width: 2ch; font-family: monospace; padding: 2px; padding-left: 0.5ch;">
+                                <strong style="display: inline-block; color: #dc3545; border: 1px solid #d0d0d0; padding: 2px 4px; border-radius: 2px;">${String(redScore).padStart(2, ' ')}</strong>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+        
+        // Сохраняем данные розыгрышей для выгрузки
+        if (modal) {
+            modal.setAttribute('data-rallies', JSON.stringify(rallies));
+        }
+        
+        console.log('[Rally Journal V2] Загружено розыгрышей:', rallies.length);
+        
+    } catch (error) {
+        console.error('[Rally Journal V2] Ошибка при загрузке журнала:', error);
+        const content = document.getElementById('rallyJournalContentV2');
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Ошибка при загрузке журнала розыгрышей: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Функция для обновления журнала розыгрышей (вариант 2)
+function updateRallyJournalV2() {
+    const modal = document.getElementById('rallyJournalModalV2');
+    if (!modal) {
+        console.error('[Rally Journal V2] Модальное окно не найдено');
+        return;
+    }
+    
+    const matchId = modal.getAttribute('data-match-id');
+    if (!matchId) {
+        console.error('[Rally Journal V2] MatchId не найден');
+        return;
+    }
+    
+    const content = document.getElementById('rallyJournalContentV2');
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Обновление...</span>
+            </div>
+            <p class="mt-2 text-muted">Обновление журнала розыгрышей...</p>
+        </div>
+    `;
+    
+    loadRallyJournalV2(matchId);
 }
 
 // Запускаем автообновление при загрузке страницы
