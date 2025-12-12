@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>{% block title %}Турнирный Ассистент{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Основные цвета темы - Серый */
+            --primary-color: #607d8b;
+            --primary-light: #90a4ae;
+            --primary-dark: #455a64;
+            --accent-color: #78909c;
+            --accent-light: #b0bec5;
+            
+            /* Фоновые цвета */
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #fafafa;
+            --bg-card: #ffffff;
+            --bg-card-hover: #eeeeee;
+            
+            /* Границы и тени */
+            --border-color: #bdbdbd;
+            --shadow-color: rgba(96, 125, 139, 0.1);
+            --shadow-hover: rgba(96, 125, 139, 0.15);
+            --shadow-strong: rgba(96, 125, 139, 0.3);
+            
+            /* Плавающие элементы */
+            --float-color: rgba(96, 125, 139, 0.1);
+            
+            /* Дополнительные цвета для совместимости */
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            padding-top: 70px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--text-primary) !important;
+        }
+        .card {
+            border: 2px solid var(--border-color);
+            box-shadow: 0 8px 16px var(--shadow-color);
+            border-radius: 15px;
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-primary));
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px var(--shadow-hover);
+            background: linear-gradient(145deg, var(--bg-card-hover), var(--bg-secondary));
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px var(--shadow-strong);
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+        }
+        .table th {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-primary));
+            border-top: none;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(45deg, var(--danger-color), #c82333);
+            color: white;
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        /* Выравнивание полей по полям ввода */
+        .form-label {
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        /* Стили для сортируемых заголовков таблицы */
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .sortable:hover {
+            background-color: #f8f9fa;
+        }
+        .sortable i {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .sortable:hover i {
+            opacity: 1;
+        }
+        .sortable.sorted i {
+            opacity: 1;
+        }
+        .sortable.sorted-asc i:before {
+            content: "\f0de"; /* fa-sort-up */
+        }
+        .sortable.sorted-desc i:before {
+            content: "\f0dd"; /* fa-sort-down */
+        }
+        .form-control, .form-select {
+            height: 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1);
+        }
+        
+        /* Дополнительные стили для кнопок */
+        .btn-success {
+            background: linear-gradient(45deg, var(--success-color), #20c997);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, var(--warning-color), #fd7e14);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger-color), #c82333);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(45deg, var(--info-color), var(--accent-color));
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(23, 162, 184, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .form-control, .form-select {
+                height: 2.25rem;
+                font-size: 0.875rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            
+            .navbar-nav .nav-link {
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .dropdown-menu {
+                font-size: 0.875rem;
+            }
+            
+            .alert {
+                font-size: 0.875rem;
+                padding: 0.75rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .card-text {
+                font-size: 0.875rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem 0.25rem;
+                vertical-align: middle;
+            }
+            
+            .btn-group .btn {
+                padding: 0.375rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .badge {
+                font-size: 0.75rem;
+            }
+            
+            .text-muted {
+                font-size: 0.8rem;
+            }
+            
+            .h1, .h2, .h3, .h4, .h5, .h6 {
+                font-size: 1.25rem;
+            }
+            
+            .h2 {
+                font-size: 1.5rem;
+            }
+            
+            .h1 {
+                font-size: 1.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+            
+            /* Уменьшаем отступ для мобильных устройств */
+            body {
+                padding-top: 60px;
+            }
+            
+            .navbar {
+                padding: 0.25rem 0;
+            }
+            
+            /* Адаптация кнопок на главной странице */
+            .btn-lg {
+                font-size: 0.85rem !important;
+                height: 48px !important;
+                padding: 0.5rem 0.75rem !important;
+            }
+            
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .card-title {
+                font-size: 1rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+            
+            /* Адаптация заголовка на главной странице */
+            .display-4 {
+                font-size: 1.5rem !important;
+            }
+            
+            .d-flex.justify-content-between {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            
+            .d-flex.justify-content-between .ms-3 {
+                margin-left: 0 !important;
+                margin-top: 0.5rem !important;
+            }
+            
+            .table th, .table td {
+                padding: 0.25rem 0.125rem;
+                font-size: 0.75rem;
+            }
+            
+            .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .card-body {
+                padding: 0.75rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.25rem;
+            }
+            
+            .navbar-brand {
+                font-size: 0.9rem;
+            }
+            
+            .navbar-brand i {
+                font-size: 0.8rem;
+            }
+        }
+        
+        
+        /* Стили для прилипающих кнопок навигации */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            background: rgba(248, 249, 250, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+        
+        
+        /* Стили для кнопок выбора темы в навбаре */
+        .theme-selector {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .theme-options {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .theme-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .theme-option input[type="radio"] {
+            display: none;
+        }
+
+        .theme-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .theme-number {
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .theme-option label:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .theme-option input[type="radio"]:checked + label {
+            border-color: white;
+            transform: scale(1.15);
+            box-shadow: 0 0 0 2px var(--primary-color), 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-option input[type="radio"]:checked + label .theme-number {
+            display: none;
+        }
+        
+        .theme-option input[type="radio"]:checked + label::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Цвета для каждой темы */
+        .theme-original-emerald label {
+            background: linear-gradient(135deg, #00c851, #00e676);
+        }
+
+        .theme-deep-emerald label {
+            background: linear-gradient(135deg, #00695c, #00897b);
+        }
+
+        .theme-bright-emerald label {
+            background: linear-gradient(135deg, #00e676, #1de9b6);
+        }
+
+
+        .theme-blue label {
+            background: linear-gradient(135deg, #2196f3, #42a5f5);
+        }
+
+        .theme-red label {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+        }
+
+        .theme-purple label {
+            background: linear-gradient(135deg, #9c27b0, #ba68c8);
+        }
+
+        .theme-gray label {
+            background: linear-gradient(135deg, #607d8b, #90a4ae);
+        }
+
+        .theme-black label {
+            background: linear-gradient(135deg, #424242, #616161);
+        }
+
+        /* Стили для inline кнопок навигации в навбаре */
+        .nav-buttons-inline {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .nav-btn-inline {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .nav-btn-inline:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            text-decoration: none;
+        }
+        
+        .nav-btn-inline.nav-btn-home {
+            background-color: rgba(40, 167, 69, 0.4);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-back {
+            background-color: rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-help {
+            background-color: rgba(0, 123, 255, 0.4);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-logout {
+            background-color: rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-home:hover {
+            background-color: rgba(33, 136, 56, 0.7);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-back:hover {
+            background-color: rgba(90, 98, 104, 0.7);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-help:hover {
+            background-color: rgba(0, 105, 217, 0.7);
+            color: white;
+        }
+        
+        .nav-btn-inline.nav-btn-logout:hover {
+            background-color: rgba(220, 53, 69, 0.7);
+            color: white;
+        }
+        
+        /* Стили для имени пользователя */
+        .user-name-display {
+            font-size: 0.75rem;
+            color: rgba(0, 0, 0, 0.4);
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.03);
+            white-space: nowrap;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .user-name-display:hover {
+            color: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .theme-selector {
+                margin-right: 10px;
+            }
+
+            .theme-options {
+                gap: 4px;
+            }
+
+            .theme-option label {
+                width: 24px;
+                height: 24px;
+            }
+
+            .theme-option input[type="radio"]:checked + label::after {
+                font-size: 8px;
+            }
+            
+            .nav-buttons-inline {
+                gap: 6px;
+            }
+            
+            .nav-btn-inline {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .user-name-display {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .theme-selector {
+                margin-right: 5px;
+            }
+
+            .theme-options {
+                gap: 3px;
+            }
+
+            .theme-option label {
+                width: 22px;
+                height: 22px;
+            }
+
+            .theme-option input[type="radio"]:checked + label::after {
+                font-size: 7px;
+            }
+            
+            .nav-buttons-inline {
+                gap: 4px;
+            }
+            
+            .nav-btn-inline {
+                width: 30px;
+                height: 30px;
+                font-size: 11px;
+            }
+        }
+        
+        /* Стили для плавающих кнопок навигации */
+        .floating-nav-buttons {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        
+        .floating-nav-buttons .nav-buttons-inline {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        /* Стили для номера страницы (отладка) */
+        .page-number-debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(220, 53, 69, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            font-family: 'Courier New', monospace;
+            min-width: 40px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .page-number-debug:hover {
+            background-color: rgba(220, 53, 69, 1);
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+        
+        /* Кнопка информации о размерах страницы */
+        .page-size-info-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: white;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .page-size-info-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+        
+        /* Модальное окно с информацией о размерах */
+        .page-size-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-size-modal.show {
+            display: flex;
+        }
+        
+        .page-size-modal-content {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(2px);
+            padding: 10px 15px;
+            border-radius: 8px;
+            width: auto;
+            max-width: none;
+            min-width: 200px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .page-size-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .page-size-modal-header h5 {
+            margin: 0;
+        }
+        
+        .page-size-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-size-modal-close:hover {
+            color: #000;
+        }
+        
+        .page-size-info-item {
+            margin-bottom: 5px;
+            padding: 4px;
+            background: rgba(248, 249, 250, 0.5);
+            border-radius: 3px;
+        }
+        
+        .page-size-info-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 2px;
+            font-size: 0.5em;
+        }
+        
+        .page-size-info-value {
+            color: #212529;
+            font-family: 'Courier New', monospace;
+            font-size: 0.5em;
+        }
+        
+        .page-size-modal-header h5 {
+            font-size: 0.7em;
+        }
+        
+        @media (max-width: 768px) {
+            .page-number-debug {
+                top: 5px;
+                right: 5px;
+                padding: 6px 10px;
+                font-size: 12px;
+                min-width: 35px;
+            }
+            
+            .page-size-info-btn {
+                width: 18px;
+                height: 18px;
+                font-size: 9px;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Модальное окно с инструкцией (в начале body для ранней доступности) -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-content">
+                        <h4>Турнирный Администратор</h4>
+                            <p class="lead">
+                              для любительских турниров в которых победитель матча определяется по
+                              итогам 3-х сетов до 2-х побед.
+                            </p>
+                        
+                            <h5><i class="fas fa-users me-2"></i>Роли пользователей</h5>
+                        
+                            <ul>
+                              <li><strong>Администратор турниров</strong></li>
+                              <li><strong>Участник</strong></li>
+                              <li><strong>Зритель</strong></li>
+                            </ul>
+                        
+                            <h5><i class="fas fa-crown me-2"></i>Администратор турниров</h5>
+                        
+                            <ul>
+                              <li>создаёт турниры</li>
+                              <li>вносит результаты матчей</li>
+                            </ul>
+                        
+                            <h6>Как стать администратором турниров?</h6>
+                            <ol>
+                              <li>
+                                Получите пароль по кнопке "Получить пароль". В открывшейся форме ведите
+                                имя, email. Реальность email не проверяется, но если email валидный на
+                                него придёт письмо с паролем.
+                              </li>
+                              <li>
+                                С паролем войдите в "Управление турнирами" по кнопке "Админ турнира".
+                              </li>
+                            </ol>
+                        
+                            <h6>Управление турнирами:</h6>
+                            <ul>
+                              <li>
+                                Кнопка "Создать турнир" открывает форму настроек турнира. Введите имя
+                                турнира, описание если нужно и выберите вид спорта. Для Бадминтона,
+                                Волейбола, Пинг-понга есть предварительные настройки. Текущая логика
+                                настроена для матчей из трех сетов до двух побед.
+                              </li>
+                              <li>
+                                После создания турнира он появляется в списке турниров для данного
+                                Админа турниров.
+                              </li>
+                              <li>
+                                По кнопке "Просмотр" открывается страница турнира с его названием, видом
+                                спорта и т.д.
+                              </li>
+                            </ul>
+                        
+                            <h6>На странице турнира в верхней части страницы три кнопки:</h6>
+                            <ul>
+                              <li>
+                                Кнопка "Добавить участника" для добавления участников:
+                                <ul>
+                                  <li>Вручную.</li>
+                                  <li>Из списка (в списке имена тех кто когда-то уже добавлен).</li>
+                                  <li>
+                                    Из листа ожидания (в листе те кто подал заявку через страницу "Для
+                                    зрителей").
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
+                        
+                            <h6>Нюансы:</h6>
+                            <ul>
+                              <li>Редактировать название турнира и его настройки нельзя.</li>
+                        
+                              <li>
+                                После введения результата любого матча турнир считается начавшимся
+                                икнопка "Добавить участника" исчезает.
+                              </li>
+                              <li>
+                                Кнопка "Составить расписание заново" удаляет все результаты и
+                                пересоставляет расписание. После добавления всех участников желательно
+                                проверить правильно ли составлено расписание.
+                              </li>
+                              <li>
+                                Кнопка "Выгрузить в Excel" - сохраняет данные турнира в виде файла
+                                "tournament_название_турнира_yyyymmdd_hhmm.csv".
+                              </li>
+                            </ul>
+                            <h6>Ввод результатов матчей:</h6>
+                            <ul>
+                              <li>
+                                Кликните по клеточке в "Турнирной таблице" или на строчку матча в
+                                расписании. Откроется форма "Результат". Введите счёт матча или Откройте
+                                страницу "Судейство" для ведения счёта Онлайн. Счёт будет автоматически
+                                обновляться на странице турнира и на страницах зрителей.
+                              </li>
+                            </ul>
+                        
+                            <h6>Страница Судейство:</h6>
+                            <ul>
+                              <li>
+                                Показывает схему корта и кнопки для настройки расположения команд и
+                                места начальной подачи.
+                              </li>
+                              <li>В центре корта кнопка обнулить счёт</li>
+                              <li>
+                                В левой части функциональные кнопки для:- Выхода из режима судейства,
+                                Демонстрации счёта игрокам, Отмены последнего розыгрыша, Перехода на
+                                команды другую сторону корта, Смены позиций игроков в левой и правой
+                                команде.
+                              </li>
+                              <li>
+                                Клик по левой или правой половине корта добавляет очко соответствующей
+                                команде. Счёт автоматически обновляется на турнирной странице и на
+                                страницах зрителей. Результат розыгрыша фиксируется в Журнале матча.
+                              </li>
+                            </ul>
+                        
+                            <h6>Завершение турнира:</h6>
+                            <ul>
+                              <li>
+                                После внесения результатов всех матчей турнир завершается и
+                                автоматически определяется победитель.
+                              </li>
+                            </ul>
+                        
+                            <h6>Логика определения победителей:</h6>
+                            <p>
+                              Места участников в турнире определяются по следующим критериям (в порядке
+                              приоритета):
+                            </p>
+                            <ol>
+                              <li>
+                                <strong>Количество набранных очков</strong> - участник с большим
+                                количеством очков занимает более высокое место.
+                              </li>
+                              <li>
+                                <strong>Результат личной встречи</strong> - при равенстве очков у двух
+                                участников, выше место у того, кто победил в личной встрече.
+                              </li>
+                              <li>
+                                <strong>Разница выигранных и проигранных сетов</strong> - при равенстве
+                                очков у трех и более участников, выше место у того, у кого лучше разница
+                                между выигранными и проигранными сетами.
+                              </li>
+                              <li>
+                                <strong>Разница очков в сетах</strong> - при равенстве всех предыдущих
+                                критериев, выше место у того, у кого лучше суммарная разница очков во
+                                всех сетах.
+                              </li>
+                            </ol>
+                        
+                            <h5><i class="fas fa-eye me-2"></i>Кнопка "Ваши турниры"</h5>
+                            <p>
+                              Предназначена для участников турниров. Кнопка показывает список турниров в
+                              которых принимает игрок.
+                            </p>
+                            <ul>
+                              <li>Вход по имени игрока.</li>
+                              <li>Открывается список турниров в которых принимает данный игрок.</li>
+                              <li>
+                                По кнопке "Просмотр" открывается турнир в режиме просмотра без
+                                возможности редактировать. В расписании выделены матчи данного игрока.
+                              </li>
+                            </ul>
+                        
+                            <h5>Кнопка "Для зрителей"</h5>
+                            <p>Открывает список всех турниров.</p>
+                            <ul>
+                              <li>
+                                Для всех турниров доступна кнопка "Я зритель". Откроется страница
+                                турнира в режиме просмотра.
+                              </li>
+                              <li>Если турнир не начался для него доступна кнопка "Подать заявку".</li>
+                              <li>Заявка будет видна администратору турнира.</li>
+                            </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Номер страницы для отладки -->
+    <div class="page-number-debug" id="pageNumberDebug">
+        <span id="pageNumberText">--</span>
+        <button class="page-size-info-btn" id="pageSizeInfoBtn" title="Информация о размерах страницы" onclick="showPageSizeInfo()">
+            <i class="fas fa-info" style="font-size: 10px;"></i>
+        </button>
+    </div>
+    
+    <!-- Модальное окно с информацией о размерах страницы -->
+    <div class="page-size-modal" id="pageSizeModal" onclick="closePageSizeInfoOnBackdrop(event)">
+        <div class="page-size-modal-content" onclick="event.stopPropagation()">
+            <div class="page-size-modal-header">
+                <h5><i class="fas fa-ruler me-2"></i>Информация о размерах страницы</h5>
+                <button class="page-size-modal-close" onclick="closePageSizeInfo()" title="Закрыть">&times;</button>
+            </div>
+            <div id="pageSizeInfoContent">
+                <!-- Информация будет добавлена через JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    {% if request.endpoint == 'index' %}
+    <!-- Полный navbar только на главной странице -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-trophy me-2"></i>Quick Score
+            </a>
+            
+            <!-- Кнопки выбора темы (только на главной странице) -->
+            <div class="theme-selector">
+                <span style="font-size: 0.85rem; margin-right: 8px; color: var(--text-primary);">цветовая тема:</span>
+                <div class="theme-options">
+                    <div class="theme-option theme-gray">
+                        <input type="radio" id="theme-gray" name="theme" value="gray" onchange="changeTheme(this.value)">
+                        <label for="theme-gray" title="Серый"><span class="theme-number">1</span></label>
+                    </div>
+                    <div class="theme-option theme-original-emerald">
+                        <input type="radio" id="theme-original-emerald" name="theme" value="original-emerald" onchange="changeTheme(this.value)">
+                        <label for="theme-original-emerald" title="Оригинальный изумруд"><span class="theme-number">2</span></label>
+                    </div>
+                    <div class="theme-option theme-deep-emerald">
+                        <input type="radio" id="theme-deep-emerald" name="theme" value="deep-emerald" onchange="changeTheme(this.value)">
+                        <label for="theme-deep-emerald" title="Глубокий изумруд"><span class="theme-number">3</span></label>
+                    </div>
+                    <div class="theme-option theme-bright-emerald">
+                        <input type="radio" id="theme-bright-emerald" name="theme" value="bright-emerald" onchange="changeTheme(this.value)">
+                        <label for="theme-bright-emerald" title="Яркий изумруд"><span class="theme-number">4</span></label>
+                    </div>
+                    <div class="theme-option theme-blue">
+                        <input type="radio" id="theme-blue" name="theme" value="blue" onchange="changeTheme(this.value)">
+                        <label for="theme-blue" title="Голубой"><span class="theme-number">5</span></label>
+                    </div>
+                    <div class="theme-option theme-red">
+                        <input type="radio" id="theme-red" name="theme" value="red" onchange="changeTheme(this.value)">
+                        <label for="theme-red" title="Красный"><span class="theme-number">6</span></label>
+                    </div>
+                    <div class="theme-option theme-purple">
+                        <input type="radio" id="theme-purple" name="theme" value="purple" onchange="changeTheme(this.value)">
+                        <label for="theme-purple" title="Фиолетовый"><span class="theme-number">7</span></label>
+                    </div>
+                    <div class="theme-option theme-black">
+                        <input type="radio" id="theme-black" name="theme" value="black" onchange="changeTheme(this.value)">
+                        <label for="theme-black" title="Чёрный"><span class="theme-number">8</span></label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопки навигации в навбаре -->
+            <div class="navbar-nav nav-buttons-inline">
+                <a href="{{ url_for('index') }}" class="nav-btn-inline nav-btn-home" title="На главную">
+                    <i class="fas fa-home"></i>
+                </a>
+                <a href="javascript:history.back()" class="nav-btn-inline nav-btn-back" title="Назад">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <a href="#" class="nav-btn-inline nav-btn-help" title="Помощь" onclick="showHelp()">
+                    <i class="fas fa-question"></i>
+                </a>
+                {% if request.endpoint not in ['referee_test', 'referee_page', 'referee_badminton', 'referee_volleyball', 'referee_pingpong', 'badminton_referee', 'tournaments_list', 'request_token', 'admin_tournament'] %}
+                    {% if request.endpoint == 'tournament_spectator' %}
+                        <span class="user-name-display ms-2">зритель</span>
+                    {% elif session.get('participant_name') or session.get('viewer_name') or session.get('admin_email') %}
+                        <span class="user-name-display ms-2">
+                            {% if session.get('participant_name') -%}
+                                {{ session.get('participant_name') }}
+                            {%- elif session.get('viewer_name') or session.get('viewer_authenticated') -%}
+                                зритель
+                            {%- elif session.get('admin_email') -%}
+                                {{ session.get('admin_email') }}
+                            {%- endif %}
+                        </span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <div class="d-flex w-100 justify-content-between">
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#">Профиль</a></li>
+                            <li><a class="dropdown-item" href="#">Настройки</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% else %}
+    <!-- Только кнопки навигации на остальных страницах -->
+    <div class="floating-nav-buttons">
+        <div class="nav-buttons-inline">
+            <a href="{{ url_for('index') }}" class="nav-btn-inline nav-btn-home" title="На главную">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="javascript:history.back()" class="nav-btn-inline nav-btn-back" title="Назад">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="#" class="nav-btn-inline nav-btn-help" title="Помощь" onclick="showHelp()">
+                <i class="fas fa-question"></i>
+            </a>
+            {% if session.get('admin_email') or session.get('is_system_admin') %}
+            <a href="{{ url_for('admin_logout') }}" class="nav-btn-inline nav-btn-logout" title="Выйти">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+            {% elif session.get('participant_logged_in') %}
+            <a href="{{ url_for('participant_logout') }}" class="nav-btn-inline nav-btn-logout" title="Выйти">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+            {% endif %}
+            {% if request.endpoint not in ['referee_test', 'referee_page', 'referee_badminton', 'referee_volleyball', 'referee_pingpong', 'badminton_referee', 'tournaments_list', 'request_token', 'admin_tournament'] %}
+                {% if request.endpoint == 'tournament_spectator' %}
+                    <span class="user-name-display">зритель</span>
+                {% elif session.get('participant_name') or session.get('viewer_name') or session.get('admin_email') %}
+                    <span class="user-name-display">
+                        {% if session.get('participant_name') -%}
+                            {{ session.get('participant_name') }}
+                        {%- elif session.get('viewer_name') or session.get('viewer_authenticated') -%}
+                            зритель
+                        {%- elif session.get('admin_email') -%}
+                            {{ session.get('admin_email') }}
+                        {%- endif %}
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <main class="container {% if request.endpoint != 'index' %}mt-2{% else %}mt-4{% endif %}">
+
+        {% block content %}{% endblock %}
+    </main>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Модальное окно регистрации пользователя -->
+    {% if not current_user.is_authenticated %}
+    <div class="modal fade" id="registerUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Регистрация нового пользователя</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerUserForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Имя пользователя</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Подтвердите пароль</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" form="registerUserForm" class="btn btn-primary">Зарегистрироваться</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <script>
+    // Инициализация базового пути из шаблона (передается через контекстный процессор Flask)
+    // Это нужно для работы с префиксом /new_dev на dev сервере
+    if (typeof window.BASE_PATH === 'undefined') {
+        window.BASE_PATH = '{{ base_path|default("") }}';
+    }
+    
+    // Функция для получения CSRF токена
+    function getCSRFToken() {
+        const token = document.querySelector('meta[name="csrf-token"]');
+        const tokenValue = token ? token.getAttribute('content') : '';
+        console.log('CSRF Token из базового шаблона:', tokenValue);
+        return tokenValue;
+    }
+    
+    // Обработка формы регистрации пользователя (глобально)
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerUserForm = document.getElementById('registerUserForm');
+        if (registerUserForm) {
+            registerUserForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Пароли не совпадают!');
+                    return;
+                }
+                
+                const formData = {
+                    username: document.getElementById('username').value,
+                    password: password
+                };
+                
+                fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        bootstrap.Modal.getInstance(document.getElementById('registerUserModal')).hide();
+                        // Обновляем страницу для отображения авторизованного состояния
+                        window.location.reload();
+                    } else {
+                        alert('Ошибка: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Ошибка при регистрации: ' + error);
+                });
+            });
+        }
+    });
+    
+    // Функция для показа помощи
+    function showHelp() {
+        console.log('showHelp() вызвана');
+        
+        // Функция для попытки открытия модального окна
+        function tryOpenModal() {
+            try {
+                // Проверяем, загружен ли Bootstrap
+                if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
+                    console.error('Bootstrap не загружен');
+                    alert('Ошибка: Bootstrap не загружен. Пожалуйста, обновите страницу.');
+                    return false;
+                }
+                
+                const helpModalElement = document.getElementById('helpModal');
+                if (!helpModalElement) {
+                    console.log('Модальное окно helpModal еще не найдено, ждем...');
+                    return false;
+                }
+                
+                console.log('Модальное окно найдено, пытаемся открыть');
+                
+                // Проверяем, есть ли уже экземпляр модального окна
+                let helpModal = bootstrap.Modal.getInstance(helpModalElement);
+                if (!helpModal) {
+                    console.log('Создаем новый экземпляр модального окна');
+                    // Создаем новый экземпляр, если его нет
+                    helpModal = new bootstrap.Modal(helpModalElement, {
+                        backdrop: true,
+                        keyboard: true,
+                        focus: true
+                    });
+                }
+                helpModal.show();
+                console.log('Модальное окно должно быть открыто');
+                return true;
+            } catch (error) {
+                console.error('Ошибка при открытии модального окна помощи:', error);
+                // Пытаемся показать модальное окно альтернативным способом
+                const helpModalElement = document.getElementById('helpModal');
+                if (helpModalElement) {
+                    console.log('Пытаемся открыть модальное окно альтернативным способом');
+                    helpModalElement.style.display = 'block';
+                    helpModalElement.classList.add('show');
+                    document.body.classList.add('modal-open');
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'modal-backdrop fade show';
+                    document.body.appendChild(backdrop);
+                    return true;
+                }
+                return false;
+            }
+        }
+        
+        // Пытаемся открыть сразу
+        if (tryOpenModal()) {
+            return;
+        }
+        
+        // Если не получилось, ждем появления элемента (максимум 2 секунды)
+        let attempts = 0;
+        const maxAttempts = 20; // 20 попыток по 100мс = 2 секунды
+        const interval = setInterval(function() {
+            attempts++;
+            if (tryOpenModal() || attempts >= maxAttempts) {
+                clearInterval(interval);
+                if (attempts >= maxAttempts) {
+                    console.error('Модальное окно helpModal не найдено после ожидания');
+                    alert('Ошибка: модальное окно помощи не найдено. Пожалуйста, обновите страницу.');
+                }
+            }
+        }, 100);
+    }
+    
+    // Делаем функцию доступной глобально
+    window.showHelp = showHelp;
+    
+    // Немедленная проверка наличия модального окна (до DOMContentLoaded)
+    (function() {
+        if (document.readyState === 'loading') {
+            // DOM еще загружается
+            console.log('DOM загружается, модальное окно будет проверено после загрузки');
+        } else {
+            // DOM уже загружен
+            const helpModalElement = document.getElementById('helpModal');
+            if (helpModalElement) {
+                console.log('✓ Модальное окно helpModal найдено (немедленная проверка)');
+            } else {
+                console.error('✗ Модальное окно helpModal НЕ найдено (немедленная проверка)!');
+            }
+        }
+    })();
+    
+    // Добавляем обработчики событий для кнопок Help после загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        // Проверяем наличие модального окна
+        const helpModalElement = document.getElementById('helpModal');
+        if (helpModalElement) {
+            console.log('✓ Модальное окно helpModal найдено в DOM');
+        } else {
+            console.error('✗ Модальное окно helpModal НЕ найдено в DOM!');
+        }
+        
+        // Находим все кнопки Help и добавляем обработчики
+        const helpButtons = document.querySelectorAll('.nav-btn-help');
+        console.log('Найдено кнопок Help:', helpButtons.length);
+        
+        helpButtons.forEach(function(button, index) {
+            console.log('Обработка кнопки Help #' + (index + 1));
+            // Удаляем старый обработчик onclick, если есть
+            button.removeAttribute('onclick');
+            // Добавляем новый обработчик через addEventListener
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Кнопка Help нажата, вызываем showHelp()');
+                showHelp();
+            });
+        });
+        console.log('Обработчики для кнопок Help добавлены, найдено кнопок:', helpButtons.length);
+    });
+    
+    // Функция для определения номера страницы по URL
+    function getPageNumber() {
+        let path = window.location.pathname;
+        
+        // Убираем префикс BASE_PATH (например, /new_dev) если он есть
+        const basePath = window.BASE_PATH || '';
+        if (basePath && path.startsWith(basePath)) {
+            path = path.substring(basePath.length) || '/';
+        }
+        
+        const pageMap = {
+            '/': 1,
+            '/index': 1,
+            '/request-token': 2,
+            '/create-tournament': 3,
+            '/admin-tournament': 4,
+            '/admin-dashboard': 5,
+            '/admin-create-tournament': 6,
+            '/admin-edit-tournament': 7,
+            '/admin-tokens': 8,
+            '/system-admin-dashboard': 9,
+            '/users': 10,
+            '/login': 11,
+            '/tournament': 12,
+            '/tournaments': 13,
+            '/tournaments-list': 14,
+            '/join-tournament': 15,
+            '/participant-tournaments': 16,
+            '/participant-tournament': 17,
+            '/tournament-view': 18,
+            '/tournament-spectator': 18,
+            '/my-tournaments': 19,
+            '/my-tournaments-login': 20,
+            '/token-generated': 21,
+            '/badminton-referee': 22,
+            '/bg-variant1': 23,
+            '/bg-variant2': 24,
+            '/bg-variant3': 25,
+            '/bg-variant4': 26,
+            '/test-green-colors': 27
+        };
+        
+        // Проверяем точное совпадение
+        if (pageMap[path]) {
+            return pageMap[path];
+        }
+        
+        // Проверяем частичные совпадения для динамических маршрутов
+        if (path.startsWith('/tournament/') && path !== '/tournament/') {
+            return 12; // Страница турнира
+        }
+        
+        if (path.startsWith('/admin/edit-tournament/')) {
+            return 7; // Редактирование турнира
+        }
+        
+        if (path.startsWith('/admin-tournament/')) {
+            return 4; // Админ турнира
+        }
+        
+        if (path.startsWith('/tournament-spectator/')) {
+            return 18; // Информация о турнире для зрителей
+        }
+        
+        if (path.startsWith('/tournament-view/')) {
+            return 18; // Просмотр турнира участником
+        }
+        
+        // Отладочный вывод (можно убрать после проверки)
+        if (path === '/system-admin-dashboard' || path.startsWith('/system-admin-dashboard')) {
+            return 9; // Системная административная панель
+        }
+        
+        // Если не найдено, возвращаем 0
+        return 0;
+    }
+    
+    // Функция для отображения информации о размерах страницы
+    function showPageSizeInfo() {
+        const modal = document.getElementById('pageSizeModal');
+        const content = document.getElementById('pageSizeInfoContent');
+        
+        if (!modal || !content) return;
+        
+        // Получаем размеры
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        
+        // Определяем ориентацию
+        let orientation = 'Неизвестно';
+        if (viewportHeight > viewportWidth) {
+            orientation = 'Портретная (Portrait)';
+        } else if (viewportWidth > viewportHeight) {
+            orientation = 'Альбомная (Landscape)';
+        } else {
+            orientation = 'Квадратная';
+        }
+        
+        // Формируем HTML с информацией (без URL и ориентации)
+        content.innerHTML = `
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Viewport (видимая область):</div>
+                <div class="page-size-info-value">${viewportWidth} × ${viewportHeight} px</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Окно браузера:</div>
+                <div class="page-size-info-value">${windowWidth} × ${windowHeight} px</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Экран устройства:</div>
+                <div class="page-size-info-value">${screenWidth} × ${screenHeight} px</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Device Pixel Ratio:</div>
+                <div class="page-size-info-value">${devicePixelRatio.toFixed(2)}</div>
+            </div>
+            <div class="page-size-info-item">
+                <div class="page-size-info-label">Номер страницы:</div>
+                <div class="page-size-info-value">${getPageNumber() || '?'}</div>
+            </div>
+        `;
+        
+        modal.classList.add('show');
+    }
+    
+    // Функция для закрытия модального окна
+    function closePageSizeInfo() {
+        const modal = document.getElementById('pageSizeModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+    
+    // Закрытие при клике на фон
+    function closePageSizeInfoOnBackdrop(event) {
+        if (event.target.id === 'pageSizeModal') {
+            closePageSizeInfo();
+        }
+    }
+    
+    // Закрытие по клавише Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closePageSizeInfo();
+        }
+    });
+    
+    // Обновление номера страницы при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        const pageNumber = getPageNumber();
+        const pageNumberText = document.getElementById('pageNumberText');
+        if (pageNumberText) {
+            pageNumberText.textContent = pageNumber > 0 ? pageNumber : '?';
+        }
+    });
+    </script>
+    
+    <!-- Система смены тем -->
+    <script>
+    // Определение тем
+    const themes = {
+        'original-emerald': {
+            '--primary-color': '#00c851',
+            '--primary-light': '#00e676',
+            '--primary-dark': '#00a041',
+            '--accent-color': '#00bfa5',
+            '--accent-light': '#1de9b6',
+            '--bg-primary': '#e8f5e8',
+            '--bg-secondary': '#f0fff0',
+            '--bg-card': '#f1f8e9',
+            '--bg-card-hover': '#f8fdf8',
+            '--border-color': '#a5d6a7',
+            '--shadow-color': 'rgba(0, 200, 81, 0.1)',
+            '--shadow-hover': 'rgba(0, 200, 81, 0.15)',
+            '--shadow-strong': 'rgba(0, 200, 81, 0.3)',
+            '--float-color': 'rgba(0, 200, 81, 0.1)'
+        },
+        'deep-emerald': {
+            '--primary-color': '#00695c',
+            '--primary-light': '#00897b',
+            '--primary-dark': '#004d40',
+            '--accent-color': '#00bfa5',
+            '--accent-light': '#1de9b6',
+            '--bg-primary': '#e8f5e8',
+            '--bg-secondary': '#f0fff0',
+            '--bg-card': '#f1f8e9',
+            '--bg-card-hover': '#f8fdf8',
+            '--border-color': '#4db6ac',
+            '--shadow-color': 'rgba(0, 105, 92, 0.1)',
+            '--shadow-hover': 'rgba(0, 105, 92, 0.15)',
+            '--shadow-strong': 'rgba(0, 105, 92, 0.3)',
+            '--float-color': 'rgba(0, 105, 92, 0.1)'
+        },
+        'bright-emerald': {
+            '--primary-color': '#00e676',
+            '--primary-light': '#1de9b6',
+            '--primary-dark': '#00c853',
+            '--accent-color': '#00bfa5',
+            '--accent-light': '#64ffda',
+            '--bg-primary': '#e8f5e8',
+            '--bg-secondary': '#f1f8e9',
+            '--bg-card': '#f8fdf8',
+            '--bg-card-hover': '#f0fff0',
+            '--border-color': '#69f0ae',
+            '--shadow-color': 'rgba(0, 230, 118, 0.1)',
+            '--shadow-hover': 'rgba(0, 230, 118, 0.15)',
+            '--shadow-strong': 'rgba(0, 230, 118, 0.3)',
+            '--float-color': 'rgba(0, 230, 118, 0.1)'
+        },
+        'blue': {
+            '--primary-color': '#2196f3',
+            '--primary-light': '#42a5f5',
+            '--primary-dark': '#1976d2',
+            '--accent-color': '#03a9f4',
+            '--accent-light': '#29b6f6',
+            '--bg-primary': '#e3f2fd',
+            '--bg-secondary': '#f3e5f5',
+            '--bg-card': '#f8f9fa',
+            '--bg-card-hover': '#e8f4fd',
+            '--border-color': '#90caf9',
+            '--shadow-color': 'rgba(33, 150, 243, 0.1)',
+            '--shadow-hover': 'rgba(33, 150, 243, 0.15)',
+            '--shadow-strong': 'rgba(33, 150, 243, 0.3)',
+            '--float-color': 'rgba(33, 150, 243, 0.1)'
+        },
+        'red': {
+            '--primary-color': '#f44336',
+            '--primary-light': '#ef5350',
+            '--primary-dark': '#d32f2f',
+            '--accent-color': '#ff5722',
+            '--accent-light': '#ff7043',
+            '--bg-primary': '#ffebee',
+            '--bg-secondary': '#fce4ec',
+            '--bg-card': '#fafafa',
+            '--bg-card-hover': '#ffcdd2',
+            '--border-color': '#ef9a9a',
+            '--shadow-color': 'rgba(244, 67, 54, 0.1)',
+            '--shadow-hover': 'rgba(244, 67, 54, 0.15)',
+            '--shadow-strong': 'rgba(244, 67, 54, 0.3)',
+            '--float-color': 'rgba(244, 67, 54, 0.1)'
+        },
+        'purple': {
+            '--primary-color': '#9c27b0',
+            '--primary-light': '#ba68c8',
+            '--primary-dark': '#7b1fa2',
+            '--accent-color': '#e91e63',
+            '--accent-light': '#f06292',
+            '--bg-primary': '#f3e5f5',
+            '--bg-secondary': '#fce4ec',
+            '--bg-card': '#fafafa',
+            '--bg-card-hover': '#e1bee7',
+            '--border-color': '#ce93d8',
+            '--shadow-color': 'rgba(156, 39, 176, 0.1)',
+            '--shadow-hover': 'rgba(156, 39, 176, 0.15)',
+            '--shadow-strong': 'rgba(156, 39, 176, 0.3)',
+            '--float-color': 'rgba(156, 39, 176, 0.1)'
+        },
+        'gray': {
+            '--primary-color': '#607d8b',
+            '--primary-light': '#90a4ae',
+            '--primary-dark': '#455a64',
+            '--accent-color': '#78909c',
+            '--accent-light': '#b0bec5',
+            '--bg-primary': '#f5f5f5',
+            '--bg-secondary': '#fafafa',
+            '--bg-card': '#ffffff',
+            '--bg-card-hover': '#eeeeee',
+            '--border-color': '#bdbdbd',
+            '--shadow-color': 'rgba(96, 125, 139, 0.1)',
+            '--shadow-hover': 'rgba(96, 125, 139, 0.15)',
+            '--shadow-strong': 'rgba(96, 125, 139, 0.3)',
+            '--float-color': 'rgba(96, 125, 139, 0.1)'
+        },
+        'black': {
+            '--primary-color': '#424242',
+            '--primary-light': '#616161',
+            '--primary-dark': '#212121',
+            '--accent-color': '#757575',
+            '--accent-light': '#9e9e9e',
+            '--bg-primary': '#f5f5f5',
+            '--bg-secondary': '#fafafa',
+            '--bg-card': '#ffffff',
+            '--bg-card-hover': '#eeeeee',
+            '--border-color': '#bdbdbd',
+            '--shadow-color': 'rgba(66, 66, 66, 0.1)',
+            '--shadow-hover': 'rgba(66, 66, 66, 0.15)',
+            '--shadow-strong': 'rgba(66, 66, 66, 0.3)',
+            '--float-color': 'rgba(66, 66, 66, 0.1)'
+        }
+    };
+
+    // Функция смены темы
+    function changeTheme(themeName) {
+        const root = document.documentElement;
+        const theme = themes[themeName];
+        
+        if (theme) {
+            Object.keys(theme).forEach(key => {
+                root.style.setProperty(key, theme[key]);
+            });
+            
+            // Сохраняем выбранную тему
+            localStorage.setItem('selectedTheme', themeName);
+        }
+    }
+
+    // Загружаем сохраненную тему при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('selectedTheme') || 'deep-emerald';
+        const root = document.documentElement;
+        const theme = themes[savedTheme];
+        
+        if (theme) {
+            Object.keys(theme).forEach(key => {
+                root.style.setProperty(key, theme[key]);
+            });
+        }
+        
+        // Устанавливаем выбранную тему в радиокнопках
+        const themeRadio = document.getElementById(`theme-${savedTheme}`);
+        if (themeRadio) {
+            themeRadio.checked = true;
+        }
+        
+        // Глобальная очистка flash сообщений через 5 секунд
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                if (alert && alert.classList.contains('show')) {
+                    alert.classList.remove('show');
+                    alert.classList.add('fade');
+                    setTimeout(function() {
+                        if (alert.parentNode) {
+                            alert.parentNode.removeChild(alert);
+                        }
+                    }, 300);
+                }
+            }, 5000); // 5 секунд
+        });
+    });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+
+    <style>
+    .help-content {
+        line-height: 1.6;
+    }
+
+    .help-content h4 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .help-content h5 {
+        color: #34495e;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
+
+    .help-content h6 {
+        color: #7f8c8d;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .help-content ul, .help-content ol {
+        margin-bottom: 15px;
+    }
+
+    .help-content li {
+        margin-bottom: 5px;
+    }
+
+    .help-content .lead {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 25px;
+    }
+    </style>
+</body>
+</html>

@@ -778,13 +778,18 @@
         
         <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mb-5">
 
-                     {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
-                     {% set has_active_matches = matches | selectattr('status', 'in', ['завершен', 'в_процессе', 'играют']) | list | length > 0 %}
-                     {% if not has_active_matches %}
-                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
-                         <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
-                     </button>
-                     {% endif %}
+                    {% if current_user.is_authenticated and (current_user.role == 'системный администратор' or current_user.role == 'администратор турнира') %}
+                    {# Показываем кнопку "Добавить опоздавшего участника", если есть хотя бы один матч (независимо от статуса) #}
+                    {# Это защищает от случайного удаления матчей при добавлении участника #}
+                    {% if matches|length > 0 %}
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addLateParticipantModal">
+                        <i class="fas fa-user-clock me-1"></i><span class="d-none d-sm-inline">Добавить опоздавшего участника</span><span class="d-sm-none">Опоздавший</span>
+                    </button>
+                    {% else %}
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                        <i class="fas fa-user-plus me-1"></i><span class="d-none d-sm-inline">Добавить участника</span><span class="d-sm-none">Добавить</span>
+                    </button>
+                    {% endif %}
                      <button class="btn btn-info btn-sm" onclick="generateSchedule()">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание заново</span><span class="d-sm-none">Расписание</span>
                      </button>
@@ -798,7 +803,7 @@
                      <button class="btn btn-info btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-calendar-alt me-1"></i><span class="d-none d-sm-inline">Составить расписание</span><span class="d-sm-none">Расписание</span>
                      </button>
-                     {% if has_active_matches %}
+                     {% if matches|length > 0 %}
                      <button class="btn btn-warning btn-sm" disabled title="Доступно только создателю турнира и администратору системы">
                          <i class="fas fa-user-clock me-1"></i><span class="d-none d-sm-inline">Добавить опоздавшего участника</span><span class="d-sm-none">Опоздавший</span>
                      </button>
@@ -947,7 +952,7 @@
                                 <td class="text-center {% if p1_data.is_late_participant %}bg-warning{% else %}bg-light{% endif %} fw-bold text-success">{{ p1_position }}</td>
                                 {% for p2_data in participants_with_stats_chessboard %}
                                 {% set p2 = p2_data.participant %}
-                                <td class="text-center position-relative {% if p1_data.is_late_participant or p2_data.is_late_participant %}bg-success bg-opacity-25{% endif %}" style="height: 80px; width: 120px; vertical-align: middle;">
+                                <td class="text-center position-relative border {% if p1_data.is_late_participant or p2_data.is_late_participant %}bg-success bg-opacity-25{% endif %}" style="height: 80px; width: 120px; vertical-align: middle;">
                                     {% if p1.id == p2.id %}
                                         <span class="text-muted">—</span>
                                     {% else %}
@@ -4307,7 +4312,8 @@ function addLateParticipant() {
         button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Добавление...';
         button.disabled = true;
         
-        fetch(`/api/tournaments/{{ tournament.id }}/add-late-participant`, {
+        const basePath = window.BASE_PATH || '';
+        fetch(basePath + `/api/tournaments/{{ tournament.id }}/participants/late`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -4317,10 +4323,22 @@ function addLateParticipant() {
                 name: name
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || `HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
-                alert(`Участник "${name}" успешно добавлен в турнир!\nРезультаты матчей сохранены.`);
+                const matchesInfo = data.matches_created > 0 
+                    ? `\nСоздано ${data.matches_created} новых матчей.` 
+                    : '\nВсе матчи уже существуют.';
+                alert(`Участник "${name}" успешно добавлен в турнир!${matchesInfo}\nРезультаты прошедших матчей сохранены.`);
                 location.reload(); // Перезагружаем страницу для отображения нового участника
             } else {
                 alert('Ошибка при добавлении участника: ' + (data.error || 'Неизвестная ошибка'));
@@ -4330,8 +4348,8 @@ function addLateParticipant() {
             }
         })
         .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Ошибка при добавлении участника. Попробуйте еще раз.');
+            console.error('Ошибка при добавлении опоздавшего участника:', error);
+            alert('Ошибка при добавлении участника: ' + error.message);
             // Восстанавливаем кнопку
             button.innerHTML = originalText;
             button.disabled = false;

@@ -36,6 +36,11 @@ class Match(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now())
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(), onupdate=lambda: datetime.now())
     
+    # Soft-delete поля
+    is_removed = db.Column(db.Boolean, default=False, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
+    deleted_by = db.Column(db.String(100), nullable=True)
+    
     # Связи для отображения имен участников
     participant1 = db.relationship('models.participant.Participant', foreign_keys=[participant1_id], backref='matches_as_p1')
     participant2 = db.relationship('models.participant.Participant', foreign_keys=[participant2_id], backref='matches_as_p2')

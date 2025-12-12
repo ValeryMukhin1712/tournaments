@@ -1977,23 +1977,28 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             flash('У вас нет доступа к этому турниру. Только администратор турнира или системный администратор могут просматривать турнир.', 'error')
             return redirect(url_for('index'))
         
-        participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
-        matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        participants = Participant.query.filter_by(tournament_id=tournament_id, is_active=True).order_by(Participant.name).all()
+        matches = Match.query.filter_by(tournament_id=tournament_id, is_removed=False).order_by(Match.match_date, Match.match_time).all()
         
         # Проверяем и обновляем статус турнира
         tournament_completed = update_tournament_status(tournament, participants, matches, db)
         
         # Автоматически создаем расписание, если есть участники, но нет матчей
+        # ВАЖНО: Не пересоздаем расписание, если уже есть матчи (даже если они завершены)
+        # Это защита от случайного удаления матчей при добавлении опоздавшего участника
         if len(participants) >= 2 and len(matches) == 0:
+            logger.info(f"[tournament_detail] Турнир {tournament_id}: {len(participants)} участников, но 0 матчей. Создаем расписание.")
             try:
                 from routes.api import create_smart_schedule
                 matches_created = create_smart_schedule(tournament, participants, Match, db)
                 db.session.commit()
                 logger.info(f"Автоматически создано {matches_created} матчей для турнира {tournament_id}")
                 # Обновляем список матчей
-                matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+                matches = Match.query.filter_by(tournament_id=tournament_id, is_removed=False).order_by(Match.match_date, Match.match_time).all()
             except Exception as e:
                 logger.error(f"Ошибка при автоматическом создании расписания: {e}")
+        else:
+            logger.debug(f"[tournament_detail] Турнир {tournament_id}: {len(participants)} участников, {len(matches)} матчей. Расписание не пересоздаем.")
         
         # Создаем базовые данные для совместимости с шаблоном
         participants_with_stats = []
@@ -2612,7 +2617,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
         
         # Получаем матчи турнира
-        matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        matches = Match.query.filter_by(tournament_id=tournament_id, is_removed=False).order_by(Match.match_date, Match.match_time).all()
         
         # Дедупликация матчей по уникальным полям (участники + дата + время)
         seen_matches = set()
@@ -2999,7 +3004,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
         participants = Participant.query.filter_by(tournament_id=tournament_id).order_by(Participant.name).all()
         
         # Получаем матчи турнира
-        matches = Match.query.filter_by(tournament_id=tournament_id).order_by(Match.match_date, Match.match_time).all()
+        matches = Match.query.filter_by(tournament_id=tournament_id, is_removed=False).order_by(Match.match_date, Match.match_time).all()
         
         # Проверяем и обновляем статус турнира
         tournament_completed = update_tournament_status(tournament, participants, matches, db)
@@ -3510,7 +3515,7 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
             participants = Participant.query.filter_by(tournament_id=tournament_id).all()
             
             # Получаем матчи турнира
-            matches = Match.query.filter_by(tournament_id=tournament_id).all()
+            matches = Match.query.filter_by(tournament_id=tournament_id, is_removed=False).all()
             
             # Создаем CSV файл в памяти с правильной кодировкой для кириллицы
             output = io.StringIO()

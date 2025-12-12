@@ -45,6 +45,11 @@ class Rally(db.Model):
     # Временные метки
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Soft-delete поля
+    is_removed = db.Column(db.Boolean, default=False, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
+    deleted_by = db.Column(db.String(100), nullable=True)
+    
     # Связи
     match = db.relationship('Match', backref='rallies')
     tournament = db.relationship('Tournament', backref='rallies')
@@ -69,6 +74,9 @@ class Rally(db.Model):
             'score': self.score,
             'swap_count': self.swap_count,
             'notes': self.notes,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'is_removed': self.is_removed,
+            'deleted_at': self.deleted_at.isoformat() if self.deleted_at else None,
+            'deleted_by': self.deleted_by
         }
 

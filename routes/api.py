@@ -866,6 +866,22 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 (Match.participant2_id == participant_id)
             ).all()
             
+            match_ids = [match.id for match in matches_to_delete]
+            
+            # Удаляем связанные розыгрыши (rally) перед удалением матчей
+            if match_ids:
+                from sqlalchemy import text, bindparam
+                # Используем raw SQL для удаления, чтобы избежать проблем с каскадным удалением
+                # Создаем параметры как словарь
+                params = {f'id_{i}': match_id for i, match_id in enumerate(match_ids)}
+                placeholders = ','.join([f':id_{i}' for i in range(len(match_ids))])
+                db.session.execute(
+                    text(f"DELETE FROM rally WHERE match_id IN ({placeholders})"),
+                    params
+                )
+                logger.info(f"Удалено розыгрышей для {len(match_ids)} матчей участника '{participant_name}'")
+            
+            # Теперь безопасно удаляем матчи
             for match in matches_to_delete:
                 db.session.delete(match)
             
@@ -873,28 +889,25 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             db.session.delete(participant)
             db.session.commit()
             
-            # Пересоздаем расписание для оставшихся участников
-            remaining_participants = Participant.query.filter_by(tournament_id=tournament_id).all()
-            if len(remaining_participants) >= 2:
-                # Удаляем все оставшиеся матчи
-                all_matches = Match.query.filter_by(tournament_id=tournament_id).all()
-                for match in all_matches:
-                    db.session.delete(match)
-                
-                # Создаем новое расписание
-                matches_created = create_smart_schedule(tournament, remaining_participants, Match, db, preserve_results=True)
-                db.session.commit()
-                
-                logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Пересоздано {matches_created} матчей для {len(remaining_participants)} оставшихся участников.")
-            else:
-                logger.info(f"Участник '{participant_name}' удален из турнира {tournament_id}. Осталось {len(remaining_participants)} участников - расписание не создается.")
+            # ВАЖНО: НЕ пересоздаем расписание! Удаляем только матчи удаляемого участника.
+            # Это сохраняет результаты прошедших матчей других участников.
+            remaining_participants = Participant.query.filter_by(tournament_id=tournament_id, is_active=True).all()
+            matches_deleted_count = len(matches_to_delete)
             
-            return jsonify({'success': True, 'message': f'Участник "{participant_name}" успешно удален. Расписание обновлено.'}), 200
+            logger.info(f"[delete_participant] Участник '{participant_name}' удален из турнира {tournament_id}.")
+            logger.info(f"[delete_participant] Удалено матчей удаляемого участника: {matches_deleted_count}")
+            logger.info(f"[delete_participant] Осталось участников: {len(remaining_participants)}")
+            logger.info(f"[delete_participant] Матчи других участников сохранены (НЕ пересоздаем расписание).")
+            
+            return jsonify({
+                'success': True, 
+                'message': f'Участник "{participant_name}" успешно удален. Удалено {matches_deleted_count} матчей. Результаты прошедших матчей других участников сохранены.'
+            }), 200
             
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Ошибка при удалении участника {participant_id}: {e}")
-            return jsonify({'success': False, 'error': 'Ошибка при удалении участника'}), 500
+            logger.error(f"Ошибка при удалении участника {participant_id}: {e}", exc_info=True)
+            return jsonify({'success': False, 'error': f'Ошибка при удалении участника: {str(e)}'}), 500
 
     @app.route('/api/tournaments/<int:tournament_id>', methods=['DELETE'])
     def delete_tournament(tournament_id):
@@ -2973,44 +2986,57 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             return jsonify({'success': False, 'error': f'Ошибка при составлении расписания: {error_message}'}), 500
 
 
-    @app.route('/api/tournaments/<int:tournament_id>/add-late-participant', methods=['POST'])
+    @app.route('/api/tournaments/<int:tournament_id>/participants/late', methods=['POST'])
     def add_late_participant(tournament_id):
-        """Добавление опоздавшего участника в турнир без пересчета расписания"""
+        logger.info(f"[add_late_participant] ===== НАЧАЛО ДОБАВЛЕНИЯ ОПОЗДАВШЕГО УЧАСТНИКА В ТУРНИР {tournament_id} =====")
+        """Добавление опоздавшего участника в турнир с сохранением временных результатов"""
+        from flask import session
+        from flask_wtf.csrf import validate_csrf
+        
         try:
-            # Проверяем CSRF токен
-            from flask_wtf.csrf import validate_csrf
-            try:
-                validate_csrf(request.headers.get('X-CSRFToken'))
-            except Exception as e:
-                logger.warning(f"CSRF validation failed: {e}")
-                return jsonify({'success': False, 'error': 'Неверный CSRF токен'}), 400
-            
-            # Получаем данные из запроса
-            data = request.get_json()
-            name = data.get('name', '').strip()
-            
-            if not name:
-                return jsonify({'success': False, 'error': 'Имя участника обязательно'}), 400
-            
-            # Получаем турнир
-            tournament = Tournament.query.get(tournament_id)
-            if not tournament:
-                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
-            
-            # Проверяем, не существует ли уже участник с таким именем
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except:
+            return jsonify({'success': False, 'error': 'Ошибка безопасности. Неверный CSRF токен.'}), 400
+        
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        tournament = Tournament.query.get_or_404(tournament_id)
+        admin_id = session['admin_id']
+        admin_email = session.get('admin_email', '')
+        
+        # Проверка прав доступа
+        if admin_id != tournament.admin_id and admin_email != 'admin@system':
+            return jsonify({'success': False, 'error': 'Недостаточно прав для добавления участника'}), 403
+        
+        data = request.get_json()
+        
+        if not data or not data.get('name'):
+            return jsonify({'success': False, 'error': 'Необходимо имя участника'}), 400
+        
+        name = data.get('name', '').strip()
+        
+        if not name:
+            return jsonify({'success': False, 'error': 'Имя участника обязательно'}), 400
+        
+        try:
+            # Проверяем, не существует ли уже активный участник с таким именем
             existing_participant = Participant.query.filter_by(
                 tournament_id=tournament_id, 
-                name=name
+                name=name,
+                is_active=True
             ).first()
             
             if existing_participant:
-                return jsonify({'success': False, 'error': 'Участник с таким именем уже существует в турнире'}), 400
+                return jsonify({'success': False, 'error': f'Участник с именем "{name}" уже существует в турнире'}), 400
             
             # Создаем нового участника
             participant = Participant(
                 tournament_id=tournament_id,
                 name=name,
-                points=0
+                points=0,
+                is_active=True,
+                registered_at=datetime.utcnow()
             )
             
             db.session.add(participant)
@@ -3029,16 +3055,717 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             db.session.commit()
             
-            logger.info(f"Опоздавший участник '{name}' добавлен в турнир {tournament_id} без пересчета расписания")
+            # Создаем только недостающие матчи для нового участника
+            from datetime import date, time, timedelta, datetime as dt_module
+            
+            # Получаем всех активных участников
+            all_participants = Participant.query.filter_by(
+                tournament_id=tournament_id,
+                is_active=True
+            ).all()
+            
+            # Получаем все существующие матчи (ВАЖНО: не удаляем их, только читаем)
+            existing_matches = Match.query.filter_by(
+                tournament_id=tournament_id,
+                is_removed=False
+            ).all()
+            
+            logger.info(f"[add_late_participant] Найдено {len(existing_matches)} существующих матчей в турнире {tournament_id}. Они НЕ будут удалены или изменены.")
+            
+            # Подсчитываем завершенные матчи для логирования
+            completed_matches_count = sum(1 for m in existing_matches if m.status in ['завершен', 'в_процессе', 'играют'])
+            logger.info(f"[add_late_participant] Из них завершенных/активных: {completed_matches_count}. Эти матчи будут сохранены.")
+            
+            # Создаем множество пар участников, для которых уже есть матчи
+            existing_pairs = set()
+            for match in existing_matches:
+                pair = tuple(sorted([match.participant1_id, match.participant2_id]))
+                existing_pairs.add(pair)
+                if match.status in ['завершен', 'в_процессе', 'играют']:
+                    logger.info(f"[add_late_participant] Сохраняем существующий матч {match.id}: участники {match.participant1_id} vs {match.participant2_id}, статус: {match.status}")
+            
+            # Параметры турнира
+            k = tournament.court_count or 4
+            time_match = tournament.match_duration or 15
+            time_break = tournament.break_duration or 2
+            start_time = tournament.start_time or time(9, 0)
+            end_time = tournament.end_time or time(18, 0)
+            start_date = tournament.start_date or date.today()
+            
+            # Находим последний матч по времени
+            last_match = Match.query.filter_by(
+                tournament_id=tournament.id,
+                is_removed=False
+            ).order_by(Match.match_date.desc(), Match.match_time.desc()).first()
+            
+            if last_match:
+                current_date = last_match.match_date
+                # Добавляем минуты к времени последнего матча
+                dt = dt_module.combine(date.today(), last_match.match_time)
+                new_dt = dt + timedelta(minutes=time_match + time_break)
+                current_time = new_dt.time()
+                if current_time > end_time:
+                    current_date += timedelta(days=1)
+                    current_time = start_time
+            else:
+                current_date = start_date
+                current_time = start_time
+            
+            # Создаем матчи только для нового участника со всеми остальными
+            matches_to_create = []
+            other_participants = [p for p in all_participants if p.id != participant.id]
+            logger.info(f"[add_late_participant] Найдено {len(other_participants)} других активных участников для создания матчей с '{participant.name}' (ID: {participant.id})")
+            logger.info(f"[add_late_participant] Существующих пар матчей: {len(existing_pairs)}")
+            
+            if len(other_participants) == 0:
+                logger.warning(f"[add_late_participant] Нет других участников для создания матчей с '{participant.name}'")
+            
+            for other_participant in other_participants:
+                pair = tuple(sorted([participant.id, other_participant.id]))
+                if pair in existing_pairs:
+                    logger.info(f"[add_late_participant] Матч между {participant.name} (ID: {participant.id}) и {other_participant.name} (ID: {other_participant.id}) уже существует, пропускаем")
+                    continue
+                matches_to_create.append({
+                    'participant1_id': participant.id,
+                    'participant2_id': other_participant.id,
+                    'participant_name': other_participant.name
+                })
+                logger.info(f"[add_late_participant] Подготовлен матч: {participant.name} vs {other_participant.name}")
+            
+            logger.info(f"[add_late_participant] Всего подготовлено {len(matches_to_create)} матчей для создания")
+            
+            # Определяем максимальный номер матча
+            max_match_number = db.session.query(db.func.max(Match.match_number)).filter_by(
+                tournament_id=tournament.id
+            ).scalar() or 0
+            
+            # Получаем все существующие матчи, отсортированные по времени (только запланированные)
+            existing_scheduled_matches = [
+                m for m in existing_matches 
+                if m.status in ['запланирован', 'в_процессе', 'играют']
+            ]
+            existing_scheduled_matches.sort(key=lambda m: (m.match_date, m.match_time, m.court_number))
+            
+            logger.info(f"[add_late_participant] Найдено {len(existing_scheduled_matches)} запланированных матчей для равномерного распределения")
+            
+            # Создаем матчи используя стандартный круговой алгоритм
+            matches_created = 0
+            new_matches_list = []  # Список новых матчей для вставки
+            
+            # Если есть существующие матчи, распределяем новые используя круговой алгоритм
+            if len(existing_scheduled_matches) > 0 and len(matches_to_create) > 0:
+                # Шаг 1: Используем круговой алгоритм для распределения новых матчей по "турам"
+                # Создаем список участников для кругового алгоритма (новый участник + все остальные)
+                participants_for_schedule = [participant] + other_participants
+                
+                # Создаем круговое расписание для всех участников
+                from routes.api import create_round_robin_schedule
+                all_rounds = create_round_robin_schedule(participants_for_schedule)
+                
+                # Извлекаем только матчи с новым участником
+                new_participant_rounds = []
+                for round_matches in all_rounds:
+                    round_with_new = [m for m in round_matches if m[0].id == participant.id or m[1].id == participant.id]
+                    if round_with_new:
+                        new_participant_rounds.append(round_with_new)
+                
+                logger.info(f"[add_late_participant] Круговой алгоритм создал {len(new_participant_rounds)} туров для нового участника")
+                
+                # Шаг 2: Распределяем матчи из туров равномерно по времени существующего расписания
+                # Вычисляем временные интервалы между существующими матчами
+                time_intervals = []
+                
+                # Интервал до первого матча
+                if existing_scheduled_matches:
+                    first_match = existing_scheduled_matches[0]
+                    first_match_start = dt_module.combine(first_match.match_date, first_match.match_time)
+                    first_day_start = dt_module.combine(first_match.match_date, start_time)
+                    if first_match_start > first_day_start:
+                        time_intervals.append({
+                            'start': first_day_start,
+                            'end': first_match_start,
+                            'duration': (first_match_start - first_day_start).total_seconds() / 60
+                        })
+                
+                # Интервалы между матчами
+                for i in range(len(existing_scheduled_matches) - 1):
+                    prev_match = existing_scheduled_matches[i]
+                    next_match = existing_scheduled_matches[i + 1]
+                    
+                    prev_end = dt_module.combine(prev_match.match_date, prev_match.match_time) + timedelta(minutes=time_match)
+                    next_start = dt_module.combine(next_match.match_date, next_match.match_time)
+                    
+                    time_diff = (next_start - prev_end).total_seconds() / 60
+                    if time_diff >= time_match + time_break:
+                        time_intervals.append({
+                            'start': prev_end,
+                            'end': next_start,
+                            'duration': time_diff
+                        })
+                
+                # Интервал после последнего матча
+                if existing_scheduled_matches:
+                    last_match = existing_scheduled_matches[-1]
+                    last_match_end = dt_module.combine(last_match.match_date, last_match.match_time) + timedelta(minutes=time_match)
+                    last_day_end = dt_module.combine(last_match.match_date, end_time)
+                    if last_day_end > last_match_end:
+                        time_intervals.append({
+                            'start': last_match_end,
+                            'end': last_day_end,
+                            'duration': (last_day_end - last_match_end).total_seconds() / 60
+                        })
+                
+                # Если интервалов недостаточно, создаем дополнительные после последнего матча
+                while len(time_intervals) < len(new_participant_rounds):
+                    if time_intervals:
+                        last_interval = time_intervals[-1]
+                        next_start = last_interval['end'] + timedelta(minutes=time_match + time_break)
+                        if next_start.time() > end_time:
+                            next_start = dt_module.combine(next_start.date() + timedelta(days=1), start_time)
+                        next_end = next_start + timedelta(minutes=time_match)
+                        time_intervals.append({
+                            'start': next_start,
+                            'end': next_end,
+                            'duration': time_match
+                        })
+                    else:
+                        # Если нет интервалов, создаем первый
+                        if existing_scheduled_matches:
+                            last_match = existing_scheduled_matches[-1]
+                            interval_start = dt_module.combine(last_match.match_date, last_match.match_time) + timedelta(minutes=time_match)
+                        else:
+                            interval_start = dt_module.combine(start_date, start_time)
+                        time_intervals.append({
+                            'start': interval_start,
+                            'end': interval_start + timedelta(minutes=time_match),
+                            'duration': time_match
+                        })
+                
+                logger.info(f"[add_late_participant] Создано {len(time_intervals)} временных интервалов для распределения {len(new_participant_rounds)} туров")
+                
+                # Шаг 3: Распределяем туры по интервалам равномерно
+                # Используем распределение по площадкам из кругового алгоритма
+                from routes.api import distribute_matches_to_courts
+                
+                match_index = 0
+                for round_idx, round_matches in enumerate(new_participant_rounds):
+                    if round_idx >= len(time_intervals):
+                        break
+                    
+                    interval = time_intervals[round_idx]
+                    
+                    # Распределяем матчи тура по площадкам
+                    court_assignments = distribute_matches_to_courts(round_matches, k)
+                    
+                    # Вычисляем время для матчей в этом интервале
+                    interval_start = interval['start']
+                    interval_duration = interval['duration']
+                    num_matches_in_round = len(round_matches)
+                    
+                    if num_matches_in_round > 1:
+                        # Распределяем матчи равномерно внутри интервала
+                        time_step = interval_duration / (num_matches_in_round + 1)
+                    else:
+                        time_step = interval_duration / 2
+                    
+                    court_match_index = 0
+                    for court_num, court_matches in court_assignments.items():
+                        for match_pair in court_matches:
+                            if match_index >= len(matches_to_create):
+                                break
+                            
+                            # Находим соответствующий match_data
+                            p1, p2 = match_pair
+                            match_data = None
+                            for md in matches_to_create:
+                                if ((md['participant1_id'] == p1.id and md['participant2_id'] == p2.id) or
+                                    (md['participant1_id'] == p2.id and md['participant2_id'] == p1.id)):
+                                    match_data = md
+                                    break
+                            
+                            if not match_data:
+                                continue
+                            
+                            # Вычисляем время для матча
+                            position_in_interval = (court_match_index + 1) * time_step
+                            new_match_datetime = interval_start + timedelta(minutes=position_in_interval)
+                            
+                            # Корректируем время, если выходит за границы интервала
+                            if new_match_datetime < interval['start']:
+                                new_match_datetime = interval['start'] + timedelta(minutes=time_break)
+                            elif new_match_datetime > interval['end']:
+                                new_match_datetime = interval['end'] - timedelta(minutes=time_match + time_break)
+                                if new_match_datetime < interval['start']:
+                                    new_match_datetime = interval['start'] + timedelta(minutes=time_break)
+                            
+                            # Корректируем время, если выходит за границы рабочего дня
+                            if new_match_datetime.time() < start_time:
+                                new_match_datetime = dt_module.combine(new_match_datetime.date(), start_time)
+                            elif new_match_datetime.time() > end_time:
+                                new_match_datetime = dt_module.combine(new_match_datetime.date() + timedelta(days=1), start_time)
+                            
+                            new_match_date = new_match_datetime.date()
+                            new_match_time = new_match_datetime.time()
+                            
+                            # Проверяем конфликты и корректируем время/площадку
+                            attempts = 0
+                            max_attempts = 100
+                            while attempts < max_attempts:
+                                conflicting_match = Match.query.filter_by(
+                                    tournament_id=tournament.id,
+                                    match_date=new_match_date,
+                                    match_time=new_match_time,
+                                    court_number=court_num,
+                                    is_removed=False
+                                ).first()
+                                
+                                if not conflicting_match:
+                                    break
+                                
+                                # Сдвигаем время на один слот
+                                new_match_datetime = dt_module.combine(new_match_date, new_match_time) + timedelta(minutes=time_match + time_break)
+                                new_match_date = new_match_datetime.date()
+                                new_match_time = new_match_datetime.time()
+                                
+                                # Если выходит за границы дня, переходим на следующую площадку
+                                if new_match_time > end_time:
+                                    new_court = (court_num % k) + 1
+                                    new_match_datetime = dt_module.combine(new_match_date, start_time)
+                                    new_match_date = new_match_datetime.date()
+                                    new_match_time = new_match_datetime.time()
+                                    court_num = new_court
+                                
+                                attempts += 1
+                            
+                            # Создаем матч
+                            match_obj = Match(
+                                tournament_id=tournament.id,
+                                participant1_id=match_data['participant1_id'],
+                                participant2_id=match_data['participant2_id'],
+                                status='запланирован',
+                                match_date=new_match_date,
+                                match_time=new_match_time,
+                                court_number=court_num,
+                                match_number=max_match_number + matches_created + 1,
+                                is_removed=False
+                            )
+                            db.session.add(match_obj)
+                            new_matches_list.append(match_obj)
+                            matches_created += 1
+                            match_index += 1
+                            court_match_index += 1
+                            
+                            logger.info(f"[add_late_participant] Создан матч (тур {round_idx + 1}): {participant.name} vs {match_data['participant_name']} (площадка {court_num}, {new_match_date} {new_match_time}, номер {match_obj.match_number})")
+            
+            # Если нет существующих матчей, создаем матчи последовательно
+            elif len(matches_to_create) > 0:
+                # Шаг 1: Вычисляем загрузку каждого участника (количество запланированных матчей)
+                participant_load = {}
+                for match in existing_scheduled_matches:
+                    participant_load[match.participant1_id] = participant_load.get(match.participant1_id, 0) + 1
+                    participant_load[match.participant2_id] = participant_load.get(match.participant2_id, 0) + 1
+                
+                # Добавляем нового участника с нулевой загрузкой, если его еще нет
+                participant_load[participant.id] = participant_load.get(participant.id, 0)
+                
+                logger.info(f"[add_late_participant] Текущая загрузка участников: {participant_load}")
+                
+                # Шаг 2: Создаем временные слоты для вставки новых матчей
+                time_slots = []
+                
+                # Слот до первого матча
+                first_match = existing_scheduled_matches[0]
+                first_match_start = dt_module.combine(first_match.match_date, first_match.match_time)
+                first_day_start = dt_module.combine(first_match.match_date, start_time)
+                if first_match_start > first_day_start:
+                    time_slots.append({
+                        'start': first_day_start,
+                        'end': first_match_start,
+                        'datetime': first_day_start + timedelta(minutes=(first_match_start - first_day_start).total_seconds() / 2 / 60)
+                    })
+                
+                # Слоты между матчами
+                for i in range(len(existing_scheduled_matches) - 1):
+                    prev_match = existing_scheduled_matches[i]
+                    next_match = existing_scheduled_matches[i + 1]
+                    
+                    prev_end = dt_module.combine(prev_match.match_date, prev_match.match_time) + timedelta(minutes=time_match)
+                    next_start = dt_module.combine(next_match.match_date, next_match.match_time)
+                    
+                    time_diff = (next_start - prev_end).total_seconds() / 60
+                    if time_diff >= time_match + time_break:
+                        # Есть место для вставки матча
+                        slot_datetime = prev_end + timedelta(minutes=time_diff / 2)
+                        time_slots.append({
+                            'start': prev_end,
+                            'end': next_start,
+                            'datetime': slot_datetime
+                        })
+                
+                # Слот после последнего матча
+                last_match = existing_scheduled_matches[-1]
+                last_match_end = dt_module.combine(last_match.match_date, last_match.match_time) + timedelta(minutes=time_match)
+                last_day_end = dt_module.combine(last_match.match_date, end_time)
+                if last_day_end > last_match_end:
+                    slot_datetime = last_match_end + timedelta(minutes=(last_day_end - last_match_end).total_seconds() / 2 / 60)
+                    time_slots.append({
+                        'start': last_match_end,
+                        'end': last_day_end,
+                        'datetime': slot_datetime
+                    })
+                
+                # Если слотов недостаточно, добавляем слоты после последнего матча
+                while len(time_slots) < len(matches_to_create):
+                    last_slot = time_slots[-1] if time_slots else {
+                        'start': dt_module.combine(last_match.match_date, last_match.match_time) + timedelta(minutes=time_match),
+                        'end': dt_module.combine(last_match.match_date, end_time),
+                        'datetime': dt_module.combine(last_match.match_date, end_time)
+                    }
+                    next_slot_start = last_slot['end'] + timedelta(minutes=time_match + time_break)
+                    if next_slot_start.time() > end_time:
+                        next_slot_start = dt_module.combine(next_slot_start.date() + timedelta(days=1), start_time)
+                    next_slot_end = next_slot_start + timedelta(minutes=time_match)
+                    time_slots.append({
+                        'start': next_slot_start,
+                        'end': next_slot_end,
+                        'datetime': next_slot_start
+                    })
+                
+                logger.info(f"[add_late_participant] Создано {len(time_slots)} временных слотов для распределения {len(matches_to_create)} новых матчей")
+                
+                # Шаг 3: Распределяем новые матчи по слотам с учетом загрузки участников
+                for match_data in matches_to_create:
+                    best_slot = None
+                    min_max_load = float('inf')
+                    best_slot_idx = -1
+                    
+                    # Ищем слот, который минимизирует максимальную загрузку
+                    for slot_idx, slot in enumerate(time_slots):
+                        # Вычисляем загрузку после вставки этого матча
+                        temp_load = participant_load.copy()
+                        temp_load[match_data['participant1_id']] = temp_load.get(match_data['participant1_id'], 0) + 1
+                        temp_load[match_data['participant2_id']] = temp_load.get(match_data['participant2_id'], 0) + 1
+                        
+                        # Находим максимальную загрузку среди всех участников
+                        max_load = max(temp_load.values()) if temp_load else 0
+                        
+                        # Также учитываем стандартное отклонение для более равномерного распределения
+                        if temp_load:
+                            avg_load = sum(temp_load.values()) / len(temp_load)
+                            variance = sum((load - avg_load) ** 2 for load in temp_load.values()) / len(temp_load)
+                            std_dev = variance ** 0.5
+                            # Комбинируем максимальную загрузку и стандартное отклонение
+                            score = max_load * 1000 + std_dev  # Приоритет максимальной загрузке
+                        else:
+                            score = max_load * 1000
+                        
+                        if score < min_max_load:
+                            min_max_load = score
+                            best_slot = slot
+                            best_slot_idx = slot_idx
+                    
+                    if best_slot is None:
+                        # Если не нашли подходящий слот, используем последний
+                        if time_slots:
+                            best_slot = time_slots[-1]
+                            best_slot_idx = len(time_slots) - 1
+                        else:
+                            # Создаем новый слот
+                            if existing_scheduled_matches:
+                                last_match = existing_scheduled_matches[-1]
+                                last_match_end = dt_module.combine(last_match.match_date, last_match.match_time) + timedelta(minutes=time_match)
+                            else:
+                                last_match_end = dt_module.combine(start_date, start_time)
+                            best_slot = {
+                                'start': last_match_end,
+                                'end': last_match_end + timedelta(minutes=time_match),
+                                'datetime': last_match_end
+                            }
+                            time_slots.append(best_slot)
+                            best_slot_idx = len(time_slots) - 1
+                    
+                    # Определяем время и дату для матча
+                    new_match_datetime = best_slot['datetime']
+                    
+                    # Корректируем время, если выходит за границы рабочего дня
+                    if new_match_datetime.time() < start_time:
+                        new_match_datetime = dt_module.combine(new_match_datetime.date(), start_time)
+                    elif new_match_datetime.time() > end_time:
+                        new_match_datetime = dt_module.combine(new_match_datetime.date() + timedelta(days=1), start_time)
+                    
+                    new_match_date = new_match_datetime.date()
+                    new_match_time = new_match_datetime.time()
+                    
+                    # Назначаем площадку (циклически)
+                    court_number = (matches_created % k) + 1
+                    
+                    # Проверяем конфликты и корректируем время/площадку
+                    attempts = 0
+                    max_attempts = 100
+                    original_datetime = new_match_datetime
+                    while attempts < max_attempts:
+                        conflicting_match = Match.query.filter_by(
+                            tournament_id=tournament.id,
+                            match_date=new_match_date,
+                            match_time=new_match_time,
+                            court_number=court_number,
+                            is_removed=False
+                        ).first()
+                        
+                        if not conflicting_match:
+                            break
+                        
+                        # Сдвигаем время на один слот
+                        new_match_datetime = dt_module.combine(new_match_date, new_match_time) + timedelta(minutes=time_match + time_break)
+                        new_match_date = new_match_datetime.date()
+                        new_match_time = new_match_datetime.time()
+                        
+                        # Если выходит за границы дня, переходим на следующую площадку
+                        if new_match_time > end_time:
+                            court_number = (court_number % k) + 1
+                            new_match_datetime = dt_module.combine(new_match_date, start_time)
+                            new_match_date = new_match_datetime.date()
+                            new_match_time = new_match_datetime.time()
+                        
+                        attempts += 1
+                    
+                    # Создаем матч
+                    match_obj = Match(
+                        tournament_id=tournament.id,
+                        participant1_id=match_data['participant1_id'],
+                        participant2_id=match_data['participant2_id'],
+                        status='запланирован',
+                        match_date=new_match_date,
+                        match_time=new_match_time,
+                        court_number=court_number,
+                        match_number=max_match_number + matches_created + 1,
+                        is_removed=False
+                    )
+                    db.session.add(match_obj)
+                    new_matches_list.append(match_obj)
+                    matches_created += 1
+                    
+                    # Обновляем загрузку участников
+                    participant_load[match_data['participant1_id']] = participant_load.get(match_data['participant1_id'], 0) + 1
+                    participant_load[match_data['participant2_id']] = participant_load.get(match_data['participant2_id'], 0) + 1
+                    
+                    # Удаляем использованный слот из списка (чтобы не использовать его повторно)
+                    if best_slot_idx >= 0 and best_slot_idx < len(time_slots):
+                        time_slots.pop(best_slot_idx)
+                    
+                    logger.info(f"[add_late_participant] Создан матч: {participant.name} vs {match_data['participant_name']} (площадка {court_number}, {new_match_date} {new_match_time}, номер {match_obj.match_number}, загрузка: {participant_load})")
+                
+                logger.info(f"[add_late_participant] Финальная загрузка участников: {participant_load}")
+            
+            # Если нет существующих матчей, создаем матчи последовательно
+            elif len(matches_to_create) > 0:
+                # Вычисляем временные интервалы между существующими матчами
+                intervals = []
+                
+                # Интервал до первого матча
+                first_match = existing_scheduled_matches[0]
+                first_match_start = dt_module.combine(first_match.match_date, first_match.match_time)
+                first_day_start = dt_module.combine(first_match.match_date, start_time)
+                intervals.append({
+                    'start': first_day_start,
+                    'end': first_match_start,
+                    'duration_minutes': (first_match_start - first_day_start).total_seconds() / 60
+                })
+                
+                # Интервалы между матчами
+                for i in range(len(existing_scheduled_matches) - 1):
+                    prev_match = existing_scheduled_matches[i]
+                    next_match = existing_scheduled_matches[i + 1]
+                    
+                    prev_end = dt_module.combine(prev_match.match_date, prev_match.match_time) + timedelta(minutes=time_match)
+                    next_start = dt_module.combine(next_match.match_date, next_match.match_time)
+                    
+                    intervals.append({
+                        'start': prev_end,
+                        'end': next_start,
+                        'duration_minutes': (next_start - prev_end).total_seconds() / 60
+                    })
+                
+                # Интервал после последнего матча
+                last_match = existing_scheduled_matches[-1]
+                last_match_end = dt_module.combine(last_match.match_date, last_match.match_time) + timedelta(minutes=time_match)
+                last_day_end = dt_module.combine(last_match.match_date, end_time)
+                intervals.append({
+                    'start': last_match_end,
+                    'end': last_day_end,
+                    'duration_minutes': (last_day_end - last_match_end).total_seconds() / 60
+                })
+                
+                # Распределяем новые матчи пропорционально длине интервалов
+                total_duration = sum(interval['duration_minutes'] for interval in intervals)
+                matches_per_interval = []
+                
+                for interval in intervals:
+                    if total_duration > 0:
+                        # Количество матчей пропорционально длине интервала
+                        num_matches = int((interval['duration_minutes'] / total_duration) * len(matches_to_create))
+                        matches_per_interval.append(num_matches)
+                    else:
+                        matches_per_interval.append(0)
+                
+                # Распределяем оставшиеся матчи равномерно
+                total_assigned = sum(matches_per_interval)
+                remaining_matches = len(matches_to_create) - total_assigned
+                if remaining_matches > 0:
+                    # Добавляем по одному матчу в интервалы с наибольшей длительностью
+                    sorted_intervals = sorted(enumerate(intervals), key=lambda x: x[1]['duration_minutes'], reverse=True)
+                    for i in range(min(remaining_matches, len(sorted_intervals))):
+                        idx = sorted_intervals[i][0]
+                        matches_per_interval[idx] += 1
+                
+                # Создаем матчи в каждом интервале
+                match_index = 0
+                for interval_idx, (interval, num_matches_in_interval) in enumerate(zip(intervals, matches_per_interval)):
+                    if num_matches_in_interval == 0:
+                        continue
+                    
+                    # Распределяем матчи равномерно внутри интервала
+                    interval_duration = interval['duration_minutes']
+                    if num_matches_in_interval > 1:
+                        step = interval_duration / (num_matches_in_interval + 1)
+                    else:
+                        step = interval_duration / 2
+                    
+                    for j in range(num_matches_in_interval):
+                        if match_index >= len(matches_to_create):
+                            break
+                        
+                        match_data = matches_to_create[match_index]
+                        
+                        # Вычисляем время для матча внутри интервала
+                        position_in_interval = (j + 1) * step
+                        new_match_datetime = interval['start'] + timedelta(minutes=position_in_interval)
+                        
+                        # Корректируем время, если выходит за границы интервала
+                        if new_match_datetime < interval['start']:
+                            new_match_datetime = interval['start'] + timedelta(minutes=time_break)
+                        elif new_match_datetime > interval['end']:
+                            new_match_datetime = interval['end'] - timedelta(minutes=time_match + time_break)
+                            if new_match_datetime < interval['start']:
+                                new_match_datetime = interval['start'] + timedelta(minutes=time_break)
+                        
+                        # Корректируем время, если выходит за границы рабочего дня
+                        if new_match_datetime.time() < start_time:
+                            new_match_datetime = dt_module.combine(new_match_datetime.date(), start_time)
+                        elif new_match_datetime.time() > end_time:
+                            new_match_datetime = dt_module.combine(new_match_datetime.date() + timedelta(days=1), start_time)
+                        
+                        new_match_date = new_match_datetime.date()
+                        new_match_time = new_match_datetime.time()
+                        
+                        # Назначаем площадку (циклически)
+                        court_number = (matches_created % k) + 1
+                        
+                        # Проверяем конфликты и корректируем время/площадку
+                        attempts = 0
+                        max_attempts = 100
+                        while attempts < max_attempts:
+                            conflicting_match = Match.query.filter_by(
+                                tournament_id=tournament.id,
+                                match_date=new_match_date,
+                                match_time=new_match_time,
+                                court_number=court_number,
+                                is_removed=False
+                            ).first()
+                            
+                            if not conflicting_match:
+                                break
+                            
+                            # Сдвигаем время на один слот
+                            new_match_datetime = dt_module.combine(new_match_date, new_match_time) + timedelta(minutes=time_match + time_break)
+                            new_match_date = new_match_datetime.date()
+                            new_match_time = new_match_datetime.time()
+                            
+                            # Если выходит за границы дня, переходим на следующую площадку
+                            if new_match_time > end_time:
+                                court_number = (court_number % k) + 1
+                                new_match_datetime = dt_module.combine(new_match_date, start_time)
+                                new_match_date = new_match_datetime.date()
+                                new_match_time = new_match_datetime.time()
+                            
+                            attempts += 1
+                        
+                        # Создаем матч
+                        match_obj = Match(
+                            tournament_id=tournament.id,
+                            participant1_id=match_data['participant1_id'],
+                            participant2_id=match_data['participant2_id'],
+                            status='запланирован',
+                            match_date=new_match_date,
+                            match_time=new_match_time,
+                            court_number=court_number,
+                            match_number=max_match_number + matches_created + 1,
+                            is_removed=False
+                        )
+                        db.session.add(match_obj)
+                        new_matches_list.append(match_obj)
+                        matches_created += 1
+                        match_index += 1
+                        
+                        logger.info(f"[add_late_participant] Создан матч: {participant.name} vs {match_data['participant_name']} (площадка {court_number}, {new_match_date} {new_match_time}, номер {match_obj.match_number})")
+            
+            # Если нет существующих матчей, создаем матчи последовательно
+            elif len(matches_to_create) > 0:
+                working_date = start_date
+                working_time = start_time
+                
+                for i, match_data in enumerate(matches_to_create):
+                    court_number = (i % k) + 1
+                    
+                    match_obj = Match(
+                        tournament_id=tournament.id,
+                        participant1_id=match_data['participant1_id'],
+                        participant2_id=match_data['participant2_id'],
+                        status='запланирован',
+                        match_date=working_date,
+                        match_time=working_time,
+                        court_number=court_number,
+                        match_number=max_match_number + matches_created + 1,
+                        is_removed=False
+                    )
+                    db.session.add(match_obj)
+                    new_matches_list.append(match_obj)
+                    matches_created += 1
+                    
+                    logger.info(f"[add_late_participant] Создан матч: {participant.name} vs {match_data['participant_name']} (площадка {court_number}, {working_date} {working_time}, номер {match_obj.match_number})")
+                    
+                    # Добавляем минуты к времени для следующего матча
+                    dt = dt_module.combine(date.today(), working_time)
+                    new_dt = dt + timedelta(minutes=time_match + time_break)
+                    working_time = new_dt.time()
+                    if working_time > end_time:
+                        working_date += timedelta(days=1)
+                        working_time = start_time
+            
+            if matches_created > 0:
+                db.session.commit()
+                logger.info(f"Создано и сохранено {matches_created} матчей для опоздавшего участника '{name}'")
+            else:
+                logger.warning(f"Не создано ни одного матча для опоздавшего участника '{name}'. Все матчи уже существуют или нет других участников.")
+            
+            logger.info(f"[add_late_participant] Опоздавший участник '{name}' добавлен в турнир {tournament_id}. Создано {matches_created} новых матчей.")
+            
+            # Проверяем, что существующие матчи не были удалены
+            final_matches_count = Match.query.filter_by(tournament_id=tournament_id, is_removed=False).count()
+            logger.info(f"[add_late_participant] После добавления участника: всего матчей в турнире = {final_matches_count} (было {len(existing_matches)}, создано {matches_created})")
+            
+            logger.info(f"[add_late_participant] ===== КОНЕЦ ДОБАВЛЕНИЯ ОПОЗДАВШЕГО УЧАСТНИКА =====")
             
             return jsonify({
                 'success': True,
-                'message': f'Участник "{name}" добавлен в турнир. Расписание и результаты матчей сохранены.'
-            })
+                'message': f'Участник "{name}" добавлен в турнир. Создано {matches_created} новых матчей. Результаты прошедших матчей сохранены.',
+                'matches_created': matches_created,
+                'participant_id': participant.id
+            }), 201
                 
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Ошибка при добавлении опоздавшего участника: {e}")
+            logger.error(f"Ошибка при добавлении опоздавшего участника: {e}", exc_info=True)
             return jsonify({'success': False, 'error': f'Ошибка при добавлении участника: {str(e)}'}), 500
 
     # ===== ОТЛАДОЧНЫЕ API МАРШРУТЫ =====
