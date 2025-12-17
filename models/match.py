@@ -8,9 +8,14 @@ class Match(db.Model):
     __tablename__ = 'match'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
-    participant1_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=False)
-    participant2_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=False)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=True)  # Теперь nullable для свободных матчей
+    participant1_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=True)  # Nullable для свободных матчей
+    participant2_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=True)  # Nullable для свободных матчей
+    # Поля для свободных матчей (без турнира)
+    player1_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=True)  # Для свободных матчей
+    player2_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=True)  # Для свободных матчей
+    player1_name = db.Column(db.String(100), nullable=True)  # Имя игрока/команды 1 (для свободных матчей)
+    player2_name = db.Column(db.String(100), nullable=True)  # Имя игрока/команды 2 (для свободных матчей)
     score1 = db.Column(db.Integer)
     score2 = db.Column(db.Integer)
     score = db.Column(db.String(20))  # результат матча в формате "2:1"
@@ -23,7 +28,8 @@ class Match(db.Model):
     set2_score2 = db.Column(db.Integer)  # счет второго сета участника 2
     set3_score1 = db.Column(db.Integer)  # счет третьего сета участника 1
     set3_score2 = db.Column(db.Integer)  # счет третьего сета участника 2
-    winner_id = db.Column(db.Integer, db.ForeignKey('participant.id'))
+    winner_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=True)  # Nullable для свободных матчей
+    winner_player_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=True)  # Для свободных матчей
     match_date = db.Column(db.Date)  # запланированная дата
     match_time = db.Column(db.Time)  # запланированное время начала
     actual_start_time = db.Column(db.DateTime, nullable=True)  # реальное время начала матча
@@ -44,6 +50,9 @@ class Match(db.Model):
     # Связи для отображения имен участников
     participant1 = db.relationship('models.participant.Participant', foreign_keys=[participant1_id], backref='matches_as_p1')
     participant2 = db.relationship('models.participant.Participant', foreign_keys=[participant2_id], backref='matches_as_p2')
+    # Связи для свободных матчей
+    player1 = db.relationship('models.player.Player', foreign_keys=[player1_id], backref='matches_as_p1')
+    player2 = db.relationship('models.player.Player', foreign_keys=[player2_id], backref='matches_as_p2')
 
     def __repr__(self):
         return f'<Match {self.participant1_id} vs {self.participant2_id} in Tournament {self.tournament_id}>'

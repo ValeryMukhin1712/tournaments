@@ -291,6 +291,52 @@
         </div>
     </div>
     
+    <!-- Секция матчей без турниров -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <h5 class="mb-2 mb-md-0">
+                        <i class="fas fa-list me-2"></i>Список матчей без турниров
+                    </h5>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadFreeMatches()">
+                        <i class="fas fa-sync-alt me-1"></i>Обновить
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="free-matches-loading" class="text-center py-3" style="display: none;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Загрузка матчей...</p>
+                    </div>
+                    <div id="free-matches-table-container" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="free-matches-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px;">ID</th>
+                                        <th>Игрок 1</th>
+                                        <th>Игрок 2</th>
+                                        <th style="width: 100px;" class="text-center">Счёт</th>
+                                        <th style="width: 120px;">Статус</th>
+                                        <th style="width: 150px;">Дата создания</th>
+                                        <th style="width: 120px;" class="text-center">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="free-matches-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="free-matches-empty" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Матчи без турниров не найдены</h5>
+                        <p class="text-muted">В системе пока нет свободных матчей.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Секция журналов розыгрышей -->
     <div class="row mb-4">
         <div class="col-12">
@@ -590,7 +636,25 @@ function deleteMatchRallies(matchId, button) {
 async function openRallyJournal(matchId) {
     const modal = document.getElementById('rallyJournalModal');
     const modalTitle = modal.querySelector('.modal-title');
-    modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: Матч ${matchId}`;
+    
+    // Загружаем данные матча для получения имен участников
+    const basePath = window.BASE_PATH || '';
+    try {
+        const matchResponse = await fetch(basePath + `/api/matches/${matchId}`);
+        const matchData = await matchResponse.json();
+        if (matchData.success && matchData.match) {
+            const match = matchData.match;
+            // Для свободных матчей используем player1_name и player2_name
+            const player1 = match.player1_name || match.participant1 || 'Игрок 1';
+            const player2 = match.player2_name || match.participant2 || 'Игрок 2';
+            modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: <span style="color: #007bff;">${player1}</span> vs <span style="color: #dc3545;">${player2}</span>`;
+        } else {
+            modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: Матч ${matchId}`;
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке данных матча:', error);
+        modalTitle.innerHTML = `<i class="fas fa-book me-2"></i>Журнал розыгрышей: Матч ${matchId}`;
+    }
     
     // Сохраняем matchId для использования
     modal.setAttribute('data-match-id', matchId);
@@ -659,8 +723,9 @@ async function loadRallyJournalForAdmin(matchId) {
         
         // Получаем имена участников из данных матча
         const match = matchData.success ? matchData.match : null;
-        const participant1 = match ? (match.participant1 || '') : '';
-        const participant2 = match ? (match.participant2 || '') : '';
+        // Для свободных матчей используем player1_name и player2_name, для турнирных - participant1 и participant2
+        const participant1 = match ? (match.participant1 || match.player1_name || '') : '';
+        const participant2 = match ? (match.participant2 || match.player2_name || '') : '';
         
         // Получаем данные матча для финальных счётов сетов
         const setScores = {};
@@ -1119,9 +1184,137 @@ async function exportRallyJournalToExcel() {
     }
 }
 
-// Загружаем журналы при загрузке страницы
+// Загрузка списка свободных матчей
+function loadFreeMatches() {
+    const loadingEl = document.getElementById('free-matches-loading');
+    const tableContainer = document.getElementById('free-matches-table-container');
+    const emptyEl = document.getElementById('free-matches-empty');
+    const tbody = document.getElementById('free-matches-tbody');
+    
+    loadingEl.style.display = 'block';
+    tableContainer.style.display = 'none';
+    emptyEl.style.display = 'none';
+    tbody.innerHTML = '';
+    
+    const basePath = window.BASE_PATH || '';
+    fetch(basePath + '/api/admin/free-matches', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingEl.style.display = 'none';
+        
+        if (data && data.matches && data.matches.length > 0) {
+            tableContainer.style.display = 'block';
+            
+            data.matches.forEach(match => {
+                const createdDate = match.created_at ? new Date(match.created_at).toLocaleDateString('ru-RU') : 'Не указана';
+                const createdTime = match.created_at ? new Date(match.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
+                
+                const row = document.createElement('tr');
+                row.setAttribute('data-match-id', match.id);
+                row.className = 'free-match-row-admin';
+                
+                // Формируем счет для отображения
+                let scoreDisplay = '-';
+                if (match.score && match.score !== '0:0') {
+                    scoreDisplay = match.score;
+                } else if (match.set1_score1 !== null && match.set1_score2 !== null) {
+                    scoreDisplay = `${match.set1_score1}:${match.set1_score2}`;
+                } else if (match.sets_won_1 || match.sets_won_2) {
+                    scoreDisplay = `${match.sets_won_1 || 0}:${match.sets_won_2 || 0}`;
+                }
+                
+                row.innerHTML = `
+                    <td class="text-center"><strong>#${match.id}</strong></td>
+                    <td><strong>${match.player1_name || 'Не указан'}</strong></td>
+                    <td><strong>${match.player2_name || 'Не указан'}</strong></td>
+                    <td class="text-center match-score-cell-admin" data-match-id="${match.id}">
+                        ${scoreDisplay !== '-' ? `<span class="badge bg-primary">${scoreDisplay}</span>` : '<span class="text-muted">-</span>'}
+                    </td>
+                    <td>
+                        <span class="badge bg-${match.status === 'завершен' ? 'success' : match.status === 'в_процессе' || match.status === 'играют' ? 'warning' : 'secondary'}">
+                            ${match.status || 'неизвестно'}
+                        </span>
+                    </td>
+                    <td><small>${createdDate} ${createdTime}</small></td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            ${match.status && ['в_процессе', 'играют', 'завершен'].includes(match.status) ? 
+                                `<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openRallyJournal(${match.id})" title="Открыть журнал">
+                                    <i class="fas fa-book"></i> Журнал
+                                </button>` : ''}
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteFreeMatch(${match.id}, this)" title="Удалить матч">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } else {
+            emptyEl.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при загрузке свободных матчей:', error);
+        loadingEl.style.display = 'none';
+        showAlert('Ошибка при загрузке списка матчей: ' + error.message, 'danger');
+    });
+}
+
+// Удаление свободного матча
+function deleteFreeMatch(matchId, button) {
+    if (confirm(`Вы уверены, что хотите удалить матч #${matchId}? Это действие нельзя отменить и удалит все связанные розыгрыши.`)) {
+        const originalHtml = button.innerHTML;
+        
+        // Показываем индикатор загрузки
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        button.disabled = true;
+        
+        const basePath = window.BASE_PATH || '';
+        fetch(basePath + `/api/matches/${matchId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удаляем строку из таблицы
+                button.closest('tr').remove();
+                showAlert(`<strong>Успешно!</strong> Матч #${matchId} удален.`, 'success');
+                
+                // Если таблица пуста, показываем сообщение
+                const tbody = document.getElementById('free-matches-tbody');
+                if (tbody.children.length === 0) {
+                    document.getElementById('free-matches-table-container').style.display = 'none';
+                    document.getElementById('free-matches-empty').style.display = 'block';
+                }
+            } else {
+                throw new Error(data.error || 'Ошибка при удалении матча');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка при удалении матча: ' + error.message, 'danger');
+            
+            // Восстанавливаем кнопку
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+        });
+    }
+}
+
+// Загружаем журналы и свободные матчи при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     loadAllRallies();
+    loadFreeMatches();
 });
 
 function showAlert(message, type) {

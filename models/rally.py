@@ -13,7 +13,7 @@ class Rally(db.Model):
     
     # Связь с матчем
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable=False)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=True)  # Nullable для свободных матчей
     
     # Номер сета (1, 2, 3)
     set_number = db.Column(db.Integer, nullable=False)

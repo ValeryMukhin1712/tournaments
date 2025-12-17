@@ -1993,6 +1993,7 @@
                     console.log('[Referee] 📊 Текущий счёт:', score1, ':', score2, 'для матча', matchId, 'сет', finalSetNumber);
                     console.log('[Referee] ✅ Проверка сохранения: match_id=', matchId, ', set_number=', finalSetNumber);
                     
+                    
                     // Получаем параметры из URL
                     const urlParams = new URLSearchParams(window.location.search);
                     const matchIdFromUrl = urlParams.get('match_id') || '';
@@ -2115,6 +2116,7 @@
         function updateScore() {
             document.getElementById('scoreLeft').textContent = scoreLeft;
             document.getElementById('scoreRight').textContent = scoreRight;
+            
             // Временное отображение swap_count и teamsSwapped для отладки
             const swapCountElement = document.getElementById('swapCountValue');
             if (swapCountElement) {
@@ -2348,12 +2350,44 @@
             const scoreAfterRally = { left: scoreLeft, right: scoreRight };
             // Получаем параметры из URL
             const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('match_id');
+            // Используем сохранённый match_id или получаем из URL
+            const matchIdFromUrl = urlParams.get('match_id');
+            // Также проверяем sessionStorage
+            const storedMatchId = sessionStorage.getItem('referee_match_id');
+            // Преобразуем в строку для единообразия, приоритет: currentMatchId > matchIdFromUrl > storedMatchId
+            const matchId = String(currentMatchId || matchIdFromUrl || storedMatchId || '').trim();
             const setNumber = urlParams.get('set') || '1';
             
-            // Если нет match_id, значит это не матч из турнира, не сохраняем
-            if (!matchId || matchId === '') {
-                console.log('[Rally] ℹ️ Нет match_id, пропускаем сохранение розыгрыша');
+            // Логируем для отладки
+            console.log('[Rally] 🔍 Проверка match_id:', {
+                'currentMatchId': currentMatchId,
+                'matchIdFromUrl': matchIdFromUrl,
+                'storedMatchId': sessionStorage.getItem('referee_match_id'),
+                'finalMatchId': matchId,
+                'setNumber': setNumber,
+                'matchIdType': typeof matchId,
+                'matchIdLength': matchId ? matchId.length : 0,
+                'URL': window.location.href
+            });
+            
+            // Если нет match_id, значит это не матч (ни из турнира, ни свободный), не сохраняем
+            if (!matchId || matchId === '' || matchId === 'null' || matchId === 'undefined') {
+                console.error('[Rally] ❌ НЕТ match_id, пропускаем сохранение розыгрыша!');
+                console.error('[Rally] ❌ Детали:', {
+                    'currentMatchId': currentMatchId,
+                    'matchIdFromUrl': matchIdFromUrl,
+                    'storedMatchId': sessionStorage.getItem('referee_match_id'),
+                    'finalMatchId': matchId,
+                    'URL': window.location.href
+                });
+                alert('Ошибка: не найден ID матча. Розыгрыш не будет сохранен. Проверьте, что матч был создан правильно.');
+                return;
+            }
+            
+            // Преобразуем matchId в число для API запроса
+            const matchIdNum = parseInt(matchId);
+            if (isNaN(matchIdNum)) {
+                console.error('[Rally] ❌ Некорректный match_id:', matchId);
                 return;
             }
             
@@ -2369,7 +2403,7 @@
             
             try {
                 // Получаем данные матча для tournament_id и court_number
-                const matchResponse = await fetch(`/api/matches/${matchId}?_t=${Date.now()}`, {
+                const matchResponse = await fetch(`/api/matches/${matchIdNum}?_t=${Date.now()}`, {
                     cache: 'no-store',
                     headers: {
                         'Cache-Control': 'no-cache'
@@ -2382,8 +2416,24 @@
                     return;
                 }
                 
-                const tournamentId = matchData.match.tournament_id;
+                // Для свободных матчей tournament_id может быть null или 0
+                const tournamentIdRaw = matchData.match.tournament_id;
                 const courtNumber = matchData.match.court_number;
+                const isFreeMatch = !tournamentIdRaw || tournamentIdRaw === 0 || tournamentIdRaw === '0';
+                
+                // Для свободных матчей явно устанавливаем tournament_id в null
+                const tournamentId = isFreeMatch ? null : (tournamentIdRaw || null);
+                
+                // Для свободных матчей всегда используем сет 1 (один сет)
+                const finalSetNumber = isFreeMatch ? 1 : (parseInt(setNumber) || 1);
+                
+                console.log('[Rally] 📊 Информация о матче:', {
+                    'isFreeMatch': isFreeMatch,
+                    'tournamentIdRaw': tournamentIdRaw,
+                    'tournamentId': tournamentId,
+                    'setNumberFromUrl': setNumber,
+                    'finalSetNumber': finalSetNumber
+                });
                 
                 // Проверка типа спорта выполняется на сервере в API endpoint
                 // Здесь просто сохраняем данные, сервер проверит, что это бадминтон
@@ -2643,11 +2693,11 @@
                 // Получаем текущее время на клиенте с точностью до миллисекунд
                 const clientDateTime = new Date().toISOString();
                 
-                // Отправляем запрос на сохранение розыгрыша
-                const rallyData = {
-                    match_id: parseInt(matchId),
-                    tournament_id: tournamentId,
-                    set_number: parseInt(setNumber) || 1,
+                // Объявляем объект заранее, чтобы он был доступен в блоке catch для логирования
+                let rallyData = {
+                    match_id: matchIdNum,
+                    tournament_id: isFreeMatch ? null : tournamentId,  // Явно null для свободных матчей
+                    set_number: finalSetNumber,  // Для свободных матчей всегда 1
                     court_number: courtNumber,
                     server_name: serverName,
                     receiver_name: receiverName,
@@ -2680,15 +2730,43 @@
                 const result = await response.json();
                 if (result.success) {
                     console.log('[Rally] ✅ Розыгрыш сохранён:', result.rally);
+                    console.log('[Rally] ✅ Детали сохраненного розыгрыша:', {
+                        'rally_id': result.rally?.id,
+                        'match_id': result.rally?.match_id,
+                        'tournament_id': result.rally?.tournament_id,
+                        'set_number': result.rally?.set_number,
+                        'server_name': result.rally?.server_name,
+                        'receiver_name': result.rally?.receiver_name,
+                        'score': result.rally?.score
+                    });
+                    
+                    // Отправляем сообщение другим вкладкам о том, что розыгрыш сохранен (для обновления журнала и счета)
+                    try {
+                        const broadcastChannel = new BroadcastChannel('match-score-updates');
+                        broadcastChannel.postMessage({
+                            type: 'score-updated',
+                            matchId: matchIdNum,
+                            rallySaved: true,  // Флаг, что был сохранен розыгрыш
+                            rallyId: result.rally?.id,  // ID сохраненного розыгрыша
+                            timestamp: Date.now()
+                        });
+                        console.log('[Rally] 📡 Сообщение об обновлении отправлено другим вкладкам через BroadcastChannel, matchId:', matchIdNum);
+                        broadcastChannel.close();
+                    } catch (error) {
+                        console.warn('[Rally] ⚠️ Не удалось отправить сообщение через BroadcastChannel:', error);
+                    }
                 } else {
-                    console.warn('[Rally] ⚠️ Ошибка сохранения розыгрыша:', result.error);
-                    console.warn('[Rally] ⚠️ Отправленные данные:', rallyData);
+                    console.error('[Rally] ❌ Ошибка сохранения розыгрыша:', result.error);
+                    console.error('[Rally] ❌ Отправленные данные:', rallyData);
+                    alert('Ошибка сохранения розыгрыша: ' + (result.error || 'Неизвестная ошибка'));
                 }
                 
             } catch (error) {
                 console.error('[Rally] ❌ Ошибка при сохранении розыгрыша:', error);
                 console.error('[Rally] ❌ Stack trace:', error.stack);
-                console.error('[Rally] ❌ Данные, которые пытались отправить:', rallyData);
+                if (typeof rallyData !== 'undefined') {
+                    console.error('[Rally] ❌ Данные, которые пытались отправить:', rallyData);
+                }
             }
         }
         
@@ -2743,6 +2821,7 @@
         // Увеличение счета левой команды
         document.getElementById('court_left')?.addEventListener('click', function(e) {
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
+            console.log('[Rally] 🖱 click court_left');
             saveGameState();
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
@@ -2764,6 +2843,7 @@
         // Увеличение счета правой команды
         document.getElementById('court_right')?.addEventListener('click', function(e) {
             if (e.target.closest('.scoreboard') || e.target.closest('.player-name')) return;
+            console.log('[Rally] 🖱 click court_right');
             saveGameState();
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
@@ -2785,6 +2865,7 @@
         // Увеличение счета при клике на цифры счёта (работает в режиме просмотра)
         document.getElementById('scoreLeft')?.addEventListener('click', function(e) {
             e.stopPropagation(); // Останавливаем всплытие события
+            console.log('[Rally] 🖱 click scoreLeft');
             saveGameState();
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
@@ -2805,6 +2886,7 @@
         
         document.getElementById('scoreRight')?.addEventListener('click', function(e) {
             e.stopPropagation(); // Останавливаем всплытие события
+            console.log('[Rally] 🖱 click scoreRight');
             saveGameState();
             const previousScoreLeft = scoreLeft;
             const previousScoreRight = scoreRight;
@@ -3692,8 +3774,17 @@
             
             // Обновляем текущие значения
             if (matchIdFromUrl && matchIdFromUrl !== 'null' && matchIdFromUrl !== '') {
-                currentMatchId = matchIdFromUrl;
-                sessionStorage.setItem('referee_match_id', matchIdFromUrl);
+                // Преобразуем в строку для единообразия
+                currentMatchId = String(matchIdFromUrl).trim();
+                sessionStorage.setItem('referee_match_id', currentMatchId);
+                console.log(`[Referee] ✅ Установлен currentMatchId: ${currentMatchId} из URL`);
+            } else {
+                // Пробуем получить из sessionStorage
+                const storedMatchId = sessionStorage.getItem('referee_match_id');
+                if (storedMatchId && storedMatchId !== 'null' && storedMatchId !== '') {
+                    currentMatchId = String(storedMatchId).trim();
+                    console.log(`[Referee] ✅ Восстановлен currentMatchId: ${currentMatchId} из sessionStorage`);
+                }
             }
             if (setNumberFromUrl) {
                 currentSetNumber = setNumberFromUrl;

@@ -59,3 +59,5 @@ with app.app_context(). See the documentation for more information.)
 2025-10-31 09:29:29 - d@d - ыыы - Токен: 69
 2025-10-31 10:46:32 - a@a - AAA - Токен: 60
 2025-11-12 21:51:44 - f@f - в - Токен: 15
+2025-12-13 14:49:37 - q@q - Q - Токен: 48
+2025-12-13 14:49:39 - q@q - Q - Токен: 48 (EMAIL НЕ ОТПРАВЛЕН: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-47a8f4c3f2esm29433365e9.9 - gsmtp'))

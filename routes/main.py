@@ -655,8 +655,14 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
 
     @app.route('/referee')
     def referee_page():
-        """Страница выбора вида спорта для судейства"""
-        return render_template('referee_sport_selection.html')
+        """Страница выбора вида спорта для судейства или форма для свободного матча"""
+        # Если передан match_id, открываем страницу судейства напрямую
+        match_id = request.args.get('match_id', '')
+        if match_id:
+            return redirect(url_for('referee_badminton', match_id=match_id))
+        
+        # Иначе показываем форму для ввода игроков
+        return render_template('referee_match_setup.html')
     
     @app.route('/referee-badminton')
     def referee_badminton():
@@ -3634,6 +3640,64 @@ def create_main_routes(app, db, User, Tournament, Participant, Match, Notificati
     def badminton_referee():
         """Страница судьи матча по бадминтону"""
         return render_template('badminton_referee.html')
+    
+    @app.route('/free-matches')
+    def free_matches_list():
+        """Страница со списком свободных матчей (без турнира) - доступна для всех"""
+        from flask import session
+        from sqlalchemy import or_
+        
+        try:
+            # Получаем все свободные матчи (tournament_id = None или 0)
+            free_matches = Match.query.filter(
+                or_(Match.tournament_id.is_(None), Match.tournament_id == 0),
+                Match.is_removed == False
+            ).order_by(Match.created_at.desc()).all()
+            
+            # Формируем данные для отображения
+            matches_data = []
+            for match in free_matches:
+                # Для свободных матчей используем счет сета 1 (set1_score1:set1_score2)
+                score = match.score
+                if not score and match.set1_score1 is not None and match.set1_score2 is not None:
+                    score = f"{match.set1_score1}:{match.set1_score2}"
+                elif not score and (match.sets_won_1 or match.sets_won_2):
+                    score = f"{match.sets_won_1 or 0}:{match.sets_won_2 or 0}"
+                
+                matches_data.append({
+                    'id': match.id,
+                    'player1_name': match.player1_name or (match.player1.name if match.player1 else 'Неизвестно'),
+                    'player2_name': match.player2_name or (match.player2.name if match.player2 else 'Неизвестно'),
+                    # Формируем счет: используем match.score если он есть, иначе формируем из set1_score или sets_won
+                    'score': score,
+                    'set1_score1': match.set1_score1,
+                    'set1_score2': match.set1_score2,
+                    'sets_won_1': match.sets_won_1 or 0,
+                    'sets_won_2': match.sets_won_2 or 0,
+                    'status': match.status,
+                    'match_date': match.match_date.strftime('%d.%m.%Y') if match.match_date else 'Не указана',
+                    'match_time': match.match_time.strftime('%H:%M') if match.match_time else 'Не указано',
+                    'created_at': match.created_at.strftime('%d.%m.%Y %H:%M') if match.created_at else '',
+                    'court_number': match.court_number or 'Не указан'
+                })
+            
+            # Проверяем, есть ли авторизация (для отображения кнопки "Назад к панели")
+            admin = None
+            if 'admin_id' in session:
+                admin_id = session['admin_id']
+                admin_email = session.get('admin_email', '')
+                admin = type('Admin', (), {'id': admin_id, 'email': admin_email, 'is_active': True})()
+            
+            return render_template('free_matches_list.html', 
+                                 admin=admin, 
+                                 matches=matches_data,
+                                 matches_count=len(matches_data))
+        except Exception as e:
+            app.logger.error(f'Ошибка при загрузке списка свободных матчей: {str(e)}')
+            import traceback
+            app.logger.error(f'Traceback: {traceback.format_exc()}')
+            flash(f'Ошибка при загрузке списка свободных матчей: {str(e)}', 'error')
+            return redirect(url_for('tournaments_list'))
     
     @app.route('/api/contact', methods=['POST'])
     def contact():

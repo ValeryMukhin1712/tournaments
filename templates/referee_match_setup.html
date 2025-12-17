@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка матча - Судейство</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .setup-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #2E7D32;
+            margin-bottom: 8px;
+        }
+        
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .autocomplete-list.show {
+            display: block;
+        }
+        
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .autocomplete-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-start-match {
+            background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .btn-start-match:hover {
+            background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="setup-container">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-whistle me-2"></i>Настройка матча
+            </h2>
+            
+            <form id="matchSetupForm">
+                <div class="mb-4">
+                    <label for="player1" class="form-label">
+                        <i class="fas fa-user me-2"></i>Игрок / Команда 1
+                    </label>
+                    <div class="autocomplete-container">
+                        <input 
+                            type="text" 
+                            class="form-control form-control-lg" 
+                            id="player1" 
+                            name="player1"
+                            placeholder="Введите имя или выберите из списка"
+                            autocomplete="off"
+                            required
+                        >
+                        <div class="autocomplete-list" id="autocomplete1"></div>
+                    </div>
+                    <small class="text-muted">Начните вводить имя для поиска в списке игроков</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="player2" class="form-label">
+                        <i class="fas fa-user me-2"></i>Игрок / Команда 2
+                    </label>
+                    <div class="autocomplete-container">
+                        <input 
+                            type="text" 
+                            class="form-control form-control-lg" 
+                            id="player2" 
+                            name="player2"
+                            placeholder="Введите имя или выберите из списка"
+                            autocomplete="off"
+                            required
+                        >
+                        <div class="autocomplete-list" id="autocomplete2"></div>
+                    </div>
+                    <small class="text-muted">Начните вводить имя для поиска в списке игроков</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="sportType" class="form-label">
+                        <i class="fas fa-table-tennis me-2"></i>Вид спорта
+                    </label>
+                    <select class="form-select form-select-lg" id="sportType" name="sportType" required>
+                        <option value="badminton" selected>Бадминтон</option>
+                        <option value="pingpong">Пинг-понг</option>
+                        <option value="volleyball">Волейбол</option>
+                    </select>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-start-match">
+                        <i class="fas fa-play me-2"></i>Начать судейство
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let allPlayers = [];
+        let currentAutocomplete = null;
+        let currentInput = null;
+        
+        // Загружаем список игроков
+        async function loadPlayers() {
+            try {
+                const response = await fetch('/api/players');
+                const data = await response.json();
+                if (data.success && data.players) {
+                    allPlayers = data.players.map(p => p.name);
+                    console.log(`Загружено ${allPlayers.length} игроков`);
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке игроков:', error);
+            }
+        }
+        
+        // Функция для отображения списка игроков
+        function showPlayersList(input, autocomplete, filterValue = '') {
+            const value = filterValue.trim().toLowerCase();
+            
+            // Фильтруем игроков
+            const filtered = allPlayers.filter(player => 
+                player.toLowerCase().includes(value)
+            );
+            
+            // Показываем список
+            if (filtered.length > 0) {
+                autocomplete.innerHTML = filtered.map(player => 
+                    `<div class="autocomplete-item" data-value="${player}">${player}</div>`
+                ).join('');
+                autocomplete.classList.add('show');
+            } else if (value.length === 0 && allPlayers.length > 0) {
+                // Если поле пустое, показываем всех игроков
+                autocomplete.innerHTML = allPlayers.map(player => 
+                    `<div class="autocomplete-item" data-value="${player}">${player}</div>`
+                ).join('');
+                autocomplete.classList.add('show');
+            } else {
+                autocomplete.classList.remove('show');
+            }
+        }
+        
+        // Функция автокомплита
+        function setupAutocomplete(inputId, autocompleteId) {
+            const input = document.getElementById(inputId);
+            const autocomplete = document.getElementById(autocompleteId);
+            
+            // При клике на поле - показываем список всех игроков
+            input.addEventListener('click', function(e) {
+                if (allPlayers.length > 0) {
+                    showPlayersList(input, autocomplete, input.value);
+                }
+            });
+            
+            // При вводе текста - фильтруем список
+            input.addEventListener('input', function(e) {
+                showPlayersList(input, autocomplete, e.target.value);
+            });
+            
+            // При фокусе - показываем список
+            input.addEventListener('focus', function(e) {
+                if (allPlayers.length > 0) {
+                    showPlayersList(input, autocomplete, input.value);
+                }
+            });
+            
+            // Обработка выбора из списка
+            autocomplete.addEventListener('click', function(e) {
+                if (e.target.classList.contains('autocomplete-item')) {
+                    const value = e.target.getAttribute('data-value');
+                    input.value = value;
+                    autocomplete.classList.remove('show');
+                    input.focus(); // Возвращаем фокус на поле
+                }
+            });
+            
+            // Скрываем список при потере фокуса
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    autocomplete.classList.remove('show');
+                }, 200);
+            });
+        }
+        
+        // Настройка автокомплита для обоих полей
+        setupAutocomplete('player1', 'autocomplete1');
+        setupAutocomplete('player2', 'autocomplete2');
+        
+        // Обработка отправки формы
+        document.getElementById('matchSetupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const player1 = document.getElementById('player1').value.trim();
+            const player2 = document.getElementById('player2').value.trim();
+            const sportType = document.getElementById('sportType').value;
+            
+            if (!player1 || !player2) {
+                alert('Пожалуйста, введите имена обоих игроков/команд');
+                return;
+            }
+            
+            if (player1 === player2) {
+                alert('Имена игроков/команд должны отличаться');
+                return;
+            }
+            
+            // Создаем свободный матч через API
+            createFreeMatch(player1, player2, sportType);
+        });
+        
+        // Создание свободного матча
+        async function createFreeMatch(player1, player2, sportType) {
+            const button = document.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Создание матча...';
+            button.disabled = true;
+            
+            try {
+                const response = await fetch('/api/matches/free', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        player1_name: player1,
+                        player2_name: player2,
+                        sport_type: sportType
+                    })
+                });
+                
+                // Проверяем, что ответ - JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Ожидался JSON, получен:', contentType, text.substring(0, 200));
+                    alert('Ошибка сервера: получен неверный формат ответа. Проверьте консоль для деталей.');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.match_id) {
+                    // Перенаправляем на страницу судейства
+                    let refereeUrl = '';
+                    if (sportType === 'badminton') {
+                        refereeUrl = `/referee-badminton?match_id=${data.match_id}&p1=${encodeURIComponent(player1)}&p2=${encodeURIComponent(player2)}`;
+                    } else if (sportType === 'pingpong') {
+                        refereeUrl = `/referee-pingpong?match_id=${data.match_id}&p1=${encodeURIComponent(player1)}&p2=${encodeURIComponent(player2)}`;
+                    } else if (sportType === 'volleyball') {
+                        refereeUrl = `/referee-volleyball?match_id=${data.match_id}&p1=${encodeURIComponent(player1)}&p2=${encodeURIComponent(player2)}`;
+                    }
+                    
+                    window.location.href = refereeUrl;
+                } else {
+                    alert('Ошибка при создании матча: ' + (data.error || 'Неизвестная ошибка'));
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка при создании матча: ' + error.message);
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        // Загружаем игроков при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlayers();
+        });
+    </script>
+</body>
+</html>
+
