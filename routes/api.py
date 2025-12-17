@@ -687,15 +687,6 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         cache_buster = request.args.get('_t', 'N/A')
         logger.info(f"[API] GET /api/matches/{match_id} - cache_buster: {cache_buster}, referer: {request.referrer}")
         
-        # Проверяем авторизацию через сессию
-        if 'admin_id' not in session:
-            return jsonify({'error': 'Необходима авторизация'}), 401
-        
-        # Простая заглушка для админа
-        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
-        if not admin or not admin.is_active:
-            return jsonify({'error': 'Неверная авторизация'}), 401
-        
         match = Match.query.get_or_404(match_id)
         
         # Дополнительная проверка: убеждаемся, что запрашиваемый match_id соответствует найденному матчу
@@ -703,42 +694,75 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"[API] ❌ Несоответствие ID матча! Запрошен: {match_id}, Найден: {match.id}")
             return jsonify({'error': f'Несоответствие ID матча: запрошен {match_id}, найден {match.id}'}), 400
         
-        # Проверяем права (создатель турнира или системный админ)
-        tournament = Tournament.query.get(match.tournament_id)
-        if not tournament:
-            return jsonify({'error': 'Турнир не найден'}), 404
+        # Проверяем, является ли матч свободным (tournament_id = 0 или None)
+        is_free_match = match.tournament_id is None or match.tournament_id == 0
+        
+        # Для свободных матчей разрешаем доступ без авторизации
+        if not is_free_match:
+            # Для турнирных матчей проверяем авторизацию
+            if 'admin_id' not in session:
+                return jsonify({'error': 'Необходима авторизация'}), 401
             
-        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
-            return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
+            # Простая заглушка для админа
+            admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
+            if not admin or not admin.is_active:
+                return jsonify({'error': 'Неверная авторизация'}), 401
+            
+            # Для турнирных матчей проверяем права
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'error': 'Турнир не найден'}), 404
+                
+            if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
+                return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
+        
+        # Формируем данные матча
+        match_data = {
+            'id': match.id,
+            'tournament_id': match.tournament_id if not is_free_match else None,
+            'participant1_id': match.participant1_id,
+            'participant2_id': match.participant2_id,
+            'score1': match.score1,
+            'score2': match.score2,
+            'score': match.score,
+            'sets_won_1': match.sets_won_1,
+            'sets_won_2': match.sets_won_2,
+            'winner_id': match.winner_id,
+            'match_date': match.match_date.isoformat() if match.match_date else None,
+            'match_time': match.match_time.isoformat() if match.match_time else None,
+            'court_number': match.court_number,
+            'match_number': match.match_number,
+            'status': match.status,
+            'created_at': match.created_at.isoformat(),
+            'updated_at': match.updated_at.isoformat(),
+            # Данные сетов
+            'set1_score1': match.set1_score1,
+            'set1_score2': match.set1_score2,
+            'set2_score1': match.set2_score1,
+            'set2_score2': match.set2_score2,
+            'set3_score1': match.set3_score1,
+            'set3_score2': match.set3_score2
+        }
+        
+        # Добавляем имена участников/игроков
+        if is_free_match:
+            # Для свободных матчей используем player1_name и player2_name
+            match_data['player1_id'] = match.player1_id
+            match_data['player2_id'] = match.player2_id
+            match_data['player1_name'] = match.player1_name or (match.player1.name if match.player1 else '')
+            match_data['player2_name'] = match.player2_name or (match.player2.name if match.player2 else '')
+            match_data['is_free_match'] = True
+        else:
+            # Для турнирных матчей используем participant
+            if match.participant1:
+                match_data['participant1_name'] = match.participant1.name
+            if match.participant2:
+                match_data['participant2_name'] = match.participant2.name
+            match_data['is_free_match'] = False
         
         return jsonify({
             'success': True,
-            'match': {
-                'id': match.id,
-                'tournament_id': match.tournament_id,
-                'participant1_id': match.participant1_id,
-                'participant2_id': match.participant2_id,
-                'score1': match.score1,
-                'score2': match.score2,
-                'score': match.score,
-                'sets_won_1': match.sets_won_1,
-                'sets_won_2': match.sets_won_2,
-                'winner_id': match.winner_id,
-                'match_date': match.match_date.isoformat() if match.match_date else None,
-                'match_time': match.match_time.isoformat() if match.match_time else None,
-                'court_number': match.court_number,
-                'match_number': match.match_number,
-                'status': match.status,
-                'created_at': match.created_at.isoformat(),
-                'updated_at': match.updated_at.isoformat(),
-                # Данные сетов
-                'set1_score1': match.set1_score1,
-                'set1_score2': match.set1_score2,
-                'set2_score1': match.set2_score1,
-                'set2_score2': match.set2_score2,
-                'set3_score1': match.set3_score1,
-                'set3_score2': match.set3_score2
-            }
+            'match': match_data
         })
 
     # ===== ТУРНИРЫ (дополнительные маршруты) =====
@@ -1053,6 +1077,92 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
 
     # ===== МАТЧИ (дополнительные маршруты) =====
     
+    @app.route('/api/matches/free', methods=['POST'])
+    @csrf.exempt
+    def create_free_match():
+        """Создание свободного матча (без турнира)"""
+        try:
+            data = request.get_json()
+            
+            if not data:
+                logger.error("[create_free_match] Отсутствуют данные в запросе")
+                return jsonify({'success': False, 'error': 'Необходимы данные матча'}), 400
+            
+            player1_name = data.get('player1_name', '').strip()
+            player2_name = data.get('player2_name', '').strip()
+            sport_type = data.get('sport_type', 'badminton')
+            
+            logger.info(f"[create_free_match] Получен запрос: player1={player1_name}, player2={player2_name}, sport={sport_type}")
+            
+            if not player1_name or not player2_name:
+                return jsonify({'success': False, 'error': 'Необходимы имена обоих игроков/команд'}), 400
+            
+            if player1_name == player2_name:
+                return jsonify({'success': False, 'error': 'Имена игроков/команд должны отличаться'}), 400
+            # Находим или создаем игроков в системе
+            player1 = Player.query.filter_by(name=player1_name).first()
+            if not player1:
+                player1 = Player(name=player1_name)
+                db.session.add(player1)
+                db.session.flush()
+            
+            player2 = Player.query.filter_by(name=player2_name).first()
+            if not player2:
+                player2 = Player(name=player2_name)
+                db.session.add(player2)
+                db.session.flush()
+            
+            # Обновляем время последнего использования
+            player1.last_used_at = datetime.utcnow()
+            player2.last_used_at = datetime.utcnow()
+            
+            # Создаем свободный матч (tournament_id = None, так как поле теперь nullable)
+            # Создаем свободный матч - используем минимальный набор полей
+            # Остальные поля установятся по умолчанию из модели
+            match = Match(
+                tournament_id=None,  # Свободный матч без турнира
+                participant1_id=None,
+                participant2_id=None,
+                player1_id=player1.id,
+                player2_id=player2.id,
+                player1_name=player1_name,
+                player2_name=player2_name,
+                match_date=date.today(),
+                match_time=datetime.now().time(),
+                court_number=1,
+                match_number=0,  # Для свободных матчей номер не важен
+                status='в_процессе'
+                # sets_won_1, sets_won_2, is_removed установятся по умолчанию из модели
+                # created_at, updated_at установятся автоматически
+            )
+            
+            db.session.add(match)
+            db.session.commit()
+            
+            logger.info(f"Создан свободный матч {match.id}: {player1_name} vs {player2_name} ({sport_type})")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Свободный матч успешно создан',
+                'match_id': match.id,
+                'player1_name': player1_name,
+                'player2_name': player2_name,
+                'sport_type': sport_type
+            }), 201
+            
+        except Exception as e:
+            db.session.rollback()
+            error_msg = str(e)
+            error_type = type(e).__name__
+            logger.error(f"[create_free_match] Ошибка при создании свободного матча: {error_type}: {error_msg}", exc_info=True)
+            import traceback
+            traceback.print_exc()
+            return jsonify({
+                'success': False, 
+                'error': f'Ошибка при создании матча: {error_msg}',
+                'error_type': error_type
+            }), 500
+
     @app.route('/api/matches', methods=['POST'])
     def create_match():
         """Создание нового матча с результатами"""
@@ -1453,6 +1563,99 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             logger.error(f"Ошибка при обновлении CSRF токена: {str(e)}")
             return jsonify({'success': False, 'error': 'Ошибка при обновлении токена'}), 500
 
+    @app.route('/api/admin/free-matches', methods=['GET'])
+    def get_free_matches():
+        """Получение списка свободных матчей (без турнира) в формате JSON"""
+        from flask import session
+        from sqlalchemy import or_
+        
+        # Проверяем авторизацию системного админа
+        if 'admin_id' not in session:
+            return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+        
+        if session.get('admin_email') != 'admin@system':
+            return jsonify({'success': False, 'error': 'Доступ только для системного администратора'}), 403
+        
+        try:
+            # Получаем все свободные матчи (tournament_id = None или 0)
+            free_matches = Match.query.filter(
+                or_(Match.tournament_id.is_(None), Match.tournament_id == 0),
+                Match.is_removed == False
+            ).order_by(Match.created_at.desc()).all()
+            
+            # Формируем данные для отображения
+            matches_data = []
+            for match in free_matches:
+                # Для свободных матчей используем счет сета 1 (set1_score1:set1_score2)
+                score = match.score
+                if not score and match.set1_score1 is not None and match.set1_score2 is not None:
+                    score = f"{match.set1_score1}:{match.set1_score2}"
+                elif not score and (match.sets_won_1 or match.sets_won_2):
+                    score = f"{match.sets_won_1 or 0}:{match.sets_won_2 or 0}"
+                
+                matches_data.append({
+                    'id': match.id,
+                    'player1_name': match.player1_name or (match.player1.name if match.player1 else 'Неизвестно'),
+                    'player2_name': match.player2_name or (match.player2.name if match.player2 else 'Неизвестно'),
+                    'score': score,
+                    'set1_score1': match.set1_score1,
+                    'set1_score2': match.set1_score2,
+                    'sets_won_1': match.sets_won_1 or 0,
+                    'sets_won_2': match.sets_won_2 or 0,
+                    'status': match.status or 'неизвестно',
+                    'match_date': match.match_date.strftime('%d.%m.%Y') if match.match_date else 'Не указана',
+                    'match_time': match.match_time.strftime('%H:%M') if match.match_time else 'Не указано',
+                    'created_at': match.created_at.isoformat() if match.created_at else None,
+                    'court_number': match.court_number or 'Не указан'
+                })
+            
+            return jsonify({'success': True, 'matches': matches_data})
+        except Exception as e:
+            logger.error(f'Ошибка при получении списка свободных матчей: {str(e)}')
+            return jsonify({'success': False, 'error': f'Ошибка при получении списка: {str(e)}'}), 500
+
+    @app.route('/api/free-matches/updates', methods=['GET'])
+    def free_matches_updates():
+        """API для частичного обновления данных свободных матчей (только счёт и статус)"""
+        from sqlalchemy import or_
+        
+        try:
+            # Получаем все свободные матчи (tournament_id = None или 0)
+            free_matches = Match.query.filter(
+                or_(Match.tournament_id.is_(None), Match.tournament_id == 0),
+                Match.is_removed == False
+            ).order_by(Match.created_at.desc()).all()
+            
+            # Подготавливаем данные матчей для отправки
+            matches_data = []
+            for match in free_matches:
+                # Для свободных матчей используем счет сета 1 (set1_score1:set1_score2)
+                score = match.score
+                if not score and match.set1_score1 is not None and match.set1_score2 is not None:
+                    score = f"{match.set1_score1}:{match.set1_score2}"
+                elif not score and (match.sets_won_1 or match.sets_won_2):
+                    score = f"{match.sets_won_1 or 0}:{match.sets_won_2 or 0}"
+                
+                matches_data.append({
+                    'id': match.id,
+                    'player1_name': match.player1_name or (match.player1.name if match.player1 else 'Неизвестно'),
+                    'player2_name': match.player2_name or (match.player2.name if match.player2 else 'Неизвестно'),
+                    'score': score,
+                    'set1_score1': match.set1_score1,
+                    'set1_score2': match.set1_score2,
+                    'sets_won_1': match.sets_won_1 or 0,
+                    'sets_won_2': match.sets_won_2 or 0,
+                    'status': match.status or 'неизвестно'
+                })
+            
+            return jsonify({
+                'success': True,
+                'matches': matches_data
+            })
+        except Exception as e:
+            logger.error(f'Ошибка при получении обновлений свободных матчей: {str(e)}')
+            return jsonify({'success': False, 'error': f'Ошибка при получении обновлений: {str(e)}'}), 500
+
     @app.route('/api/matches/<int:match_id>', methods=['DELETE'])
     def delete_match(match_id):
         """Удаление матча"""
@@ -1478,13 +1681,25 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         match = Match.query.get_or_404(match_id)
         
         # Проверяем права (создатель турнира или системный админ)
-        tournament = Tournament.query.get(match.tournament_id)
-        if not tournament:
-            return jsonify({'error': 'Турнир не найден'}), 404
-            
-        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
-            return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
+        # Для свободных матчей (без турнира) разрешаем удаление только системному админу
+        if match.tournament_id is None or match.tournament_id == 0:
+            # Свободный матч - только системный админ может удалить
+            if session.get('admin_email') != 'admin@system':
+                return jsonify({'error': 'Недостаточно прав для удаления свободного матча'}), 403
+        else:
+            # Матч из турнира - проверяем права как обычно
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'error': 'Турнир не найден'}), 404
+                
+            if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
+                return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
         
+        # Удаляем связанные розыгрыши
+        from sqlalchemy import text
+        Rally.query.filter_by(match_id=match_id).delete()
+        
+        # Удаляем матч
         db.session.delete(match)
         db.session.commit()
         
@@ -4734,10 +4949,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 logger.error(f"[auto-save-score] ❌ Несоответствие ID матча! Запрошен: {match_id}, Найден: {match.id}")
                 return jsonify({'success': False, 'error': f'Несоответствие ID матча: запрошен {match_id}, найден {match.id}'}), 400
             
-            # Загружаем турнир
-            tournament = Tournament.query.get(match.tournament_id)
-            if not tournament:
-                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            # Проверяем, является ли матч свободным
+            is_free_match = match.tournament_id is None or match.tournament_id == 0
+            
+            # Для свободных матчей не нужен турнир
+            if not is_free_match:
+                tournament = Tournament.query.get(match.tournament_id)
+                if not tournament:
+                    return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            else:
+                tournament = None  # Для свободных матчей используем значения по умолчанию
             
             # Логируем текущие значения счёта перед обновлением
             logger.info(f"[auto-save-score] 📊 Матч {match_id}, сет {set_number}: Текущие значения в БД:")
@@ -4765,11 +4986,21 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 logger.warning(f"[auto-save-score] ⚠️ Матч {match_id}: Неизвестный номер сета {set_number}")
             
             # Пересчитываем выигранные сеты на основе текущих счетов
+            sets_won_1 = 0
+            sets_won_2 = 0
+            
             if tournament:
-                sets_won_1 = 0
-                sets_won_2 = 0
                 sport_type = tournament.sport_type.lower() if tournament.sport_type else ''
                 points_to_win = tournament.points_to_win or 21
+                sets_to_win = tournament.sets_to_win or 2
+            else:
+                # Для свободных матчей используем значения по умолчанию (бадминтон)
+                sport_type = 'badminton'
+                points_to_win = 21
+                sets_to_win = 2
+            
+            # Обрабатываем сеты для турнирных и свободных матчей
+            if tournament or is_free_match:
                 
                 # Определяем правила для бадминтона
                 if 'бадминтон' in sport_type or 'badminton' in sport_type:
@@ -4830,7 +5061,6 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 logger.info(f"[auto-save-score] Матч {match_id}, сет {set_number}: set1_score1={match.set1_score1}, set1_score2={match.set1_score2}, sets_won_1={sets_won_1}, sets_won_2={sets_won_2}, score={match.score}")
                 
                 # Определяем статус матча
-                sets_to_win = tournament.sets_to_win or 2
                 if sets_won_1 >= sets_to_win or sets_won_2 >= sets_to_win:
                     if match.status != 'завершен':
                         match.status = 'завершен'
@@ -5386,8 +5616,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if not data:
                 return jsonify({'success': False, 'error': 'Отсутствуют данные'}), 400
             
-            # Проверяем обязательные поля
-            required_fields = ['match_id', 'tournament_id', 'set_number', 'server_name', 'receiver_name', 'server_won', 'score']
+            # Проверяем обязательные поля (tournament_id не обязателен для свободных матчей)
+            required_fields = ['match_id', 'set_number', 'server_name', 'receiver_name', 'server_won', 'score']
             missing = [f for f in required_fields if f not in data]
             if missing:
                 return jsonify({'success': False, 'error': f'Отсутствуют обязательные поля: {", ".join(missing)}'}), 400
@@ -5397,15 +5627,34 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if not match:
                 return jsonify({'success': False, 'error': 'Матч не найден'}), 404
             
-            # Проверяем, что турнир существует
-            tournament = Tournament.query.get(data['tournament_id'])
-            if not tournament:
-                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            # Проверяем, является ли матч свободным
+            is_free_match = match.tournament_id is None or match.tournament_id == 0
             
-            # Проверяем, что это бадминтон
-            sport_type = tournament.sport_type.lower()
-            if 'бадминтон' not in sport_type and 'badminton' not in sport_type:
-                return jsonify({'success': False, 'error': 'Розыгрыши можно сохранять только для бадминтона'}), 400
+            logger.info(f"[Rally Create] Матч {data['match_id']}: is_free_match={is_free_match}, tournament_id из матча={match.tournament_id}")
+            
+            tournament_id = data.get('tournament_id')
+            logger.info(f"[Rally Create] tournament_id из данных запроса: {tournament_id}, тип: {type(tournament_id)}")
+            
+            if not is_free_match:
+                # Для турнирных матчей проверяем турнир
+                tournament = Tournament.query.get(tournament_id)
+                if not tournament:
+                    return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+                
+                # Проверяем, что это бадминтон
+                sport_type = tournament.sport_type.lower()
+                if 'бадминтон' not in sport_type and 'badminton' not in sport_type:
+                    return jsonify({'success': False, 'error': 'Розыгрыши можно сохранять только для бадминтона'}), 400
+            else:
+                # Для свободных матчей tournament_id должен быть явно None
+                # Игнорируем значение из запроса, если матч свободный
+                tournament_id = None
+                logger.info(f"[Rally Create] Свободный матч: tournament_id установлен в None")
+                
+                # Для свободных матчей всегда используем сет 1
+                if 'set_number' in data and int(data['set_number']) != 1:
+                    logger.warning(f"[Rally Create] Свободный матч: set_number={data['set_number']} изменен на 1")
+                    data['set_number'] = 1
             
             # Создаем розыгрыш
             # Используем время с клиента, если оно передано (более точно отражает момент события)
@@ -5425,9 +5674,19 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             else:
                 rally_datetime = datetime.now()
             
+            # Для свободных матчей убеждаемся, что tournament_id имеет допустимое значение для БД
+            # В идеале колонка должна быть nullable, но если в БД ещё стоит NOT NULL,
+            # используем 0 как специальное значение для свободных матчей.
+            if is_free_match:
+                final_tournament_id = 0
+            else:
+                final_tournament_id = tournament_id
+            
+            logger.info(f"[Rally Create] Создание розыгрыша: match_id={data['match_id']}, tournament_id={final_tournament_id}, set_number={data['set_number']}, is_free_match={is_free_match}")
+            
             rally = Rally(
                 match_id=int(data['match_id']),
-                tournament_id=int(data['tournament_id']),
+                tournament_id=final_tournament_id,  # 0 для свободных матчей, реальный ID для турнирных
                 set_number=int(data['set_number']),
                 rally_date=rally_datetime.date(),
                 rally_time=rally_datetime.time(),
@@ -5442,9 +5701,43 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             )
             
             db.session.add(rally)
+            
+            # Обновляем счет матча на основе сохраненного розыгрыша
+            # Парсим счет из строки "21:19" в два числа
+            try:
+                score_parts = str(rally.score).split(':')
+                if len(score_parts) == 2:
+                    score1 = int(score_parts[0])
+                    score2 = int(score_parts[1])
+                    
+                    # Обновляем счет в зависимости от номера сета
+                    set_number = int(data['set_number'])
+                    if set_number == 1:
+                        match.set1_score1 = score1
+                        match.set1_score2 = score2
+                    elif set_number == 2:
+                        match.set2_score1 = score1
+                        match.set2_score2 = score2
+                    elif set_number == 3:
+                        match.set3_score1 = score1
+                        match.set3_score2 = score2
+                    
+                    # Для свободных матчей обновляем также общий счет
+                    if is_free_match:
+                        match.score = rally.score
+                        # Обновляем score1 и score2 для совместимости
+                        match.score1 = score1
+                        match.score2 = score2
+                    
+                    logger.info(f"📊 Обновлен счет матча {match.id}: сет {set_number} = {score1}:{score2}")
+            except (ValueError, IndexError) as e:
+                logger.warning(f"⚠️ Не удалось обновить счет матча из строки '{rally.score}': {e}")
+            
             db.session.commit()
             
-            logger.info(f"Создан розыгрыш {rally.id} для матча {data['match_id']}, сет {data['set_number']}")
+            logger.info(f"✅ Создан розыгрыш {rally.id} для матча {data['match_id']}, сет {data['set_number']}, tournament_id={final_tournament_id}, is_free_match={is_free_match}")
+            logger.info(f"   Розыгрыш: {rally.server_name} vs {rally.receiver_name}, счет: {rally.score}, server_won: {rally.server_won}")
+            
             return jsonify({'success': True, 'rally': rally.to_dict()}), 201
             
         except Exception as e:
@@ -5467,17 +5760,27 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             set_number = request.args.get('set_number', type=int)
             
             # Запрос розыгрышей
-            query = Rally.query.filter_by(match_id=match_id)
+            # Для свободных матчей не фильтруем по tournament_id, так как он может быть None
+            query = Rally.query.filter_by(match_id=match_id, is_removed=False)
             if set_number:
                 query = query.filter_by(set_number=set_number)
             
             rallies = query.order_by(Rally.rally_datetime.asc()).all()
             
+            logger.info(f"[get_match_rallies] Матч {match_id}: найдено {len(rallies)} розыгрышей")
+            if len(rallies) > 0:
+                logger.info(f"[get_match_rallies] Первый розыгрыш: id={rallies[0].id}, tournament_id={rallies[0].tournament_id}, set_number={rallies[0].set_number}")
+            
+            # Проверяем, является ли матч свободным
+            is_free_match = match.tournament_id is None or match.tournament_id == 0
+            logger.info(f"[get_match_rallies] Матч {match_id}: is_free_match={is_free_match}, tournament_id={match.tournament_id}")
+            
             return jsonify({
                 'success': True,
                 'match_id': match_id,
                 'rallies': [rally.to_dict() for rally in rallies],
-                'count': len(rallies)
+                'count': len(rallies),
+                'is_free_match': is_free_match
             }), 200
             
         except Exception as e:
