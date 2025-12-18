@@ -700,49 +700,49 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         # Для свободных матчей разрешаем доступ без авторизации
         if not is_free_match:
             # Для турнирных матчей проверяем авторизацию
-            if 'admin_id' not in session:
-                return jsonify({'error': 'Необходима авторизация'}), 401
-            
-            # Простая заглушка для админа
-            admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
-            if not admin or not admin.is_active:
-                return jsonify({'error': 'Неверная авторизация'}), 401
-            
+        if 'admin_id' not in session:
+            return jsonify({'error': 'Необходима авторизация'}), 401
+        
+        # Простая заглушка для админа
+        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
+        if not admin or not admin.is_active:
+            return jsonify({'error': 'Неверная авторизация'}), 401
+        
             # Для турнирных матчей проверяем права
-            tournament = Tournament.query.get(match.tournament_id)
-            if not tournament:
-                return jsonify({'error': 'Турнир не найден'}), 404
-                
-            if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
-                return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
+        tournament = Tournament.query.get(match.tournament_id)
+        if not tournament:
+            return jsonify({'error': 'Турнир не найден'}), 404
+            
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
+            return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
         
         # Формируем данные матча
         match_data = {
-            'id': match.id,
+                'id': match.id,
             'tournament_id': match.tournament_id if not is_free_match else None,
-            'participant1_id': match.participant1_id,
-            'participant2_id': match.participant2_id,
-            'score1': match.score1,
-            'score2': match.score2,
-            'score': match.score,
-            'sets_won_1': match.sets_won_1,
-            'sets_won_2': match.sets_won_2,
-            'winner_id': match.winner_id,
-            'match_date': match.match_date.isoformat() if match.match_date else None,
-            'match_time': match.match_time.isoformat() if match.match_time else None,
-            'court_number': match.court_number,
-            'match_number': match.match_number,
-            'status': match.status,
-            'created_at': match.created_at.isoformat(),
-            'updated_at': match.updated_at.isoformat(),
-            # Данные сетов
-            'set1_score1': match.set1_score1,
-            'set1_score2': match.set1_score2,
-            'set2_score1': match.set2_score1,
-            'set2_score2': match.set2_score2,
-            'set3_score1': match.set3_score1,
-            'set3_score2': match.set3_score2
-        }
+                'participant1_id': match.participant1_id,
+                'participant2_id': match.participant2_id,
+                'score1': match.score1,
+                'score2': match.score2,
+                'score': match.score,
+                'sets_won_1': match.sets_won_1,
+                'sets_won_2': match.sets_won_2,
+                'winner_id': match.winner_id,
+                'match_date': match.match_date.isoformat() if match.match_date else None,
+                'match_time': match.match_time.isoformat() if match.match_time else None,
+                'court_number': match.court_number,
+                'match_number': match.match_number,
+                'status': match.status,
+                'created_at': match.created_at.isoformat(),
+                'updated_at': match.updated_at.isoformat(),
+                # Данные сетов
+                'set1_score1': match.set1_score1,
+                'set1_score2': match.set1_score2,
+                'set2_score1': match.set2_score1,
+                'set2_score2': match.set2_score2,
+                'set3_score1': match.set3_score1,
+                'set3_score2': match.set3_score2
+            }
         
         # Добавляем имена участников/игроков
         if is_free_match:
@@ -1162,7 +1162,7 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 'error': f'Ошибка при создании матча: {error_msg}',
                 'error_type': error_type
             }), 500
-
+    
     @app.route('/api/matches', methods=['POST'])
     def create_match():
         """Создание нового матча с результатами"""
@@ -1688,12 +1688,12 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 return jsonify({'error': 'Недостаточно прав для удаления свободного матча'}), 403
         else:
             # Матч из турнира - проверяем права как обычно
-            tournament = Tournament.query.get(match.tournament_id)
-            if not tournament:
-                return jsonify({'error': 'Турнир не найден'}), 404
-                
-            if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
-                return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
+        tournament = Tournament.query.get(match.tournament_id)
+        if not tournament:
+            return jsonify({'error': 'Турнир не найден'}), 404
+            
+        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
+            return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
         
         # Удаляем связанные розыгрыши
         from sqlalchemy import text
@@ -3206,10 +3206,10 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         logger.info(f"[add_late_participant] ===== НАЧАЛО ДОБАВЛЕНИЯ ОПОЗДАВШЕГО УЧАСТНИКА В ТУРНИР {tournament_id} =====")
         """Добавление опоздавшего участника в турнир с сохранением временных результатов"""
         from flask import session
-        from flask_wtf.csrf import validate_csrf
+            from flask_wtf.csrf import validate_csrf
         
-        try:
-            validate_csrf(request.headers.get('X-CSRFToken'))
+            try:
+                validate_csrf(request.headers.get('X-CSRFToken'))
         except:
             return jsonify({'success': False, 'error': 'Ошибка безопасности. Неверный CSRF токен.'}), 400
         
@@ -3224,16 +3224,16 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         if admin_id != tournament.admin_id and admin_email != 'admin@system':
             return jsonify({'success': False, 'error': 'Недостаточно прав для добавления участника'}), 403
         
-        data = request.get_json()
+            data = request.get_json()
         
         if not data or not data.get('name'):
             return jsonify({'success': False, 'error': 'Необходимо имя участника'}), 400
         
-        name = data.get('name', '').strip()
-        
-        if not name:
-            return jsonify({'success': False, 'error': 'Имя участника обязательно'}), 400
-        
+            name = data.get('name', '').strip()
+            
+            if not name:
+                return jsonify({'success': False, 'error': 'Имя участника обязательно'}), 400
+            
         try:
             # Проверяем, не существует ли уже активный участник с таким именем
             existing_participant = Participant.query.filter_by(
@@ -4954,9 +4954,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             # Для свободных матчей не нужен турнир
             if not is_free_match:
-                tournament = Tournament.query.get(match.tournament_id)
-                if not tournament:
-                    return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
             else:
                 tournament = None  # Для свободных матчей используем значения по умолчанию
             
@@ -4986,8 +4986,8 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 logger.warning(f"[auto-save-score] ⚠️ Матч {match_id}: Неизвестный номер сета {set_number}")
             
             # Пересчитываем выигранные сеты на основе текущих счетов
-            sets_won_1 = 0
-            sets_won_2 = 0
+                sets_won_1 = 0
+                sets_won_2 = 0
             
             if tournament:
                 sport_type = tournament.sport_type.lower() if tournament.sport_type else ''
@@ -5638,13 +5638,13 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             if not is_free_match:
                 # Для турнирных матчей проверяем турнир
                 tournament = Tournament.query.get(tournament_id)
-                if not tournament:
-                    return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
-                
-                # Проверяем, что это бадминтон
-                sport_type = tournament.sport_type.lower()
-                if 'бадминтон' not in sport_type and 'badminton' not in sport_type:
-                    return jsonify({'success': False, 'error': 'Розыгрыши можно сохранять только для бадминтона'}), 400
+            if not tournament:
+                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+            
+            # Проверяем, что это бадминтон
+            sport_type = tournament.sport_type.lower()
+            if 'бадминтон' not in sport_type and 'badminton' not in sport_type:
+                return jsonify({'success': False, 'error': 'Розыгрыши можно сохранять только для бадминтона'}), 400
             else:
                 # Для свободных матчей tournament_id должен быть явно None
                 # Игнорируем значение из запроса, если матч свободный
