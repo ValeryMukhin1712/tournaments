@@ -700,21 +700,21 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         # Для свободных матчей разрешаем доступ без авторизации
         if not is_free_match:
             # Для турнирных матчей проверяем авторизацию
-        if 'admin_id' not in session:
-            return jsonify({'error': 'Необходима авторизация'}), 401
-        
-        # Простая заглушка для админа
-        admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
-        if not admin or not admin.is_active:
-            return jsonify({'error': 'Неверная авторизация'}), 401
-        
+            if 'admin_id' not in session:
+                return jsonify({'error': 'Необходима авторизация'}), 401
+
+            # Простая заглушка для админа
+            admin = type('Admin', (), {'id': session['admin_id'], 'is_active': True})()
+            if not admin or not admin.is_active:
+                return jsonify({'error': 'Неверная авторизация'}), 401
+
             # Для турнирных матчей проверяем права
-        tournament = Tournament.query.get(match.tournament_id)
-        if not tournament:
-            return jsonify({'error': 'Турнир не найден'}), 404
-            
-        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
-            return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'error': 'Турнир не найден'}), 404
+
+            if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
+                return jsonify({'error': 'Недостаточно прав для просмотра матча'}), 403
         
         # Формируем данные матча
         match_data = {
@@ -1688,12 +1688,12 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
                 return jsonify({'error': 'Недостаточно прав для удаления свободного матча'}), 403
         else:
             # Матч из турнира - проверяем права как обычно
-        tournament = Tournament.query.get(match.tournament_id)
-        if not tournament:
-            return jsonify({'error': 'Турнир не найден'}), 404
-            
-        if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
-            return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
+            tournament = Tournament.query.get(match.tournament_id)
+            if not tournament:
+                return jsonify({'error': 'Турнир не найден'}), 404
+
+            if admin.id != tournament.admin_id and session.get('admin_email') != 'admin@system':
+                return jsonify({'error': 'Недостаточно прав для удаления матча'}), 403
         
         # Удаляем связанные розыгрыши
         from sqlalchemy import text
@@ -3206,10 +3206,10 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
         logger.info(f"[add_late_participant] ===== НАЧАЛО ДОБАВЛЕНИЯ ОПОЗДАВШЕГО УЧАСТНИКА В ТУРНИР {tournament_id} =====")
         """Добавление опоздавшего участника в турнир с сохранением временных результатов"""
         from flask import session
-            from flask_wtf.csrf import validate_csrf
-        
-            try:
-                validate_csrf(request.headers.get('X-CSRFToken'))
+        from flask_wtf.csrf import validate_csrf
+
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
         except:
             return jsonify({'success': False, 'error': 'Ошибка безопасности. Неверный CSRF токен.'}), 400
         
@@ -4954,9 +4954,9 @@ def create_api_routes(app, db, User, Tournament, Participant, Match, Notificatio
             
             # Для свободных матчей не нужен турнир
             if not is_free_match:
-            tournament = Tournament.query.get(match.tournament_id)
-            if not tournament:
-                return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
+                tournament = Tournament.query.get(match.tournament_id)
+                if not tournament:
+                    return jsonify({'success': False, 'error': 'Турнир не найден'}), 404
             else:
                 tournament = None  # Для свободных матчей используем значения по умолчанию
             

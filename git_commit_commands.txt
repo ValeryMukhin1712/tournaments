@@ -1,0 +1,31 @@
+Команды для создания коммита проекта:
+
+1. Откройте командную строку (cmd.exe) или Git Bash
+
+2. Перейдите в директорию проекта:
+   cd "C:\Cursor\Tournaments_v.1 — 04598ed коммит в main_1"
+
+3. Инициализируйте git репозиторий (если не инициализирован):
+   git init
+
+4. Добавьте все файлы:
+   git add .
+
+5. Проверьте статус:
+   git status
+
+6. Создайте коммит:
+   git commit -m "Update project with dual repo setup and migration scripts
+
+- Added dual repository setup scripts (setup_dual_repos.sh, copy_repo_content.sh)
+- Created server migration tools (server_migration.py, check_server_db_structure.py)
+- Updated documentation with dual repo setup guide
+- Added database structure checking tools
+- Prepared for production deployment workflow
+- Added SSH key setup instructions
+- Created workflow for dev/prod environment separation"
+
+7. Проверьте результат:
+   git log --oneline
+
+После выполнения этих команд изменения будут сохранены в локальном git репозитории.
